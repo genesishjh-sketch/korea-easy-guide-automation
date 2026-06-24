@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup
 
 from src.config import ROOT_DIR, load_settings
 from src.publishing.blogger import BloggerCredentialsError, BloggerPublisher
+from src.quality.hades import HadesQualityGate
 
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
@@ -35,9 +36,19 @@ def load_article(article_dir: Path) -> tuple[str, str, list[str]]:
     title = article["title"]
     labels = article.get("tags", [])
     validate_required_images(article_dir)
+    validate_quality(article_dir)
     html = (article_dir / "article.html").read_text(encoding="utf-8")
     html = rewrite_local_image_paths(html, article_dir)
     return title, html, labels
+
+
+def validate_quality(article_dir: Path) -> None:
+    report = HadesQualityGate().review_article_dir(article_dir)
+    report_path = article_dir / "quality_report.json"
+    report_path.write_text(json.dumps(report.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8")
+    if not report.passed:
+        issues = "; ".join(f"{issue.code}: {issue.message}" for issue in report.issues)
+        raise ValueError(f"Hades quality gate failed with score {report.score}/{report.min_score}: {issues}")
 
 
 def validate_required_images(article_dir: Path) -> None:

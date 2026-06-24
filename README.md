@@ -9,11 +9,13 @@ Stage 1, Stage 2, and Stage 3 are implemented:
 1. Collect topic signals from Reddit and Google suggestions.
 2. Score and select a posting topic.
 3. Generate an English article from structured templates.
-4. Insert a free/local image.
+4. Generate a strict Codex image plan for hero and inline images.
 5. Save Markdown, HTML, and metadata files.
+6. Block Blogger publishing unless the Hades Engineer quality gate passes.
 
-The current zero-cost workflow creates drafts first, then publishes reviewed
-posts when you are ready.
+The target publishing cadence is one public post per day, including weekends,
+at 09:00 KST. Public publishing is allowed only after automated quality review
+passes. See `docs/PUBLISHING_RULES.md`.
 
 ## Setup
 
@@ -93,6 +95,13 @@ Make an existing draft public:
 
 ```bash
 python -m src.pipeline.stage2_make_public --post-id BLOGGER_POST_ID
+```
+
+Direct public publishing is blocked unless required images and the Hades
+quality report pass:
+
+```bash
+python -m src.pipeline.stage2_publish --mode publish
 ```
 
 ## Run Daily Draft Pipeline

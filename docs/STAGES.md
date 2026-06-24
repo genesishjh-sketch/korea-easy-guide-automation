@@ -8,7 +8,7 @@ Implemented now.
 - Google suggestion collector
 - Topic scoring
 - English article generation
-- Local SVG cover image generation
+- Strict Codex image plan generation
 - Markdown, HTML, and metadata storage
 - GitHub Actions artifact workflow
 
@@ -25,16 +25,27 @@ Implemented now.
 - Google OAuth flow
 - Blogger API client
 - Draft post creation
+- Hades Engineer automated quality gate
 - Required static pages creation
 - Label/category mapping
 - Optional direct publishing
 - Publish result persistence
+
+Publishing cadence:
+
+- One post per day.
+- Includes weekends.
+- Target public publish time: 09:00 KST.
+- If quality fails, skip publishing instead of batch-publishing later.
 
 Entrypoint:
 
 ```bash
 python -m src.pipeline.stage2_publish --article-dir data/generated/YYYY-MM-DD/slug
 ```
+
+The publish command writes `quality_report.json` and stops when the article
+does not pass the Hades Engineer gate.
 
 Publish an existing Blogger draft after review:
 
