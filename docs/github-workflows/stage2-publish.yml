@@ -24,12 +24,14 @@ jobs:
       GOOGLE_OAUTH_TOKEN_FILE: .credentials/google_token.json
       BLOGGER_PUBLISH_MODE: ${{ github.event.inputs.mode }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
       - name: Install dependencies
         run: pip install -r requirements.txt
+      - name: Run safety regression tests
+        run: python -m unittest discover -v
       - name: Write Google OAuth files
         run: |
           mkdir -p .credentials
@@ -43,7 +45,7 @@ jobs:
             python -m src.pipeline.stage2_publish --mode "${{ github.event.inputs.mode }}"
           fi
       - name: Upload publish result
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: blogger-publish-result
           path: data/generated/**/blogger_publish_result.json

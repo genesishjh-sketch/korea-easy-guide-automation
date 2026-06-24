@@ -24,19 +24,21 @@ jobs:
       GOOGLE_SEARCH_PROVIDER: suggest
       PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
       - name: Install dependencies
         run: pip install -r requirements.txt
+      - name: Run safety regression tests
+        run: python -m unittest discover -v
       - name: Generate article
         run: |
           SEED="${{ github.event.inputs.seed }}"
           if [ -z "$SEED" ]; then SEED="incheon airport to seoul"; fi
           python -m src.pipeline.stage1_generate --seed "$SEED"
       - name: Upload generated article
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: generated-article
           path: data/generated/

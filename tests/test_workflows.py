@@ -9,8 +9,12 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 
 class WorkflowSafetyTests(unittest.TestCase):
     def test_workflows_use_node24_compatible_actions(self) -> None:
-        workflow_dir = ROOT_DIR / ".github" / "workflows"
-        workflow_text = "\n".join(path.read_text(encoding="utf-8") for path in workflow_dir.glob("*.yml"))
+        workflow_dirs = [ROOT_DIR / ".github" / "workflows", ROOT_DIR / "docs" / "github-workflows"]
+        workflow_text = "\n".join(
+            path.read_text(encoding="utf-8")
+            for workflow_dir in workflow_dirs
+            for path in workflow_dir.glob("*.yml")
+        )
 
         self.assertNotIn("actions/checkout@v4", workflow_text)
         self.assertNotIn("actions/setup-python@v5", workflow_text)
@@ -20,11 +24,24 @@ class WorkflowSafetyTests(unittest.TestCase):
         self.assertIn("actions/upload-artifact@v6", workflow_text)
 
     def test_workflows_pin_python_311(self) -> None:
-        workflow_dir = ROOT_DIR / ".github" / "workflows"
+        workflow_dirs = [ROOT_DIR / ".github" / "workflows", ROOT_DIR / "docs" / "github-workflows"]
 
-        for path in workflow_dir.glob("*.yml"):
-            workflow = path.read_text(encoding="utf-8")
-            self.assertIn('python-version: "3.11"', workflow, path.name)
+        for workflow_dir in workflow_dirs:
+            for path in workflow_dir.glob("*.yml"):
+                workflow = path.read_text(encoding="utf-8")
+                self.assertIn('python-version: "3.11"', workflow, path.name)
+
+    def test_korea_daily_runs_safety_tests_before_oauth(self) -> None:
+        workflow = (ROOT_DIR / ".github" / "workflows" / "daily-draft.yml").read_text(encoding="utf-8")
+
+        install_index = workflow.index("- name: Install dependencies")
+        test_index = workflow.index("- name: Run safety regression tests")
+        oauth_index = workflow.index("- name: Write Google OAuth files")
+        draft_index = workflow.index("- name: Run daily draft pipeline")
+
+        self.assertLess(install_index, test_index)
+        self.assertLess(test_index, oauth_index)
+        self.assertLess(oauth_index, draft_index)
 
     def test_easy_pc_daily_runs_safety_tests_before_publish(self) -> None:
         workflow = (ROOT_DIR / ".github" / "workflows" / "easy-pc-daily.yml").read_text(encoding="utf-8")
