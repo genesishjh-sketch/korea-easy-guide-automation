@@ -60,6 +60,12 @@ class PreflightTests(unittest.TestCase):
         self.assertEqual(check.status, "pass")
         self.assertIn("2026-07-22", check.message)
 
+    def test_reddit_health_workflow_coverage_pass(self) -> None:
+        check = stage0_preflight.check_reddit_health_workflow()
+
+        self.assertEqual(check.status, "pass")
+        self.assertIn("OAuth", check.message)
+
     def test_critical_notifications_are_required(self) -> None:
         check = stage0_preflight.check_critical_notifications()
 

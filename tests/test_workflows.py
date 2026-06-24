@@ -113,6 +113,7 @@ class WorkflowSafetyTests(unittest.TestCase):
             ".github/workflows/easy-pc-publication-check.yml",
             ".github/workflows/easy-pc-weekly-report.yml",
             ".github/workflows/easy-pc-cadence-alert.yml",
+            ".github/workflows/easy-pc-reddit-health.yml",
             ".github/workflows/easy-pc-validate-smoke.yml",
         ]:
             self.assertIn(f'"{workflow_path}"', workflow)
@@ -135,6 +136,17 @@ class WorkflowSafetyTests(unittest.TestCase):
         self.assertIn("if: ${{ always() }}", upload_block)
         self.assertIn("reports/easy_pc_fix_guide-weekly-*", workflow)
         self.assertIn("reports/easy_pc_fix_guide-weekly-failure.json", workflow)
+
+    def test_easy_pc_reddit_health_uses_oauth_secrets_and_artifact(self) -> None:
+        workflow = (ROOT_DIR / ".github" / "workflows" / "easy-pc-reddit-health.yml").read_text(encoding="utf-8")
+
+        self.assertIn("20 0 * * *", workflow)
+        self.assertIn("REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}", workflow)
+        self.assertIn("REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}", workflow)
+        self.assertIn("python -m src.pipeline.stage0_reddit_health --site easy_pc_fix_guide", workflow)
+        self.assertIn("--notify", workflow)
+        self.assertIn("actions/upload-artifact@v6", workflow)
+        self.assertIn("reports/easy_pc_fix_guide-reddit-health.json", workflow)
 
 
 if __name__ == "__main__":

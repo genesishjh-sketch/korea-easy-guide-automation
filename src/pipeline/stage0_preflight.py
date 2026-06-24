@@ -41,6 +41,7 @@ def run(site: str | None = None) -> Path:
         check_publication_check_workflow(),
         check_weekly_report_workflow(),
         check_cadence_alert_workflow(),
+        check_reddit_health_workflow(),
         check_critical_notifications(),
         check_public_feed(settings.site_url),
         check_local_google_files(settings.google_oauth_client_secret_file, settings.google_oauth_token_file),
@@ -296,6 +297,25 @@ def check_cadence_alert_workflow() -> PreflightCheck:
     return PreflightCheck("cadence_alert_workflow", "pass", "Cadence alert workflow sends Posting Bot review alerts on 2026-07-22 and 2026-08-19.")
 
 
+def check_reddit_health_workflow() -> PreflightCheck:
+    path = ROOT_DIR / ".github" / "workflows" / "easy-pc-reddit-health.yml"
+    if not path.exists():
+        return PreflightCheck("reddit_health_workflow", "fail", "Easy PC Reddit health workflow is missing.")
+    text = path.read_text(encoding="utf-8")
+    required = [
+        "20 0 * * *",
+        "REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}",
+        "REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}",
+        "python -m src.pipeline.stage0_reddit_health --site easy_pc_fix_guide",
+        "--notify",
+        "reports/easy_pc_fix_guide-reddit-health.json",
+    ]
+    missing = [item for item in required if item not in text]
+    if missing:
+        return PreflightCheck("reddit_health_workflow", "fail", f"Missing Reddit health workflow safeguards: {', '.join(missing)}")
+    return PreflightCheck("reddit_health_workflow", "pass", "Reddit health workflow checks OAuth with secrets and uploads its report.")
+
+
 def check_critical_notifications() -> PreflightCheck:
     required = {
         "daily_draft.py": [
@@ -304,6 +324,7 @@ def check_critical_notifications() -> PreflightCheck:
         ],
         "stage3_submit_sitemap.py": "NotificationClient(settings).send_required(build_message(settings.site_name, result))",
         "stage4_publication_check.py": "NotificationClient(settings).send_required(build_message(result))",
+        "stage0_reddit_health.py": "NotificationClient(settings).send_required(build_message(result))",
         "stage3_weekly_report.py": "NotificationClient(settings).send_required(path.read_text(encoding=\"utf-8\"))",
         "stage3_cadence_alert.py": "NotificationClient(settings).send_required(message)",
     }
