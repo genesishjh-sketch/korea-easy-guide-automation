@@ -10,6 +10,8 @@ import traceback
 from src.config import ROOT_DIR
 from src.config import load_settings
 from src.notifications.telegram import NotificationClient
+from src.pipeline.stage4_publication_check import fetch_public_feed
+from src.pipeline.stage4_publication_check import parse_posts
 from src.pipeline.stage1_generate import run as run_stage1
 from src.pipeline.stage2_publish import run as run_stage2
 from src.quality.hades import HadesQualityGate
@@ -64,6 +66,8 @@ def run(seed: str | None = None, site: str | None = None, publish_mode: str = "d
         article_dir = run_stage1(selected_seed, site)
         if publish_mode == "validate":
             result_path = run_validation(article_dir, site)
+        elif publish_mode == "publish":
+            result_path = run_publish_with_duplicate_guard(article_dir, site)
         else:
             result_path = run_stage2(article_dir=article_dir, mode=publish_mode, site=site)
         result = {
@@ -107,6 +111,83 @@ def run_validation(article_dir: Path, site: str | None = None) -> Path:
     return result_path
 
 
+def run_publish_with_duplicate_guard(article_dir: Path, site: str | None = None) -> Path:
+    settings = load_settings(site)
+    metadata = read_json(article_dir / "metadata.json")
+    article = metadata.get("article", {})
+    slug = article.get("slug", "")
+    title = article.get("title", "")
+    duplicate = find_public_post(settings.site_url, slug, title) if slug or title else None
+    if duplicate:
+        result_path = article_dir / "duplicate_publish_result.json"
+        result_path.write_text(
+            json.dumps(
+                {
+                    "draft": False,
+                    "skipped": True,
+                    "reason": "duplicate_public_post",
+                    "blogger": {
+                        "id": None,
+                        "url": duplicate.get("url"),
+                        "selfLink": None,
+                        "status": "SKIPPED_DUPLICATE",
+                        "published": duplicate.get("published_kst"),
+                        "updated": None,
+                    },
+                },
+                ensure_ascii=False,
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+        validate_existing_article(article_dir, site)
+        return result_path
+    return run_stage2(article_dir=article_dir, mode="publish", site=site)
+
+
+def validate_existing_article(article_dir: Path, site: str | None = None) -> None:
+    settings = load_settings(site)
+    report = HadesQualityGate(settings.content_domain).review_article_dir(article_dir)
+    (article_dir / "quality_report.json").write_text(
+        json.dumps(report.to_dict(), ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
+
+def find_public_post(site_url: str, slug: str = "", title: str = "") -> dict | None:
+    try:
+        posts = parse_posts(fetch_public_feed(site_url))
+    except Exception:
+        return None
+    normalized_title = normalize_match_text(title)
+    for post in posts:
+        if normalized_title and normalize_match_text(post.get("title", "")) == normalized_title:
+            return duplicate_post_payload(post)
+        if slug and public_url_matches_slug(post.get("url", ""), slug):
+            return duplicate_post_payload(post)
+    return None
+
+
+def public_url_matches_slug(url: str, slug: str) -> bool:
+    public_slug = Path(url.split("?", 1)[0]).stem
+    if not public_slug:
+        return False
+    return public_slug == slug or slug.startswith(f"{public_slug}-")
+
+
+def duplicate_post_payload(post: dict) -> dict:
+    published = post.get("published_kst")
+    return {
+        "title": post.get("title"),
+        "url": post.get("url"),
+        "published_kst": published.isoformat() if published else "",
+    }
+
+
+def normalize_match_text(value: str) -> str:
+    return " ".join(value.casefold().split())
+
+
 def notify_daily_completion(result: dict[str, str]) -> None:
     settings = load_settings(result.get("site"))
     NotificationClient(settings).send(build_daily_success_message(result))
@@ -144,12 +225,15 @@ def build_daily_success_message(result: dict[str, str]) -> str:
 
     article = metadata.get("article", {})
     blogger = publish_result.get("blogger", {})
+    skipped = publish_result.get("skipped", False)
     draft = publish_result.get("draft", True)
     quality_score = quality_report.get("score", "n/a")
     quality_passed = quality_report.get("passed", False)
     issues = quality_report.get("issues", [])
     if mode == "validate":
         status = "검증 완료"
+    elif skipped:
+        status = "중복 공개 글 감지, 발행 건너뜀"
     else:
         status = "초안 업로드 완료" if draft else "공개 발행 완료"
     blogger_status = blogger.get("status") or "unknown"
