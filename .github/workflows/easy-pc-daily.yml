@@ -7,9 +7,9 @@ on:
         description: "Optional Windows topic seed"
         required: false
       mode:
-        description: "draft or publish"
+        description: "validate, draft, or publish"
         required: false
-        default: "draft"
+        default: "validate"
   schedule:
     - cron: "10 0 * * *"
 
@@ -26,7 +26,7 @@ jobs:
       EASY_PC_FIX_GUIDE_GA4_PROPERTY_ID: ${{ vars.EASY_PC_FIX_GUIDE_GA4_PROPERTY_ID }}
       GOOGLE_OAUTH_CLIENT_SECRET_FILE: .credentials/client_secret.json
       GOOGLE_OAUTH_TOKEN_FILE: .credentials/google_token.json
-      BLOGGER_PUBLISH_MODE: ${{ github.event_name == 'schedule' && 'publish' || github.event.inputs.mode || 'draft' }}
+      BLOGGER_PUBLISH_MODE: ${{ github.event_name == 'schedule' && 'publish' || github.event.inputs.mode || 'validate' }}
       REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
       REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
       GOOGLE_SEARCH_PROVIDER: suggest
