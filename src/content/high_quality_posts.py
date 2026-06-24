@@ -1,118 +1,264 @@
 from __future__ import annotations
 
 
-INCHEON_AIRPORT_TO_SEOUL_HTML = """
-<p>Arriving at Incheon International Airport for the first time can feel overwhelming, especially after a long flight. The good news is that getting from Incheon Airport to Seoul is usually straightforward once you know the main options.</p>
-
-<p>This guide explains the easiest ways to reach Seoul by airport train, airport bus, taxi, or private transfer. It is written for first-time visitors, exchange students, working holiday visitors, and anyone who wants a simple arrival plan.</p>
-
-<h2>Quick Recommendation</h2>
-<table>
-  <tr><th>Your Situation</th><th>Best Choice</th></tr>
-  <tr><td>Staying near Seoul Station</td><td>AREX Express Train</td></tr>
-  <tr><td>Staying near Hongdae</td><td>All-Stop Airport Railroad</td></tr>
-  <tr><td>Staying near Myeongdong, Gangnam, Dongdaemun, or a major hotel</td><td>Airport Limousine Bus</td></tr>
-  <tr><td>Arriving very late at night</td><td>Taxi or private transfer</td></tr>
-  <tr><td>Traveling with children or several suitcases</td><td>Airport bus, taxi, or private transfer</td></tr>
-  <tr><td>Looking for the cheapest public transport option</td><td>All-Stop Airport Railroad</td></tr>
-</table>
-
-<h2>Option 1: AREX Express Train</h2>
-<p>The AREX Express Train is a non-stop train between Incheon Airport and Seoul Station. It is one of the fastest and most predictable ways to reach central Seoul because it does not depend on road traffic.</p>
-
-<table>
-  <tr><th>Pros</th><th>Cons</th></tr>
-  <tr><td>Fast and reliable</td><td>Only goes directly to Seoul Station</td></tr>
-  <tr><td>No traffic delays</td><td>You may need another subway or taxi after arrival</td></tr>
-  <tr><td>Good for solo travelers</td><td>Less convenient if your hotel is far from Seoul Station</td></tr>
-  <tr><td>Reserved seating</td><td>Requires a separate ticket before boarding</td></tr>
-</table>
-
-<p>Choose AREX Express if your hotel is near Seoul Station or if you want a predictable travel time after a long flight.</p>
-
-<h2>Option 2: All-Stop Airport Railroad</h2>
-<p>The All-Stop Airport Railroad uses the same airport rail line but stops at multiple stations. It is usually cheaper than the express train and can be very useful if your destination is connected to the subway network.</p>
-
-<table>
-  <tr><th>Destination Area</th><th>Why This Option Works</th></tr>
-  <tr><td>Hongdae</td><td>Direct access via Hongik University Station</td></tr>
-  <tr><td>Digital Media City</td><td>Convenient transfer point</td></tr>
-  <tr><td>Gongdeok</td><td>Easy subway connections</td></tr>
-  <tr><td>Seoul Station</td><td>Final central stop with subway and KTX connections</td></tr>
-</table>
-
-<p>This option is best for budget travelers who are comfortable using public transportation and do not mind making transfers.</p>
-
-<h2>Option 3: Airport Limousine Bus</h2>
-<p>Airport limousine buses connect Incheon Airport with many major areas of Seoul, including hotel districts and tourist zones. They are often the easiest choice if the bus stops near your accommodation.</p>
-
-<table>
-  <tr><th>Pros</th><th>Cons</th></tr>
-  <tr><td>Good if your hotel is near a bus stop</td><td>Can be delayed by traffic</td></tr>
-  <tr><td>Easier with luggage</td><td>Route names and stops may be confusing at first</td></tr>
-  <tr><td>No subway transfers</td><td>Less frequent late at night</td></tr>
-  <tr><td>Comfortable seats</td><td>Not always the cheapest option</td></tr>
-</table>
-
-<p>Airport buses are especially useful for areas such as Myeongdong, Gangnam, Dongdaemun, and major hotel zones.</p>
-
-<h2>Option 4: Taxi</h2>
-<p>Taxis are available at Incheon Airport and can take you directly to your destination in Seoul. This is the most convenient option if you arrive late at night, have heavy luggage, or are traveling in a small group.</p>
-
-<p><strong>Important tip:</strong> prepare your hotel name and address in Korean before getting into the taxi. Showing the address in Naver Map or KakaoMap can reduce confusion.</p>
-
-<h2>Option 5: Private Transfer</h2>
-<p>A private transfer is a pre-booked car service from the airport to your hotel. It is usually more expensive than public transportation, but it can be worth it if you are traveling with family, arriving after midnight, or carrying several bags.</p>
-
-<h2>Should You Buy a T-money Card at the Airport?</h2>
-<p>A T-money card is a rechargeable transportation card used for buses, subways, and some taxis in Korea. If you plan to use public transportation during your trip, getting a transportation card early can make your first day easier.</p>
-
-<table>
-  <tr><th>Good To Know</th><th>Details</th></tr>
-  <tr><td>Where to use it</td><td>Subway, buses, some taxis, and selected stores</td></tr>
-  <tr><td>Who should get one</td><td>Most travelers using public transportation</td></tr>
-  <tr><td>Where to buy</td><td>Convenience stores and transportation card sales locations</td></tr>
-  <tr><td>Payment style</td><td>Recharge before use</td></tr>
-</table>
-
-<h2>What to Prepare Before Leaving the Airport</h2>
-<table>
-  <tr><th>Tip</th><th>Why It Helps</th></tr>
-  <tr><td>Install Naver Map or KakaoMap</td><td>These apps are usually better than Google Maps for Korean transit routes.</td></tr>
-  <tr><td>Save your hotel address in Korean</td><td>This helps taxi drivers and airport staff understand your destination.</td></tr>
-  <tr><td>Check your terminal</td><td>Incheon Airport has Terminal 1 and Terminal 2, and transport locations can differ.</td></tr>
-  <tr><td>Activate your SIM or eSIM</td><td>You will need internet for maps, translation, and messaging.</td></tr>
-  <tr><td>Check the last train or bus time</td><td>This is especially important for late-night arrivals.</td></tr>
-</table>
-
-<h2>FAQ</h2>
-<h3>What is the easiest way from Incheon Airport to Seoul?</h3>
-<p>The easiest option depends on your hotel location. AREX is easiest for Seoul Station, while airport buses are often easier for hotels in Myeongdong, Gangnam, Dongdaemun, or other major hotel areas.</p>
-
-<h3>Is AREX better than the airport bus?</h3>
-<p>AREX is better if you want to avoid traffic and go to Seoul Station. The airport bus is better if it stops close to your hotel.</p>
-
-<h3>Can I use Google Maps in Korea?</h3>
-<p>Google Maps works for basic location search, but Naver Map and KakaoMap are usually more useful for public transportation in Korea.</p>
-
-<h3>Do I need cash when arriving in Korea?</h3>
-<p>Many services accept cards, but keeping some Korean won is useful for emergencies, small purchases, or payment situations where your foreign card does not work.</p>
-
-<h2>Final Recommendation</h2>
-<p>If this is your first time in Korea, choose the route that gets you closest to your accommodation with the least stress. A slightly more convenient option can be worth it after a long international flight.</p>
-
-<table>
-  <tr><th>If You Want</th><th>Choose</th></tr>
-  <tr><td>Fastest route to Seoul Station</td><td>AREX Express</td></tr>
-  <tr><td>Cheapest public transport</td><td>All-Stop Airport Railroad</td></tr>
-  <tr><td>Hotel-friendly route</td><td>Airport Limousine Bus</td></tr>
-  <tr><td>Door-to-door convenience</td><td>Taxi or private transfer</td></tr>
-</table>
-
-<h2>Sources to Check Before You Go</h2>
-<ul>
-  <li><a href="https://english.visitkorea.or.kr/">VISITKOREA official travel information</a></li>
-  <li><a href="https://www.airport.kr/ap_en/index.do">Incheon Airport official website</a></li>
-  <li><a href="https://english.seoul.go.kr/">Seoul Metropolitan Government official website</a></li>
-</ul>
-""".strip()
+HIGH_QUALITY_POSTS = {
+    "how-to-get-from-incheon-airport-to-seoul-easy-guide-for-first-time-visitors": {
+        "title": "How to Get from Incheon Airport to Seoul: Easy Guide for First-Time Visitors",
+        "meta_description": "Practical guide to getting from Incheon Airport to Seoul by AREX train, airport bus, taxi, or private transfer.",
+        "lead": "Landing at Incheon Airport is usually smooth, but the first transport decision can be confusing after a long flight. The best route depends less on Seoul as a whole and more on where your hotel is located.",
+        "inline_caption": "Compare airport train, limousine bus, and taxi options before leaving the arrival area.",
+        "quick_answer": [
+            ("Fastest route to Seoul Station", "AREX Express Train"),
+            ("Cheapest public transit option", "All-Stop Airport Railroad"),
+            ("Hotel is near Myeongdong, Gangnam, Dongdaemun, or a major bus stop", "Airport limousine bus"),
+            ("Late-night arrival, children, or heavy luggage", "Taxi or pre-booked transfer"),
+        ],
+        "before_start": [
+            "Check whether you arrived at Terminal 1 or Terminal 2. Train, bus, and taxi areas are clearly marked, but the walking route can differ by terminal.",
+            "Save your hotel name and address in Korean before leaving the airport. This helps taxi drivers, hotel staff, and information desk staff understand your destination.",
+            "Install Naver Map or KakaoMap before your flight if possible. Google Maps can be useful for basic searching, but Korean map apps usually give better public transport routing inside Korea.",
+        ],
+        "steps": [
+            "Look up your hotel area first, not just the word Seoul. Seoul Station, Hongdae, Myeongdong, Gangnam, and Dongdaemun can require different best routes.",
+            "If your hotel is near Seoul Station, compare AREX Express and the all-stop airport railroad.",
+            "If your hotel is near a limousine bus stop, the airport bus may be easier than carrying luggage through subway transfers.",
+            "If you arrive late or feel tired, use an official taxi stand or a pre-booked transfer instead of trying to solve multiple transfers at night.",
+            "Before boarding, check terminal, destination, last departure time, and whether you need a separate ticket or transport card.",
+        ],
+        "costs_payment": [
+            ("AREX Express", "Separate reserved ticket; good for Seoul Station."),
+            ("All-Stop Airport Railroad", "Transit fare; convenient with a transportation card."),
+            ("Airport limousine bus", "Bus ticket or transport card depending on route and sales point."),
+            ("Taxi", "Metered fare; card payment is common, but keep a backup card or some cash."),
+        ],
+        "common_problems": [
+            "Choosing AREX Express even though the hotel is far from Seoul Station, which creates an extra transfer after arrival.",
+            "Forgetting that airport buses can be delayed by traffic, especially during commute hours.",
+            "Arriving late at night without checking the last train or bus time.",
+            "Showing only an English hotel name to a taxi driver instead of a Korean address.",
+        ],
+        "tips": [
+            ("Use the airport information desk", "If you are unsure, staff can point you toward train, bus, or taxi areas."),
+            ("Do not over-optimize", "After a long flight, a slightly easier route can be worth more than saving a small amount."),
+            ("Keep your first night simple", "Book accommodation with a clear airport route if this is your first Korea trip."),
+        ],
+        "faq": [
+            ("What is the easiest way from Incheon Airport to Seoul?", "For Seoul Station, AREX is usually easiest. For hotel districts with a direct airport bus stop, the limousine bus can be easier."),
+            ("Is the airport train better than the bus?", "The train avoids traffic. The bus can be better if it stops close to your hotel."),
+            ("Can I take a taxi from Incheon Airport to Seoul?", "Yes. Use the official taxi stand and show your destination in Korean."),
+            ("Should I buy a T-money card at the airport?", "If you plan to use subways and buses during your stay, getting a transportation card early is useful."),
+        ],
+        "sources": [
+            ("Incheon Airport official transportation guide", "https://www.airport.kr/ap_en/index.do"),
+            ("Airport Railroad official ticket/reservation page", "https://www.airportrailroad.com/ticket/rsv"),
+            ("VISITKOREA official travel information", "https://english.visitkorea.or.kr/"),
+        ],
+    },
+    "how-to-buy-ktx-tickets-in-korea-as-a-foreigner": {
+        "title": "How to Buy KTX Tickets in Korea as a Foreigner",
+        "meta_description": "Practical guide for foreign visitors buying KTX tickets in Korea through KORAIL, station counters, and travel platforms.",
+        "lead": "KTX is the main high-speed train option for long-distance travel in Korea. For foreign visitors, the confusing part is not the train itself but choosing where to book, how payment works, and what to check before boarding.",
+        "inline_caption": "Check your departure station, platform, and train time before heading through the gate.",
+        "quick_answer": [
+            ("Best official booking option", "KORAIL official website for foreigners"),
+            ("Want staff help", "Station ticket counter"),
+            ("Popular route such as Seoul to Busan", "Book early, especially on weekends and holidays"),
+            ("Payment fails online", "Try another card, station counter, or a reputable travel platform"),
+        ],
+        "before_start": [
+            "KTX tickets can sell out on busy routes and holiday periods. Seoul to Busan, Seoul to Gyeongju, and Seoul to Gangneung are common tourist routes.",
+            "KORAIL states that train tickets can be purchased in advance on its official foreigner website. Always confirm the latest rules on the official site before relying on a blog post.",
+            "Your departure station matters. In Seoul, some trains use Seoul Station, while other routes may involve Yongsan, Cheongnyangni, or Suseo for SRT, which is a different system.",
+        ],
+        "steps": [
+            "Go to the KORAIL official foreigner website or use a station ticket counter.",
+            "Enter departure station, arrival station, travel date, time, and passenger count.",
+            "Choose a train time that leaves enough margin for subway transfers and finding the platform.",
+            "Check train type, departure station, arrival station, and seat class before paying.",
+            "Save your confirmation and arrive early enough to find the correct platform.",
+        ],
+        "costs_payment": [
+            ("Online KORAIL booking", "Foreign cards may work, but failures can happen. Try another card if payment does not complete."),
+            ("Station counter", "Good backup if online payment fails or your route is confusing."),
+            ("Travel platforms", "Convenient for some visitors, but compare fees and cancellation rules."),
+            ("KORAIL Pass", "Only useful for certain multi-trip itineraries; compare against normal tickets."),
+        ],
+        "common_problems": [
+            "Booking the wrong Seoul-area station.",
+            "Leaving too little time between airport arrival and train departure.",
+            "Assuming every foreign card will work on the first try.",
+            "Not checking refund and change rules before buying through a third-party platform.",
+        ],
+        "tips": [
+            ("Book popular routes early", "Weekend and holiday seats can disappear faster than expected."),
+            ("Screenshot your booking", "Keep the confirmation available even if mobile data is unstable."),
+            ("Arrive early", "Large stations can take time to navigate with luggage."),
+        ],
+        "faq": [
+            ("Can foreigners buy KTX tickets online?", "Yes, KORAIL provides an official foreigner website for train ticket booking."),
+            ("Do I need a Korean phone number?", "For official web booking, requirements can vary by flow. If you have trouble, use the station counter as a backup."),
+            ("Is KTX the same as SRT?", "No. They are different services and booking systems. Check your departure station carefully."),
+            ("Should I print my ticket?", "Follow the current instructions from the booking channel you used, and keep your confirmation accessible."),
+        ],
+        "sources": [
+            ("KORAIL official website for foreigners", "https://www.korail.com/global/eng/main"),
+            ("KORAIL ticket reservation page", "https://www.korail.com/global/eng/ticket/reservation"),
+            ("KORAIL booking information", "https://www.korail.com/global/eng/myReservation"),
+        ],
+    },
+    "how-to-use-kakao-t-taxi-in-korea-as-a-foreigner": {
+        "title": "How to Use Kakao T Taxi in Korea as a Foreigner",
+        "meta_description": "Practical guide to using Kakao T Taxi in Korea as a foreign visitor, including setup, pickup points, payment, and backup options.",
+        "lead": "Kakao T is one of Korea's most common mobility apps, and it can make taxi rides much easier than trying to explain an address on the street. The main things foreigners need to understand are account setup, destination search, pickup location, and payment backup.",
+        "inline_caption": "When using a taxi app in Korea, save your destination in Korean and check the pickup point before the taxi arrives.",
+        "quick_answer": [
+            ("Need a taxi in Seoul", "Use Kakao T if you can set it up successfully"),
+            ("Destination search fails in English", "Search the Korean place name or paste the Korean address"),
+            ("Foreign card does not work in-app", "Choose pay-to-driver if available or pay in the taxi"),
+            ("Late night or bad weather", "Expect longer waits and possible surge in demand"),
+        ],
+        "before_start": [
+            "Install Kakao T before you urgently need a ride. App setup is easier when you have stable internet and time to troubleshoot.",
+            "Prepare your destination in Korean. Copy it from your hotel booking, Naver Map, KakaoMap, or the official venue page.",
+            "Do not rely on only one taxi option. In busy areas, late at night, or during rain, wait times can be longer.",
+        ],
+        "steps": [
+            "Open Kakao T and choose the taxi service.",
+            "Confirm your pickup point on the map. This is important because the driver goes to the pin, not your general neighborhood.",
+            "Enter the destination using a Korean address or place name if English search is unreliable.",
+            "Check taxi type, estimated fare, and payment option before requesting the ride.",
+            "After matching, check the vehicle number and pickup point before getting in.",
+        ],
+        "costs_payment": [
+            ("In-app payment", "May require supported card/payment setup. Foreign card behavior can vary."),
+            ("Pay to driver", "Useful backup when in-app payment is not available or card setup fails."),
+            ("Taxi meter", "Final fare can depend on distance, time, tolls, and traffic."),
+            ("Backup payment", "Carry another card or some cash in case your first payment method fails."),
+        ],
+        "common_problems": [
+            "Pickup pin is on the wrong side of a wide road.",
+            "The destination search works better in Korean than in English.",
+            "Driver calls or messages in Korean, so translation help may be needed.",
+            "A regular taxi may not fit several large suitcases.",
+        ],
+        "tips": [
+            ("Stand exactly at the pickup pin", "Small location differences can cause missed rides in busy streets."),
+            ("Check the plate number", "Do not get into a taxi just because it arrives nearby."),
+            ("Use hotel staff when stuck", "They can help confirm the Korean address or pickup point."),
+        ],
+        "faq": [
+            ("Can foreigners use Kakao T?", "Many foreign visitors use it, but setup and payment options can vary by phone number, account, and card."),
+            ("Can I pay the driver directly?", "If the app offers a pay-to-driver option for your ride, it can be a useful backup."),
+            ("What if I cannot find my destination?", "Search in a Korean map app, copy the Korean address, and paste it into Kakao T."),
+            ("Is Kakao T the only taxi option?", "No. Street taxis, hotel taxi calls, and other ride apps may be useful backups."),
+        ],
+        "sources": [
+            ("Kakao T App Store listing", "https://apps.apple.com/us/app/kakao-t/id981110422"),
+            ("Kakao T Google Play listing", "https://play.google.com/store/apps/details?id=com.kakao.taxi"),
+            ("VISITKOREA official travel information", "https://english.visitkorea.or.kr/"),
+        ],
+    },
+    "korea-esim-guide-for-tourists-what-to-know-before-you-arrive": {
+        "title": "Korea eSIM Guide for Tourists: What to Know Before You Arrive",
+        "meta_description": "Practical Korea eSIM guide for tourists, including when to buy, what to check, setup tips, and backup options.",
+        "lead": "A working data connection makes Korea much easier: maps, translation, taxi apps, train tickets, and hotel messages all depend on it. For many visitors, an eSIM is the simplest way to get online soon after arrival.",
+        "inline_caption": "Set up mobile data before you rely on maps, taxi apps, or translation tools in Korea.",
+        "quick_answer": [
+            ("Phone supports eSIM", "Buy and install before departure, activate according to provider instructions"),
+            ("Phone does not support eSIM", "Use a physical SIM or portable Wi-Fi"),
+            ("Need calls/SMS", "Check whether the plan includes voice or only data"),
+            ("Arriving late", "Set up as much as possible before the flight"),
+        ],
+        "before_start": [
+            "Check whether your phone supports eSIM and is carrier-unlocked. A locked phone may not accept a travel eSIM.",
+            "Many tourist eSIM plans are data-only. If you need a Korean phone number for reservations or verification, read the plan details carefully.",
+            "Do not delete an eSIM profile until you are sure you no longer need it. Some providers limit reinstalling the same eSIM.",
+        ],
+        "steps": [
+            "Confirm your phone supports eSIM and is unlocked.",
+            "Compare data amount, validity period, hotspot/tethering rules, and whether voice/SMS is included.",
+            "Install the eSIM using Wi-Fi before departure or at the airport.",
+            "Follow the provider's activation timing carefully. Some plans start when installed, others when connected in Korea.",
+            "After landing, turn on the eSIM line, enable data roaming if required, and test maps and messaging.",
+        ],
+        "costs_payment": [
+            ("Data-only eSIM", "Usually enough for maps, messaging, translation, and taxi apps."),
+            ("SIM with phone number", "Useful if you need local calls or SMS, but requirements and prices differ."),
+            ("Portable Wi-Fi", "Good for groups, but it is another device to charge and return."),
+            ("Airport SIM counter", "Useful backup if setup fails before arrival."),
+        ],
+        "common_problems": [
+            "Buying an eSIM before checking phone compatibility.",
+            "Expecting a data-only plan to receive Korean SMS verification.",
+            "Installing too early when the validity period starts immediately.",
+            "Forgetting to enable the correct mobile data line after landing.",
+        ],
+        "tips": [
+            ("Keep airport Wi-Fi as backup", "Use it to finish setup if your eSIM does not connect immediately."),
+            ("Save the QR/instructions offline", "You may need them before you have mobile data."),
+            ("Test before leaving the airport", "Maps, messaging, and translation should work before you head into the city."),
+        ],
+        "faq": [
+            ("Is eSIM better than a physical SIM in Korea?", "If your phone supports it, eSIM is usually more convenient. Physical SIM can be better if you need certain phone-number services."),
+            ("Do I need a Korean phone number?", "For basic travel, data is often enough. Some local reservations or verification flows may ask for a Korean number."),
+            ("Can I use hotspot?", "Only if your eSIM provider allows tethering. Check before buying."),
+            ("Should I buy before arriving?", "Buying before arrival can save time, but read activation timing carefully."),
+        ],
+        "sources": [
+            ("VISITKOREA official travel information", "https://english.visitkorea.or.kr/"),
+            ("Incheon Airport official website", "https://www.airport.kr/ap_en/index.do"),
+        ],
+    },
+    "how-to-use-naver-map-for-foreigners-in-korea-easy-guide-for-foreign-visitors": {
+        "title": "How to Use Naver Map for Foreigners in Korea: Easy Guide for Foreign Visitors",
+        "meta_description": "Practical guide to using Naver Map in Korea for foreign visitors, including search, transit routes, walking, and backup tips.",
+        "lead": "For travel inside Korea, Naver Map is often more useful than relying only on a global map app. It is especially helpful for subway, bus, walking routes, local place names, and finding entrances.",
+        "inline_caption": "Use Korean map apps to check walking, subway, and bus routes before you start moving.",
+        "quick_answer": [
+            ("Need public transit directions", "Use Naver Map or another Korean map app"),
+            ("Search fails in English", "Try the Korean place name or address"),
+            ("Going to a cafe, clinic, or small shop", "Check exact branch and entrance"),
+            ("Offline or low data", "Screenshot the route before leaving Wi-Fi"),
+        ],
+        "before_start": [
+            "Install the app before your trip and set the language options where available.",
+            "Save hotel addresses, major stations, and planned attractions in advance.",
+            "Korean place names can have multiple English spellings. If search fails, copy the Korean name from the official website or your booking app.",
+        ],
+        "steps": [
+            "Search for your destination using English first, then Korean if needed.",
+            "Check whether the result is the correct branch, not just a similar name.",
+            "Choose transit, walking, or driving route depending on your situation.",
+            "Look at transfer stations, exit numbers, walking time, and bus stop direction.",
+            "Start navigation before leaving the building so you know which exit or street side to use.",
+        ],
+        "costs_payment": [
+            ("App cost", "The map app itself is free to download."),
+            ("Mobile data", "You need a working data plan or Wi-Fi to use routes smoothly."),
+            ("Public transit", "Use a transportation card or accepted payment method for subway and bus rides."),
+            ("Taxi backup", "Save the Korean address in case you need to show it to a driver."),
+        ],
+        "common_problems": [
+            "Choosing the wrong branch of a chain store or clinic.",
+            "Ignoring subway exit numbers and walking much farther than necessary.",
+            "Searching only in English when the Korean name works better.",
+            "Starting the route after already entering the wrong side of a station or bus stop.",
+        ],
+        "tips": [
+            ("Use Korean names", "Copy and paste the Korean place name for better accuracy."),
+            ("Check exits", "Subway exit numbers can save a lot of walking."),
+            ("Screenshot key routes", "Useful when mobile data is weak underground."),
+        ],
+        "faq": [
+            ("Is Naver Map available in English?", "The app listings note support for multiple languages, including English, but some local data may still work better in Korean."),
+            ("Why not just use Google Maps?", "Google Maps can help with basic places, but Korean map apps often provide stronger local transit and walking details."),
+            ("Can I use it for buses and subway?", "Yes, it is commonly used for public transport routing in Korea."),
+            ("What should I do if search fails?", "Use the Korean address or place name from an official page, booking confirmation, or local map listing."),
+        ],
+        "sources": [
+            ("NAVER Map Google Play listing", "https://play.google.com/store/apps/details?id=com.nhn.android.nmap"),
+            ("NAVER Map App Store listing", "https://apps.apple.com/us/app/naver-maps-navigation/id311867728"),
+            ("NAVER Map official BE LOCAL page", "https://mkt.naver.com/belocal"),
+        ],
+    },
+}

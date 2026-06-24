@@ -63,6 +63,7 @@ class EnglishArticleGenerator:
             "quick_answer": self._quick_answer(candidate.keyword),
             "basics": self._basics(candidate.keyword),
             "steps": self._steps(candidate.keyword),
+            "costs_payment": self._costs_payment(candidate.keyword),
             "mistakes": self._mistakes(candidate.keyword),
             "tips": self._tips(candidate.keyword),
             "faq": self._faq(candidate.keyword),
@@ -148,6 +149,14 @@ class EnglishArticleGenerator:
             "Checking only one map app when public transportation routes are involved.",
             "Forgetting that late-night options can be limited outside central Seoul.",
             "Using outdated blog prices without checking an official source.",
+        ]
+
+    def _costs_payment(self, keyword: str) -> list[dict[str, str]]:
+        return [
+            {"item": "Official price or fare", "detail": "Check the latest fare on an official website or app before making a final decision."},
+            {"item": "Foreign cards", "detail": "Some local apps and kiosks may reject certain foreign cards, so keep a backup card or cash."},
+            {"item": "Refunds and changes", "detail": "Rules can differ by service, ticket type, provider, and purchase channel."},
+            {"item": "Convenience fees", "detail": "Third-party platforms may be easier to use, but compare fees and cancellation terms."},
         ]
 
     def _tips(self, keyword: str) -> list[dict[str, str]]:

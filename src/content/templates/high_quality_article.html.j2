@@ -6,7 +6,6 @@
     --keg-blue: #2563eb;
     --keg-teal: #0f766e;
     --keg-amber: #b45309;
-    --keg-soft: #f6fafc;
     color: var(--keg-ink);
     font-family: Arial, Helvetica, sans-serif;
     font-size: 17px;
@@ -16,26 +15,16 @@
   }
   .keg-post * { box-sizing: border-box; }
   .keg-post figure { margin: 0 0 28px; }
-  .keg-post__hero {
+  .keg-post__hero,
+  .keg-post__inline-image {
     overflow: hidden;
     border: 1px solid var(--keg-line);
     border-radius: 18px;
     background: #f8fbfd;
-    box-shadow: 0 18px 45px rgba(23, 32, 51, 0.08);
   }
-  .keg-post__hero img {
-    display: block;
-    width: 100%;
-    height: auto;
-  }
-  .keg-post__inline-image {
-    overflow: hidden;
-    margin: 30px 0;
-    border: 1px solid var(--keg-line);
-    border-radius: 16px;
-    background: #f8fbfd;
-  }
-  .keg-post__inline-image img {
+  .keg-post__hero { box-shadow: 0 18px 45px rgba(23, 32, 51, 0.08); }
+  .keg-post__inline-image { margin: 30px 0; border-radius: 16px; }
+  .keg-post img {
     display: block;
     width: 100%;
     height: auto;
@@ -78,7 +67,6 @@
     text-decoration: none;
     border-bottom: 1px solid rgba(37, 99, 235, 0.32);
   }
-  .keg-post a:hover { border-bottom-color: var(--keg-blue); }
   .keg-post table {
     width: 100%;
     margin: 14px 0 26px;
@@ -159,27 +147,32 @@
 
 <article class="keg-post">
   <figure class="keg-post__hero">
-    <img src="{{ image.url or image.path }}" alt="{{ image.alt }}" loading="lazy">
+    <img src="{{ image.url }}" alt="{{ image.alt }}" loading="lazy">
   </figure>
 
-  <p class="keg-post__lead">{{ intro }}</p>
+  <p class="keg-post__lead">{{ post.lead }}</p>
 
   <h2>Quick Answer</h2>
   <table>
     <tr><th>Situation</th><th>Best Choice</th></tr>
-    {% for row in quick_answer %}
-    <tr><td>{{ row.situation }}</td><td>{{ row.choice }}</td></tr>
+    {% for situation, answer in post.quick_answer %}
+    <tr><td>{{ situation }}</td><td>{{ answer }}</td></tr>
     {% endfor %}
   </table>
 
   <h2>Before You Start</h2>
-  {% for paragraph in basics %}
+  {% for paragraph in post.before_start %}
   <p>{{ paragraph }}</p>
   {% endfor %}
 
+  <figure class="keg-post__inline-image">
+    <img src="{{ inline_image.url }}" alt="{{ inline_image.alt }}" loading="lazy">
+    <figcaption class="keg-post__caption">{{ post.inline_caption }}</figcaption>
+  </figure>
+
   <h2>Step-by-Step Guide</h2>
   <ol>
-    {% for step in steps %}
+    {% for step in post.steps %}
     <li>{{ step }}</li>
     {% endfor %}
   </ol>
@@ -187,36 +180,36 @@
   <h2>Costs / Payment</h2>
   <table>
     <tr><th>Item</th><th>What to Know</th></tr>
-    {% for item in costs_payment %}
-    <tr><td>{{ item.item }}</td><td>{{ item.detail }}</td></tr>
+    {% for item, detail in post.costs_payment %}
+    <tr><td>{{ item }}</td><td>{{ detail }}</td></tr>
     {% endfor %}
   </table>
 
   <h2>Common Problems</h2>
   <ul>
-    {% for mistake in mistakes %}
-    <li>{{ mistake }}</li>
+    {% for problem in post.common_problems %}
+    <li>{{ problem }}</li>
     {% endfor %}
   </ul>
 
   <h2>Useful Tips for Foreign Visitors</h2>
   <table>
     <tr><th>Tip</th><th>Why It Helps</th></tr>
-    {% for tip in tips %}
-    <tr><td>{{ tip.title }}</td><td>{{ tip.detail }}</td></tr>
+    {% for tip, detail in post.tips %}
+    <tr><td>{{ tip }}</td><td>{{ detail }}</td></tr>
     {% endfor %}
   </table>
 
   <h2>FAQ</h2>
-  {% for item in faq %}
-  <h3>{{ item.question }}</h3>
-  <p>{{ item.answer }}</p>
+  {% for question, answer in post.faq %}
+  <h3>{{ question }}</h3>
+  <p>{{ answer }}</p>
   {% endfor %}
 
   <h2>Official Links to Check</h2>
   <ul class="keg-post__sources">
-    {% for source in sources %}
-    <li><a href="{{ source.url }}">{{ source.name }}</a></li>
+    {% for name, url in post.sources %}
+    <li><a href="{{ url }}">{{ name }}</a></li>
     {% endfor %}
   </ul>
 </article>
