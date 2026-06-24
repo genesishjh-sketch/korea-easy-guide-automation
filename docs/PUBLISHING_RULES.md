@@ -55,6 +55,8 @@ Required checks:
   - six source records
   - three official or platform sources
   - five reader questions or search intents
+- Windows help posts must include at least four official Microsoft links in the article and research report.
+- Windows help posts must include at least two direct Microsoft support, Learn, release-health, or product pages. Microsoft search-result URLs are useful fallback links, but they do not count as direct source depth.
 - Meta description and tags must exist.
 - Placeholder, generic old-template, and AI refusal phrases are blocked.
 

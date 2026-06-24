@@ -25,6 +25,8 @@ MIN_FAQ_QUESTIONS = 5
 MIN_RESEARCH_QUERIES = 6
 MIN_RESEARCH_SOURCES = 6
 MIN_RESEARCH_READER_QUESTIONS = 5
+MIN_WINDOWS_MICROSOFT_LINKS = 4
+MIN_WINDOWS_DIRECT_MICROSOFT_LINKS = 2
 
 OFFICIAL_SOURCE_DOMAINS = (
     ".go.kr",
@@ -232,13 +234,25 @@ class HadesQualityGate:
 
     def _review_windows_article(self, soup: BeautifulSoup | None, text_lower: str, links: list) -> list[QualityIssue]:
         issues: list[QualityIssue] = []
-        microsoft_links = [
-            link
-            for link in links
-            if any(domain in (link.get("href") or "") for domain in ("microsoft.com", "learn.microsoft.com", "support.microsoft.com"))
-        ]
+        microsoft_links = [_href(link) for link in links if _is_microsoft_url(_href(link))]
+        direct_microsoft_links = [url for url in microsoft_links if _is_direct_microsoft_url(url)]
+        if len(microsoft_links) < MIN_WINDOWS_MICROSOFT_LINKS:
+            issues.append(
+                QualityIssue(
+                    "weak_microsoft_sources",
+                    f"Windows help articles require at least {MIN_WINDOWS_MICROSOFT_LINKS} official Microsoft source links.",
+                )
+            )
         if not microsoft_links:
-            issues.append(QualityIssue("missing_microsoft_source", "Windows help articles require at least one official Microsoft source."))
+            issues.append(QualityIssue("missing_microsoft_source", "Windows help articles require official Microsoft sources."))
+        if len(direct_microsoft_links) < MIN_WINDOWS_DIRECT_MICROSOFT_LINKS:
+            issues.append(
+                QualityIssue(
+                    "shallow_microsoft_sources",
+                    "Windows help articles require at least "
+                    f"{MIN_WINDOWS_DIRECT_MICROSOFT_LINKS} direct Microsoft support, Learn, release-health, or product links, not only search result pages.",
+                )
+            )
         for required in ["applies to", "risk level", "data loss risk", "estimated time", "last checked"]:
             if required not in text_lower:
                 issues.append(QualityIssue("missing_windows_safety_field", f"Missing Windows safety field: {required}."))
@@ -299,14 +313,22 @@ class HadesQualityGate:
             official_sources = [
                 source
                 for source in sources
-                if any(domain in (source.get("url") or "") for domain in ("microsoft.com", "learn.microsoft.com", "support.microsoft.com"))
+                if _is_microsoft_url(source.get("url") or "")
             ]
+            direct_official_sources = [
+                source
+                for source in official_sources
+                if _is_direct_microsoft_url(source.get("url") or "")
+            ]
+        else:
+            direct_official_sources = official_sources
 
         metrics.update(
             {
                 "research_query_count": len(queries),
                 "research_source_count": len(sources),
                 "research_official_source_count": len(official_sources),
+                "research_direct_official_source_count": len(direct_official_sources),
                 "research_reader_question_count": len(reader_questions),
             }
         )
@@ -318,6 +340,21 @@ class HadesQualityGate:
             issues.append(QualityIssue("shallow_research_sources", f"Research must include at least {MIN_RESEARCH_SOURCES} sources."))
         if len(official_sources) < 3:
             issues.append(QualityIssue("weak_official_research", "Research must include at least three official or platform sources."))
+        if self.content_domain == "windows_help":
+            if len(official_sources) < MIN_WINDOWS_MICROSOFT_LINKS:
+                issues.append(
+                    QualityIssue(
+                        "weak_microsoft_research",
+                        f"Windows research must include at least {MIN_WINDOWS_MICROSOFT_LINKS} Microsoft official sources.",
+                    )
+                )
+            if len(direct_official_sources) < MIN_WINDOWS_DIRECT_MICROSOFT_LINKS:
+                issues.append(
+                    QualityIssue(
+                        "shallow_microsoft_research",
+                        "Windows research must include direct Microsoft pages, not only Microsoft search result URLs.",
+                    )
+                )
         if len(reader_questions) < MIN_RESEARCH_READER_QUESTIONS:
             issues.append(QualityIssue("weak_reader_questions", f"Research must include at least {MIN_RESEARCH_READER_QUESTIONS} reader questions or search intents."))
         return metrics, issues
@@ -346,3 +383,27 @@ def _section_text_by_h2(soup: BeautifulSoup) -> dict[str, str]:
                 parts.append(get_text(" ", strip=True))
         sections[title] = " ".join(part for part in parts if part)
     return sections
+
+
+def _href(link: object) -> str:
+    get = getattr(link, "get", None)
+    if get:
+        return get("href") or ""
+    if isinstance(link, dict):
+        return str(link.get("url") or link.get("href") or "")
+    return ""
+
+
+def _is_microsoft_url(url: str) -> bool:
+    return any(domain in url for domain in ("microsoft.com", "learn.microsoft.com", "support.microsoft.com"))
+
+
+def _is_direct_microsoft_url(url: str) -> bool:
+    if not _is_microsoft_url(url):
+        return False
+    blocked_fragments = (
+        "support.microsoft.com/search/results",
+        "support.microsoft.com/search?",
+        "bing.com/search",
+    )
+    return not any(fragment in url for fragment in blocked_fragments)

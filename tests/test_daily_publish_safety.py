@@ -459,6 +459,71 @@ class WindowsQualityGateTests(unittest.TestCase):
 
         self.assertIn("missing_microsoft_source", {issue.code for issue in issues})
 
+    def test_windows_articles_require_multiple_microsoft_sources(self) -> None:
+        gate = HadesQualityGate("windows_help")
+        soup = BeautifulSoup(
+            """
+            <article>
+              <a href="https://support.microsoft.com/windows">Microsoft Support</a>
+              <a href="https://learn.microsoft.com/windows/">Microsoft Learn</a>
+              <a href="https://learn.microsoft.com/windows/release-health/">Windows release health</a>
+            </article>
+            """,
+            "html.parser",
+        )
+        issues = gate._review_windows_article(
+            soup,
+            "applies to risk level data loss risk estimated time last checked advanced fixes back up important files",
+            links=soup.find_all("a"),
+        )
+
+        self.assertIn("weak_microsoft_sources", {issue.code for issue in issues})
+
+    def test_windows_articles_reject_search_only_microsoft_sources(self) -> None:
+        gate = HadesQualityGate("windows_help")
+        soup = BeautifulSoup(
+            """
+            <article>
+              <a href="https://support.microsoft.com/search/results?query=Windows%20troubleshooting">Search 1</a>
+              <a href="https://support.microsoft.com/search/results?query=Windows%20Update">Search 2</a>
+              <a href="https://support.microsoft.com/search/results?query=Bluetooth%20Windows">Search 3</a>
+              <a href="https://support.microsoft.com/search/results?query=Printer%20Windows">Search 4</a>
+            </article>
+            """,
+            "html.parser",
+        )
+        issues = gate._review_windows_article(
+            soup,
+            "applies to risk level data loss risk estimated time last checked advanced fixes back up important files",
+            links=soup.find_all("a"),
+        )
+
+        self.assertIn("shallow_microsoft_sources", {issue.code for issue in issues})
+
+    def test_windows_research_rejects_search_only_microsoft_sources(self) -> None:
+        gate = HadesQualityGate("windows_help")
+        with tempfile.TemporaryDirectory() as tmpdir:
+            article_dir = Path(tmpdir)
+            (article_dir / "research_report.json").write_text(
+                json.dumps(
+                    {
+                        "queries": [f"query {i}" for i in range(6)],
+                        "reader_questions": [f"question {i}" for i in range(5)],
+                        "sources": [
+                            {"name": f"Search {i}", "url": f"https://support.microsoft.com/search/results?query=test{i}"}
+                            for i in range(6)
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            metrics, issues = gate._review_research_report(article_dir)
+
+        self.assertEqual(metrics["research_official_source_count"], 6)
+        self.assertEqual(metrics["research_direct_official_source_count"], 0)
+        self.assertIn("shallow_microsoft_research", {issue.code for issue in issues})
+
     def test_windows_articles_block_activation_bypass_content(self) -> None:
         gate = HadesQualityGate("windows_help")
         issues = gate._review_windows_article(
