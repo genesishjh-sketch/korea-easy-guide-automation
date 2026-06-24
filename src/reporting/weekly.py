@@ -56,6 +56,7 @@ class WeeklyReporter:
             "search_console": search_console,
             "indexed_pages": indexed_pages,
             "analytics": GA4Client(self.settings).summary(week_start.date(), now.date()),
+            "operations": self._operations_result(),
             "cadence_review": cadence_review.to_dict(),
             "next_actions": self._next_actions(articles, static_pages, public_posts),
         }
@@ -139,6 +140,24 @@ class WeeklyReporter:
         if not path.exists():
             return []
         return json.loads(path.read_text(encoding="utf-8")).get("pages", [])
+
+    def _operations_result(self) -> dict:
+        report_dir = ROOT_DIR / "reports"
+        return {
+            "preflight": self._read_report(report_dir / f"{self.settings.site_key}-preflight.json"),
+            "publication_check": self._read_report(report_dir / f"{self.settings.site_key}-publication-check.json"),
+            "sitemap_submit": self._read_report(report_dir / f"{self.settings.site_key}-search-console-sitemap-submit.json"),
+        }
+
+    def _read_report(self, path: Path) -> dict:
+        if not path.exists():
+            return {"status": "not_uploaded", "path": str(path)}
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            return {"status": "error", "path": str(path), "error": str(exc)}
+        data.setdefault("path", str(path))
+        return data
 
     def _quality_issue_count(self, articles: list[dict]) -> int:
         issue_count = 0
@@ -254,6 +273,31 @@ class WeeklyReporter:
         elif analytics.get("error"):
             lines.append(f"- 오류: {analytics.get('error')}")
 
+        lines.extend(["", "## 운영 점검", ""])
+        operations = report.get("operations", {})
+        preflight = operations.get("preflight", {})
+        publication_check = operations.get("publication_check", {})
+        sitemap_submit = operations.get("sitemap_submit", {})
+        lines.append(f"- Preflight: {_status_kr(preflight.get('status', 'not_uploaded'))}")
+        if preflight.get("checks"):
+            failed_or_warned = [check for check in preflight.get("checks", []) if check.get("status") != "pass"]
+            if failed_or_warned:
+                for check in failed_or_warned:
+                    lines.append(f"  - {check.get('name')}: {_status_kr(check.get('status'))} - {check.get('message')}")
+            else:
+                lines.append("  - 전체 점검 통과")
+        lines.append(f"- 발행 확인: {_status_kr(publication_check.get('status', 'not_uploaded'))}")
+        if publication_check.get("today_post_count") is not None:
+            lines.append(f"  - 기준 이후 공개 글 수: {publication_check.get('today_post_count', 0)}")
+        if publication_check.get("latest_posts"):
+            latest = publication_check["latest_posts"][0]
+            lines.append(f"  - 최근 글: {latest.get('title', '')}")
+        lines.append(f"- Sitemap 제출: {_status_kr(sitemap_submit.get('status', 'not_uploaded'))}")
+        if sitemap_submit.get("sitemap_url"):
+            lines.append(f"  - {sitemap_submit.get('sitemap_url')}")
+        if sitemap_submit.get("error"):
+            lines.append(f"  - 오류: {sitemap_submit.get('error')}")
+
         lines.extend(["", "## 발행량 전환 검토", ""])
         cadence = report.get("cadence_review", {})
         lines.append(f"- 권장 조치: {cadence.get('action', '확인 필요')}")
@@ -283,5 +327,10 @@ def _status_kr(status: str | None) -> str:
         "not_uploaded": "미업로드",
         "error": "오류",
         "submitted": "제출됨",
+        "pass": "통과",
+        "warn": "주의",
+        "fail": "실패",
+        "published_today": "오늘 공개 글 확인",
+        "missing_today": "오늘 공개 글 없음",
     }
     return mapping.get(status or "not_uploaded", status or "미업로드")

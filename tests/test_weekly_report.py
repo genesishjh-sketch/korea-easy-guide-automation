@@ -71,6 +71,14 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                 "static_pages": [],
                 "search_console": {"status": "not_configured", "note": "test"},
                 "analytics": {"status": "not_configured", "note": "test"},
+                "operations": {
+                    "preflight": {"status": "pass", "checks": []},
+                    "publication_check": {"status": "published_today", "today_post_count": 1},
+                    "sitemap_submit": {
+                        "status": "submitted",
+                        "sitemap_url": "https://easypcfixguide.blogspot.com/sitemap.xml",
+                    },
+                },
                 "cadence_review": {},
                 "next_actions": [],
             }
@@ -79,6 +87,10 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("## Blogger 공개 피드 확인", markdown)
         self.assertIn("최근 7일 공개 피드 글 수: 1", markdown)
         self.assertIn("Wi-Fi Button Missing on Windows 11", markdown)
+        self.assertIn("## 운영 점검", markdown)
+        self.assertIn("Preflight: 통과", markdown)
+        self.assertIn("발행 확인: 오늘 공개 글 확인", markdown)
+        self.assertIn("Sitemap 제출: 제출됨", markdown)
 
     def test_next_actions_do_not_ask_for_first_article_when_public_feed_has_posts(self) -> None:
         settings = load_settings("easy_pc_fix_guide")
