@@ -30,7 +30,7 @@ class WeeklyReporter:
         search_console_client = SearchConsoleClient(self.settings)
         search_console = search_console_client.summary(week_start.date(), now.date())
         indexed_pages = search_console_client.indexed_page_estimate(week_start.date(), now.date())
-        operations = self._operations_result()
+        operations = self._operations_result(now, public_posts, search_console)
         local_published_count = sum(1 for item in articles if item.get("blogger_status") == "LIVE")
         published_count = max(local_published_count, len(public_posts.get("posts", [])))
         cadence_review = review_cadence(
@@ -142,14 +142,57 @@ class WeeklyReporter:
             return []
         return json.loads(path.read_text(encoding="utf-8")).get("pages", [])
 
-    def _operations_result(self) -> dict:
+    def _operations_result(
+        self,
+        now: datetime | None = None,
+        public_posts: dict | None = None,
+        search_console: dict | None = None,
+    ) -> dict:
         report_dir = ROOT_DIR / "reports"
+        publication_check = self._read_report(report_dir / f"{self.settings.site_key}-publication-check.json")
+        if publication_check.get("status") == "not_uploaded" and now is not None and public_posts is not None:
+            publication_check = self._publication_check_from_public_posts(now, public_posts)
+        sitemap_submit = self._read_report(report_dir / f"{self.settings.site_key}-search-console-sitemap-submit.json")
+        if sitemap_submit.get("status") == "not_uploaded" and (public_posts or search_console):
+            sitemap_submit = {
+                "status": "not_persisted",
+                "note": "이전 workflow artifact는 주간 workflow 환경에 자동 보존되지 않습니다. Daily publish workflow는 공개 발행 직후 sitemap 제출 단계를 실행합니다.",
+            }
         return {
             "daily_success": self._read_report(report_dir / f"{self.settings.site_key}-daily-success.json"),
             "daily_failure": self._read_report(report_dir / f"{self.settings.site_key}-daily-failure.json"),
             "preflight": self._read_report(report_dir / f"{self.settings.site_key}-preflight.json"),
-            "publication_check": self._read_report(report_dir / f"{self.settings.site_key}-publication-check.json"),
-            "sitemap_submit": self._read_report(report_dir / f"{self.settings.site_key}-search-console-sitemap-submit.json"),
+            "publication_check": publication_check,
+            "sitemap_submit": sitemap_submit,
+        }
+
+    def _publication_check_from_public_posts(self, now: datetime, public_posts: dict) -> dict:
+        if public_posts.get("status") != "connected":
+            return {
+                "status": "not_uploaded",
+                "source": "public_feed",
+                "note": "발행 확인 artifact가 없고 공개 피드도 확인되지 않았습니다.",
+            }
+        cutoff = now.replace(hour=9, minute=0, second=0, microsecond=0)
+        todays_posts = []
+        for post in public_posts.get("posts", []):
+            published_raw = post.get("published_kst", "")
+            try:
+                published_at = datetime.fromisoformat(published_raw)
+            except ValueError:
+                continue
+            if published_at.date() == now.date() and published_at >= cutoff:
+                todays_posts.append(post)
+        return {
+            "site": self.settings.site_key,
+            "site_name": self.settings.site_name,
+            "site_url": self.settings.site_url,
+            "checked_at_kst": now.isoformat(),
+            "cutoff_kst": cutoff.isoformat(),
+            "status": "published_today" if todays_posts else "missing_today",
+            "source": "weekly_public_feed_fallback",
+            "today_post_count": len(todays_posts),
+            "latest_posts": public_posts.get("posts", [])[:5],
         }
 
     def _read_report(self, path: Path) -> dict:
@@ -329,12 +372,18 @@ class WeeklyReporter:
             else:
                 lines.append("  - 전체 점검 통과")
         lines.append(f"- 발행 확인: {_status_kr(publication_check.get('status', 'not_uploaded'))}")
+        if publication_check.get("source"):
+            lines.append(f"  - 확인 기준: {publication_check.get('source')}")
+        if publication_check.get("note"):
+            lines.append(f"  - 참고: {publication_check.get('note')}")
         if publication_check.get("today_post_count") is not None:
             lines.append(f"  - 기준 이후 공개 글 수: {publication_check.get('today_post_count', 0)}")
         if publication_check.get("latest_posts"):
             latest = publication_check["latest_posts"][0]
             lines.append(f"  - 최근 글: {latest.get('title', '')}")
         lines.append(f"- Sitemap 제출: {_status_kr(sitemap_submit.get('status', 'not_uploaded'))}")
+        if sitemap_submit.get("note"):
+            lines.append(f"  - 참고: {sitemap_submit.get('note')}")
         if sitemap_submit.get("sitemap_url"):
             lines.append(f"  - {sitemap_submit.get('sitemap_url')}")
         if sitemap_submit.get("error"):
@@ -367,6 +416,7 @@ def _status_kr(status: str | None) -> str:
         "connected": "연결됨",
         "not_configured": "미설정",
         "not_uploaded": "미업로드",
+        "not_persisted": "이전 실행 파일 미보존",
         "error": "오류",
         "submitted": "제출됨",
         "pass": "통과",

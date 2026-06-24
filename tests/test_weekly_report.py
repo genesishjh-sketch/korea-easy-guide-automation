@@ -167,6 +167,32 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertEqual(operations["daily_success"]["status"], "published")
         self.assertEqual(operations["daily_failure"]["status"], "failed")
 
+    def test_operations_result_falls_back_to_public_feed_when_artifacts_are_not_persisted(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+        now = datetime(2026, 6, 25, 9, 40, tzinfo=ZoneInfo("Asia/Seoul"))
+
+        with tempfile.TemporaryDirectory() as tmpdir, patch("src.reporting.weekly.ROOT_DIR", Path(tmpdir)):
+            operations = reporter._operations_result(
+                now=now,
+                public_posts={
+                    "status": "connected",
+                    "posts": [
+                        {
+                            "title": "Wi-Fi Button Missing on Windows 11",
+                            "url": "https://easypcfixguide.blogspot.com/2026/06/example.html",
+                            "published_kst": "2026-06-25T09:12:00+09:00",
+                        }
+                    ],
+                },
+                search_console={"status": "connected"},
+            )
+
+        self.assertEqual(operations["publication_check"]["status"], "published_today")
+        self.assertEqual(operations["publication_check"]["today_post_count"], 1)
+        self.assertEqual(operations["publication_check"]["source"], "weekly_public_feed_fallback")
+        self.assertEqual(operations["sitemap_submit"]["status"], "not_persisted")
+
 
 if __name__ == "__main__":
     unittest.main()
