@@ -15,6 +15,60 @@ from src.quality.hades import HadesQualityGate
 
 
 class DuplicatePublishGuardTests(unittest.TestCase):
+    def test_daily_success_report_is_written_with_quality_and_url(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            article_dir = root / "article"
+            article_dir.mkdir()
+            publish_result_path = article_dir / "blogger_publish_result.json"
+            (article_dir / "metadata.json").write_text(
+                json.dumps(
+                    {
+                        "article": {
+                            "title": "Wi-Fi Button Missing on Windows 11",
+                            "category": "Wi-Fi & Internet",
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (article_dir / "quality_report.json").write_text(
+                json.dumps({"score": 100, "passed": True, "metrics": {"word_count": 1512}}),
+                encoding="utf-8",
+            )
+            publish_result_path.write_text(
+                json.dumps(
+                    {
+                        "draft": False,
+                        "blogger": {
+                            "status": "LIVE",
+                            "url": "https://easypcfixguide.blogspot.com/2026/06/example.html",
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            with patch.object(daily_draft, "ROOT_DIR", root):
+                report_path = daily_draft.save_daily_success_report(
+                    {
+                        "site": "easy_pc_fix_guide",
+                        "mode": "publish",
+                        "seed": "wifi button missing windows 11",
+                        "article_dir": str(article_dir),
+                        "publish_result": str(publish_result_path),
+                        "skipped_duplicate_seeds": [],
+                    }
+                )
+
+            payload = json.loads(report_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(payload["status"], "published")
+        self.assertEqual(payload["title"], "Wi-Fi Button Missing on Windows 11")
+        self.assertEqual(payload["quality_score"], 100)
+        self.assertEqual(payload["quality_metrics"]["word_count"], 1512)
+        self.assertEqual(payload["url"], "https://easypcfixguide.blogspot.com/2026/06/example.html")
+
     def test_daily_success_message_includes_quality_metrics(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             article_dir = Path(tmpdir)

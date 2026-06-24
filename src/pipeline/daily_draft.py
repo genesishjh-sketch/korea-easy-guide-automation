@@ -126,6 +126,7 @@ def run(seed: str | None = None, site: str | None = None, publish_mode: str = "d
             "mode": publish_mode,
             "skipped_duplicate_seeds": skipped_duplicate_seeds,
         }
+        save_daily_success_report(result)
         notify_daily_completion(result)
         return result
     except Exception as exc:
@@ -306,6 +307,51 @@ def save_daily_failure_report(seed: str, exc: Exception, site: str | None = None
     }
     output_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     return output_path
+
+
+def save_daily_success_report(result: dict[str, str]) -> Path:
+    settings = load_settings(result.get("site"))
+    article_dir = Path(result["article_dir"])
+    metadata = read_json(article_dir / "metadata.json")
+    publish_result = read_json(Path(result["publish_result"]))
+    quality_report = read_json(article_dir / "quality_report.json")
+    article = metadata.get("article", {})
+    blogger = publish_result.get("blogger", {})
+    output_dir = ROOT_DIR / "reports"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_path = output_dir / f"{settings.site_key}-daily-success.json"
+    payload = {
+        "site": settings.site_key,
+        "site_name": settings.site_name,
+        "site_url": settings.site_url,
+        "mode": result.get("mode", "draft"),
+        "status": daily_result_status(result, publish_result),
+        "seed": result.get("seed", ""),
+        "article_dir": result.get("article_dir", ""),
+        "publish_result": result.get("publish_result", ""),
+        "title": article.get("title", ""),
+        "category": article.get("category", ""),
+        "blogger_status": blogger.get("status", ""),
+        "url": blogger.get("url", ""),
+        "quality_score": quality_report.get("score"),
+        "quality_passed": quality_report.get("passed"),
+        "quality_metrics": quality_report.get("metrics", {}),
+        "skipped_duplicate_seeds": result.get("skipped_duplicate_seeds") or [],
+        "created_at": datetime.utcnow().isoformat() + "Z",
+    }
+    output_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    return output_path
+
+
+def daily_result_status(result: dict, publish_result: dict) -> str:
+    mode = result.get("mode", "draft")
+    if mode == "validate":
+        return "validated"
+    if publish_result.get("skipped"):
+        return "skipped_duplicate"
+    if publish_result.get("draft", True):
+        return "draft_uploaded"
+    return "published"
 
 
 def build_daily_success_message(result: dict[str, str]) -> str:
