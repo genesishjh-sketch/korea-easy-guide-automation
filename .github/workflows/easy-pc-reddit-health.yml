@@ -1,0 +1,50 @@
+name: Easy PC Fix Reddit OAuth Health
+
+on:
+  workflow_dispatch:
+    inputs:
+      query:
+        description: "Optional Reddit search query"
+        required: false
+        default: "wifi button missing windows 11"
+      notify:
+        description: "Send result to Posting Bot"
+        required: false
+        default: "true"
+  schedule:
+    - cron: "20 0 * * *"
+
+jobs:
+  reddit-health:
+    runs-on: ubuntu-latest
+    env:
+      APP_ENV: production
+      SITE_KEY: easy_pc_fix_guide
+      EASY_PC_FIX_GUIDE_SITE_URL: ${{ vars.EASY_PC_FIX_GUIDE_SITE_URL || 'https://easypcfixguide.blogspot.com' }}
+      REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+      REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+      NOTIFICATION_PROVIDER: ${{ vars.NOTIFICATION_PROVIDER }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run Reddit OAuth health check
+        run: |
+          QUERY="${{ github.event.inputs.query || 'wifi button missing windows 11' }}"
+          NOTIFY="${{ github.event.inputs.notify || 'true' }}"
+          if [ "$NOTIFY" = "true" ]; then
+            python -m src.pipeline.stage0_reddit_health --site easy_pc_fix_guide --query "$QUERY" --notify
+          else
+            python -m src.pipeline.stage0_reddit_health --site easy_pc_fix_guide --query "$QUERY"
+          fi
+      - name: Upload Reddit health report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: easy-pc-fix-reddit-health
+          path: reports/easy_pc_fix_guide-reddit-health.json
