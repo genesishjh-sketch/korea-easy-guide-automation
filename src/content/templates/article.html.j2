@@ -177,6 +177,15 @@
   <p>{{ paragraph }}</p>
   {% endfor %}
 
+  {% if inline_images %}
+  <figure class="keg-post__inline-image">
+    <img src="{{ inline_images[0].url or inline_images[0].path }}" alt="{{ inline_images[0].alt }}" loading="lazy">
+    <figcaption class="keg-post__caption">
+      {% if inline_images[0].caption %}{{ inline_images[0].caption }}{% else %}Use this visual checkpoint before continuing with the next step.{% endif %}
+    </figcaption>
+  </figure>
+  {% endif %}
+
   <h2>Step-by-Step Guide</h2>
   <ol>
     {% for step in steps %}

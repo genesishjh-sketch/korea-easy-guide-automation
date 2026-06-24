@@ -21,12 +21,21 @@ image: "{{ image.url or image.path }}"
 | {{ row.situation }} | {{ row.choice }} |
 {% endfor %}
 
-## What You Should Know First
+## Before You Start
 
 {% for paragraph in basics -%}
 {{ paragraph }}
 
 {% endfor -%}
+
+{% if inline_images -%}
+![{{ inline_images[0].alt }}]({{ inline_images[0].url or inline_images[0].path }})
+
+{% if inline_images[0].caption -%}
+{{ inline_images[0].caption }}
+
+{% endif -%}
+{% endif -%}
 
 ## Step-by-Step Guide
 
@@ -34,7 +43,15 @@ image: "{{ image.url or image.path }}"
 {{ loop.index }}. {{ step }}
 {% endfor %}
 
-## Common Mistakes to Avoid
+## Costs / Payment
+
+| Item | What to Know |
+|---|---|
+{% for item in costs_payment -%}
+| {{ item.item }} | {{ item.detail }} |
+{% endfor %}
+
+## Common Problems
 
 {% for mistake in mistakes -%}
 - {{ mistake }}
@@ -57,7 +74,7 @@ image: "{{ image.url or image.path }}"
 
 {% endfor -%}
 
-## Sources to Check Before You Go
+## Official Links to Check
 
 {% for source in sources -%}
 - [{{ source.name }}]({{ source.url }})

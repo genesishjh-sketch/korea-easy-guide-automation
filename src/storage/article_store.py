@@ -23,6 +23,10 @@ class ArticleStore:
         image_source = Path(article.image.path)
         if image_source.exists():
             shutil.copy2(image_source, assets_dir / image_source.name)
+        for inline_image in article.inline_images:
+            inline_source = Path(inline_image.path)
+            if inline_source.exists():
+                shutil.copy2(inline_source, assets_dir / inline_source.name)
 
         (article_dir / "article.md").write_text(article.markdown, encoding="utf-8")
         (article_dir / "article.html").write_text(article.html, encoding="utf-8")

@@ -34,9 +34,37 @@ def load_article(article_dir: Path) -> tuple[str, str, list[str]]:
     article = metadata["article"]
     title = article["title"]
     labels = article.get("tags", [])
+    validate_required_images(article_dir)
     html = (article_dir / "article.html").read_text(encoding="utf-8")
     html = rewrite_local_image_paths(html, article_dir)
     return title, html, labels
+
+
+def validate_required_images(article_dir: Path) -> None:
+    image_plan_path = article_dir / "image_plan.json"
+    if not image_plan_path.exists():
+        return
+
+    image_plan = json.loads(image_plan_path.read_text(encoding="utf-8"))
+    if not image_plan.get("strict", False):
+        return
+
+    missing = []
+    for image in image_plan.get("images", []):
+        if not image.get("required", True):
+            continue
+        url = image.get("url") or f"assets/{image.get('filename', '')}"
+        if not url.startswith("assets/"):
+            continue
+        if not (article_dir / url).exists():
+            missing.append(url)
+
+    if missing:
+        joined = ", ".join(missing)
+        raise FileNotFoundError(
+            f"Required Codex-generated image assets are missing: {joined}. "
+            "Generate the images from image_plan.json and save them before publishing."
+        )
 
 
 def rewrite_local_image_paths(html: str, article_dir: Path) -> str:

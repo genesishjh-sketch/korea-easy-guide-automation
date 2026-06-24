@@ -30,6 +30,7 @@ class ImageAsset:
     alt: str
     source: str
     credit: str = ""
+    caption: str = ""
 
 
 @dataclass
@@ -44,3 +45,4 @@ class Article:
     image: ImageAsset
     sources: list[dict]
     created_at: datetime
+    inline_images: list[ImageAsset] = field(default_factory=list)

@@ -39,7 +39,12 @@ class EnglishArticleGenerator:
             lstrip_blocks=True,
         )
 
-    def generate(self, candidate: TopicCandidate, image: ImageAsset) -> Article:
+    def generate(
+        self,
+        candidate: TopicCandidate,
+        image: ImageAsset,
+        inline_images: list[ImageAsset] | None = None,
+    ) -> Article:
         title_keyword = title_case_keyword(candidate.keyword)
         if candidate.intent == "how-to" or not title_keyword.lower().startswith("how"):
             title = f"How to Use {title_keyword} in Korea: Easy Guide for Foreign Visitors"
@@ -51,6 +56,7 @@ class EnglishArticleGenerator:
         tags = self._build_tags(candidate)
         meta_description = self._meta_description(candidate.keyword)
         sources = OFFICIAL_SOURCE_MAP.get(candidate.category, OFFICIAL_SOURCE_MAP["Transportation"])
+        inline_images = inline_images or []
 
         context = {
             "title": title,
@@ -59,6 +65,7 @@ class EnglishArticleGenerator:
             "tags": tags,
             "meta_description": meta_description,
             "image": image,
+            "inline_images": inline_images,
             "intro": self._intro(candidate.keyword),
             "quick_answer": self._quick_answer(candidate.keyword),
             "basics": self._basics(candidate.keyword),
@@ -83,6 +90,7 @@ class EnglishArticleGenerator:
             image=image,
             sources=sources,
             created_at=datetime.utcnow(),
+            inline_images=inline_images,
         )
 
     def _normalize_title(self, keyword: str, default_title: str) -> str:

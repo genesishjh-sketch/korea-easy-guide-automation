@@ -10,7 +10,7 @@ from src.collectors.reddit import RedditCollector
 from src.config import ROOT_DIR, load_settings
 from src.content.generator import EnglishArticleGenerator
 from src.content.topic_scoring import build_candidate
-from src.images.cover import create_local_svg_cover
+from src.images.ai_plan import build_article_image_plan
 from src.storage.article_store import ArticleStore
 
 
@@ -42,15 +42,22 @@ def run(seed: str | None = None) -> Path:
     candidate = build_candidate(keyword, signals)
     LOGGER.info("Selected topic category=%s score=%s", candidate.category, candidate.score)
 
-    temporary_image_dir = ROOT_DIR / "data" / "generated" / "_tmp_images"
-    provisional_title = f"{keyword} guide for foreign visitors"
-    image = create_local_svg_cover(provisional_title, temporary_image_dir)
-
     generator = EnglishArticleGenerator(settings)
-    article = generator.generate(candidate, image)
+    provisional_plan = build_article_image_plan(candidate, f"{keyword} guide")
+    provisional_article = generator.generate(
+        candidate,
+        provisional_plan.hero_asset(),
+        provisional_plan.inline_assets(),
+    )
+    image_plan = build_article_image_plan(candidate, provisional_article.title)
+    article = generator.generate(candidate, image_plan.hero_asset(), image_plan.inline_assets())
 
     store = ArticleStore()
     output_dir = store.save(article, candidate)
+    (output_dir / "image_plan.json").write_text(
+        json.dumps(image_plan.to_dict(), ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
     LOGGER.info("Saved article to %s", output_dir)
     return output_dir
 

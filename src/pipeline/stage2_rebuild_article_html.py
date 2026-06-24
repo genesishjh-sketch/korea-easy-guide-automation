@@ -32,9 +32,21 @@ def rebuild_article_html(article_dir: Path) -> Path:
         alt=image_data["alt"],
         source=image_data["source"],
         credit=image_data.get("credit", ""),
+        caption=image_data.get("caption", ""),
     )
+    inline_images = [
+        ImageAsset(
+            path=image["path"],
+            url=image["url"],
+            alt=image["alt"],
+            source=image["source"],
+            credit=image.get("credit", ""),
+            caption=image.get("caption", ""),
+        )
+        for image in article_data.get("inline_images", [])
+    ]
 
-    article = EnglishArticleGenerator(load_settings()).generate(candidate, image)
+    article = EnglishArticleGenerator(load_settings()).generate(candidate, image, inline_images)
     (article_dir / "article.html").write_text(article.html, encoding="utf-8")
 
     metadata["article"] = {

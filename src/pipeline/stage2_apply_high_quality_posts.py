@@ -53,6 +53,16 @@ def render_post(article_dir: Path, env: Environment) -> Path | None:
     article["title"] = post["title"]
     article["meta_description"] = post["meta_description"]
     article["html"] = html
+    article["inline_images"] = [
+        {
+            "path": str(article_dir / inline_image["url"]),
+            "url": inline_image["url"],
+            "alt": inline_image["alt"],
+            "source": "codex_image_plan",
+            "credit": "Generated with Codex image generation",
+            "caption": post["inline_caption"],
+        }
+    ]
     article["sources"] = [{"name": name, "url": url} for name, url in post["sources"]]
 
     (article_dir / "article.html").write_text(html, encoding="utf-8")
