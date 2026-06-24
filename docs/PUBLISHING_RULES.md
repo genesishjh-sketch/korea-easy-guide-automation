@@ -68,6 +68,9 @@ and issue count == 0
 ## Image Rules
 
 - Do not call paid image APIs from the Python pipeline.
+- GitHub Actions for unattended publishing must not receive paid or external image API keys such as `OPENAI_API_KEY`, `OPENAI_IMAGES_API_KEY`, or `PEXELS_API_KEY`.
+- The preflight check must fail if paid image API keys are wired into unattended workflows.
+- If paid/external image API keys exist only in the local shell, preflight should warn so the operator can confirm they are not used by scheduled publishing.
 - Each generated post must include `image_plan.json`.
 - Codex-generated raster images are the preferred image source.
 - Local SVG assets are allowed as zero-cost fallback assets for unattended automation.

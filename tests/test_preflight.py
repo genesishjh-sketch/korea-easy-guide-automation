@@ -114,6 +114,51 @@ class PreflightTests(unittest.TestCase):
         self.assertEqual(check.status, "pass")
         self.assertIn("Reddit OAuth credentials", check.message)
 
+    def test_zero_cost_image_policy_passes_without_paid_image_envs(self) -> None:
+        env = {name: "" for name in stage0_preflight.PAID_IMAGE_ENV_NAMES}
+        with patch.dict("os.environ", env):
+            check = stage0_preflight.check_zero_cost_image_policy()
+
+        self.assertEqual(check.status, "pass")
+        self.assertIn("without paid image API wiring", check.message)
+
+    def test_zero_cost_image_policy_warns_with_local_paid_image_key(self) -> None:
+        env = {name: "" for name in stage0_preflight.PAID_IMAGE_ENV_NAMES}
+        env["OPENAI_API_KEY"] = "local-test-key"
+        with patch.dict("os.environ", env):
+            check = stage0_preflight.check_zero_cost_image_policy()
+
+        self.assertEqual(check.status, "warn")
+        self.assertIn("OPENAI_API_KEY", check.message)
+
+    def test_zero_cost_image_policy_fails_when_workflow_uses_paid_image_key(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            workflow_dir = root / ".github" / "workflows"
+            workflow_dir.mkdir(parents=True)
+            (workflow_dir / "daily.yml").write_text("env:\n  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}\n", encoding="utf-8")
+            image_dir = root / "src" / "images"
+            image_dir.mkdir(parents=True)
+            (image_dir / "ai_plan.py").write_text(
+                "\n".join(
+                    [
+                        "codex_generated_no_api",
+                        "Do not call paid image APIs in the Python pipeline.",
+                        "IMAGE_ASSET_MODE",
+                        "local_svg",
+                        "APP_ENV",
+                        "production",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+            env = {name: "" for name in stage0_preflight.PAID_IMAGE_ENV_NAMES}
+            with patch.object(stage0_preflight, "ROOT_DIR", root), patch.dict("os.environ", env):
+                check = stage0_preflight.check_zero_cost_image_policy()
+
+        self.assertEqual(check.status, "fail")
+        self.assertIn("OPENAI_API_KEY", check.message)
+
     def test_public_feed_warns_without_breaking_preflight(self) -> None:
         with patch.object(stage0_preflight, "fetch_public_feed", side_effect=RuntimeError("feed unavailable")):
             check = stage0_preflight.check_public_feed("https://easypcfixguide.blogspot.com")

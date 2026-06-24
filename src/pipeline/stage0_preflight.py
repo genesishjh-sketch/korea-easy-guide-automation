@@ -4,6 +4,7 @@ import argparse
 from dataclasses import asdict
 from dataclasses import dataclass
 import json
+import os
 from pathlib import Path
 import sys
 
@@ -34,6 +35,7 @@ def run(site: str | None = None) -> Path:
         check_seed_file(site),
         check_launch_queue(site),
         check_reddit_collection_settings(site),
+        check_zero_cost_image_policy(),
         check_daily_workflow(),
         check_validate_workflow(),
         check_publication_check_workflow(),
@@ -121,6 +123,72 @@ def check_reddit_collection_settings(site: str | None = None) -> PreflightCheck:
         "warn",
         "Reddit OAuth credentials are missing. Public Reddit JSON may return 403, so the pipeline may rely on fallback reader questions.",
     )
+
+
+PAID_IMAGE_ENV_NAMES = [
+    "OPENAI_API_KEY",
+    "OPENAI_IMAGES_API_KEY",
+    "OPENAI_IMAGE_MODEL",
+    "IMAGE_GENERATION_API_KEY",
+    "PEXELS_API_KEY",
+]
+
+
+def check_zero_cost_image_policy() -> PreflightCheck:
+    configured = [name for name in PAID_IMAGE_ENV_NAMES if os.getenv(name)]
+    workflow_refs = _paid_image_env_refs_in_workflows()
+    image_plan = ROOT_DIR / "src" / "images" / "ai_plan.py"
+    image_plan_text = image_plan.read_text(encoding="utf-8") if image_plan.exists() else ""
+    missing_safeguards = [
+        snippet
+        for snippet in [
+            "Do not call paid image APIs in the Python pipeline.",
+            "codex_generated_no_api",
+            "IMAGE_ASSET_MODE",
+            "local_svg",
+            "APP_ENV",
+            "production",
+        ]
+        if snippet not in image_plan_text
+    ]
+    if workflow_refs:
+        return PreflightCheck(
+            "zero_cost_image_policy",
+            "fail",
+            "Paid/external image API environment names are referenced by GitHub Actions: "
+            f"{', '.join(workflow_refs)}. Remove them from unattended publishing workflows.",
+        )
+    if missing_safeguards:
+        return PreflightCheck(
+            "zero_cost_image_policy",
+            "fail",
+            f"Image plan is missing zero-cost safeguards: {', '.join(missing_safeguards)}",
+        )
+    if configured:
+        return PreflightCheck(
+            "zero_cost_image_policy",
+            "warn",
+            "Local paid/external image API settings are present but must not be used by unattended publishing: "
+            f"{', '.join(configured)}.",
+        )
+    return PreflightCheck(
+        "zero_cost_image_policy",
+        "pass",
+        "Unattended publishing is configured for Codex image plans and local SVG fallback without paid image API wiring.",
+    )
+
+
+def _paid_image_env_refs_in_workflows() -> list[str]:
+    workflow_dir = ROOT_DIR / ".github" / "workflows"
+    if not workflow_dir.exists():
+        return []
+    refs: set[str] = set()
+    for path in workflow_dir.glob("*.yml"):
+        text = path.read_text(encoding="utf-8")
+        for name in PAID_IMAGE_ENV_NAMES:
+            if name in text:
+                refs.add(name)
+    return sorted(refs)
 
 
 def check_python_runtime() -> PreflightCheck:
