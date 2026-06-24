@@ -36,7 +36,7 @@ def choose_seed(explicit_seed: str | None = None, site: str | None = None) -> st
     settings = load_settings(site)
     if explicit_seed:
         return explicit_seed
-    seeds = load_seed_list(site)
+    seeds = load_active_seed_list(site)
     if settings.app_env.lower() == "production":
         return choose_seed_for_date(seeds, settings.automation_start_date, date.today())
     used = used_keywords(site)
@@ -48,7 +48,30 @@ def choose_seed(explicit_seed: str | None = None, site: str | None = None) -> st
 
 def load_seed_list(site: str | None = None) -> list[str]:
     settings = load_settings(site)
-    seed_path = Path(settings.seed_file)
+    return load_seed_file(settings.seed_file)
+
+
+def load_launch_seed_list(site: str | None = None) -> list[str]:
+    settings = load_settings(site)
+    if not settings.launch_seed_file:
+        return []
+    return load_seed_file(settings.launch_seed_file)
+
+
+def load_active_seed_list(site: str | None = None) -> list[str]:
+    settings = load_settings(site)
+    seeds = load_seed_list(site)
+    launch_seeds = load_launch_seed_list(site)
+    if settings.app_env.lower() != "production" or not launch_seeds:
+        return seeds
+    days_since_start = days_since_automation_start(settings.automation_start_date, date.today())
+    if days_since_start < len(launch_seeds):
+        return launch_seeds
+    return seeds
+
+
+def load_seed_file(seed_file: str) -> list[str]:
+    seed_path = Path(seed_file)
     if not seed_path.is_absolute():
         seed_path = ROOT_DIR / seed_path
     return json.loads(seed_path.read_text(encoding="utf-8"))
@@ -58,7 +81,7 @@ def choose_publish_seed_candidates(explicit_seed: str | None = None, site: str |
     if explicit_seed:
         return [explicit_seed]
     settings = load_settings(site)
-    seeds = load_seed_list(site)
+    seeds = load_active_seed_list(site)
     if settings.app_env.lower() == "production":
         first = choose_seed_for_date(seeds, settings.automation_start_date, date.today())
         first_index = seeds.index(first)
@@ -71,12 +94,16 @@ def choose_publish_seed_candidates(explicit_seed: str | None = None, site: str |
 def choose_seed_for_date(seeds: list[str], start_date: str, today: date) -> str:
     if not seeds:
         raise ValueError("Seed file must contain at least one topic seed.")
+    index = days_since_automation_start(start_date, today) % len(seeds)
+    return seeds[index]
+
+
+def days_since_automation_start(start_date: str, today: date) -> int:
     try:
         start = datetime.strptime(start_date, "%Y-%m-%d").date()
     except ValueError:
         start = today
-    index = max(0, (today - start).days) % len(seeds)
-    return seeds[index]
+    return max(0, (today - start).days)
 
 
 def run(seed: str | None = None, site: str | None = None, publish_mode: str = "draft") -> dict[str, str]:

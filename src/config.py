@@ -21,6 +21,7 @@ class Settings:
     default_author: str
     content_domain: str
     seed_file: str
+    launch_seed_file: str
     generated_output_dir: str
     automation_start_date: str
     reddit_subreddits: list[str]
@@ -68,6 +69,7 @@ def load_settings(site_key: str | None = None) -> Settings:
         default_author=site_getenv("DEFAULT_AUTHOR", profile.author),
         content_domain=site_getenv("CONTENT_DOMAIN", profile.content_domain),
         seed_file=site_getenv("SEED_FILE", str(profile.seed_file)),
+        launch_seed_file=site_getenv("LAUNCH_SEED_FILE", str(profile.launch_seed_file or "")),
         generated_output_dir=site_getenv("GENERATED_OUTPUT_DIR", str(profile.output_dir)),
         automation_start_date=site_getenv("AUTOMATION_START_DATE", profile.automation_start_date),
         reddit_subreddits=[

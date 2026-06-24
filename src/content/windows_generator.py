@@ -44,6 +44,7 @@ TOPIC_SOURCE_RULES = [
         ("windows update", "update error", "0x"),
         [
             {"name": "Microsoft Support search: Windows Update troubleshooter", "url": "https://support.microsoft.com/search/results?query=Windows%20Update%20troubleshooter"},
+            {"name": "Microsoft Support search: Windows Update error codes", "url": "https://support.microsoft.com/search/results?query=Windows%20Update%20error%20code"},
             {"name": "Windows release health known issues", "url": "https://learn.microsoft.com/windows/release-health/"},
         ],
     ),

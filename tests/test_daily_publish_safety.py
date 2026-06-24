@@ -15,6 +15,32 @@ from src.quality.hades import HadesQualityGate
 
 
 class DuplicatePublishGuardTests(unittest.TestCase):
+    def test_production_uses_launch_queue_before_long_term_seed_list(self) -> None:
+        with patch.object(daily_draft, "load_settings") as load_settings:
+            load_settings.return_value.app_env = "production"
+            load_settings.return_value.automation_start_date = "2026-06-24"
+            with patch.object(daily_draft, "load_seed_list", return_value=["long term topic"]), patch.object(
+                daily_draft, "load_launch_seed_list", return_value=["launch day one", "launch day two"]
+            ), patch.object(daily_draft, "date") as fake_date:
+                fake_date.today.return_value = datetime(2026, 6, 25).date()
+
+                seed = daily_draft.choose_seed(site="easy_pc_fix_guide")
+
+        self.assertEqual(seed, "launch day two")
+
+    def test_production_returns_to_long_term_seeds_after_launch_queue(self) -> None:
+        with patch.object(daily_draft, "load_settings") as load_settings:
+            load_settings.return_value.app_env = "production"
+            load_settings.return_value.automation_start_date = "2026-06-24"
+            with patch.object(daily_draft, "load_seed_list", return_value=["long term one", "long term two"]), patch.object(
+                daily_draft, "load_launch_seed_list", return_value=["launch only"]
+            ), patch.object(daily_draft, "date") as fake_date:
+                fake_date.today.return_value = datetime(2026, 6, 26).date()
+
+                seed = daily_draft.choose_seed(site="easy_pc_fix_guide")
+
+        self.assertEqual(seed, "long term one")
+
     def test_matches_existing_post_by_title_when_blogger_shortens_slug(self) -> None:
         existing_post = {
             "title": "Wi-Fi Button Missing on Windows 11: Simple Fixes for Beginners",

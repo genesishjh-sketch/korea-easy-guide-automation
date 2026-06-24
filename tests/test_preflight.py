@@ -22,6 +22,30 @@ class PreflightTests(unittest.TestCase):
         self.assertEqual(check.status, "pass")
         self.assertIn("covers source, tests", check.message)
 
+    def test_launch_queue_passes_with_seven_topics_from_main_seed_file(self) -> None:
+        with patch.object(stage0_preflight, "load_settings") as load_settings:
+            load_settings.return_value.content_domain = "windows_help"
+            with patch.object(stage0_preflight, "load_seed_list", return_value=[f"topic {i}" for i in range(8)]), patch.object(
+                stage0_preflight, "load_launch_seed_list", return_value=[f"topic {i}" for i in range(7)]
+            ):
+                check = stage0_preflight.check_launch_queue("easy_pc_fix_guide")
+
+        self.assertEqual(check.status, "pass")
+        self.assertIn("7 launch topics", check.message)
+
+    def test_launch_queue_fails_when_topic_is_not_in_main_seed_file(self) -> None:
+        with patch.object(stage0_preflight, "load_settings") as load_settings:
+            load_settings.return_value.content_domain = "windows_help"
+            with patch.object(stage0_preflight, "load_seed_list", return_value=[f"topic {i}" for i in range(7)]), patch.object(
+                stage0_preflight,
+                "load_launch_seed_list",
+                return_value=[*([f"topic {i}" for i in range(6)]), "missing topic"],
+            ):
+                check = stage0_preflight.check_launch_queue("easy_pc_fix_guide")
+
+        self.assertEqual(check.status, "fail")
+        self.assertIn("missing topic", check.message)
+
     def test_public_feed_warns_without_breaking_preflight(self) -> None:
         with patch.object(stage0_preflight, "fetch_public_feed", side_effect=RuntimeError("feed unavailable")):
             check = stage0_preflight.check_public_feed("https://easypcfixguide.blogspot.com")

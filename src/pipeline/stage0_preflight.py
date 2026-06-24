@@ -8,6 +8,7 @@ from pathlib import Path
 
 from src.config import ROOT_DIR
 from src.config import load_settings
+from src.pipeline.daily_draft import load_launch_seed_list
 from src.pipeline.daily_draft import load_seed_list
 from src.pipeline.stage4_publication_check import fetch_public_feed
 from src.pipeline.stage4_publication_check import parse_posts
@@ -25,6 +26,7 @@ def run(site: str | None = None) -> Path:
     checks = [
         check_site_settings(site),
         check_seed_file(site),
+        check_launch_queue(site),
         check_daily_workflow(),
         check_validate_workflow(),
         check_public_feed(settings.site_url),
@@ -67,6 +69,27 @@ def check_seed_file(site: str | None = None) -> PreflightCheck:
     if len(seeds) < 30:
         return PreflightCheck("seed_file", "warn", f"Only {len(seeds)} topic seeds found; add more for long automation runs.")
     return PreflightCheck("seed_file", "pass", f"{len(seeds)} topic seeds found.")
+
+
+def check_launch_queue(site: str | None = None) -> PreflightCheck:
+    settings = load_settings(site)
+    if settings.content_domain != "windows_help":
+        return PreflightCheck("launch_queue", "pass", "No launch queue is required for this site.")
+    try:
+        seeds = load_seed_list(site)
+        launch_seeds = load_launch_seed_list(site)
+    except Exception as exc:
+        return PreflightCheck("launch_queue", "fail", f"Could not load launch queue: {exc}")
+    if len(launch_seeds) < 7:
+        return PreflightCheck("launch_queue", "fail", "Windows launch queue must include at least 7 topics.")
+    duplicates = sorted({seed for seed in launch_seeds if launch_seeds.count(seed) > 1})
+    if duplicates:
+        return PreflightCheck("launch_queue", "fail", f"Duplicate launch topics: {', '.join(duplicates)}")
+    seed_set = set(seeds)
+    missing = [seed for seed in launch_seeds if seed not in seed_set]
+    if missing:
+        return PreflightCheck("launch_queue", "fail", f"Launch topics missing from main seed file: {', '.join(missing)}")
+    return PreflightCheck("launch_queue", "pass", f"{len(launch_seeds)} launch topics are ready before the long-term queue.")
 
 
 def check_daily_workflow() -> PreflightCheck:
