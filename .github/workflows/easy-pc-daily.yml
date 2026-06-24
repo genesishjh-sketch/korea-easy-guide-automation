@@ -42,6 +42,8 @@ jobs:
         run: pip install -r requirements.txt
       - name: Run safety regression tests
         run: python -m unittest discover -v
+      - name: Run automation preflight
+        run: python -m src.pipeline.stage0_preflight --site easy_pc_fix_guide
       - name: Write Google OAuth files
         run: |
           mkdir -p .credentials
