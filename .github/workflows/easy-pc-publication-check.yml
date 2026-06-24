@@ -1,0 +1,27 @@
+name: Easy PC Fix Publication Check
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 09:45 KST, after the 09:10 daily publish workflow has time to finish.
+    - cron: "45 0 * * *"
+
+jobs:
+  publication-check:
+    runs-on: ubuntu-latest
+    env:
+      APP_ENV: production
+      SITE_KEY: easy_pc_fix_guide
+      EASY_PC_FIX_GUIDE_SITE_URL: ${{ vars.EASY_PC_FIX_GUIDE_SITE_URL || 'https://easypcfixguide.blogspot.com' }}
+      NOTIFICATION_PROVIDER: ${{ vars.NOTIFICATION_PROVIDER }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Check public Blogger feed
+        run: python -m src.pipeline.stage4_publication_check --site easy_pc_fix_guide --after-hour 9
