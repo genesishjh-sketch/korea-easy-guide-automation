@@ -17,8 +17,8 @@ jobs:
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
       - name: Install dependencies
@@ -27,7 +27,7 @@ jobs:
         run: python -m src.pipeline.stage4_publication_check --site easy_pc_fix_guide --after-hour 9
       - name: Upload publication check report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: easy-pc-fix-publication-check
           path: reports/easy_pc_fix_guide-publication-check.json
