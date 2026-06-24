@@ -84,6 +84,18 @@ WINDOWS_BLOCKED_PHRASES = {
     "disable antivirus permanently",
 }
 
+WINDOWS_ADVANCED_ONLY_TERMS = {
+    "registry",
+    "regedit",
+    "bios",
+    "uefi",
+    "partition",
+    "format",
+    "powershell",
+    "command prompt",
+    "diskpart",
+}
+
 
 @dataclass(frozen=True)
 class QualityIssue:
@@ -172,7 +184,7 @@ class HadesQualityGate:
                 issues.append(QualityIssue("blocked_phrase", f"Blocked phrase found: {phrase}."))
 
         if self.content_domain == "windows_help":
-            issues.extend(self._review_windows_article(text_lower, links))
+            issues.extend(self._review_windows_article(soup, text_lower, links))
 
         image_plan_path = article_dir / "image_plan.json"
         if image_plan_path.exists():
@@ -206,7 +218,7 @@ class HadesQualityGate:
         }
         return self._report(score, issues, metrics)
 
-    def _review_windows_article(self, text_lower: str, links: list) -> list[QualityIssue]:
+    def _review_windows_article(self, soup: BeautifulSoup | None, text_lower: str, links: list) -> list[QualityIssue]:
         issues: list[QualityIssue] = []
         microsoft_links = [
             link
@@ -220,9 +232,31 @@ class HadesQualityGate:
                 issues.append(QualityIssue("missing_windows_safety_field", f"Missing Windows safety field: {required}."))
         if "advanced fixes" in text_lower and "back up important files" not in text_lower:
             issues.append(QualityIssue("missing_advanced_warning", "Advanced fixes require a clear backup warning."))
+        if soup is not None:
+            issues.extend(self._review_windows_advanced_only_terms(soup))
         for phrase in WINDOWS_BLOCKED_PHRASES:
             if phrase in text_lower:
                 issues.append(QualityIssue("blocked_windows_phrase", f"Blocked Windows phrase found: {phrase}."))
+        return issues
+
+    def _review_windows_advanced_only_terms(self, soup: BeautifulSoup) -> list[QualityIssue]:
+        issues: list[QualityIssue] = []
+        beginner_sections = {
+            "try this first",
+            "step-by-step fixes",
+        }
+        for heading, section_text in _section_text_by_h2(soup).items():
+            if heading.casefold() not in beginner_sections:
+                continue
+            section_lower = section_text.casefold()
+            found_terms = sorted(term for term in WINDOWS_ADVANCED_ONLY_TERMS if term in section_lower)
+            if found_terms:
+                issues.append(
+                    QualityIssue(
+                        "advanced_fix_in_beginner_section",
+                        f"Advanced-only terms found in {heading}: {', '.join(found_terms)}.",
+                    )
+                )
         return issues
 
     def _review_research_report(self, article_dir: Path) -> tuple[dict[str, int], list[QualityIssue]]:
@@ -285,3 +319,18 @@ class HadesQualityGate:
             issues=issues,
             metrics=metrics,
         )
+
+
+def _section_text_by_h2(soup: BeautifulSoup) -> dict[str, str]:
+    sections: dict[str, str] = {}
+    for heading in soup.find_all("h2"):
+        title = heading.get_text(" ", strip=True)
+        parts = []
+        for sibling in heading.next_siblings:
+            if getattr(sibling, "name", None) == "h2":
+                break
+            get_text = getattr(sibling, "get_text", None)
+            if get_text:
+                parts.append(get_text(" ", strip=True))
+        sections[title] = " ".join(part for part in parts if part)
+    return sections

@@ -8,6 +8,8 @@ from zoneinfo import ZoneInfo
 import unittest
 from unittest.mock import patch
 
+from bs4 import BeautifulSoup
+
 from src.pipeline import daily_draft
 from src.quality.hades import HadesQualityGate
 
@@ -115,6 +117,7 @@ class WindowsQualityGateTests(unittest.TestCase):
     def test_windows_articles_require_official_microsoft_source(self) -> None:
         gate = HadesQualityGate("windows_help")
         issues = gate._review_windows_article(
+            None,
             "applies to risk level data loss risk estimated time last checked advanced fixes back up important files",
             links=[],
         )
@@ -124,11 +127,33 @@ class WindowsQualityGateTests(unittest.TestCase):
     def test_windows_articles_block_activation_bypass_content(self) -> None:
         gate = HadesQualityGate("windows_help")
         issues = gate._review_windows_article(
+            None,
             "applies to risk level data loss risk estimated time last checked kms activator",
             links=[],
         )
 
         self.assertIn("blocked_windows_phrase", {issue.code for issue in issues})
+
+    def test_windows_articles_keep_advanced_terms_out_of_beginner_fix_sections(self) -> None:
+        gate = HadesQualityGate("windows_help")
+        soup = BeautifulSoup(
+            """
+            <article>
+              <h2>Try This First</h2>
+              <p>Open regedit and change a Registry value.</p>
+              <h2>Advanced Fixes</h2>
+              <p>Back up important files before advanced fixes.</p>
+            </article>
+            """,
+            "html.parser",
+        )
+        issues = gate._review_windows_article(
+            soup,
+            "applies to risk level data loss risk estimated time last checked advanced fixes back up important files",
+            links=[],
+        )
+
+        self.assertIn("advanced_fix_in_beginner_section", {issue.code for issue in issues})
 
 
 if __name__ == "__main__":
