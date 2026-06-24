@@ -1,11 +1,9 @@
 name: Cadence Review Alert
 
 on:
+  # Legacy Korea cadence alert is manual-only while Easy PC Fix Guide owns the
+  # scheduled posting-volume review alerts.
   workflow_dispatch:
-  schedule:
-    # 09:30 KST on 2026-07-22 and 2026-08-19.
-    - cron: "30 0 22 7 *"
-    - cron: "30 0 19 8 *"
 
 jobs:
   cadence-alert:
