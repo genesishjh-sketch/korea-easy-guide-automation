@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 
 from src.config import ROOT_DIR
+from src.config import load_settings
+from src.notifications.telegram import NotificationClient
 from src.pipeline.stage1_generate import run as run_stage1
 from src.pipeline.stage2_publish import run as run_stage2
 
@@ -38,11 +40,28 @@ def run(seed: str | None = None) -> dict[str, str]:
     selected_seed = choose_seed(seed)
     article_dir = run_stage1(selected_seed)
     result_path = run_stage2(article_dir=article_dir, mode="draft")
-    return {
+    result = {
         "seed": selected_seed,
         "article_dir": str(article_dir),
         "publish_result": str(result_path),
     }
+    notify_daily_completion(result)
+    return result
+
+
+def notify_daily_completion(result: dict[str, str]) -> None:
+    settings = load_settings()
+    NotificationClient(settings).send(
+        "\n".join(
+            [
+                "[Korea Easy Guide] 일일 자동화 완료",
+                f"- 주제 시드: {result['seed']}",
+                f"- 생성 폴더: {result['article_dir']}",
+                f"- Blogger 결과: {result['publish_result']}",
+                "- 상태: 초안 업로드 완료",
+            ]
+        )
+    )
 
 
 def main() -> None:

@@ -25,6 +25,9 @@ jobs:
       REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
       REDDIT_USER_AGENT: ${{ vars.REDDIT_USER_AGENT || 'korea-easy-guide/0.1' }}
       GOOGLE_SEARCH_PROVIDER: suggest
+      NOTIFICATION_PROVIDER: ${{ vars.NOTIFICATION_PROVIDER }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

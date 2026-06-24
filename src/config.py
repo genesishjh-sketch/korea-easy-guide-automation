@@ -30,6 +30,9 @@ class Settings:
     search_console_site_url: str
     ga4_property_id: str
     ga4_measurement_id: str
+    notification_provider: str
+    telegram_bot_token: str
+    telegram_chat_id: str
 
 
 def load_settings() -> Settings:
@@ -53,4 +56,7 @@ def load_settings() -> Settings:
         search_console_site_url=os.getenv("SEARCH_CONSOLE_SITE_URL", os.getenv("SITE_URL", "https://koreaeasyguide.blogspot.com")),
         ga4_property_id=os.getenv("GA4_PROPERTY_ID", ""),
         ga4_measurement_id=os.getenv("GA4_MEASUREMENT_ID", ""),
+        notification_provider=os.getenv("NOTIFICATION_PROVIDER", ""),
+        telegram_bot_token=os.getenv("TELEGRAM_BOT_TOKEN", ""),
+        telegram_chat_id=os.getenv("TELEGRAM_CHAT_ID", ""),
     )
