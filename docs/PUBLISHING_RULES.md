@@ -4,6 +4,7 @@
 
 - Publish one new post every day, including weekends.
 - Target public publish time: 09:00 KST.
+- Send a Posting Bot daily result report every morning after the daily pipeline finishes.
 - Do not batch-publish multiple new posts on the same day during the early growth phase.
 - If the daily post fails quality checks, skip publishing instead of lowering the standard.
 
@@ -12,6 +13,7 @@
 - The target operating mode is full automation.
 - The pipeline must create the topic, article, image plan, images, quality report, Blogger post, and weekly report without manual editorial approval.
 - Manual review is replaced by the automated Hades Engineer quality gate.
+- Posting Bot must report daily success or failure, including title, Blogger status, URL, quality score, and action notes.
 
 ## Hades Engineer Quality Gate
 

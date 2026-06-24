@@ -6,7 +6,7 @@ Telegram is the easiest zero-cost option for automated blog messages.
 
 The automation can send:
 
-- A daily completion message after a post draft is uploaded.
+- A daily morning posting result report after a post draft or public post is uploaded.
 - The weekly Korean report after it is generated.
 
 ## Environment Variables
@@ -42,6 +42,26 @@ python -m src.pipeline.stage3_weekly_report
 ```
 
 If Telegram is configured correctly, the report will arrive as a message.
+
+## Daily Morning Report
+
+The daily pipeline is scheduled for:
+
+```text
+09:00 KST every day
+```
+
+The Posting Bot daily message includes:
+
+- Blog name and site URL
+- Posting status
+- Blogger status
+- Article title
+- Category
+- Topic seed
+- Quality score
+- Blogger URL
+- Failure reason if the pipeline fails
 
 ## Assisted Setup Command
 
