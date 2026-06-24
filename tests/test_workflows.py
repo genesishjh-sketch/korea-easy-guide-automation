@@ -8,6 +8,17 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 
 
 class WorkflowSafetyTests(unittest.TestCase):
+    def test_workflows_use_node24_compatible_actions(self) -> None:
+        workflow_dir = ROOT_DIR / ".github" / "workflows"
+        workflow_text = "\n".join(path.read_text(encoding="utf-8") for path in workflow_dir.glob("*.yml"))
+
+        self.assertNotIn("actions/checkout@v4", workflow_text)
+        self.assertNotIn("actions/setup-python@v5", workflow_text)
+        self.assertNotIn("actions/upload-artifact@v4", workflow_text)
+        self.assertIn("actions/checkout@v5", workflow_text)
+        self.assertIn("actions/setup-python@v6", workflow_text)
+        self.assertIn("actions/upload-artifact@v6", workflow_text)
+
     def test_easy_pc_daily_runs_safety_tests_before_publish(self) -> None:
         workflow = (ROOT_DIR / ".github" / "workflows" / "easy-pc-daily.yml").read_text(encoding="utf-8")
 
