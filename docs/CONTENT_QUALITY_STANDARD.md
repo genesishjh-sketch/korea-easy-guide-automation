@@ -11,6 +11,7 @@ This project should publish posts at or above the strengthened T-money article q
   - `assets/ai-hero.jpg`
   - `assets/ai-inline-1.jpg`
 - Four or more official/platform links in the article.
+- App/service articles must include direct app-store, official service, booking, or operator links that help the reader take action.
 - Five or more FAQ questions.
 - No placeholder phrases, AI refusal phrases, or generic old-template section names.
 
@@ -67,6 +68,7 @@ A public post should answer:
 - Common errors and fixes.
 - Safer alternatives or comparisons.
 - Official links to verify current details.
+- Related app, booking, or service links where they improve reader convenience.
 
 ## Hades Gate
 

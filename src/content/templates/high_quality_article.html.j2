@@ -207,9 +207,10 @@
   {% endfor %}
 
   <h2>Official Links to Check</h2>
+  <p>Use these official or platform links to download apps, confirm current rules, and check live service details before you travel.</p>
   <ul class="keg-post__sources">
     {% for name, url in post.sources %}
-    <li><a href="{{ url }}">{{ name }}</a></li>
+    <li><a href="{{ url }}" target="_blank" rel="noopener noreferrer">{{ name }}</a></li>
     {% endfor %}
   </ul>
 </article>

@@ -51,6 +51,8 @@ HIGH_QUALITY_POSTS = {
         "sources": [
             ("Incheon Airport official transportation guide", "https://www.airport.kr/ap_en/index.do"),
             ("Airport Railroad official ticket/reservation page", "https://www.airportrailroad.com/ticket/rsv"),
+            ("Airport Railroad official website", "https://www.airportrailroad.com/"),
+            ("Seoul Metropolitan Government official website", "https://english.seoul.go.kr/"),
             ("VISITKOREA official travel information", "https://english.visitkorea.or.kr/"),
         ],
     },
@@ -103,6 +105,8 @@ HIGH_QUALITY_POSTS = {
         "sources": [
             ("KORAIL official website for foreigners", "https://www.korail.com/global/eng/main"),
             ("KORAIL ticket reservation page", "https://www.korail.com/global/eng/ticket/reservation"),
+            ("KORAIL ticketing guide", "https://www.korail.com/global/eng/passengerGuide/ticketTypes/tickets"),
+            ("KORAIL Pass official page", "https://www.korail.com/global/eng/ticket/railpass"),
             ("KORAIL booking information", "https://www.korail.com/global/eng/myReservation"),
         ],
     },
@@ -155,6 +159,8 @@ HIGH_QUALITY_POSTS = {
         "sources": [
             ("Kakao T App Store listing", "https://apps.apple.com/us/app/kakao-t/id981110422"),
             ("Kakao T Google Play listing", "https://play.google.com/store/apps/details?id=com.kakao.taxi"),
+            ("Kakao Mobility official website", "https://www.kakaomobility.com/"),
+            ("Kakao T official Kakao service page", "https://www.kakaocorp.com/page/service/service/KakaoT?lang=ENG"),
             ("VISITKOREA official travel information", "https://english.visitkorea.or.kr/"),
         ],
     },
@@ -207,6 +213,9 @@ HIGH_QUALITY_POSTS = {
         "sources": [
             ("VISITKOREA official travel information", "https://english.visitkorea.or.kr/"),
             ("Incheon Airport official website", "https://www.airport.kr/ap_en/index.do"),
+            ("SK Telecom roaming official website", "https://www.skroaming.com/"),
+            ("KT roaming official website", "https://roaming.kt.com/"),
+            ("LG U+ roaming official website", "https://www.lguplus.com/ib-roaming"),
         ],
     },
     "how-to-use-naver-map-for-foreigners-in-korea-easy-guide-for-foreign-visitors": {
@@ -259,6 +268,9 @@ HIGH_QUALITY_POSTS = {
             ("NAVER Map Google Play listing", "https://play.google.com/store/apps/details?id=com.nhn.android.nmap"),
             ("NAVER Map App Store listing", "https://apps.apple.com/us/app/naver-maps-navigation/id311867728"),
             ("NAVER Map official BE LOCAL page", "https://mkt.naver.com/belocal"),
+            ("KakaoMap Google Play listing", "https://play.google.com/store/apps/details?id=net.daum.android.map"),
+            ("KakaoMap App Store listing", "https://apps.apple.com/us/app/kakaomap-korea-no-1-map/id304608425"),
+            ("KakaoMap official Kakao service page", "https://www.kakaocorp.com/page/service/service/KakaoMap?lang=en"),
         ],
     },
 }
@@ -455,7 +467,7 @@ ENHANCED_POST_UPDATES = {
             ("SK Telecom roaming official website", "https://www.skroaming.com/"),
             ("KT roaming official website", "https://roaming.kt.com/"),
             ("LG U+ roaming official website", "https://www.lguplus.com/ib-roaming"),
-            ("VISITKOREA Transportation Cards", "https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=140663"),
+            ("Korea Tourism Organization official website", "https://knto.or.kr/eng/"),
         ],
     },
     "how-to-use-naver-map-for-foreigners-in-korea-easy-guide-for-foreign-visitors": {

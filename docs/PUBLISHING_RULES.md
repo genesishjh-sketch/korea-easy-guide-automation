@@ -33,6 +33,7 @@ Required checks:
   - `assets/ai-hero.jpg`
   - `assets/ai-inline-1.jpg`
 - At least four official or platform source links in the article.
+- For app, transport, ticket, SIM/eSIM, taxi, map, delivery, shopping, and booking posts, include useful action links such as official app-store pages, official booking pages, operator pages, and government/tourism pages.
 - At least five FAQ questions.
 - A `research_report.json` file must exist for every public post.
 - Research must include at least:
@@ -67,6 +68,7 @@ Allowed improvement targets:
 - Expand thin sections.
 - Add missing FAQ entries.
 - Improve source links.
+- Add reader-useful related links, not only generic homepages.
 - Add deeper official-source research.
 - Add reader-question coverage from Reddit, Google suggestions, and search results.
 - Regenerate weak image prompts.

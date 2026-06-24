@@ -15,6 +15,7 @@ OFFICIAL_SOURCE_MAP = {
     "Transportation": [
         {"name": "VISITKOREA Transportation Guide", "url": "https://english.visitkorea.or.kr/"},
         {"name": "Incheon Airport Transportation", "url": "https://www.airport.kr/ap_en/index.do"},
+        {"name": "Airport Railroad official website", "url": "https://www.airportrailroad.com/"},
         {"name": "Seoul Metropolitan Government", "url": "https://english.seoul.go.kr/"},
     ],
     "Mobile & Internet": [
@@ -24,6 +25,8 @@ OFFICIAL_SOURCE_MAP = {
     "Apps in Korea": [
         {"name": "VISITKOREA", "url": "https://english.visitkorea.or.kr/"},
         {"name": "Korea Tourism Organization", "url": "https://knto.or.kr/eng/"},
+        {"name": "NAVER Map Google Play listing", "url": "https://play.google.com/store/apps/details?id=com.nhn.android.nmap"},
+        {"name": "NAVER Map App Store listing", "url": "https://apps.apple.com/us/app/naver-maps-navigation/id311867728"},
     ],
 }
 
@@ -303,6 +306,7 @@ class EnglishArticleGenerator:
         return "t money" in normalized or "t-money" in normalized or "tmoney" in normalized
 
     def _sources(self, candidate: TopicCandidate) -> list[dict[str, str]]:
+        keyword = candidate.keyword.lower()
         if self._is_tmoney(candidate.keyword):
             return [
                 {"name": "Tmoney official English site", "url": "https://eng.tmoney.co.kr/en/aeb/main/main/readMain.dev"},
@@ -310,5 +314,46 @@ class EnglishArticleGenerator:
                 {"name": "Seoul Metropolitan Government official website", "url": "https://english.seoul.go.kr/"},
                 {"name": "WOWPASS official website", "url": "https://www.wowpass.io/"},
                 {"name": "NAMANE CARD official website", "url": "https://en.namanecard.com/"},
+            ]
+        if "naver map" in keyword:
+            return [
+                {"name": "NAVER Map Google Play listing", "url": "https://play.google.com/store/apps/details?id=com.nhn.android.nmap"},
+                {"name": "NAVER Map App Store listing", "url": "https://apps.apple.com/us/app/naver-maps-navigation/id311867728"},
+                {"name": "NAVER Map official BE LOCAL page", "url": "https://mkt.naver.com/belocal"},
+                {"name": "KakaoMap Google Play listing", "url": "https://play.google.com/store/apps/details?id=net.daum.android.map"},
+                {"name": "KakaoMap App Store listing", "url": "https://apps.apple.com/us/app/kakaomap-korea-no-1-map/id304608425"},
+                {"name": "VISITKOREA official travel information", "url": "https://english.visitkorea.or.kr/"},
+            ]
+        if "kakao taxi" in keyword or "kakao t" in keyword:
+            return [
+                {"name": "Kakao T Google Play listing", "url": "https://play.google.com/store/apps/details?id=com.kakao.taxi"},
+                {"name": "Kakao T App Store listing", "url": "https://apps.apple.com/us/app/kakao-t/id981110422"},
+                {"name": "Kakao Mobility official website", "url": "https://www.kakaomobility.com/"},
+                {"name": "Kakao T official Kakao service page", "url": "https://www.kakaocorp.com/page/service/service/KakaoT?lang=ENG"},
+                {"name": "VISITKOREA official travel information", "url": "https://english.visitkorea.or.kr/"},
+            ]
+        if "ktx" in keyword:
+            return [
+                {"name": "KORAIL official website for foreigners", "url": "https://www.korail.com/global/eng/main"},
+                {"name": "KORAIL ticket reservation page", "url": "https://www.korail.com/global/eng/ticket/reservation"},
+                {"name": "KORAIL ticketing guide", "url": "https://www.korail.com/global/eng/passengerGuide/ticketTypes/tickets"},
+                {"name": "KORAIL Pass official page", "url": "https://www.korail.com/global/eng/ticket/railpass"},
+                {"name": "VISITKOREA official travel information", "url": "https://english.visitkorea.or.kr/"},
+            ]
+        if "incheon airport" in keyword:
+            return [
+                {"name": "Incheon Airport official transportation guide", "url": "https://www.airport.kr/ap_en/index.do"},
+                {"name": "Airport Railroad official website", "url": "https://www.airportrailroad.com/"},
+                {"name": "Airport Railroad ticket reservation page", "url": "https://www.airportrailroad.com/ticket/rsv"},
+                {"name": "Seoul Metropolitan Government official website", "url": "https://english.seoul.go.kr/"},
+                {"name": "VISITKOREA official travel information", "url": "https://english.visitkorea.or.kr/"},
+            ]
+        if "esim" in keyword:
+            return [
+                {"name": "SK Telecom roaming official website", "url": "https://www.skroaming.com/"},
+                {"name": "KT roaming official website", "url": "https://roaming.kt.com/"},
+                {"name": "LG U+ roaming official website", "url": "https://www.lguplus.com/ib-roaming"},
+                {"name": "Incheon Airport official website", "url": "https://www.airport.kr/ap_en/index.do"},
+                {"name": "VISITKOREA official travel information", "url": "https://english.visitkorea.or.kr/"},
             ]
         return OFFICIAL_SOURCE_MAP.get(candidate.category, OFFICIAL_SOURCE_MAP["Transportation"])
