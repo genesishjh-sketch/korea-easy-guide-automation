@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 from src.content.topic_scoring import build_candidate
 from src.images.ai_plan import build_article_image_plan
+from src.models import TopicSignal
 from src.pipeline import stage1_generate
 
 
@@ -28,8 +29,19 @@ class ImagePlanTests(unittest.TestCase):
             seed_file.write_text(json.dumps(["incheon airport to seoul"]), encoding="utf-8")
             with patch.dict("os.environ", {"APP_ENV": "production"}, clear=False), patch.object(
                 stage1_generate, "load_settings"
-            ) as load_settings, patch.object(stage1_generate.RedditCollector, "collect", return_value=[]), patch.object(
-                stage1_generate.GoogleSuggestCollector, "collect", return_value=[]
+            ) as load_settings, patch.object(
+                stage1_generate.RedditCollector,
+                "collect",
+                return_value=[
+                    TopicSignal("reddit_fallback", "incheon airport to seoul", "Should I use AREX or airport bus?"),
+                    TopicSignal("reddit", "incheon airport to seoul", "Incheon to Seoul advice", url="https://reddit.com/r/test"),
+                ],
+            ), patch.object(
+                stage1_generate.GoogleSuggestCollector,
+                "collect",
+                return_value=[
+                    TopicSignal("google_suggest", "incheon airport to seoul", "incheon airport to seoul by train")
+                ],
             ):
                 load_settings.return_value.site_key = "korea_easy_guide"
                 load_settings.return_value.site_name = "Korea Easy Guide"
@@ -46,10 +58,16 @@ class ImagePlanTests(unittest.TestCase):
                 article_dir = stage1_generate.run(site="korea_easy_guide")
 
             image_plan = json.loads((article_dir / "image_plan.json").read_text(encoding="utf-8"))
+            research_report = json.loads((article_dir / "research_report.json").read_text(encoding="utf-8"))
             hero_exists = (article_dir / "assets" / "ai-hero.svg").exists()
             inline_exists = (article_dir / "assets" / "ai-inline-1.svg").exists()
 
         self.assertEqual([image["url"] for image in image_plan["images"]], ["assets/ai-hero.svg", "assets/ai-inline-1.svg"])
+        self.assertEqual(research_report["signal_source_counts"]["reddit"], 1)
+        self.assertEqual(research_report["signal_source_counts"]["reddit_fallback"], 1)
+        self.assertEqual(research_report["signal_source_counts"]["google_suggest"], 1)
+        self.assertEqual(research_report["live_reddit_signal_count"], 1)
+        self.assertEqual(research_report["fallback_reddit_signal_count"], 1)
         self.assertTrue(hero_exists)
         self.assertTrue(inline_exists)
 

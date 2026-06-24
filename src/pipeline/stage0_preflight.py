@@ -33,6 +33,7 @@ def run(site: str | None = None) -> Path:
         check_site_settings(site),
         check_seed_file(site),
         check_launch_queue(site),
+        check_reddit_collection_settings(site),
         check_daily_workflow(),
         check_validate_workflow(),
         check_publication_check_workflow(),
@@ -101,6 +102,25 @@ def check_launch_queue(site: str | None = None) -> PreflightCheck:
     if missing:
         return PreflightCheck("launch_queue", "fail", f"Launch topics missing from main seed file: {', '.join(missing)}")
     return PreflightCheck("launch_queue", "pass", f"{len(launch_seeds)} launch topics are ready before the long-term queue.")
+
+
+def check_reddit_collection_settings(site: str | None = None) -> PreflightCheck:
+    settings = load_settings(site)
+    if not settings.reddit_subreddits:
+        return PreflightCheck("reddit_collection", "fail", "No subreddit list is configured for Reddit topic discovery.")
+    if not settings.reddit_user_agent:
+        return PreflightCheck("reddit_collection", "fail", "REDDIT_USER_AGENT is required for Reddit topic discovery.")
+    if settings.reddit_client_id and settings.reddit_client_secret:
+        return PreflightCheck(
+            "reddit_collection",
+            "pass",
+            f"Reddit OAuth credentials are configured for {len(settings.reddit_subreddits)} subreddit(s).",
+        )
+    return PreflightCheck(
+        "reddit_collection",
+        "warn",
+        "Reddit OAuth credentials are missing. Public Reddit JSON may return 403, so the pipeline may rely on fallback reader questions.",
+    )
 
 
 def check_python_runtime() -> PreflightCheck:

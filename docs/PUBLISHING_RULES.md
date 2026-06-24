@@ -25,6 +25,7 @@
 - The pipeline must create the topic, article, image plan, images, quality report, Blogger post, and weekly report without manual editorial approval.
 - Manual review is replaced by the automated Hades Engineer quality gate.
 - Posting Bot must report daily success or failure, including title, Blogger status, URL, quality score, and action notes.
+- Reddit OAuth credentials are recommended for stable question discovery. If Reddit public JSON is blocked, the pipeline may use fallback reader questions, and preflight should show a warning rather than hiding the reduced data quality.
 
 ## Hades Engineer Quality Gate
 

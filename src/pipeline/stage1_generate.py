@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import json
 import logging
 from pathlib import Path
@@ -79,6 +80,7 @@ def run(seed: str | None = None, site: str | None = None) -> Path:
 
 def build_research_report(settings, keyword: str, article, signals: list) -> dict:
     signal_queries = [signal.title for signal in signals[:4] if signal.title]
+    signal_source_counts = Counter(signal.source for signal in signals)
     queries = [keyword, f"{keyword} official", f"{keyword} beginner fix", *signal_queries]
     if settings.content_domain == "windows_help":
         queries.extend(
@@ -108,6 +110,10 @@ def build_research_report(settings, keyword: str, article, signals: list) -> dic
             f"Can {keyword} cause data loss?",
             f"When should I get help for {keyword}?",
         ],
+        "signal_source_counts": dict(sorted(signal_source_counts.items())),
+        "live_reddit_signal_count": signal_source_counts.get("reddit", 0),
+        "fallback_reddit_signal_count": signal_source_counts.get("reddit_fallback", 0),
+        "google_suggest_signal_count": signal_source_counts.get("google_suggest", 0),
         "notes": [
             "Reddit and Google Suggest are used for topic discovery.",
             "Official/platform sources are used for publishing validation.",

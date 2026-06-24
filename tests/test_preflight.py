@@ -90,6 +90,30 @@ class PreflightTests(unittest.TestCase):
         self.assertEqual(check.status, "fail")
         self.assertIn("missing topic", check.message)
 
+    def test_reddit_collection_warns_without_oauth_credentials(self) -> None:
+        with patch.object(stage0_preflight, "load_settings") as load_settings:
+            load_settings.return_value.reddit_subreddits = ["WindowsHelp", "Windows11"]
+            load_settings.return_value.reddit_user_agent = "easy-pc-fix-guide/0.1"
+            load_settings.return_value.reddit_client_id = ""
+            load_settings.return_value.reddit_client_secret = ""
+
+            check = stage0_preflight.check_reddit_collection_settings("easy_pc_fix_guide")
+
+        self.assertEqual(check.status, "warn")
+        self.assertIn("Public Reddit JSON may return 403", check.message)
+
+    def test_reddit_collection_passes_with_oauth_credentials(self) -> None:
+        with patch.object(stage0_preflight, "load_settings") as load_settings:
+            load_settings.return_value.reddit_subreddits = ["WindowsHelp", "Windows11"]
+            load_settings.return_value.reddit_user_agent = "easy-pc-fix-guide/0.1"
+            load_settings.return_value.reddit_client_id = "client"
+            load_settings.return_value.reddit_client_secret = "secret"
+
+            check = stage0_preflight.check_reddit_collection_settings("easy_pc_fix_guide")
+
+        self.assertEqual(check.status, "pass")
+        self.assertIn("Reddit OAuth credentials", check.message)
+
     def test_public_feed_warns_without_breaking_preflight(self) -> None:
         with patch.object(stage0_preflight, "fetch_public_feed", side_effect=RuntimeError("feed unavailable")):
             check = stage0_preflight.check_public_feed("https://easypcfixguide.blogspot.com")
