@@ -29,6 +29,19 @@ FALLBACK_REDDIT_QUESTIONS = [
 ]
 
 
+WINDOWS_FALLBACK_REDDIT_QUESTIONS = [
+    "Why is the Wi-Fi button missing on Windows 11?",
+    "How do I fix a Windows Update error without resetting my PC?",
+    "Why did Bluetooth disappear from Windows settings?",
+    "What should I try first when Windows sound stops working?",
+    "How do I fix a printer that says offline in Windows 11?",
+    "Why does File Explorer keep freezing on Windows?",
+    "How do I start Windows in Safe Mode if normal startup fails?",
+    "Is it safe for a beginner to run SFC or DISM commands?",
+    "What information should I write down before asking for Windows help?",
+]
+
+
 class RedditCollector:
     def __init__(
         self,
@@ -88,11 +101,28 @@ class RedditCollector:
         if signals:
             return sorted(signals, key=lambda item: item.score, reverse=True)
 
-        return [
-            TopicSignal(source="reddit_fallback", keyword=query, title=question, score=2.0)
-            for question in FALLBACK_REDDIT_QUESTIONS
-            if any(part in question.lower() for part in query.lower().split())
-        ][:limit]
+        query_terms = {part for part in query.lower().split() if len(part) > 2}
+        fallback_signals = []
+        for question in self._fallback_questions():
+            question_terms = set(question.lower().split())
+            overlap = len(query_terms & question_terms)
+            if overlap == 0:
+                continue
+            fallback_signals.append(
+                TopicSignal(
+                    source="reddit_fallback",
+                    keyword=query,
+                    title=question,
+                    score=2.0 + overlap,
+                )
+            )
+        return sorted(fallback_signals, key=lambda item: item.score, reverse=True)[:limit]
+
+    def _fallback_questions(self) -> list[str]:
+        windows_subreddits = {"windowshelp", "windows11", "techsupport", "pchelp"}
+        if any(subreddit.lower() in windows_subreddits for subreddit in self.subreddits):
+            return WINDOWS_FALLBACK_REDDIT_QUESTIONS
+        return FALLBACK_REDDIT_QUESTIONS
 
     def _collect_with_praw(self, query: str, limit: int) -> list[TopicSignal]:
         try:
