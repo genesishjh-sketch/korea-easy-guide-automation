@@ -1,0 +1,51 @@
+name: Easy PC Fix Validate Smoke Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      seed:
+        description: "Optional Windows topic seed"
+        required: false
+        default: "windows settings app not opening"
+  push:
+    branches:
+      - main
+    paths:
+      - "src/**"
+      - "data/seeds/windows_topic_seeds.json"
+      - ".github/workflows/easy-pc-validate-smoke.yml"
+
+jobs:
+  validate-smoke:
+    runs-on: ubuntu-latest
+    env:
+      APP_ENV: production
+      SITE_KEY: easy_pc_fix_guide
+      EASY_PC_FIX_GUIDE_BLOGGER_BLOG_ID: ${{ vars.EASY_PC_FIX_GUIDE_BLOGGER_BLOG_ID }}
+      EASY_PC_FIX_GUIDE_SITE_URL: ${{ vars.EASY_PC_FIX_GUIDE_SITE_URL || 'https://easypcfixguide.blogspot.com' }}
+      EASY_PC_FIX_GUIDE_SEARCH_CONSOLE_SITE_URL: ${{ vars.EASY_PC_FIX_GUIDE_SEARCH_CONSOLE_SITE_URL || 'https://easypcfixguide.blogspot.com/' }}
+      EASY_PC_FIX_GUIDE_GA4_MEASUREMENT_ID: ${{ vars.EASY_PC_FIX_GUIDE_GA4_MEASUREMENT_ID }}
+      EASY_PC_FIX_GUIDE_GA4_PROPERTY_ID: ${{ vars.EASY_PC_FIX_GUIDE_GA4_PROPERTY_ID }}
+      GOOGLE_SEARCH_PROVIDER: suggest
+      NOTIFICATION_PROVIDER: ${{ vars.NOTIFICATION_PROVIDER }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run validate-only pipeline
+        run: |
+          if [ -n "${{ github.event.inputs.seed }}" ]; then
+            python -m src.pipeline.daily_draft --site easy_pc_fix_guide --mode validate --seed "${{ github.event.inputs.seed }}"
+          else
+            python -m src.pipeline.daily_draft --site easy_pc_fix_guide --mode validate
+          fi
+      - name: Upload validation outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: easy-pc-fix-validate-smoke-output
+          path: data/generated/easy_pc_fix_guide/
