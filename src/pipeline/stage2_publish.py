@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import logging
 from pathlib import Path
-import re
 
 from bs4 import BeautifulSoup
 
@@ -39,14 +39,19 @@ def load_article(article_dir: Path) -> tuple[str, str, list[str]]:
 
 
 def rewrite_local_image_paths(html: str, article_dir: Path) -> str:
-    """Remove broken local image URLs until public image hosting is enabled."""
+    """Embed local SVG covers directly so Blogger posts have images without hosting costs."""
     soup = BeautifulSoup(html, "html.parser")
     for img in soup.find_all("img"):
         src = img.get("src", "")
         if src.startswith("assets/"):
-            figure = img.find_parent("figure")
-            if figure:
-                figure.decompose()
+            asset_path = article_dir / src
+            if not asset_path.exists():
+                img.decompose()
+                continue
+            if asset_path.suffix.lower() == ".svg":
+                encoded = base64.b64encode(asset_path.read_bytes()).decode("ascii")
+                img["src"] = f"data:image/svg+xml;base64,{encoded}"
+                img["loading"] = "lazy"
             else:
                 img.decompose()
     return str(soup)
