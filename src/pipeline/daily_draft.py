@@ -19,6 +19,7 @@ from src.quality.hades import HadesQualityGate
 
 
 KST = ZoneInfo("Asia/Seoul")
+MAX_QUALITY_ATTEMPTS = 3
 
 
 def used_keywords(site: str | None = None) -> set[str]:
@@ -124,6 +125,7 @@ def run(seed: str | None = None, site: str | None = None, publish_mode: str = "d
                     "site": settings.site_key,
                     "mode": publish_mode,
                     "skipped_duplicate_seeds": [],
+                    "skipped_quality_seeds": [],
                     "daily_limit_skipped": True,
                     "existing_post": existing_today,
                 }
@@ -132,8 +134,11 @@ def run(seed: str | None = None, site: str | None = None, publish_mode: str = "d
                 return result
         selected_seed = choose_seed(seed, site)
         skipped_duplicate_seeds: list[str] = []
+        skipped_quality_seeds: list[str] = []
         if publish_mode == "publish":
-            selected_seed, article_dir, result_path, skipped_duplicate_seeds = run_publish_with_seed_fallback(seed, site)
+            selected_seed, article_dir, result_path, skipped_duplicate_seeds, skipped_quality_seeds = (
+                run_publish_with_seed_fallback(seed, site)
+            )
         else:
             article_dir = run_stage1(selected_seed, site)
             if publish_mode == "validate":
@@ -147,6 +152,7 @@ def run(seed: str | None = None, site: str | None = None, publish_mode: str = "d
             "site": load_settings(site).site_key,
             "mode": publish_mode,
             "skipped_duplicate_seeds": skipped_duplicate_seeds,
+            "skipped_quality_seeds": skipped_quality_seeds,
         }
         save_daily_success_report(result)
         notify_daily_completion(result)
@@ -157,24 +163,51 @@ def run(seed: str | None = None, site: str | None = None, publish_mode: str = "d
         raise
 
 
-def run_publish_with_seed_fallback(seed: str | None = None, site: str | None = None) -> tuple[str, Path, Path, list[str]]:
+def run_publish_with_seed_fallback(
+    seed: str | None = None, site: str | None = None
+) -> tuple[str, Path, Path, list[str], list[str]]:
     skipped_duplicate_seeds: list[str] = []
+    skipped_quality_seeds: list[str] = []
     last_attempt: tuple[str, Path, Path] | None = None
+    last_quality_error: Exception | None = None
     for candidate_seed in choose_publish_seed_candidates(seed, site):
         article_dir = run_stage1(candidate_seed, site)
-        result_path = run_publish_with_duplicate_guard(article_dir, site)
+        try:
+            result_path = run_publish_with_duplicate_guard(article_dir, site)
+        except Exception as exc:
+            if seed or not is_quality_gate_failure(exc) or len(skipped_quality_seeds) >= MAX_QUALITY_ATTEMPTS - 1:
+                raise
+            skipped_quality_seeds.append(candidate_seed)
+            last_quality_error = exc
+            continue
         last_attempt = (candidate_seed, article_dir, result_path)
         if is_duplicate_publish_result(result_path):
             skipped_duplicate_seeds.append(candidate_seed)
             if seed:
                 break
             continue
-        return candidate_seed, article_dir, result_path, skipped_duplicate_seeds
+        return candidate_seed, article_dir, result_path, skipped_duplicate_seeds, skipped_quality_seeds
 
     if last_attempt is None:
+        if last_quality_error:
+            raise last_quality_error
         raise ValueError("No topic seeds are available for publishing.")
     selected_seed, article_dir, result_path = last_attempt
-    return selected_seed, article_dir, result_path, skipped_duplicate_seeds
+    return selected_seed, article_dir, result_path, skipped_duplicate_seeds, skipped_quality_seeds
+
+
+def is_quality_gate_failure(exc: Exception) -> bool:
+    message = str(exc)
+    return (
+        isinstance(exc, (ValueError, FileNotFoundError))
+        and (
+            "Hades quality gate failed" in message
+            or "Hades validation failed" in message
+            or "image_plan.json is required" in message
+            or "Required Codex-generated image assets are missing" in message
+            or "At least two required image assets" in message
+        )
+    )
 
 
 def is_duplicate_publish_result(result_path: Path) -> bool:
@@ -373,6 +406,7 @@ def save_daily_success_report(result: dict[str, str]) -> Path:
         "existing_post": existing_post,
         "daily_limit_skipped": result.get("daily_limit_skipped", False),
         "skipped_duplicate_seeds": result.get("skipped_duplicate_seeds") or [],
+        "skipped_quality_seeds": result.get("skipped_quality_seeds") or [],
         "created_at": datetime.utcnow().isoformat() + "Z",
     }
     output_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -454,6 +488,10 @@ def build_daily_success_message(result: dict[str, str]) -> str:
     if skipped_duplicate_seeds:
         lines.append(f"- 중복으로 건너뛴 시드 수: {len(skipped_duplicate_seeds)}")
         lines.append(f"- 중복 시드: {', '.join(skipped_duplicate_seeds[:5])}")
+    skipped_quality_seeds = result.get("skipped_quality_seeds") or []
+    if skipped_quality_seeds:
+        lines.append(f"- 품질검수 실패로 재시도한 시드 수: {len(skipped_quality_seeds)}")
+        lines.append(f"- 품질 재시도 시드: {', '.join(skipped_quality_seeds[:5])}")
 
     if issues:
         lines.extend(["", "품질 이슈:"])

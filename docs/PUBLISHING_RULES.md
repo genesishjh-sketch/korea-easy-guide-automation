@@ -76,6 +76,11 @@ and issue count == 0
 
 The automation should improve and re-check a post until it passes the Hades gate.
 
+For unattended scheduled publishing, the pipeline must not lower quality criteria. If the selected
+candidate fails the Hades gate, the daily publisher may try the next scheduled topic candidate and
+run the full generation -> image -> Hades -> publish check again. The Posting Bot daily report must
+show which topic seeds were skipped because of quality failure.
+
 Allowed improvement targets:
 
 - Expand thin sections.
@@ -91,6 +96,7 @@ Allowed improvement targets:
 Hard stop:
 
 - If a post still fails after three improvement attempts, skip public publishing and keep the failed output for inspection.
+- If three scheduled topic candidates fail quality in one run, fail the run and send the daily failure report instead of publishing a weak post.
 
 ## Current Practical Constraint
 

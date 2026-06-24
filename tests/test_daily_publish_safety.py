@@ -126,7 +126,9 @@ class DuplicatePublishGuardTests(unittest.TestCase):
             result_path = article_dir / "blogger_publish_result.json"
 
             with patch.object(daily_draft, "find_public_post_published_today") as daily_guard, patch.object(
-                daily_draft, "run_publish_with_seed_fallback", return_value=("manual seed", article_dir, result_path, [])
+                daily_draft,
+                "run_publish_with_seed_fallback",
+                return_value=("manual seed", article_dir, result_path, [], []),
             ), patch.object(daily_draft, "save_daily_success_report"), patch.object(
                 daily_draft, "notify_daily_completion"
             ):
@@ -294,6 +296,63 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertEqual(result["skipped_duplicate_seeds"], ["duplicate topic"])
         self.assertTrue(result["publish_result"].endswith("blogger_publish_result.json"))
 
+    def test_publish_mode_tries_next_seed_when_first_seed_fails_quality(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+
+            def fake_stage1(seed: str, site: str | None = None) -> Path:
+                article_dir = root / seed.replace(" ", "-")
+                article_dir.mkdir()
+                (article_dir / "metadata.json").write_text(
+                    json.dumps({"article": {"title": seed, "category": "Test", "slug": seed.replace(" ", "-")}}),
+                    encoding="utf-8",
+                )
+                return article_dir
+
+            def fake_publish(article_dir: Path, site: str | None = None) -> Path:
+                if article_dir.name == "thin-topic":
+                    raise ValueError("Hades quality gate failed with score 76/90: thin_content")
+                result_path = article_dir / "blogger_publish_result.json"
+                result_path.write_text(
+                    json.dumps({"draft": False, "blogger": {"status": "LIVE", "url": "https://example.com/new.html"}}),
+                    encoding="utf-8",
+                )
+                return result_path
+
+            with patch.object(
+                daily_draft, "choose_publish_seed_candidates", return_value=["thin topic", "strong topic"]
+            ), patch.object(daily_draft, "run_stage1", side_effect=fake_stage1), patch.object(
+                daily_draft, "run_publish_with_duplicate_guard", side_effect=fake_publish
+            ), patch.object(
+                daily_draft, "find_public_post_published_today", return_value=None
+            ), patch.object(
+                daily_draft, "ROOT_DIR", root
+            ), patch.object(
+                daily_draft, "notify_daily_completion"
+            ):
+                result = daily_draft.run(site="easy_pc_fix_guide", publish_mode="publish")
+
+            report_path = root / "reports" / "easy_pc_fix_guide-daily-success.json"
+            payload = json.loads(report_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(result["seed"], "strong topic")
+        self.assertEqual(result["skipped_quality_seeds"], ["thin topic"])
+        self.assertEqual(payload["skipped_quality_seeds"], ["thin topic"])
+        self.assertTrue(result["publish_result"].endswith("blogger_publish_result.json"))
+
+    def test_explicit_seed_quality_failure_does_not_switch_topic(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            article_dir = Path(tmpdir) / "thin-topic"
+            article_dir.mkdir()
+
+            with patch.object(daily_draft, "run_stage1", return_value=article_dir), patch.object(
+                daily_draft,
+                "run_publish_with_duplicate_guard",
+                side_effect=ValueError("Hades quality gate failed with score 76/90: thin_content"),
+            ):
+                with self.assertRaises(ValueError):
+                    daily_draft.run_publish_with_seed_fallback("thin topic", "easy_pc_fix_guide")
+
     def test_explicit_seed_stops_on_duplicate_without_switching_topic(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             article_dir = Path(tmpdir) / "duplicate-topic"
@@ -326,6 +385,37 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertEqual(result["seed"], "duplicate topic")
         self.assertEqual(result["skipped_duplicate_seeds"], ["duplicate topic"])
         self.assertTrue(result["publish_result"].endswith("duplicate_publish_result.json"))
+
+    def test_daily_success_message_includes_quality_retry_seeds(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            article_dir = Path(tmpdir)
+            publish_result_path = article_dir / "blogger_publish_result.json"
+            (article_dir / "metadata.json").write_text(
+                json.dumps({"article": {"title": "Strong Topic", "category": "Windows"}}),
+                encoding="utf-8",
+            )
+            (article_dir / "quality_report.json").write_text(
+                json.dumps({"score": 100, "passed": True, "issues": [], "metrics": {}}),
+                encoding="utf-8",
+            )
+            publish_result_path.write_text(
+                json.dumps({"draft": False, "blogger": {"status": "LIVE", "url": "https://example.com/new.html"}}),
+                encoding="utf-8",
+            )
+
+            message = daily_draft.build_daily_success_message(
+                {
+                    "site": "easy_pc_fix_guide",
+                    "mode": "publish",
+                    "seed": "strong topic",
+                    "article_dir": str(article_dir),
+                    "publish_result": str(publish_result_path),
+                    "skipped_quality_seeds": ["thin topic"],
+                }
+            )
+
+        self.assertIn("- 품질검수 실패로 재시도한 시드 수: 1", message)
+        self.assertIn("- 품질 재시도 시드: thin topic", message)
 
     def test_daily_failure_report_is_written_before_reraising(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
