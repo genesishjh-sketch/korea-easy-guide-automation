@@ -1,0 +1,53 @@
+name: Daily Draft Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      seed:
+        description: "Optional topic seed"
+        required: false
+  schedule:
+    - cron: "0 22 * * *"
+
+jobs:
+  daily-draft:
+    runs-on: ubuntu-latest
+    env:
+      APP_ENV: production
+      SITE_NAME: ${{ vars.SITE_NAME || 'Korea Easy Guide' }}
+      SITE_URL: ${{ vars.SITE_URL || 'https://koreaeasyguide.blogspot.com' }}
+      DEFAULT_AUTHOR: ${{ vars.DEFAULT_AUTHOR || 'Guide Studio' }}
+      BLOGGER_BLOG_ID: ${{ vars.BLOGGER_BLOG_ID || '288143591612645486' }}
+      GOOGLE_OAUTH_CLIENT_SECRET_FILE: .credentials/client_secret.json
+      GOOGLE_OAUTH_TOKEN_FILE: .credentials/google_token.json
+      BLOGGER_PUBLISH_MODE: draft
+      REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+      REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+      REDDIT_USER_AGENT: ${{ vars.REDDIT_USER_AGENT || 'korea-easy-guide/0.1' }}
+      GOOGLE_SEARCH_PROVIDER: suggest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Write Google OAuth files
+        run: |
+          mkdir -p .credentials
+          printf '%s' '${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET_JSON }}' > .credentials/client_secret.json
+          printf '%s' '${{ secrets.GOOGLE_OAUTH_TOKEN_JSON }}' > .credentials/google_token.json
+      - name: Run daily draft pipeline
+        run: |
+          if [ -n "${{ github.event.inputs.seed }}" ]; then
+            python -m src.pipeline.daily_draft --seed "${{ github.event.inputs.seed }}"
+          else
+            python -m src.pipeline.daily_draft
+          fi
+      - name: Upload generated outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-draft-output
+          path: |
+            data/generated/
+            reports/

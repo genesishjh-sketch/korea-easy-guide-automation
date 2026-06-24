@@ -1,0 +1,56 @@
+<article>
+  <figure>
+    <img src="{{ image.url or image.path }}" alt="{{ image.alt }}" style="width:100%;height:auto;">
+    <figcaption>{{ image.credit }}</figcaption>
+  </figure>
+
+  <p>{{ intro }}</p>
+
+  <h2>Quick Answer</h2>
+  <table>
+    <tr><th>Situation</th><th>Best Choice</th></tr>
+    {% for row in quick_answer %}
+    <tr><td>{{ row.situation }}</td><td>{{ row.choice }}</td></tr>
+    {% endfor %}
+  </table>
+
+  <h2>What You Should Know First</h2>
+  {% for paragraph in basics %}
+  <p>{{ paragraph }}</p>
+  {% endfor %}
+
+  <h2>Step-by-Step Guide</h2>
+  <ol>
+    {% for step in steps %}
+    <li>{{ step }}</li>
+    {% endfor %}
+  </ol>
+
+  <h2>Common Mistakes to Avoid</h2>
+  <ul>
+    {% for mistake in mistakes %}
+    <li>{{ mistake }}</li>
+    {% endfor %}
+  </ul>
+
+  <h2>Useful Tips for Foreign Visitors</h2>
+  <table>
+    <tr><th>Tip</th><th>Why It Helps</th></tr>
+    {% for tip in tips %}
+    <tr><td>{{ tip.title }}</td><td>{{ tip.detail }}</td></tr>
+    {% endfor %}
+  </table>
+
+  <h2>FAQ</h2>
+  {% for item in faq %}
+  <h3>{{ item.question }}</h3>
+  <p>{{ item.answer }}</p>
+  {% endfor %}
+
+  <h2>Sources to Check Before You Go</h2>
+  <ul>
+    {% for source in sources %}
+    <li><a href="{{ source.url }}">{{ source.name }}</a></li>
+    {% endfor %}
+  </ul>
+</article>

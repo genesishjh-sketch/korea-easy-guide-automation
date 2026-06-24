@@ -1,0 +1,49 @@
+name: Stage 2 Publish Draft
+
+on:
+  workflow_dispatch:
+    inputs:
+      article_dir:
+        description: "Generated article directory. Leave blank for latest."
+        required: false
+      mode:
+        description: "draft or publish"
+        required: true
+        default: "draft"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      APP_ENV: production
+      SITE_NAME: ${{ vars.SITE_NAME || 'Korea Easy Guide' }}
+      SITE_URL: ${{ vars.SITE_URL || 'https://koreaeasyguide.blogspot.com' }}
+      DEFAULT_AUTHOR: ${{ vars.DEFAULT_AUTHOR || 'Korea Easy Guide Editorial Team' }}
+      BLOGGER_BLOG_ID: ${{ vars.BLOGGER_BLOG_ID || '288143591612645486' }}
+      GOOGLE_OAUTH_CLIENT_SECRET_FILE: .credentials/client_secret.json
+      GOOGLE_OAUTH_TOKEN_FILE: .credentials/google_token.json
+      BLOGGER_PUBLISH_MODE: ${{ github.event.inputs.mode }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Write Google OAuth files
+        run: |
+          mkdir -p .credentials
+          printf '%s' '${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET_JSON }}' > .credentials/client_secret.json
+          printf '%s' '${{ secrets.GOOGLE_OAUTH_TOKEN_JSON }}' > .credentials/google_token.json
+      - name: Publish generated article
+        run: |
+          if [ -n "${{ github.event.inputs.article_dir }}" ]; then
+            python -m src.pipeline.stage2_publish --article-dir "${{ github.event.inputs.article_dir }}" --mode "${{ github.event.inputs.mode }}"
+          else
+            python -m src.pipeline.stage2_publish --mode "${{ github.event.inputs.mode }}"
+          fi
+      - name: Upload publish result
+        uses: actions/upload-artifact@v4
+        with:
+          name: blogger-publish-result
+          path: data/generated/**/blogger_publish_result.json

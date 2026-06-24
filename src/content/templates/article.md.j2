@@ -1,0 +1,64 @@
+---
+title: "{{ title }}"
+slug: "{{ slug }}"
+category: "{{ category }}"
+tags: {{ tags }}
+meta_description: "{{ meta_description }}"
+image: "{{ image.url or image.path }}"
+---
+
+# {{ title }}
+
+![{{ image.alt }}]({{ image.url or image.path }})
+
+{{ intro }}
+
+## Quick Answer
+
+| Situation | Best Choice |
+|---|---|
+{% for row in quick_answer -%}
+| {{ row.situation }} | {{ row.choice }} |
+{% endfor %}
+
+## What You Should Know First
+
+{% for paragraph in basics -%}
+{{ paragraph }}
+
+{% endfor -%}
+
+## Step-by-Step Guide
+
+{% for step in steps -%}
+{{ loop.index }}. {{ step }}
+{% endfor %}
+
+## Common Mistakes to Avoid
+
+{% for mistake in mistakes -%}
+- {{ mistake }}
+{% endfor %}
+
+## Useful Tips for Foreign Visitors
+
+| Tip | Why It Helps |
+|---|---|
+{% for tip in tips -%}
+| {{ tip.title }} | {{ tip.detail }} |
+{% endfor %}
+
+## FAQ
+
+{% for item in faq -%}
+### {{ item.question }}
+
+{{ item.answer }}
+
+{% endfor -%}
+
+## Sources to Check Before You Go
+
+{% for source in sources -%}
+- [{{ source.name }}]({{ source.url }})
+{% endfor %}

@@ -1,0 +1,9 @@
+.env
+.credentials/
+.venv/
+__pycache__/
+*.pyc
+data/raw/
+data/generated/
+reports/
+logs/

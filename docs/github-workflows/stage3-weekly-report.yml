@@ -1,0 +1,29 @@
+name: Stage 3 Weekly Report
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * 1"
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    env:
+      APP_ENV: production
+      SITE_NAME: ${{ vars.SITE_NAME || 'Korea Easy Guide' }}
+      SITE_URL: ${{ vars.SITE_URL || 'https://koreaeasyguide.blogspot.com' }}
+      BLOGGER_BLOG_ID: ${{ vars.BLOGGER_BLOG_ID || '288143591612645486' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Generate weekly report
+        run: python -m src.pipeline.stage3_weekly_report
+      - name: Upload weekly report
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekly-report
+          path: reports/
