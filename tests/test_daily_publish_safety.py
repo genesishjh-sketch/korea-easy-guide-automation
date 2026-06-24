@@ -36,6 +36,18 @@ class DuplicatePublishGuardTests(unittest.TestCase):
                 json.dumps({"score": 100, "passed": True, "metrics": {"word_count": 1512}}),
                 encoding="utf-8",
             )
+            (article_dir / "research_report.json").write_text(
+                json.dumps(
+                    {
+                        "live_reddit_signal_count": 0,
+                        "reddit_oauth_signal_count": 0,
+                        "reddit_public_json_signal_count": 0,
+                        "fallback_reddit_signal_count": 6,
+                        "reddit_collection_method_counts": {"fallback": 6},
+                    }
+                ),
+                encoding="utf-8",
+            )
             publish_result_path.write_text(
                 json.dumps(
                     {
@@ -72,6 +84,8 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertEqual(payload["title"], "Wi-Fi Button Missing on Windows 11")
         self.assertEqual(payload["quality_score"], 100)
         self.assertEqual(payload["quality_metrics"]["word_count"], 1512)
+        self.assertEqual(payload["reddit_signal_quality"]["fallback_reddit_signal_count"], 6)
+        self.assertIn("fallback 질문만 사용", payload["reddit_signal_quality"]["warning"])
         self.assertEqual(payload["url"], "https://easypcfixguide.blogspot.com/2026/06/example.html")
         self.assertTrue(stale_failure_removed)
 
@@ -172,6 +186,18 @@ class DuplicatePublishGuardTests(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
+            (article_dir / "research_report.json").write_text(
+                json.dumps(
+                    {
+                        "live_reddit_signal_count": 0,
+                        "reddit_oauth_signal_count": 0,
+                        "reddit_public_json_signal_count": 0,
+                        "fallback_reddit_signal_count": 6,
+                        "reddit_collection_method_counts": {"fallback": 6},
+                    }
+                ),
+                encoding="utf-8",
+            )
             publish_result_path.write_text(
                 json.dumps(
                     {
@@ -199,6 +225,51 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertIn("- 이미지 수: 2", message)
         self.assertIn("- 공식 링크 수: 7", message)
         self.assertIn("- FAQ 수: 9", message)
+        self.assertIn("- Reddit fallback 신호 수: 6", message)
+        self.assertIn("수집 품질 경고", message)
+        self.assertIn("fallback 질문만 사용", message)
+
+    def test_daily_success_message_warns_when_reddit_uses_public_json_only(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            article_dir = Path(tmpdir)
+            publish_result_path = article_dir / "blogger_publish_result.json"
+            (article_dir / "metadata.json").write_text(
+                json.dumps({"article": {"title": "Public JSON Topic", "category": "Windows"}}),
+                encoding="utf-8",
+            )
+            (article_dir / "quality_report.json").write_text(
+                json.dumps({"score": 100, "passed": True, "issues": [], "metrics": {}}),
+                encoding="utf-8",
+            )
+            (article_dir / "research_report.json").write_text(
+                json.dumps(
+                    {
+                        "live_reddit_signal_count": 4,
+                        "reddit_oauth_signal_count": 0,
+                        "reddit_public_json_signal_count": 4,
+                        "fallback_reddit_signal_count": 0,
+                        "reddit_collection_method_counts": {"public_json": 4},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            publish_result_path.write_text(
+                json.dumps({"draft": False, "blogger": {"status": "LIVE", "url": "https://example.com/public-json.html"}}),
+                encoding="utf-8",
+            )
+
+            message = daily_draft.build_daily_success_message(
+                {
+                    "site": "easy_pc_fix_guide",
+                    "mode": "publish",
+                    "seed": "public json topic",
+                    "article_dir": str(article_dir),
+                    "publish_result": str(publish_result_path),
+                }
+            )
+
+        self.assertIn("- Reddit public JSON 신호 수: 4", message)
+        self.assertIn("public JSON 경로에만 의존", message)
 
     def test_production_uses_launch_queue_before_long_term_seed_list(self) -> None:
         with patch.object(daily_draft, "load_settings") as load_settings:

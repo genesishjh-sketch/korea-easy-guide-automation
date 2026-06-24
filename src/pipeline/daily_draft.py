@@ -380,9 +380,11 @@ def save_daily_success_report(result: dict[str, str]) -> Path:
     metadata = read_json(Path(article_dir_raw) / "metadata.json") if article_dir_raw else {}
     publish_result = read_json(Path(publish_result_raw)) if publish_result_raw else {}
     quality_report = read_json(Path(article_dir_raw) / "quality_report.json") if article_dir_raw else {}
+    research_report = read_json(Path(article_dir_raw) / "research_report.json") if article_dir_raw else {}
     article = metadata.get("article", {})
     blogger = publish_result.get("blogger", {})
     existing_post = result.get("existing_post") or {}
+    reddit_signal_quality = build_reddit_signal_quality(research_report)
     output_dir = ROOT_DIR / "reports"
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / f"{settings.site_key}-daily-success.json"
@@ -403,6 +405,7 @@ def save_daily_success_report(result: dict[str, str]) -> Path:
         "quality_score": quality_report.get("score"),
         "quality_passed": quality_report.get("passed"),
         "quality_metrics": quality_report.get("metrics", {}),
+        "reddit_signal_quality": reddit_signal_quality,
         "existing_post": existing_post,
         "daily_limit_skipped": result.get("daily_limit_skipped", False),
         "skipped_duplicate_seeds": result.get("skipped_duplicate_seeds") or [],
@@ -441,6 +444,7 @@ def build_daily_success_message(result: dict[str, str]) -> str:
     metadata = read_json(Path(article_dir_raw) / "metadata.json") if article_dir_raw else {}
     publish_result = read_json(Path(publish_result_raw)) if publish_result_raw else {}
     quality_report = read_json(Path(article_dir_raw) / "quality_report.json") if article_dir_raw else {}
+    research_report = read_json(Path(article_dir_raw) / "research_report.json") if article_dir_raw else {}
     mode = result.get("mode", "draft")
 
     article = metadata.get("article", {})
@@ -452,6 +456,7 @@ def build_daily_success_message(result: dict[str, str]) -> str:
     quality_passed = quality_report.get("passed", False)
     quality_metrics = quality_report.get("metrics", {})
     issues = quality_report.get("issues", [])
+    reddit_signal_quality = build_reddit_signal_quality(research_report)
     if mode == "validate":
         status = "검증 완료"
     elif result.get("daily_limit_skipped"):
@@ -481,9 +486,16 @@ def build_daily_success_message(result: dict[str, str]) -> str:
         f"- 이미지 수: {quality_metrics.get('image_count', 'n/a')}",
         f"- 공식 링크 수: {quality_metrics.get('official_link_count', 'n/a')}",
         f"- FAQ 수: {quality_metrics.get('faq_question_count', 'n/a')}",
+        f"- Reddit 실제 신호 수: {reddit_signal_quality.get('live_reddit_signal_count', 0)}",
+        f"- Reddit OAuth 신호 수: {reddit_signal_quality.get('reddit_oauth_signal_count', 0)}",
+        f"- Reddit public JSON 신호 수: {reddit_signal_quality.get('reddit_public_json_signal_count', 0)}",
+        f"- Reddit fallback 신호 수: {reddit_signal_quality.get('fallback_reddit_signal_count', 0)}",
         f"- URL: {blogger_url}",
         f"- 생성 폴더: {result.get('article_dir', '')}",
     ]
+    reddit_warning = reddit_signal_quality.get("warning")
+    if reddit_warning:
+        lines.extend(["", "수집 품질 경고:", f"- {reddit_warning}"])
     skipped_duplicate_seeds = result.get("skipped_duplicate_seeds") or []
     if skipped_duplicate_seeds:
         lines.append(f"- 중복으로 건너뛴 시드 수: {len(skipped_duplicate_seeds)}")
@@ -518,6 +530,27 @@ def build_daily_success_message(result: dict[str, str]) -> str:
         ]
     )
     return "\n".join(lines)
+
+
+def build_reddit_signal_quality(research_report: dict) -> dict:
+    live_count = int(research_report.get("live_reddit_signal_count", 0) or 0)
+    oauth_count = int(research_report.get("reddit_oauth_signal_count", 0) or 0)
+    public_json_count = int(research_report.get("reddit_public_json_signal_count", 0) or 0)
+    fallback_count = int(research_report.get("fallback_reddit_signal_count", 0) or 0)
+    method_counts = research_report.get("reddit_collection_method_counts", {}) or {}
+    warning = ""
+    if fallback_count and not live_count:
+        warning = "Reddit 실제 신호 없이 fallback 질문만 사용했습니다. Reddit OAuth 설정을 점검하세요."
+    elif public_json_count and not oauth_count:
+        warning = "Reddit 실제 신호가 public JSON 경로에만 의존합니다. 403 차단 가능성을 줄이려면 Reddit OAuth 수집을 점검하세요."
+    return {
+        "live_reddit_signal_count": live_count,
+        "reddit_oauth_signal_count": oauth_count,
+        "reddit_public_json_signal_count": public_json_count,
+        "fallback_reddit_signal_count": fallback_count,
+        "reddit_collection_method_counts": method_counts,
+        "warning": warning,
+    }
 
 
 def read_json(path: Path) -> dict:
