@@ -52,7 +52,7 @@ def run(site: str | None = None, today: datetime | None = None, after_hour: int 
             for post in posts[:5]
         ],
     }
-    NotificationClient(settings).send(build_message(result))
+    NotificationClient(settings).send_required(build_message(result))
     return result
 
 

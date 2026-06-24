@@ -28,7 +28,7 @@ class PublicationCheckTests(unittest.TestCase):
 
         self.assertEqual(result["status"], "published_today")
         self.assertEqual(result["today_post_count"], 1)
-        notification.return_value.send.assert_called_once()
+        notification.return_value.send_required.assert_called_once()
 
     def test_run_accepts_today_post_before_cutoff(self) -> None:
         post = {
@@ -49,7 +49,26 @@ class PublicationCheckTests(unittest.TestCase):
         self.assertEqual(result["status"], "published_today_before_cutoff")
         self.assertEqual(result["today_post_count"], 0)
         self.assertEqual(result["today_total_post_count"], 1)
-        notification.return_value.send.assert_called_once()
+        notification.return_value.send_required.assert_called_once()
+
+    def test_run_raises_when_publication_check_notification_fails(self) -> None:
+        post = {
+            "title": "Fresh post",
+            "url": "https://easypcfixguide.blogspot.com/2026/06/fresh-post.html",
+            "published_kst": datetime(2026, 6, 25, 9, 12, tzinfo=ZoneInfo("Asia/Seoul")),
+        }
+
+        with patch.object(stage4_publication_check, "fetch_public_feed", return_value={}), patch.object(
+            stage4_publication_check, "parse_posts", return_value=[post]
+        ), patch("src.pipeline.stage4_publication_check.NotificationClient") as notification:
+            notification.return_value.send_required.side_effect = RuntimeError("telegram failed")
+
+            with self.assertRaises(RuntimeError):
+                stage4_publication_check.run(
+                    "easy_pc_fix_guide",
+                    today=datetime(2026, 6, 25, 9, 45, tzinfo=ZoneInfo("Asia/Seoul")),
+                    after_hour=9,
+                )
 
     def test_main_accepts_today_post_before_cutoff(self) -> None:
         early_result = {
