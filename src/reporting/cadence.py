@@ -72,3 +72,27 @@ def review_cadence(
         three_post_review_date=THREE_POST_REVIEW_DATE.isoformat(),
         reasons=reasons,
     )
+
+
+def build_cadence_alert_message(site_name: str, site_url: str, review: CadenceReview) -> str:
+    return "\n".join(
+        [
+            "[Posting Bot] 발행량 전환 검토일 알림",
+            "",
+            f"- 블로그: {site_name}",
+            f"- 사이트: {site_url}",
+            f"- 권장 조치: {review.action}",
+            f"- 운영 일수: {review.days_since_start}일",
+            f"- 공개 글 수: {review.published_posts}개",
+            f"- Search Console 색인/노출 페이지 추정: {review.indexed_pages_estimate}개",
+            f"- 최근 노출 수: {review.recent_impressions}",
+            f"- 품질 이슈 수: {review.quality_issue_count}",
+            "",
+            "판단 근거:",
+            *[f"- {reason}" for reason in review.reasons],
+            "",
+            "운영 원칙:",
+            "- 자동으로 발행량을 늘리지는 않습니다.",
+            "- 전환 가능 알림이 오면 승인 후 스케줄을 변경합니다.",
+        ]
+    )

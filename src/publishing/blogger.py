@@ -59,6 +59,16 @@ class BloggerPublisher:
         service = self._service()
         return service.posts().publish(blogId=self.blog_id, postId=post_id).execute()
 
+    def public_post_count(self) -> int:
+        service = self._service()
+        count = 0
+        request = service.posts().list(blogId=self.blog_id, fetchBodies=False, status=["LIVE"])
+        while request is not None:
+            response = request.execute()
+            count += len(response.get("items", []))
+            request = service.posts().list_next(request, response)
+        return count
+
     def upsert_page(self, title: str, html: str) -> dict[str, Any]:
         service = self._service()
         existing = self.find_page_by_title(title)
