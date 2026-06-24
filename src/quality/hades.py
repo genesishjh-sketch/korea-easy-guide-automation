@@ -187,14 +187,26 @@ class HadesQualityGate:
             issues.extend(self._review_windows_article(soup, text_lower, links))
 
         image_plan_path = article_dir / "image_plan.json"
-        if image_plan_path.exists():
+        if not image_plan_path.exists():
+            issues.append(QualityIssue("missing_image_plan", "image_plan.json is required before public publishing."))
+        else:
             image_plan = json.loads(image_plan_path.read_text(encoding="utf-8"))
+            if not image_plan.get("strict", False):
+                issues.append(QualityIssue("non_strict_image_plan", "image_plan.json must set strict=true."))
+            required_images = [image for image in image_plan.get("images", []) if image.get("required", True)]
+            if len(required_images) < 2:
+                issues.append(QualityIssue("weak_image_plan", "Image plan must include at least two required images."))
             missing_assets = []
-            for image in image_plan.get("images", []):
-                if image.get("required", True):
-                    url = image.get("url") or f"assets/{image.get('filename', '')}"
-                    if url.startswith("assets/") and not (article_dir / url).exists():
-                        missing_assets.append(url)
+            invalid_urls = []
+            for image in required_images:
+                url = image.get("url") or f"assets/{image.get('filename', '')}"
+                if not url.startswith("assets/"):
+                    invalid_urls.append(url)
+                    continue
+                if not (article_dir / url).exists():
+                    missing_assets.append(url)
+            if invalid_urls:
+                issues.append(QualityIssue("invalid_image_plan_url", f"Required images must be local assets/ files: {', '.join(invalid_urls)}."))
             if missing_assets:
                 issues.append(QualityIssue("missing_required_image_assets", f"Missing image assets: {', '.join(missing_assets)}."))
 

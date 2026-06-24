@@ -56,21 +56,29 @@ def validate_quality(article_dir: Path, site: str | None = None) -> None:
 def validate_required_images(article_dir: Path) -> None:
     image_plan_path = article_dir / "image_plan.json"
     if not image_plan_path.exists():
-        return
+        raise FileNotFoundError("image_plan.json is required before Blogger publishing.")
 
     image_plan = json.loads(image_plan_path.read_text(encoding="utf-8"))
     if not image_plan.get("strict", False):
-        return
+        raise ValueError("image_plan.json must set strict=true before Blogger publishing.")
 
+    required_images = [image for image in image_plan.get("images", []) if image.get("required", True)]
+    if len(required_images) < 2:
+        raise ValueError("At least two required image assets are needed before Blogger publishing.")
+
+    invalid_urls = []
     missing = []
-    for image in image_plan.get("images", []):
-        if not image.get("required", True):
-            continue
+    for image in required_images:
         url = image.get("url") or f"assets/{image.get('filename', '')}"
         if not url.startswith("assets/"):
+            invalid_urls.append(url)
             continue
         if not (article_dir / url).exists():
             missing.append(url)
+
+    if invalid_urls:
+        joined = ", ".join(invalid_urls)
+        raise ValueError(f"Required image assets must be local assets/ files: {joined}.")
 
     if missing:
         joined = ", ".join(missing)
