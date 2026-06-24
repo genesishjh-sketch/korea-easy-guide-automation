@@ -428,6 +428,7 @@ def _status_kr(status: str | None) -> str:
         "draft_uploaded": "초안 업로드",
         "published": "공개 발행",
         "skipped_duplicate": "중복 건너뜀",
+        "skipped_daily_limit": "하루 1개 제한으로 건너뜀",
         "failed": "실패",
     }
     return mapping.get(status or "not_uploaded", status or "미업로드")

@@ -75,6 +75,52 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertEqual(payload["url"], "https://easypcfixguide.blogspot.com/2026/06/example.html")
         self.assertTrue(stale_failure_removed)
 
+    def test_scheduled_publish_skips_when_public_post_already_exists_today(self) -> None:
+        existing_post = {
+            "title": "Wi-Fi Button Missing on Windows 11",
+            "url": "https://easypcfixguide.blogspot.com/2026/06/example.html",
+            "published_kst": "2026-06-25T00:12:10+09:00",
+        }
+
+        with tempfile.TemporaryDirectory() as tmpdir, patch.object(daily_draft, "ROOT_DIR", Path(tmpdir)), patch.object(
+            daily_draft, "find_public_post_published_today", return_value=existing_post
+        ), patch.object(daily_draft, "run_stage1") as stage1, patch.object(
+            daily_draft, "run_publish_with_seed_fallback"
+        ) as publish, patch.object(
+            daily_draft, "notify_daily_completion"
+        ) as notify:
+            result = daily_draft.run(site="easy_pc_fix_guide", publish_mode="publish")
+            report_path = Path(tmpdir) / "reports" / "easy_pc_fix_guide-daily-success.json"
+            payload = json.loads(report_path.read_text(encoding="utf-8"))
+
+        stage1.assert_not_called()
+        publish.assert_not_called()
+        notify.assert_called_once()
+        self.assertTrue(result["daily_limit_skipped"])
+        self.assertEqual(payload["status"], "skipped_daily_limit")
+        self.assertEqual(payload["title"], "Wi-Fi Button Missing on Windows 11")
+        self.assertEqual(payload["url"], "https://easypcfixguide.blogspot.com/2026/06/example.html")
+
+    def test_explicit_publish_seed_does_not_use_daily_limit_guard(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            article_dir = Path(tmpdir) / "article"
+            article_dir.mkdir()
+            result_path = article_dir / "blogger_publish_result.json"
+
+            with patch.object(daily_draft, "find_public_post_published_today") as daily_guard, patch.object(
+                daily_draft, "run_publish_with_seed_fallback", return_value=("manual seed", article_dir, result_path, [])
+            ), patch.object(daily_draft, "save_daily_success_report"), patch.object(
+                daily_draft, "notify_daily_completion"
+            ):
+                result = daily_draft.run(
+                    seed="manual seed",
+                    site="easy_pc_fix_guide",
+                    publish_mode="publish",
+                )
+
+        daily_guard.assert_not_called()
+        self.assertEqual(result["seed"], "manual seed")
+
     def test_daily_success_message_includes_quality_metrics(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             article_dir = Path(tmpdir)
@@ -217,6 +263,8 @@ class DuplicatePublishGuardTests(unittest.TestCase):
                 daily_draft, "choose_publish_seed_candidates", return_value=["duplicate topic", "fresh topic"]
             ), patch.object(daily_draft, "run_stage1", side_effect=fake_stage1), patch.object(
                 daily_draft, "run_publish_with_duplicate_guard", side_effect=fake_publish
+            ), patch.object(
+                daily_draft, "find_public_post_published_today", return_value=None
             ), patch.object(
                 daily_draft, "notify_daily_completion"
             ):

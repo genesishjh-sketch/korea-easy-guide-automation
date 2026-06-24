@@ -6,6 +6,7 @@ from datetime import datetime
 import json
 from pathlib import Path
 import traceback
+from zoneinfo import ZoneInfo
 
 from src.config import ROOT_DIR
 from src.config import load_settings
@@ -15,6 +16,9 @@ from src.pipeline.stage4_publication_check import parse_posts
 from src.pipeline.stage1_generate import run as run_stage1
 from src.pipeline.stage2_publish import run as run_stage2
 from src.quality.hades import HadesQualityGate
+
+
+KST = ZoneInfo("Asia/Seoul")
 
 
 def used_keywords(site: str | None = None) -> set[str]:
@@ -107,6 +111,23 @@ def days_since_automation_start(start_date: str, today: date) -> int:
 
 
 def run(seed: str | None = None, site: str | None = None, publish_mode: str = "draft") -> dict[str, str]:
+    settings = load_settings(site)
+    if publish_mode == "publish" and seed is None:
+        existing_today = find_public_post_published_today(settings.site_url)
+        if existing_today:
+            result = {
+                "seed": "",
+                "article_dir": "",
+                "publish_result": "",
+                "site": settings.site_key,
+                "mode": publish_mode,
+                "skipped_duplicate_seeds": [],
+                "daily_limit_skipped": True,
+                "existing_post": existing_today,
+            }
+            save_daily_success_report(result)
+            notify_daily_completion(result)
+            return result
     selected_seed = choose_seed(seed, site)
     try:
         skipped_duplicate_seeds: list[str] = []
@@ -241,6 +262,15 @@ def find_public_post(site_url: str, slug: str = "", title: str = "") -> dict | N
     return None
 
 
+def find_public_post_published_today(site_url: str, now: datetime | None = None) -> dict | None:
+    selected_now = now or datetime.now(tz=KST)
+    posts = parse_posts(fetch_public_feed(site_url))
+    for post in posts:
+        if post["published_kst"].date() == selected_now.date():
+            return duplicate_post_payload(post)
+    return None
+
+
 def public_url_matches_slug(url: str, slug: str) -> bool:
     public_slug = Path(url.split("?", 1)[0]).stem
     if not public_slug:
@@ -311,12 +341,14 @@ def save_daily_failure_report(seed: str, exc: Exception, site: str | None = None
 
 def save_daily_success_report(result: dict[str, str]) -> Path:
     settings = load_settings(result.get("site"))
-    article_dir = Path(result["article_dir"])
-    metadata = read_json(article_dir / "metadata.json")
-    publish_result = read_json(Path(result["publish_result"]))
-    quality_report = read_json(article_dir / "quality_report.json")
+    article_dir_raw = result.get("article_dir", "")
+    publish_result_raw = result.get("publish_result", "")
+    metadata = read_json(Path(article_dir_raw) / "metadata.json") if article_dir_raw else {}
+    publish_result = read_json(Path(publish_result_raw)) if publish_result_raw else {}
+    quality_report = read_json(Path(article_dir_raw) / "quality_report.json") if article_dir_raw else {}
     article = metadata.get("article", {})
     blogger = publish_result.get("blogger", {})
+    existing_post = result.get("existing_post") or {}
     output_dir = ROOT_DIR / "reports"
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / f"{settings.site_key}-daily-success.json"
@@ -330,13 +362,15 @@ def save_daily_success_report(result: dict[str, str]) -> Path:
         "seed": result.get("seed", ""),
         "article_dir": result.get("article_dir", ""),
         "publish_result": result.get("publish_result", ""),
-        "title": article.get("title", ""),
+        "title": article.get("title", "") or existing_post.get("title", ""),
         "category": article.get("category", ""),
         "blogger_status": blogger.get("status", ""),
-        "url": blogger.get("url", ""),
+        "url": blogger.get("url", "") or existing_post.get("url", ""),
         "quality_score": quality_report.get("score"),
         "quality_passed": quality_report.get("passed"),
         "quality_metrics": quality_report.get("metrics", {}),
+        "existing_post": existing_post,
+        "daily_limit_skipped": result.get("daily_limit_skipped", False),
         "skipped_duplicate_seeds": result.get("skipped_duplicate_seeds") or [],
         "created_at": datetime.utcnow().isoformat() + "Z",
     }
@@ -354,6 +388,8 @@ def remove_stale_report(path: Path) -> None:
 
 def daily_result_status(result: dict, publish_result: dict) -> str:
     mode = result.get("mode", "draft")
+    if result.get("daily_limit_skipped"):
+        return "skipped_daily_limit"
     if mode == "validate":
         return "validated"
     if publish_result.get("skipped"):
@@ -365,14 +401,16 @@ def daily_result_status(result: dict, publish_result: dict) -> str:
 
 def build_daily_success_message(result: dict[str, str]) -> str:
     settings = load_settings(result.get("site"))
-    article_dir = Path(result["article_dir"])
-    metadata = read_json(article_dir / "metadata.json")
-    publish_result = read_json(Path(result["publish_result"]))
-    quality_report = read_json(article_dir / "quality_report.json")
+    article_dir_raw = result.get("article_dir", "")
+    publish_result_raw = result.get("publish_result", "")
+    metadata = read_json(Path(article_dir_raw) / "metadata.json") if article_dir_raw else {}
+    publish_result = read_json(Path(publish_result_raw)) if publish_result_raw else {}
+    quality_report = read_json(Path(article_dir_raw) / "quality_report.json") if article_dir_raw else {}
     mode = result.get("mode", "draft")
 
     article = metadata.get("article", {})
     blogger = publish_result.get("blogger", {})
+    existing_post = result.get("existing_post") or {}
     skipped = publish_result.get("skipped", False)
     draft = publish_result.get("draft", True)
     quality_score = quality_report.get("score", "n/a")
@@ -381,12 +419,15 @@ def build_daily_success_message(result: dict[str, str]) -> str:
     issues = quality_report.get("issues", [])
     if mode == "validate":
         status = "검증 완료"
+    elif result.get("daily_limit_skipped"):
+        status = "오늘 공개 글 이미 있음, 추가 발행 건너뜀"
     elif skipped:
         status = "중복 공개 글 감지, 발행 건너뜀"
     else:
         status = "초안 업로드 완료" if draft else "공개 발행 완료"
     blogger_status = blogger.get("status") or "unknown"
-    blogger_url = blogger.get("url") or "발행 없음"
+    blogger_url = blogger.get("url") or existing_post.get("url") or "발행 없음"
+    title = article.get("title", "") or existing_post.get("title", "제목 없음")
 
     lines = [
         "[Posting Bot] 매일 아침 포스팅 결과 보고",
@@ -396,9 +437,9 @@ def build_daily_success_message(result: dict[str, str]) -> str:
         f"- 실행모드: {mode}",
         f"- 상태: {status}",
         f"- Blogger 상태: {blogger_status}",
-        f"- 제목: {article.get('title', '제목 없음')}",
+        f"- 제목: {title}",
         f"- 카테고리: {article.get('category', '미분류')}",
-        f"- 주제 시드: {result['seed']}",
+        f"- 주제 시드: {result.get('seed', '')}",
         f"- 품질점수: {quality_score}/100",
         f"- 품질통과: {'예' if quality_passed else '아니오'}",
         f"- 단어 수: {quality_metrics.get('word_count', 'n/a')}",
@@ -406,7 +447,7 @@ def build_daily_success_message(result: dict[str, str]) -> str:
         f"- 공식 링크 수: {quality_metrics.get('official_link_count', 'n/a')}",
         f"- FAQ 수: {quality_metrics.get('faq_question_count', 'n/a')}",
         f"- URL: {blogger_url}",
-        f"- 생성 폴더: {result['article_dir']}",
+        f"- 생성 폴더: {result.get('article_dir', '')}",
     ]
     skipped_duplicate_seeds = result.get("skipped_duplicate_seeds") or []
     if skipped_duplicate_seeds:
@@ -417,6 +458,16 @@ def build_daily_success_message(result: dict[str, str]) -> str:
         lines.extend(["", "품질 이슈:"])
         for issue in issues[:5]:
             lines.append(f"- {issue.get('code')}: {issue.get('message')}")
+
+    if result.get("daily_limit_skipped"):
+        lines.extend(
+            [
+                "",
+                "운영 메모:",
+                "- 하루 1개 발행 원칙에 따라 오늘 추가 발행을 중단했습니다.",
+                "- 내일 09:10 KST 자동 발행은 정상 대기합니다.",
+            ]
+        )
 
     lines.extend(
         [
