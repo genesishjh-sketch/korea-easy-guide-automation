@@ -12,6 +12,7 @@ from src.config import load_settings
 from src.notifications.telegram import NotificationClient
 from src.pipeline.stage1_generate import run as run_stage1
 from src.pipeline.stage2_publish import run as run_stage2
+from src.quality.hades import HadesQualityGate
 
 
 def used_keywords(site: str | None = None) -> set[str]:
@@ -61,18 +62,49 @@ def run(seed: str | None = None, site: str | None = None, publish_mode: str = "d
     selected_seed = choose_seed(seed, site)
     try:
         article_dir = run_stage1(selected_seed, site)
-        result_path = run_stage2(article_dir=article_dir, mode=publish_mode, site=site)
+        if publish_mode == "validate":
+            result_path = run_validation(article_dir, site)
+        else:
+            result_path = run_stage2(article_dir=article_dir, mode=publish_mode, site=site)
         result = {
             "seed": selected_seed,
             "article_dir": str(article_dir),
             "publish_result": str(result_path),
             "site": load_settings(site).site_key,
+            "mode": publish_mode,
         }
         notify_daily_completion(result)
         return result
     except Exception as exc:
         notify_daily_failure(selected_seed, exc, site)
         raise
+
+
+def run_validation(article_dir: Path, site: str | None = None) -> Path:
+    settings = load_settings(site)
+    report = HadesQualityGate(settings.content_domain).review_article_dir(article_dir)
+    report_path = article_dir / "quality_report.json"
+    report_path.write_text(json.dumps(report.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8")
+    result_path = article_dir / "validation_result.json"
+    result_path.write_text(
+        json.dumps(
+            {
+                "mode": "validate",
+                "published": False,
+                "passed": report.passed,
+                "score": report.score,
+                "min_score": report.min_score,
+                "issues": [issue.__dict__ for issue in report.issues],
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    if not report.passed:
+        issues = "; ".join(f"{issue.code}: {issue.message}" for issue in report.issues)
+        raise ValueError(f"Hades validation failed with score {report.score}/{report.min_score}: {issues}")
+    return result_path
 
 
 def notify_daily_completion(result: dict[str, str]) -> None:
@@ -108,6 +140,7 @@ def build_daily_success_message(result: dict[str, str]) -> str:
     metadata = read_json(article_dir / "metadata.json")
     publish_result = read_json(Path(result["publish_result"]))
     quality_report = read_json(article_dir / "quality_report.json")
+    mode = result.get("mode", "draft")
 
     article = metadata.get("article", {})
     blogger = publish_result.get("blogger", {})
@@ -115,15 +148,19 @@ def build_daily_success_message(result: dict[str, str]) -> str:
     quality_score = quality_report.get("score", "n/a")
     quality_passed = quality_report.get("passed", False)
     issues = quality_report.get("issues", [])
-    status = "초안 업로드 완료" if draft else "공개 발행 완료"
+    if mode == "validate":
+        status = "검증 완료"
+    else:
+        status = "초안 업로드 완료" if draft else "공개 발행 완료"
     blogger_status = blogger.get("status") or "unknown"
-    blogger_url = blogger.get("url") or "URL 없음"
+    blogger_url = blogger.get("url") or "발행 없음"
 
     lines = [
         "[Posting Bot] 매일 아침 포스팅 결과 보고",
         "",
         f"- 블로그: {settings.site_name}",
         f"- 사이트: {settings.site_url}",
+        f"- 실행모드: {mode}",
         f"- 상태: {status}",
         f"- Blogger 상태: {blogger_status}",
         f"- 제목: {article.get('title', '제목 없음')}",
@@ -144,6 +181,7 @@ def build_daily_success_message(result: dict[str, str]) -> str:
         [
             "",
             "다음 확인:",
+            "- 검증 모드면 Blogger에는 글이 생성되지 않습니다.",
             "- 공개 발행 전이면 이미지/링크/본문 품질을 최종 확인하세요.",
             "- 공개 발행 후에는 Search Console 색인 요청과 Analytics 수집 여부를 확인하세요.",
         ]
@@ -161,7 +199,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Daily pipeline: collect, generate, and upload a Blogger draft.")
     parser.add_argument("--seed", help="Optional explicit topic seed")
     parser.add_argument("--site", help="Site profile key, for example: easy_pc_fix_guide")
-    parser.add_argument("--mode", choices=["draft", "publish"], default="draft")
+    parser.add_argument("--mode", choices=["validate", "draft", "publish"], default="draft")
     args = parser.parse_args()
     result = run(args.seed, args.site, args.mode)
     print(json.dumps(result, ensure_ascii=False, indent=2))

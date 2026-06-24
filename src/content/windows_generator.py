@@ -453,6 +453,7 @@ def _related_guides(category: str) -> list[str]:
         "Windows Update": ["How to check your Windows version", "How to free up disk space on Windows", "Windows Update stuck at 100%"],
         "Wi-Fi & Internet": ["Internet connected but not working", "DNS problems on Windows", "How to reset network settings safely"],
         "Bluetooth & Devices": ["Bluetooth missing from Windows settings", "How to check Device Manager safely", "Bluetooth headphones connected but no sound"],
+        "Apps & Settings": ["Microsoft Store not opening", "How to change default apps safely", "Windows Settings app not opening"],
         "Printer & Scanner": ["How to clear the printer queue", "Printer not showing in Windows", "Scanner not detected on Windows"],
     }
     return mapping.get(category, ["How to start Windows in Safe Mode", "How to check your Windows version", "Beginner PC troubleshooting checklist"])

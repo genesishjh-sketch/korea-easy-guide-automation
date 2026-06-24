@@ -56,6 +56,7 @@ def build_article_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
         "File Explorer",
         "Windows Search",
         "OneDrive & Account",
+        "Apps & Settings",
         "Beginner PC Tips",
         "Error Codes",
         "Computer Help",

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import Counter
+import re
 
 from src.models import TopicCandidate, TopicSignal
 
@@ -22,6 +23,7 @@ WINDOWS_CATEGORY_RULES = [
     ("File Explorer", ["file explorer", "folder", "files", "freezing"]),
     ("Windows Search", ["windows search", "search", "indexing"]),
     ("OneDrive & Account", ["onedrive", "account", "pin", "login", "sign in"]),
+    ("Apps & Settings", ["settings app", "microsoft store", "photos app", "snipping tool", "calculator app", "default apps", "default browser", "uninstall apps"]),
     ("Beginner PC Tips", ["screenshot", "disk space", "text bigger", "windows version"]),
     ("Windows Update", ["windows update stuck", "update error", "0x800f0922", "0x80070002", "0x80070005", "0x80070643"]),
     ("Error Codes", ["0x"]),
@@ -32,14 +34,25 @@ def infer_category(keyword: str, content_domain: str = "korea_travel") -> str:
     normalized = keyword.lower()
     if content_domain == "windows_help":
         for category, terms in WINDOWS_CATEGORY_RULES:
-            if any(term in normalized for term in terms):
+            if matches_terms(normalized, terms):
                 return category
         return "Computer Help"
 
     for category, terms in CATEGORY_RULES:
-        if any(term in normalized for term in terms):
+        if matches_terms(normalized, terms):
             return category
     return "Travel Basics"
+
+
+def matches_terms(text: str, terms: list[str]) -> bool:
+    for term in terms:
+        if len(term) <= 3 and term.isalnum():
+            if re.search(rf"\b{re.escape(term)}\b", text):
+                return True
+            continue
+        if term in text:
+            return True
+    return False
 
 
 def infer_intent(keyword: str) -> str:
