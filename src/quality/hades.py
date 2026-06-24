@@ -19,6 +19,22 @@ REQUIRED_HEADINGS = {
     "Official Links to Check",
 }
 
+MIN_WORD_COUNT = 1200
+
+OFFICIAL_SOURCE_DOMAINS = (
+    ".go.kr",
+    "visitkorea.or.kr",
+    "korail.com",
+    "airport.kr",
+    "tmoney.co.kr",
+    "seoul.go.kr",
+    "seoulmetro.co.kr",
+    "naver.com",
+    "kakao.com",
+    "apple.com",
+    "google.com",
+)
+
 BLOCKED_PHRASES = {
     "lorem ipsum",
     "insert image",
@@ -89,7 +105,7 @@ class HadesQualityGate:
         official_links = [
             link
             for link in links
-            if any(domain in (link.get("href") or "") for domain in (".go.kr", "visitkorea.or.kr", "korail.com", "airport.kr", "naver.com", "kakao.com", "apple.com", "google.com"))
+            if any(domain in (link.get("href") or "") for domain in OFFICIAL_SOURCE_DOMAINS)
         ]
         faq_heading = soup.find(string=re.compile(r"^FAQ$", re.I))
         faq_questions = 0
@@ -100,8 +116,8 @@ class HadesQualityGate:
         missing_headings = sorted(REQUIRED_HEADINGS - headings)
         if missing_headings:
             issues.append(QualityIssue("missing_required_sections", f"Missing sections: {', '.join(missing_headings)}."))
-        if len(words) < 650:
-            issues.append(QualityIssue("thin_content", "Article must contain at least 650 words before public publishing."))
+        if len(words) < MIN_WORD_COUNT:
+            issues.append(QualityIssue("thin_content", f"Article must contain at least {MIN_WORD_COUNT} words before public publishing."))
         if len(images) < 2:
             issues.append(QualityIssue("missing_images", "Article must include at least one hero image and one inline image."))
         if len(official_links) < 2:

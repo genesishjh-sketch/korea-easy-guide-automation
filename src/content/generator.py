@@ -55,7 +55,7 @@ class EnglishArticleGenerator:
         slug = slugify(title)
         tags = self._build_tags(candidate)
         meta_description = self._meta_description(candidate.keyword)
-        sources = OFFICIAL_SOURCE_MAP.get(candidate.category, OFFICIAL_SOURCE_MAP["Transportation"])
+        sources = self._sources(candidate)
         inline_images = inline_images or []
 
         context = {
@@ -115,6 +115,8 @@ class EnglishArticleGenerator:
         return list(dict.fromkeys(tags))[:8]
 
     def _meta_description(self, keyword: str) -> str:
+        if self._is_tmoney(keyword):
+            return "Complete T-money card guide for Korea visitors: where to buy, recharge, tap in and out, use buses, check balance, avoid mistakes, and compare tourist card options."
         return f"Simple English guide to {keyword} for travelers, exchange students, and long-term foreign visitors in Korea."
 
     def _intro(self, keyword: str) -> str:
@@ -122,7 +124,8 @@ class EnglishArticleGenerator:
             return (
                 "A T-money card is one of the easiest things to set up during your first day in Korea. "
                 "It works like a rechargeable transportation card for subways, buses, and many everyday travel moments, "
-                "but foreign visitors often get confused about where to buy it, how to recharge it, and when it is better than paying by single ticket."
+                "but foreign visitors often get confused about where to buy it, how to recharge it, and when it is better than paying by single ticket. "
+                "This guide explains the practical flow from airport arrival to your first subway or bus ride, with the common mistakes that usually cause delays."
             )
         return (
             f"If you are visiting Korea for the first time, {keyword} can be confusing because local apps, "
@@ -137,6 +140,7 @@ class EnglishArticleGenerator:
                 {"situation": "Using subway and buses often", "choice": "Recharge the card and tap in/out instead of buying single tickets"},
                 {"situation": "Arriving with no Korean cash", "choice": "Use airport transport first, then buy/recharge after finding an ATM or card-friendly store"},
                 {"situation": "Staying only one or two days", "choice": "Still useful if you plan several subway or bus rides"},
+                {"situation": "Want shopping or tourist benefits", "choice": "Compare T-money with Korea Tour Card, WOWPASS, or NAMANE before buying"},
             ]
         if keyword.lower() == "incheon airport to seoul":
             return [
@@ -158,6 +162,10 @@ class EnglishArticleGenerator:
                 "The card itself is separate from the balance. Buying a card does not mean it already has enough money for your trip, so check the stored value and recharge before you rely on it for a transfer.",
                 "Foreign visitors should keep a small amount of Korean won available because some recharge machines or store counters may be easier with cash. Card payment availability can vary by location and machine.",
                 "Do not treat the card as a replacement for every payment situation. It is mainly useful for transportation and selected small purchases, while hotels, restaurants, and online services usually require another payment method.",
+                "For most tourists, the simplest buying path is a convenience store near your hotel, a subway station, or an airport-area transport counter if one is available. If staff do not understand the English word T-money, show 티머니 on your phone and say you want to recharge it as well.",
+                "The biggest practical advantage is not only price. It is speed. You avoid buying a single-use subway ticket for every ride, and you can move between subway and bus routes with less friction when your balance is enough.",
+                "If you are traveling as a family or group, each person should normally carry their own card. One card per traveler keeps fare calculation and transfers simple and avoids gate errors when several people try to pass with one card.",
+                "If you plan to leave Seoul, check local compatibility before assuming the same card behavior everywhere. T-money is widely used, but local transport rules, accepted cards, and refund handling can differ by city or service.",
             ]
         return [
             f"The most important thing is to check the latest official information before relying on any guide about {keyword}. Korea changes app features, fares, routes, and business rules regularly.",
@@ -169,12 +177,14 @@ class EnglishArticleGenerator:
         if self._is_tmoney(keyword):
             return [
                 "Buy a T-money card at a convenience store, subway station sales point, or other authorized location after you arrive in Korea.",
-                "Ask the staff to recharge it or use a recharge machine at a subway station. If you are unsure, start with a modest balance and add more later.",
-                "Tap the card on the reader when entering the subway gate. Wait for the beep or screen confirmation before walking through.",
-                "Tap again when exiting the subway. This matters because the system calculates the correct fare based on your route.",
-                "On buses, tap when boarding and tap again when getting off if the bus system requires it. This helps with transfer discounts and correct fare handling.",
-                "Check your remaining balance at gates, machines, or some convenience stores before taking a long route late at night.",
-                "Keep the card separate from other transit or bank cards when tapping. Multiple cards near the reader can cause an error or failed tap.",
+                "Recharge it immediately. Do not wait until you are standing at a subway gate with luggage. For a short Seoul stay, start with a moderate balance and add more after you understand your daily travel pattern.",
+                "At a subway station, use the card reader at the gate and wait for confirmation before moving. If the gate does not open, step aside and check balance or card position instead of repeatedly tapping in a rush.",
+                "Tap again when exiting the subway. This matters because the system calculates the correct fare based on your route and distance.",
+                "On buses, tap when boarding. In many situations you should also tap when getting off, especially if you may transfer afterward. It is a small habit that prevents fare and transfer problems.",
+                "Use Naver Map or KakaoMap to plan the route before tapping in. The card pays the fare, but it does not tell you which platform, bus stop, or exit is best.",
+                "Check your remaining balance at gates, recharge machines, or some convenience stores before taking a long route late at night.",
+                "Keep the card separate from other transit, hotel, and contactless bank cards when tapping. Multiple cards near the reader can cause an error or failed tap.",
+                "Before your final day, decide whether to use down the balance, keep the card for a future Korea trip, or ask about refund options. Do not leave refund questions until you are already rushing to airport security.",
             ]
         return [
             f"Decide whether {keyword} is mainly a speed, price, comfort, or convenience problem for your trip.",
@@ -194,6 +204,9 @@ class EnglishArticleGenerator:
                 "Assuming every machine or counter will accept the same foreign card payment method.",
                 "Forgetting to tap out correctly, especially when transferring between subway and bus routes.",
                 "Waiting until the last train or late-night bus to solve a low-balance problem.",
+                "Buying a tourist-benefit card without checking whether you actually need the discounts.",
+                "Treating mobile T-money information as universal. Some mobile options depend on phone type, local setup, Korean payment methods, or app availability.",
+                "Assuming airport, subway station, and convenience store staff all handle refunds or balance questions in the same way.",
             ]
         return [
             "Assuming every Korean app accepts foreign cards or foreign phone numbers.",
@@ -209,6 +222,8 @@ class EnglishArticleGenerator:
                 {"item": "Recharge balance", "detail": "Add stored value before riding. Cash is often the simplest backup for recharging."},
                 {"item": "Transport fares", "detail": "Subway and bus fares can change, so check official transport information for current pricing."},
                 {"item": "Refunds", "detail": "Refund rules may depend on remaining balance, card type, and sales location. Ask staff before assuming it is refundable."},
+                {"item": "Single-use tickets", "detail": "Single-use subway tickets can work for one ride, but they add extra steps and are less convenient for repeated travel."},
+                {"item": "Tourist cards", "detail": "Korea Tour Card, WOWPASS, and NAMANE may add travel or payment features, but compare fees, reload methods, and actual benefits."},
             ]
         return [
             {"item": "Official price or fare", "detail": "Check the latest fare on an official website or app before making a final decision."},
@@ -225,6 +240,9 @@ class EnglishArticleGenerator:
                 {"title": "Use one card per person", "detail": "Each traveler should have their own card for normal subway and bus tapping."},
                 {"title": "Check the balance often", "detail": "Low balance is easier to fix before entering a station than when you are rushing for a train."},
                 {"title": "Pair it with Naver Map", "detail": "Use Naver Map or KakaoMap to plan the route, then use T-money to move through the gates and buses."},
+                {"title": "Write down 티머니", "detail": "Showing the Korean word helps at small counters when staff are busy or English support is limited."},
+                {"title": "Do not overbuy balance", "detail": "Recharge in stages unless you already know you will use public transport heavily."},
+                {"title": "Keep it after the trip", "detail": "If you expect to return to Korea, keeping the card can be easier than handling a small refund."},
             ]
         return [
             {"title": "Use Korean map apps", "detail": "Naver Map and KakaoMap usually provide better local transit information."},
@@ -238,19 +256,31 @@ class EnglishArticleGenerator:
             return [
                 {
                     "question": "Do tourists need a T-money card in Korea?",
-                    "answer": "Most visitors who use subways or buses should get one. It reduces the need to buy single tickets and makes transfers easier.",
+                    "answer": "Most visitors who use subways or buses should get one. It reduces the need to buy single tickets, helps with transfers, and makes daily movement less stressful after the first setup.",
                 },
                 {
                     "question": "Where can I buy a T-money card?",
-                    "answer": "Common places include convenience stores and subway station sales points. Availability can vary, so ask staff if you do not see one immediately.",
+                    "answer": "Common places include convenience stores, subway station sales points, and transport-related counters. Availability can vary by location and card design, so ask staff if you do not see one immediately.",
                 },
                 {
                     "question": "Can I recharge T-money with a foreign card?",
-                    "answer": "Sometimes payment options vary by machine, store, and card issuer. Keep cash or another card as a backup.",
+                    "answer": "Sometimes payment options vary by machine, store, and card issuer. Keep Korean won cash or another card as a backup, especially on your first day.",
                 },
                 {
                     "question": "Can one T-money card be used by two people?",
                     "answer": "For normal travel, each person should use their own card. Sharing one card can cause fare and transfer problems.",
+                },
+                {
+                    "question": "Is T-money better than a single-use subway ticket?",
+                    "answer": "For repeated rides, yes. Single-use tickets are acceptable for one-off trips, but T-money is faster and easier when you use subways and buses several times.",
+                },
+                {
+                    "question": "Should I buy T-money, Korea Tour Card, WOWPASS, or NAMANE?",
+                    "answer": "Use a basic T-money card if you mainly need transportation. Compare tourist or prepaid payment cards only if you want extra shopping, cashless payment, or design features.",
+                },
+                {
+                    "question": "Can I use T-money for taxis or convenience stores?",
+                    "answer": "Some taxis and selected stores may accept it, but do not rely on it as your only payment method. Keep a regular payment card or cash backup.",
                 },
             ]
         return [
@@ -271,3 +301,12 @@ class EnglishArticleGenerator:
     def _is_tmoney(self, keyword: str) -> bool:
         normalized = keyword.lower()
         return "t money" in normalized or "t-money" in normalized or "tmoney" in normalized
+
+    def _sources(self, candidate: TopicCandidate) -> list[dict[str, str]]:
+        if self._is_tmoney(candidate.keyword):
+            return [
+                {"name": "Tmoney official English site", "url": "https://eng.tmoney.co.kr/en/aeb/main/main/readMain.dev"},
+                {"name": "VISITKOREA official travel information", "url": "https://english.visitkorea.or.kr/"},
+                {"name": "Seoul Metropolitan Government official website", "url": "https://english.seoul.go.kr/"},
+            ]
+        return OFFICIAL_SOURCE_MAP.get(candidate.category, OFFICIAL_SOURCE_MAP["Transportation"])
