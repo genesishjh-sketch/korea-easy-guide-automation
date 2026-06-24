@@ -43,6 +43,28 @@ python -m src.pipeline.stage3_weekly_report
 
 If Telegram is configured correctly, the report will arrive as a message.
 
+## Assisted Setup Command
+
+After creating a Telegram bot with BotFather, send any message to the bot once.
+
+Then run:
+
+```bash
+python -m src.pipeline.stage4_telegram_setup --bot-token "YOUR_BOT_TOKEN" --write-env
+```
+
+This command will:
+
+- Find the latest chat ID from Telegram `getUpdates`.
+- Save `NOTIFICATION_PROVIDER`, `TELEGRAM_BOT_TOKEN`, and `TELEGRAM_CHAT_ID` to `.env`.
+- Send a test message.
+
+If the bot is in a group or channel, pass the exact chat ID:
+
+```bash
+python -m src.pipeline.stage4_telegram_setup --bot-token "YOUR_BOT_TOKEN" --chat-id "YOUR_CHAT_ID" --write-env
+```
+
 ## GitHub Actions Variables And Secrets
 
 Set these repository variables:
