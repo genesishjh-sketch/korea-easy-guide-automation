@@ -12,6 +12,10 @@ LOGGER = logging.getLogger(__name__)
 TELEGRAM_LIMIT = 4096
 
 
+class NotificationDeliveryError(RuntimeError):
+    pass
+
+
 class NotificationClient:
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
@@ -49,6 +53,10 @@ class NotificationClient:
                 ok = False
                 LOGGER.warning("Telegram notification failed: %s %s", response.status_code, response.text[:500])
         return ok
+
+    def send_required(self, message: str) -> None:
+        if not self.send(message):
+            raise NotificationDeliveryError("Telegram notification was not delivered.")
 
 
 def get_updates(bot_token: str) -> dict[str, Any]:

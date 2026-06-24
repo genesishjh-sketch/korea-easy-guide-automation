@@ -16,7 +16,7 @@ def run(site: str | None = None) -> Path:
     settings = load_settings(site)
     try:
         path = WeeklyReporter(settings).generate()
-        NotificationClient(settings).send(path.read_text(encoding="utf-8"))
+        NotificationClient(settings).send_required(path.read_text(encoding="utf-8"))
         remove_stale_weekly_failure_report(settings.site_key)
         return path
     except Exception as exc:

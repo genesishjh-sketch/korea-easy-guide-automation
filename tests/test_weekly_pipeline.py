@@ -27,7 +27,7 @@ class WeeklyPipelineTests(unittest.TestCase):
 
                 result_path = stage3_weekly_report.run("easy_pc_fix_guide")
 
-                notifier.return_value.send.assert_called_once_with("# Weekly report")
+                notifier.return_value.send_required.assert_called_once_with("# Weekly report")
                 stale_failure_removed = not stale_failure_path.exists()
 
         self.assertEqual(result_path, weekly_markdown_path)
@@ -50,6 +50,27 @@ class WeeklyPipelineTests(unittest.TestCase):
         self.assertEqual(payload["status"], "failed")
         self.assertEqual(payload["error_type"], "RuntimeError")
         self.assertIn("weekly failed", payload["error"])
+
+    def test_weekly_notification_failure_is_reported_before_reraising(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            weekly_markdown_path = root / "weekly.md"
+            weekly_markdown_path.write_text("# Weekly report", encoding="utf-8")
+
+            with patch.object(stage3_weekly_report, "ROOT_DIR", root), patch(
+                "src.pipeline.stage3_weekly_report.WeeklyReporter"
+            ) as reporter, patch("src.pipeline.stage3_weekly_report.NotificationClient") as notifier:
+                reporter.return_value.generate.return_value = weekly_markdown_path
+                notifier.return_value.send_required.side_effect = RuntimeError("telegram failed")
+
+                with self.assertRaises(RuntimeError):
+                    stage3_weekly_report.run("easy_pc_fix_guide")
+
+            report_path = root / "reports" / "easy_pc_fix_guide-weekly-failure.json"
+            payload = json.loads(report_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(payload["status"], "failed")
+        self.assertIn("telegram failed", payload["error"])
 
 
 if __name__ == "__main__":

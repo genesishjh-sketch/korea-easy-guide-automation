@@ -7,6 +7,7 @@ from unittest.mock import patch
 import requests
 
 from src.notifications.telegram import NotificationClient
+from src.notifications.telegram import NotificationDeliveryError
 from src.notifications.telegram import split_message
 
 
@@ -23,6 +24,18 @@ class TelegramNotificationTests(unittest.TestCase):
             sent = client.send("hello")
 
         self.assertFalse(sent)
+
+    def test_send_required_raises_when_telegram_request_fails(self) -> None:
+        settings = SimpleNamespace(
+            notification_provider="telegram",
+            telegram_bot_token="token",
+            telegram_chat_id="123",
+        )
+        client = NotificationClient(settings)
+
+        with patch("src.notifications.telegram.requests.post", side_effect=requests.Timeout("timeout")):
+            with self.assertRaises(NotificationDeliveryError):
+                client.send_required("hello")
 
     def test_split_message_keeps_chunks_under_telegram_limit(self) -> None:
         message = "\n".join(["line " + ("x" * 100)] * 80)

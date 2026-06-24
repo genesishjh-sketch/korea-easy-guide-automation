@@ -18,7 +18,7 @@ def run(sitemap_url: str | None = None, site: str | None = None) -> Path:
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / f"{settings.site_key}-search-console-sitemap-submit.json"
     output_path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
-    NotificationClient(settings).send(build_message(settings.site_name, result))
+    NotificationClient(settings).send_required(build_message(settings.site_name, result))
     return output_path
 
 

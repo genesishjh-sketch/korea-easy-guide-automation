@@ -294,7 +294,7 @@ def normalize_match_text(value: str) -> str:
 
 def notify_daily_completion(result: dict[str, str]) -> None:
     settings = load_settings(result.get("site"))
-    NotificationClient(settings).send(build_daily_success_message(result))
+    NotificationClient(settings).send_required(build_daily_success_message(result))
 
 
 def notify_daily_failure(seed: str, exc: Exception, site: str | None = None) -> None:
