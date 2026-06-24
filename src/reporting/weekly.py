@@ -30,6 +30,7 @@ class WeeklyReporter:
         search_console_client = SearchConsoleClient(self.settings)
         search_console = search_console_client.summary(week_start.date(), now.date())
         indexed_pages = search_console_client.indexed_page_estimate(week_start.date(), now.date())
+        operations = self._operations_result()
         local_published_count = sum(1 for item in articles if item.get("blogger_status") == "LIVE")
         published_count = max(local_published_count, len(public_posts.get("posts", [])))
         cadence_review = review_cadence(
@@ -56,9 +57,9 @@ class WeeklyReporter:
             "search_console": search_console,
             "indexed_pages": indexed_pages,
             "analytics": GA4Client(self.settings).summary(week_start.date(), now.date()),
-            "operations": self._operations_result(),
+            "operations": operations,
             "cadence_review": cadence_review.to_dict(),
-            "next_actions": self._next_actions(articles, static_pages, public_posts),
+            "next_actions": self._next_actions(articles, static_pages, public_posts, operations),
         }
 
         output_dir = ROOT_DIR / "reports"
@@ -173,11 +174,33 @@ class WeeklyReporter:
             issue_count += len(report.get("issues", []))
         return issue_count
 
-    def _next_actions(self, articles: list[dict], static_pages: list[dict], public_posts: dict | None = None) -> list[str]:
+    def _next_actions(
+        self,
+        articles: list[dict],
+        static_pages: list[dict],
+        public_posts: dict | None = None,
+        operations: dict | None = None,
+    ) -> list[str]:
         actions = []
         public_post_count = len((public_posts or {}).get("posts", []))
         has_local_live_article = any(article.get("blogger_status") == "LIVE" for article in articles)
         has_public_article = has_local_live_article or public_post_count > 0
+        operations = operations or {}
+        preflight_status = operations.get("preflight", {}).get("status")
+        publication_status = operations.get("publication_check", {}).get("status")
+        sitemap_status = operations.get("sitemap_submit", {}).get("status")
+        if preflight_status == "fail":
+            actions.append("Preflight 실패 항목을 먼저 복구하세요. 설정, workflow 안전장치, 알림 설정을 확인해야 합니다.")
+        elif preflight_status == "warn":
+            actions.append("Preflight 주의 항목을 확인하세요. 자동화는 계속되지만 운영 리스크가 있습니다.")
+        if publication_status == "missing_today":
+            actions.append("발행 확인에서 오늘 공개 글을 찾지 못했습니다. daily publish 실행 결과와 Blogger 공개 피드를 확인하세요.")
+        elif publication_status == "error":
+            actions.append("발행 확인 워크플로우 오류를 확인하세요. Blogger 공개 피드 접근 또는 알림 설정 문제가 있을 수 있습니다.")
+        if sitemap_status == "error":
+            actions.append("Search Console sitemap 제출 실패를 확인하세요. OAuth 토큰과 Search Console 권한을 점검해야 합니다.")
+        elif sitemap_status == "not_uploaded":
+            actions.append("Search Console sitemap 제출 결과 파일이 없습니다. publish 실행 후 sitemap 제출 단계가 실행됐는지 확인하세요.")
         if len(static_pages) < 4:
             actions.append("필수 고정 페이지 4개(About, Contact, Privacy Policy, Disclaimer)를 모두 발행하세요.")
         if not articles and not has_public_article:

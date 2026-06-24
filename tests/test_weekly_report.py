@@ -114,6 +114,26 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertNotIn("최소 1개의 글 초안을 생성하세요.", joined)
         self.assertNotIn("공개 글이 생긴 뒤 Search Console 연결을 확인하세요.", joined)
 
+    def test_next_actions_include_operations_failures(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+
+        actions = reporter._next_actions(
+            articles=[],
+            static_pages=[{"title": "About"}, {"title": "Contact"}, {"title": "Privacy Policy"}, {"title": "Disclaimer"}],
+            public_posts={"status": "connected", "posts": [{"title": "Published"}]},
+            operations={
+                "preflight": {"status": "fail"},
+                "publication_check": {"status": "missing_today"},
+                "sitemap_submit": {"status": "error"},
+            },
+        )
+
+        joined = "\n".join(actions)
+        self.assertIn("Preflight 실패", joined)
+        self.assertIn("오늘 공개 글을 찾지 못했습니다", joined)
+        self.assertIn("sitemap 제출 실패", joined)
+
 
 if __name__ == "__main__":
     unittest.main()
