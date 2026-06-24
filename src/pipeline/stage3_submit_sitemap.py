@@ -50,7 +50,11 @@ def main() -> None:
     parser.add_argument("--sitemap-url", help="Defaults to SITE_URL/sitemap.xml")
     parser.add_argument("--site", help="Site profile key, for example: easy_pc_fix_guide")
     args = parser.parse_args()
-    print(run(args.sitemap_url, args.site))
+    path = run(args.sitemap_url, args.site)
+    print(path)
+    result = json.loads(path.read_text(encoding="utf-8"))
+    if result.get("status") != "submitted":
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

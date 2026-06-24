@@ -1,7 +1,12 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
+import tempfile
 import unittest
+from unittest.mock import patch
 
+from src.pipeline import stage3_submit_sitemap
 from src.pipeline.stage3_submit_sitemap import build_message
 
 
@@ -34,6 +39,29 @@ class SearchConsoleSitemapMessageTests(unittest.TestCase):
         self.assertIn("제출 실패", message)
         self.assertIn("permission denied", message)
         self.assertIn("조치 필요", message)
+
+    def test_main_exits_nonzero_when_sitemap_submit_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            report_path = Path(tmpdir) / "sitemap.json"
+            report_path.write_text(json.dumps({"status": "error", "error": "permission denied"}), encoding="utf-8")
+
+            with patch.object(stage3_submit_sitemap, "run", return_value=report_path), patch(
+                "sys.argv", ["stage3_submit_sitemap"]
+            ):
+                with self.assertRaises(SystemExit) as raised:
+                    stage3_submit_sitemap.main()
+
+        self.assertEqual(raised.exception.code, 1)
+
+    def test_main_accepts_successful_sitemap_submit(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            report_path = Path(tmpdir) / "sitemap.json"
+            report_path.write_text(json.dumps({"status": "submitted"}), encoding="utf-8")
+
+            with patch.object(stage3_submit_sitemap, "run", return_value=report_path), patch(
+                "sys.argv", ["stage3_submit_sitemap"]
+            ):
+                stage3_submit_sitemap.main()
 
 
 if __name__ == "__main__":
