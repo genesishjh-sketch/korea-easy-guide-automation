@@ -1,0 +1,190 @@
+/* Korea Easy Guide: Blogger theme overlay.
+   Paste this into Blogger Theme > Customize > Advanced > Add CSS,
+   or keep it in a site-wide HTML gadget inside a <style> tag. */
+
+:root {
+  --keg-page: #f4f8fb;
+  --keg-surface: #ffffff;
+  --keg-ink: #172033;
+  --keg-muted: #526173;
+  --keg-line: #d9e3ea;
+  --keg-blue: #2563eb;
+  --keg-teal: #0f766e;
+  --keg-amber: #b45309;
+}
+
+html,
+body {
+  background:
+    linear-gradient(180deg, #e9f5ff 0, #f4f8fb 340px),
+    var(--keg-page) !important;
+  color: var(--keg-ink) !important;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif !important;
+  letter-spacing: 0 !important;
+}
+
+a {
+  color: var(--keg-blue);
+}
+
+.centered-top,
+.Header,
+.header,
+#header,
+.header-outer,
+.region-inner.header-inner {
+  background: transparent !important;
+}
+
+.Header h1,
+.Header h1 a,
+.header h1,
+.header h1 a,
+#header h1,
+#header h1 a,
+.blog-name,
+.blog-name a {
+  color: var(--keg-ink) !important;
+  font-size: 34px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0 !important;
+  text-decoration: none !important;
+}
+
+.blog-name .widget.Header,
+#Header1 {
+  display: inline-block !important;
+  width: auto !important;
+  max-width: min(92vw, 620px) !important;
+  padding: 16px 22px !important;
+  border: 1px solid rgba(217, 227, 234, 0.8) !important;
+  border-radius: 14px !important;
+  background: rgba(255, 255, 255, 0.88) !important;
+  box-shadow: 0 18px 45px rgba(23, 32, 51, 0.14) !important;
+}
+
+.Header h1::after {
+  content: "Practical Korea travel and living guides for foreign visitors";
+  display: block;
+  margin-top: 8px;
+  color: var(--keg-muted);
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.Header p,
+.Header .description,
+#Header1 p,
+.blog-name > p {
+  display: none !important;
+}
+
+.content-outer,
+.content-inner,
+.main-outer,
+.main-inner,
+.blog-posts,
+.post-outer,
+.post,
+.post-body {
+  background: transparent !important;
+}
+
+.post-outer,
+.widget.Blog .post,
+.blog-posts .post-outer {
+  margin-bottom: 28px !important;
+}
+
+.post,
+.post-outer,
+.widget.Blog .post {
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.post-title,
+.post-title a,
+h1.post-title,
+h2.post-title {
+  color: var(--keg-ink) !important;
+  font-size: 34px !important;
+  line-height: 1.18 !important;
+  letter-spacing: 0 !important;
+  text-decoration: none !important;
+}
+
+.post-header,
+.post-footer,
+.post-labels,
+.post-timestamp,
+.byline {
+  color: var(--keg-muted) !important;
+}
+
+.post-body {
+  color: var(--keg-ink) !important;
+  font-size: 17px !important;
+  line-height: 1.72 !important;
+}
+
+.sidebar,
+.sidebar-container,
+aside,
+[role="complementary"] {
+  color: var(--keg-ink) !important;
+}
+
+.widget {
+  border: 1px solid var(--keg-line) !important;
+  border-radius: 16px !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  box-shadow: 0 16px 40px rgba(23, 32, 51, 0.06) !important;
+}
+
+.widget h2,
+.widget-title,
+.sidebar h2 {
+  color: var(--keg-ink) !important;
+  font-size: 17px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0 !important;
+}
+
+.widget a {
+  color: var(--keg-blue) !important;
+  font-weight: 700 !important;
+  text-decoration: none !important;
+}
+
+.blog-pager a,
+.home-link,
+.feed-links a {
+  border-radius: 999px !important;
+  background: var(--keg-teal) !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  padding: 10px 16px !important;
+  text-decoration: none !important;
+}
+
+@media (max-width: 760px) {
+  .Header h1,
+  .Header h1 a,
+  .blog-name,
+  .blog-name a,
+  .post-title,
+  .post-title a,
+  h1.post-title,
+  h2.post-title {
+    font-size: 27px !important;
+  }
+
+  .Header h1::after,
+  .blog-name::after {
+    font-size: 14px;
+  }
+}

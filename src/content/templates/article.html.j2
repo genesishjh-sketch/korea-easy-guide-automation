@@ -1,9 +1,148 @@
-<article>
-  <figure>
-    <img src="{{ image.url or image.path }}" alt="{{ image.alt }}" style="width:100%;height:auto;">
+<style>
+  .keg-post {
+    --keg-ink: #172033;
+    --keg-muted: #526173;
+    --keg-line: #d9e3ea;
+    --keg-blue: #2563eb;
+    --keg-teal: #0f766e;
+    --keg-amber: #b45309;
+    --keg-soft: #f6fafc;
+    color: var(--keg-ink);
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 17px;
+    line-height: 1.72;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+  .keg-post * { box-sizing: border-box; }
+  .keg-post figure { margin: 0 0 28px; }
+  .keg-post__hero {
+    overflow: hidden;
+    border: 1px solid var(--keg-line);
+    border-radius: 18px;
+    background: #f8fbfd;
+    box-shadow: 0 18px 45px rgba(23, 32, 51, 0.08);
+  }
+  .keg-post__hero img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .keg-post__lead {
+    margin: 0 0 28px;
+    padding: 20px 22px;
+    border-left: 5px solid var(--keg-teal);
+    border-radius: 0 14px 14px 0;
+    background: #eefaf7;
+    color: #1d3b43;
+    font-size: 18px;
+  }
+  .keg-post h2 {
+    margin: 40px 0 16px;
+    padding-top: 8px;
+    border-top: 1px solid var(--keg-line);
+    color: var(--keg-ink);
+    font-size: 26px;
+    line-height: 1.25;
+  }
+  .keg-post h3 {
+    margin: 24px 0 8px;
+    color: #20304a;
+    font-size: 20px;
+    line-height: 1.35;
+  }
+  .keg-post p { margin: 0 0 18px; }
+  .keg-post a {
+    color: var(--keg-blue);
+    font-weight: 700;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(37, 99, 235, 0.32);
+  }
+  .keg-post a:hover { border-bottom-color: var(--keg-blue); }
+  .keg-post table {
+    width: 100%;
+    margin: 14px 0 26px;
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: hidden;
+    border: 1px solid var(--keg-line);
+    border-radius: 14px;
+    background: #fff;
+  }
+  .keg-post th,
+  .keg-post td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--keg-line);
+    text-align: left;
+    vertical-align: top;
+  }
+  .keg-post th {
+    background: #eaf3ff;
+    color: #17335f;
+    font-size: 14px;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+  .keg-post tr:last-child td { border-bottom: 0; }
+  .keg-post ol,
+  .keg-post ul {
+    margin: 0 0 26px;
+    padding: 0;
+    list-style: none;
+  }
+  .keg-post li {
+    position: relative;
+    margin: 0 0 12px;
+    padding: 15px 18px 15px 46px;
+    border: 1px solid var(--keg-line);
+    border-radius: 14px;
+    background: #fff;
+  }
+  .keg-post ol { counter-reset: keg-step; }
+  .keg-post ol li { counter-increment: keg-step; }
+  .keg-post ol li::before {
+    content: counter(keg-step);
+    position: absolute;
+    left: 15px;
+    top: 15px;
+    display: grid;
+    width: 22px;
+    height: 22px;
+    place-items: center;
+    border-radius: 999px;
+    background: var(--keg-teal);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .keg-post ul li::before {
+    content: "";
+    position: absolute;
+    left: 20px;
+    top: 23px;
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: var(--keg-amber);
+  }
+  .keg-post__sources li { padding-left: 18px; }
+  .keg-post__sources li::before { display: none; }
+  @media (max-width: 640px) {
+    .keg-post { font-size: 16px; }
+    .keg-post__lead { padding: 16px 18px; font-size: 17px; }
+    .keg-post h2 { font-size: 23px; }
+    .keg-post table { display: block; overflow-x: auto; }
+    .keg-post th,
+    .keg-post td { min-width: 180px; }
+  }
+</style>
+
+<article class="keg-post">
+  <figure class="keg-post__hero">
+    <img src="{{ image.url or image.path }}" alt="{{ image.alt }}" loading="lazy">
   </figure>
 
-  <p>{{ intro }}</p>
+  <p class="keg-post__lead">{{ intro }}</p>
 
   <h2>Quick Answer</h2>
   <table>
@@ -47,7 +186,7 @@
   {% endfor %}
 
   <h2>Sources to Check Before You Go</h2>
-  <ul>
+  <ul class="keg-post__sources">
     {% for source in sources %}
     <li><a href="{{ source.url }}">{{ source.name }}</a></li>
     {% endfor %}
