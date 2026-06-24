@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+import os
 from pathlib import Path
 
 from src.images.cover import detect_scene
@@ -106,9 +107,14 @@ def build_article_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
 
 
 def build_windows_image_plan(candidate: TopicCandidate, title: str) -> ArticleImagePlan:
+    use_local_svg = (
+        os.getenv("IMAGE_ASSET_MODE", "").lower() == "local_svg"
+        or os.getenv("APP_ENV", "").lower() == "production"
+    )
+    extension = "svg" if use_local_svg else "jpg"
     hero = PlannedImage(
         role="hero",
-        filename="ai-hero.jpg",
+        filename=f"ai-hero.{extension}",
         alt=f"{title} beginner-friendly Windows help visual",
         caption="A calm beginner-friendly visual for solving this Windows problem safely.",
         prompt=(
@@ -120,7 +126,7 @@ def build_windows_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
     )
     inline = PlannedImage(
         role="inline",
-        filename="ai-inline-1.jpg",
+        filename=f"ai-inline-1.{extension}",
         alt=f"Safe step-by-step troubleshooting setup for {candidate.keyword}",
         caption="Work through the safe checks first before trying advanced repair steps.",
         prompt=(
@@ -134,7 +140,7 @@ def build_windows_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
         strict=True,
         notes=[
             "Do not call paid image APIs in the Python pipeline.",
-            "Generate these assets manually with Codex image generation, then save them with the exact filenames.",
+            "Generate these assets manually with Codex image generation, or use local SVG fallback in CI.",
             "Do not generate fake Windows UI or readable error screens.",
             "Publishing should stop when required image files are missing.",
         ],
