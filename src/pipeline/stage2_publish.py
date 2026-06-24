@@ -46,9 +46,7 @@ def rewrite_local_image_paths(html: str, article_dir: Path) -> str:
         if src.startswith("assets/"):
             figure = img.find_parent("figure")
             if figure:
-                note = soup.new_tag("p")
-                note.string = "Image placeholder: a public cover image will be attached after image hosting is configured."
-                figure.replace_with(note)
+                figure.decompose()
             else:
                 img.decompose()
     return str(soup)
