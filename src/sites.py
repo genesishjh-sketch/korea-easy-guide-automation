@@ -16,6 +16,7 @@ class SiteProfile:
     seed_file: Path
     reddit_user_agent: str
     reddit_subreddits: list[str]
+    automation_start_date: str = "2026-06-24"
     default_blogger_blog_id: str = ""
     default_search_console_site_url: str = ""
     default_ga4_measurement_id: str = ""
@@ -32,6 +33,7 @@ SITE_PROFILES = {
         seed_file=ROOT_DIR / "data" / "seeds" / "topic_seeds.json",
         reddit_user_agent="korea-easy-guide/0.1",
         reddit_subreddits=["koreatravel", "korea", "Living_in_Korea", "travel", "solotravel"],
+        automation_start_date="2026-06-24",
         default_blogger_blog_id="288143591612645486",
         default_search_console_site_url="https://koreaeasyguide.blogspot.com/",
         output_dir=ROOT_DIR / "data" / "generated" / "korea_easy_guide",
@@ -45,6 +47,7 @@ SITE_PROFILES = {
         seed_file=ROOT_DIR / "data" / "seeds" / "windows_topic_seeds.json",
         reddit_user_agent="easy-pc-fix-guide/0.1",
         reddit_subreddits=["WindowsHelp", "Windows11", "techsupport", "pchelp"],
+        automation_start_date="2026-06-24",
         default_search_console_site_url="https://easypcfixguide.blogspot.com/",
         output_dir=ROOT_DIR / "data" / "generated" / "easy_pc_fix_guide",
     ),

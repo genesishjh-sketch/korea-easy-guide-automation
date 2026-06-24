@@ -22,6 +22,7 @@ class Settings:
     content_domain: str
     seed_file: str
     generated_output_dir: str
+    automation_start_date: str
     reddit_subreddits: list[str]
     reddit_client_id: str
     reddit_client_secret: str
@@ -68,6 +69,7 @@ def load_settings(site_key: str | None = None) -> Settings:
         content_domain=site_getenv("CONTENT_DOMAIN", profile.content_domain),
         seed_file=site_getenv("SEED_FILE", str(profile.seed_file)),
         generated_output_dir=site_getenv("GENERATED_OUTPUT_DIR", str(profile.output_dir)),
+        automation_start_date=site_getenv("AUTOMATION_START_DATE", profile.automation_start_date),
         reddit_subreddits=[
             value.strip()
             for value in site_getenv("REDDIT_SUBREDDITS", ",".join(profile.reddit_subreddits)).split(",")

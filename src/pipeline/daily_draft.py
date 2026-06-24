@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import argparse
+from datetime import date
+from datetime import datetime
 import json
 from pathlib import Path
 import traceback
@@ -35,11 +37,24 @@ def choose_seed(explicit_seed: str | None = None, site: str | None = None) -> st
     if not seed_path.is_absolute():
         seed_path = ROOT_DIR / seed_path
     seeds = json.loads(seed_path.read_text(encoding="utf-8"))
+    if settings.app_env.lower() == "production":
+        return choose_seed_for_date(seeds, settings.automation_start_date, date.today())
     used = used_keywords(site)
     for seed in seeds:
         if seed.lower() not in used:
             return seed
     return seeds[0]
+
+
+def choose_seed_for_date(seeds: list[str], start_date: str, today: date) -> str:
+    if not seeds:
+        raise ValueError("Seed file must contain at least one topic seed.")
+    try:
+        start = datetime.strptime(start_date, "%Y-%m-%d").date()
+    except ValueError:
+        start = today
+    index = max(0, (today - start).days) % len(seeds)
+    return seeds[index]
 
 
 def run(seed: str | None = None, site: str | None = None, publish_mode: str = "draft") -> dict[str, str]:
