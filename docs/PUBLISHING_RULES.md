@@ -29,6 +29,7 @@
 - Reddit OAuth credentials are recommended for stable question discovery. If Reddit public JSON is blocked, the pipeline may use fallback reader questions, and preflight should show a warning rather than hiding the reduced data quality.
 - Research reports and weekly reports must separate Reddit OAuth signals, Reddit public JSON signals, and Reddit fallback signals so collection quality problems are visible.
 - If weekly reports show public JSON signals without OAuth signals, treat it as a stability warning because public Reddit JSON can be blocked with 403.
+- Run `python -m src.pipeline.stage0_reddit_health --site easy_pc_fix_guide --notify` to verify whether Reddit OAuth can collect live Reddit signals and send the result to Posting Bot.
 
 ## Hades Engineer Quality Gate
 
