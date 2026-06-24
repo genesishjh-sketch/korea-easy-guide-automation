@@ -56,7 +56,7 @@ def run(seed: str | None = None, site: str | None = None, publish_mode: str = "d
         notify_daily_completion(result)
         return result
     except Exception as exc:
-        notify_daily_failure(selected_seed, exc)
+        notify_daily_failure(selected_seed, exc, site)
         raise
 
 
@@ -65,8 +65,8 @@ def notify_daily_completion(result: dict[str, str]) -> None:
     NotificationClient(settings).send(build_daily_success_message(result))
 
 
-def notify_daily_failure(seed: str, exc: Exception) -> None:
-    settings = load_settings()
+def notify_daily_failure(seed: str, exc: Exception, site: str | None = None) -> None:
+    settings = load_settings(site)
     error = "".join(traceback.format_exception_only(type(exc), exc)).strip()
     NotificationClient(settings).send(
         "\n".join(
