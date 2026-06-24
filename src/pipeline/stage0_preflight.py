@@ -31,6 +31,7 @@ def run(site: str | None = None) -> Path:
         check_validate_workflow(),
         check_publication_check_workflow(),
         check_weekly_report_workflow(),
+        check_critical_notifications(),
         check_public_feed(settings.site_url),
         check_local_google_files(settings.google_oauth_client_secret_file, settings.google_oauth_token_file),
         check_telegram_settings(settings.notification_provider, settings.telegram_bot_token, settings.telegram_chat_id),
@@ -163,6 +164,32 @@ def check_weekly_report_workflow() -> PreflightCheck:
     if missing:
         return PreflightCheck("weekly_report_workflow", "fail", f"Missing weekly report safeguards: {', '.join(missing)}")
     return PreflightCheck("weekly_report_workflow", "pass", "Weekly report workflow includes Search Console, Analytics, Telegram, and artifact upload wiring.")
+
+
+def check_critical_notifications() -> PreflightCheck:
+    required = {
+        "daily_draft.py": "NotificationClient(settings).send_required(build_daily_success_message(result))",
+        "stage3_submit_sitemap.py": "NotificationClient(settings).send_required(build_message(settings.site_name, result))",
+        "stage4_publication_check.py": "NotificationClient(settings).send_required(build_message(result))",
+        "stage3_weekly_report.py": "NotificationClient(settings).send_required(path.read_text(encoding=\"utf-8\"))",
+        "stage3_cadence_alert.py": "NotificationClient(settings).send_required(message)",
+    }
+    missing = []
+    pipeline_dir = ROOT_DIR / "src" / "pipeline"
+    for filename, snippet in required.items():
+        path = pipeline_dir / filename
+        if not path.exists():
+            missing.append(filename)
+            continue
+        if snippet not in path.read_text(encoding="utf-8"):
+            missing.append(filename)
+    if missing:
+        return PreflightCheck(
+            "critical_notifications",
+            "fail",
+            f"Critical Posting Bot notifications are not enforced in: {', '.join(missing)}",
+        )
+    return PreflightCheck("critical_notifications", "pass", "Critical Posting Bot notifications fail loudly if Telegram delivery fails.")
 
 
 def check_public_feed(site_url: str) -> PreflightCheck:

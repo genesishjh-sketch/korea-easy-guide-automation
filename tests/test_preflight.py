@@ -34,6 +34,12 @@ class PreflightTests(unittest.TestCase):
         self.assertEqual(check.status, "pass")
         self.assertIn("Search Console", check.message)
 
+    def test_critical_notifications_are_required(self) -> None:
+        check = stage0_preflight.check_critical_notifications()
+
+        self.assertEqual(check.status, "pass")
+        self.assertIn("fail loudly", check.message)
+
     def test_launch_queue_passes_with_seven_topics_from_main_seed_file(self) -> None:
         with patch.object(stage0_preflight, "load_settings") as load_settings:
             load_settings.return_value.content_domain = "windows_help"
