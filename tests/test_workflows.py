@@ -44,6 +44,18 @@ class WorkflowSafetyTests(unittest.TestCase):
         self.assertIn("python -m src.pipeline.stage0_preflight --site easy_pc_fix_guide", workflow)
         self.assertIn("reports/easy_pc_fix_guide-preflight.json", workflow)
 
+    def test_easy_pc_validate_runs_when_any_easy_pc_workflow_changes(self) -> None:
+        workflow = (ROOT_DIR / ".github" / "workflows" / "easy-pc-validate-smoke.yml").read_text(encoding="utf-8")
+
+        for workflow_path in [
+            ".github/workflows/easy-pc-daily.yml",
+            ".github/workflows/easy-pc-publication-check.yml",
+            ".github/workflows/easy-pc-weekly-report.yml",
+            ".github/workflows/easy-pc-cadence-alert.yml",
+            ".github/workflows/easy-pc-validate-smoke.yml",
+        ]:
+            self.assertIn(f'"{workflow_path}"', workflow)
+
     def test_easy_pc_publication_check_uploads_report(self) -> None:
         workflow = (ROOT_DIR / ".github" / "workflows" / "easy-pc-publication-check.yml").read_text(encoding="utf-8")
 

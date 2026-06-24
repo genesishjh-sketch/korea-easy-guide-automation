@@ -123,13 +123,17 @@ def check_validate_workflow() -> PreflightCheck:
         '"src/**"',
         '"tests/**"',
         '".github/workflows/easy-pc-daily.yml"',
+        '".github/workflows/easy-pc-publication-check.yml"',
+        '".github/workflows/easy-pc-weekly-report.yml"',
+        '".github/workflows/easy-pc-cadence-alert.yml"',
+        '".github/workflows/easy-pc-validate-smoke.yml"',
         "Run safety regression tests",
         "python -m src.pipeline.daily_draft --site easy_pc_fix_guide --mode validate",
     ]
     missing = [item for item in required if item not in text]
     if missing:
         return PreflightCheck("validate_workflow", "fail", f"Missing validate workflow coverage: {', '.join(missing)}")
-    return PreflightCheck("validate_workflow", "pass", "Validate workflow covers source, tests, and daily workflow changes.")
+    return PreflightCheck("validate_workflow", "pass", "Validate workflow covers source, tests, and Easy PC workflow changes.")
 
 
 def check_publication_check_workflow() -> PreflightCheck:
