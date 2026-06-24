@@ -1,0 +1,58 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+import tempfile
+import unittest
+from unittest.mock import patch
+
+from src.content.topic_scoring import build_candidate
+from src.images.ai_plan import build_article_image_plan
+from src.pipeline import stage1_generate
+
+
+class ImagePlanTests(unittest.TestCase):
+    def test_korea_production_uses_local_svg_fallback_filenames(self) -> None:
+        candidate = build_candidate("incheon airport to seoul", [], "korea_travel")
+
+        with patch.dict("os.environ", {"APP_ENV": "production"}, clear=False):
+            plan = build_article_image_plan(candidate, "How to Get from Incheon Airport to Seoul")
+
+        self.assertEqual([image.filename for image in plan.images], ["ai-hero.svg", "ai-inline-1.svg"])
+        self.assertTrue(plan.strict)
+
+    def test_korea_stage1_creates_two_local_svg_assets_in_production(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            generated_dir = Path(tmpdir) / "generated"
+            seed_file = Path(tmpdir) / "seeds.json"
+            seed_file.write_text(json.dumps(["incheon airport to seoul"]), encoding="utf-8")
+            with patch.dict("os.environ", {"APP_ENV": "production"}, clear=False), patch.object(
+                stage1_generate, "load_settings"
+            ) as load_settings, patch.object(stage1_generate.RedditCollector, "collect", return_value=[]), patch.object(
+                stage1_generate.GoogleSuggestCollector, "collect", return_value=[]
+            ):
+                load_settings.return_value.site_key = "korea_easy_guide"
+                load_settings.return_value.site_name = "Korea Easy Guide"
+                load_settings.return_value.site_url = "https://koreaeasyguide.blogspot.com"
+                load_settings.return_value.default_author = "Guide Studio"
+                load_settings.return_value.content_domain = "korea_travel"
+                load_settings.return_value.generated_output_dir = str(generated_dir)
+                load_settings.return_value.seed_file = str(seed_file)
+                load_settings.return_value.reddit_user_agent = "test"
+                load_settings.return_value.reddit_client_id = ""
+                load_settings.return_value.reddit_client_secret = ""
+                load_settings.return_value.reddit_subreddits = ["travel"]
+
+                article_dir = stage1_generate.run(site="korea_easy_guide")
+
+            image_plan = json.loads((article_dir / "image_plan.json").read_text(encoding="utf-8"))
+            hero_exists = (article_dir / "assets" / "ai-hero.svg").exists()
+            inline_exists = (article_dir / "assets" / "ai-inline-1.svg").exists()
+
+        self.assertEqual([image["url"] for image in image_plan["images"]], ["assets/ai-hero.svg", "assets/ai-inline-1.svg"])
+        self.assertTrue(hero_exists)
+        self.assertTrue(inline_exists)
+
+
+if __name__ == "__main__":
+    unittest.main()

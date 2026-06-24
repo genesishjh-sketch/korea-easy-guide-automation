@@ -7,9 +7,9 @@ This project should publish posts at or above the strengthened T-money article q
 - 1,400+ English words.
 - Clear practical intent for foreign visitors in Korea.
 - Specific topic depth, not generic Korea travel filler.
-- Two Codex-generated raster images:
-  - `assets/ai-hero.jpg`
-  - `assets/ai-inline-1.jpg`
+- Two required images:
+  - preferred: `assets/ai-hero.jpg` and `assets/ai-inline-1.jpg`
+  - zero-cost CI fallback: `assets/ai-hero.svg` and `assets/ai-inline-1.svg`
 - Four or more official/platform links in the article.
 - App/service articles must include direct app-store, official service, booking, or operator links that help the reader take action.
 - Five or more FAQ questions.

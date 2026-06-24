@@ -43,8 +43,8 @@ Required checks:
   - FAQ
   - Official Links to Check
 - At least two images:
-  - `assets/ai-hero.jpg`
-  - `assets/ai-inline-1.jpg`
+  - `assets/ai-hero.jpg` or `assets/ai-hero.svg`
+  - `assets/ai-inline-1.jpg` or `assets/ai-inline-1.svg`
 - At least four official or platform source links in the article.
 - For app, transport, ticket, SIM/eSIM, taxi, map, delivery, shopping, and booking posts, include useful action links such as official app-store pages, official booking pages, operator pages, and government/tourism pages.
 - At least five FAQ questions.
@@ -69,7 +69,7 @@ and issue count == 0
 - Do not call paid image APIs from the Python pipeline.
 - Each generated post must include `image_plan.json`.
 - Codex-generated raster images are the preferred image source.
-- Local SVG covers are fallback assets only and should not be used for public posts.
+- Local SVG assets are allowed as zero-cost fallback assets for unattended automation.
 - If required image files are missing, Blogger publishing must stop.
 
 ## Repeat-Until-Quality Rule
@@ -94,4 +94,4 @@ Hard stop:
 
 ## Current Practical Constraint
 
-Under the zero-additional-cost policy, GitHub Actions can run the Python pipeline, but it cannot independently create Codex images. A fully unattended public publish requires the Codex image-generation step to run in a Codex-capable environment. Until that is wired as an automation, the quality gate intentionally blocks posts with missing required images.
+Under the zero-additional-cost policy, GitHub Actions can run the Python pipeline, but it cannot independently create Codex raster images. The production pipeline therefore creates local SVG fallback assets so unattended runs can still satisfy the image gate. Replace SVG fallback assets with Codex-generated JPG images when visual quality is being upgraded manually or through a Codex-capable automation.

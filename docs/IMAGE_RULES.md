@@ -1,6 +1,6 @@
 # Image Rules
 
-Korea Easy Guide uses AI-generated raster images for published posts. Local SVG covers are fallback assets only.
+Korea Easy Guide uses AI-generated raster images for polished public posts. Local SVG assets are zero-cost fallback assets for unattended CI/production automation when Codex image generation is not available inside the Python pipeline.
 
 ## Default Post Image Structure
 
@@ -17,7 +17,7 @@ Each published post should include:
 - Clean Korea travel context: airport, station, taxi pickup, street navigation, cafe, store, hotel, or transit area.
 - Practical and trustworthy, not dramatic or cinematic.
 - Horizontal 16:9 composition.
-- Save as compressed JPG around 1200x675 before embedding in Blogger.
+- Save polished Codex images as compressed JPG around 1200x675 before embedding in Blogger. Automated CI fallback assets may use SVG with the same logical filenames.
 
 ## Prompt Requirements
 
@@ -64,11 +64,11 @@ Avoid: fake official UI, QR codes, barcodes, clutter, cartoon/vector art, dark c
 1. Generate with Codex image generation, not the OpenAI Images API pipeline.
 2. Copy the selected image into the article `assets/` directory.
 3. Keep the original generated image in the Codex generated images folder.
-4. Convert to JPG:
+4. Convert polished generated images to JPG:
 
 ```bash
 sips -s format jpeg -s formatOptions 78 -z 675 1200 source.png --out ai-hero.jpg
 ```
 
-5. Reference it in article HTML as `assets/ai-hero.jpg` or `assets/ai-inline-1.jpg`.
+5. Reference it in article HTML as `assets/ai-hero.jpg` / `assets/ai-inline-1.jpg`, or as `assets/ai-hero.svg` / `assets/ai-inline-1.svg` when using the zero-cost local fallback.
 6. Use `stage2_refresh_post` to update the existing Blogger post.

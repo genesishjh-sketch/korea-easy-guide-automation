@@ -12,6 +12,7 @@ from src.content.generator import EnglishArticleGenerator
 from src.content.topic_scoring import build_candidate
 from src.content.windows_generator import WindowsArticleGenerator
 from src.images.ai_plan import build_article_image_plan
+from src.images.local_svg import create_korea_svg_assets
 from src.images.local_svg import create_windows_svg_assets
 from src.storage.article_store import ArticleStore
 
@@ -63,8 +64,11 @@ def run(seed: str | None = None, site: str | None = None) -> Path:
         json.dumps(image_plan.to_dict(), ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
-    if settings.content_domain == "windows_help" and image_plan.images[0].filename.endswith(".svg"):
-        create_windows_svg_assets(output_dir, article.title, keyword)
+    if image_plan.images[0].filename.endswith(".svg"):
+        if settings.content_domain == "windows_help":
+            create_windows_svg_assets(output_dir, article.title, keyword)
+        else:
+            create_korea_svg_assets(output_dir, article.title, keyword)
     (output_dir / "research_report.json").write_text(
         json.dumps(build_research_report(settings, keyword, article, signals), ensure_ascii=False, indent=2),
         encoding="utf-8",

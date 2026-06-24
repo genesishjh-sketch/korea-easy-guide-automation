@@ -3,6 +3,17 @@ from __future__ import annotations
 from pathlib import Path
 from xml.sax.saxutils import escape
 
+from src.images.cover import detect_scene
+from src.images.cover import render_cover
+
+
+def create_korea_svg_assets(article_dir: Path, title: str, keyword: str) -> None:
+    assets_dir = article_dir / "assets"
+    assets_dir.mkdir(parents=True, exist_ok=True)
+    scene = detect_scene(f"{keyword} {title}")
+    (assets_dir / "ai-hero.svg").write_text(render_cover(title, scene), encoding="utf-8")
+    (assets_dir / "ai-inline-1.svg").write_text(_korea_inline_svg(keyword, scene), encoding="utf-8")
+
 
 def create_windows_svg_assets(article_dir: Path, title: str, keyword: str) -> None:
     assets_dir = article_dir / "assets"
@@ -78,5 +89,62 @@ def _inline_svg(keyword: str) -> str:
       <text x="356" y="556" fill="#7f1d1d">Advanced only if needed</text>
     </g>
     <text x="0" y="690" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="700" fill="#526173">Start with reversible steps. Stop if files, drives, BitLocker, or repeated blue screens are involved.</text>
+  </g>
+</svg>"""
+
+
+def _korea_inline_svg(keyword: str, scene: str) -> str:
+    safe_keyword = escape(keyword.title())
+    title = {
+        "airport": "Compare Your Transfer Options",
+        "ktx": "Check the Train Details First",
+        "esim": "Set Up Mobile Data Before Moving",
+        "taxi": "Confirm Pickup and Destination",
+        "map": "Check Route Details Before Walking",
+        "transport_card": "Buy, Recharge, Tap",
+        "shopping": "Check Payment and App Requirements",
+    }.get(scene, "Follow the Practical Steps")
+    steps = {
+        "airport": ("Airport", "Train / Bus / Taxi", "Hotel Area"),
+        "ktx": ("Station", "Ticket Details", "Platform"),
+        "esim": ("QR / App", "Mobile Data", "Maps Ready"),
+        "taxi": ("Pickup Point", "Car Info", "Destination"),
+        "map": ("Search", "Compare Routes", "Move Safely"),
+        "transport_card": ("Buy Card", "Recharge", "Tap Gate"),
+        "shopping": ("Open App", "Check Payment", "Confirm Address"),
+    }.get(scene, ("Start", "Check", "Go"))
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 788" role="img" aria-label="{escape(title)} for {safe_keyword}">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#f8fbff"/>
+      <stop offset="0.55" stop-color="#fffaf2"/>
+      <stop offset="1" stop-color="#eef9f5"/>
+    </linearGradient>
+    <filter id="shadow" x="-18%" y="-18%" width="136%" height="136%">
+      <feDropShadow dx="0" dy="20" stdDeviation="24" flood-color="#172033" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+  <rect width="1400" height="788" fill="url(#bg)"/>
+  <g transform="translate(96 88)">
+    <text x="0" y="54" font-family="Arial, Helvetica, sans-serif" font-size="44" font-weight="800" fill="#172033">{escape(title)}</text>
+    <text x="0" y="98" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#526173">{safe_keyword}</text>
+    <g filter="url(#shadow)" font-family="Arial, Helvetica, sans-serif" font-weight="800">
+      <rect x="0" y="170" width="330" height="210" rx="28" fill="#ffffff" stroke="#d8e4ec"/>
+      <circle cx="68" cy="245" r="30" fill="#dbeafe"/>
+      <text x="58" y="256" font-size="31" fill="#2563eb">1</text>
+      <text x="42" y="326" font-size="30" fill="#172033">{escape(steps[0])}</text>
+      <path d="M354 275h120" stroke="#9ca3af" stroke-width="12" stroke-linecap="round"/>
+      <rect x="500" y="170" width="330" height="210" rx="28" fill="#ffffff" stroke="#d8e4ec"/>
+      <circle cx="568" cy="245" r="30" fill="#dcfce7"/>
+      <text x="558" y="256" font-size="31" fill="#0f766e">2</text>
+      <text x="542" y="326" font-size="30" fill="#172033">{escape(steps[1])}</text>
+      <path d="M854 275h120" stroke="#9ca3af" stroke-width="12" stroke-linecap="round"/>
+      <rect x="1000" y="170" width="330" height="210" rx="28" fill="#ffffff" stroke="#d8e4ec"/>
+      <circle cx="1068" cy="245" r="30" fill="#fef3c7"/>
+      <text x="1058" y="256" font-size="31" fill="#ca8a04">3</text>
+      <text x="1042" y="326" font-size="30" fill="#172033">{escape(steps[2])}</text>
+    </g>
+    <rect x="0" y="480" width="1228" height="104" rx="28" fill="#ffffff" stroke="#d8e4ec"/>
+    <text x="42" y="544" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#526173">Use this as a quick visual checklist before relying on apps, transport, tickets, or local services in Korea.</text>
   </g>
 </svg>"""

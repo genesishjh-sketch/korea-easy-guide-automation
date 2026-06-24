@@ -63,6 +63,11 @@ def build_article_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
     }:
         return build_windows_image_plan(candidate, title)
 
+    use_local_svg = (
+        os.getenv("IMAGE_ASSET_MODE", "").lower() == "local_svg"
+        or os.getenv("APP_ENV", "").lower() == "production"
+    )
+    extension = "svg" if use_local_svg else "jpg"
     scene = detect_scene(f"{candidate.keyword} {title}")
     visual_subject = _visual_subject(scene, candidate.keyword)
     style = (
@@ -73,7 +78,7 @@ def build_article_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
 
     hero = PlannedImage(
         role="hero",
-        filename="ai-hero.jpg",
+        filename=f"ai-hero.{extension}",
         alt=f"{title} visual guide for foreign visitors in Korea",
         caption="A practical visual guide for planning this part of your Korea trip.",
         prompt=(
@@ -85,7 +90,7 @@ def build_article_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
     )
     inline = PlannedImage(
         role="inline",
-        filename="ai-inline-1.jpg",
+        filename=f"ai-inline-1.{extension}",
         alt=f"Step-by-step example for {candidate.keyword} in Korea",
         caption=_inline_caption(scene),
         prompt=(
@@ -101,7 +106,7 @@ def build_article_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
         strict=True,
         notes=[
             "Do not call paid image APIs in the Python pipeline.",
-            "Generate these assets manually with Codex image generation, then save them with the exact filenames.",
+            "Generate these assets manually with Codex image generation, or use local SVG fallback in CI.",
             "Publishing should stop when required image files are missing.",
         ],
         images=[hero, inline],
