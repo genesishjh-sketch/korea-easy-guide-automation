@@ -18,6 +18,7 @@ on:
       - ".github/workflows/easy-pc-publication-check.yml"
       - ".github/workflows/easy-pc-weekly-report.yml"
       - ".github/workflows/easy-pc-cadence-alert.yml"
+      - ".github/workflows/easy-pc-reddit-health.yml"
       - ".github/workflows/easy-pc-validate-smoke.yml"
 
 jobs:
