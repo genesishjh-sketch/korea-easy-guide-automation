@@ -39,7 +39,10 @@ jobs:
       - name: Generate and send weekly report
         run: python -m src.pipeline.stage3_weekly_report --site easy_pc_fix_guide
       - name: Upload weekly report
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: easy-pc-fix-weekly-report
-          path: reports/easy_pc_fix_guide-weekly-*
+          path: |
+            reports/easy_pc_fix_guide-weekly-*
+            reports/easy_pc_fix_guide-weekly-failure.json
