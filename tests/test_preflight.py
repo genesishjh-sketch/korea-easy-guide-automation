@@ -10,6 +10,26 @@ from src.pipeline import stage0_preflight
 
 
 class PreflightTests(unittest.TestCase):
+    def test_python_runtime_passes_on_supported_version(self) -> None:
+        with patch.object(stage0_preflight.sys, "version_info") as version_info:
+            version_info.major = 3
+            version_info.minor = 11
+            version_info.micro = 9
+            check = stage0_preflight.check_python_runtime()
+
+        self.assertEqual(check.status, "pass")
+        self.assertIn("Python 3.11.9", check.message)
+
+    def test_python_runtime_warns_below_actions_version(self) -> None:
+        with patch.object(stage0_preflight.sys, "version_info") as version_info:
+            version_info.major = 3
+            version_info.minor = 9
+            version_info.micro = 6
+            check = stage0_preflight.check_python_runtime()
+
+        self.assertEqual(check.status, "warn")
+        self.assertIn("use Python 3.11", check.message)
+
     def test_daily_workflow_safeguards_pass(self) -> None:
         check = stage0_preflight.check_daily_workflow()
 

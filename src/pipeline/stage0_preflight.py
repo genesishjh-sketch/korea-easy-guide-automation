@@ -5,6 +5,7 @@ from dataclasses import asdict
 from dataclasses import dataclass
 import json
 from pathlib import Path
+import sys
 
 from src.config import ROOT_DIR
 from src.config import load_settings
@@ -24,6 +25,7 @@ class PreflightCheck:
 def run(site: str | None = None) -> Path:
     settings = load_settings(site)
     checks = [
+        check_python_runtime(),
         check_site_settings(site),
         check_seed_file(site),
         check_launch_queue(site),
@@ -94,6 +96,18 @@ def check_launch_queue(site: str | None = None) -> PreflightCheck:
     if missing:
         return PreflightCheck("launch_queue", "fail", f"Launch topics missing from main seed file: {', '.join(missing)}")
     return PreflightCheck("launch_queue", "pass", f"{len(launch_seeds)} launch topics are ready before the long-term queue.")
+
+
+def check_python_runtime() -> PreflightCheck:
+    version = sys.version_info
+    current = f"{version.major}.{version.minor}.{version.micro}"
+    if (version.major, version.minor) < (3, 11):
+        return PreflightCheck(
+            "python_runtime",
+            "warn",
+            f"Current Python is {current}; use Python 3.11 to match GitHub Actions and avoid dependency drift.",
+        )
+    return PreflightCheck("python_runtime", "pass", f"Python {current} matches the automation runtime policy.")
 
 
 def check_daily_workflow() -> PreflightCheck:

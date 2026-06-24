@@ -33,11 +33,13 @@ The pipeline can:
 
 ```bash
 cd korea_blog_automation
-python3 -m venv .venv
+python3.11 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
 ```
+
+Use Python 3.11 for local runs. GitHub Actions is also pinned to Python 3.11, so keeping the local virtualenv on the same runtime avoids dependency drift between manual checks and scheduled publishing.
 
 Set `SITE_KEY` or pass `--site` for multi-site commands.
 

@@ -19,6 +19,13 @@ class WorkflowSafetyTests(unittest.TestCase):
         self.assertIn("actions/setup-python@v6", workflow_text)
         self.assertIn("actions/upload-artifact@v6", workflow_text)
 
+    def test_workflows_pin_python_311(self) -> None:
+        workflow_dir = ROOT_DIR / ".github" / "workflows"
+
+        for path in workflow_dir.glob("*.yml"):
+            workflow = path.read_text(encoding="utf-8")
+            self.assertIn('python-version: "3.11"', workflow, path.name)
+
     def test_easy_pc_daily_runs_safety_tests_before_publish(self) -> None:
         workflow = (ROOT_DIR / ".github" / "workflows" / "easy-pc-daily.yml").read_text(encoding="utf-8")
 
