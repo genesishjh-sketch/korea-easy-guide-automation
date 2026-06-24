@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from datetime import datetime
 import json
+from pathlib import Path
+import tempfile
 import unittest
 from unittest.mock import patch
 from zoneinfo import ZoneInfo
@@ -114,10 +116,12 @@ class PublicationCheckTests(unittest.TestCase):
             "status": "published_today",
             "today_post_count": 1,
         }
-        path = stage4_publication_check.save_result(result)
+        with tempfile.TemporaryDirectory() as tmpdir, patch.object(stage4_publication_check, "ROOT_DIR", Path(tmpdir)):
+            path = stage4_publication_check.save_result(result)
+            saved_exists = path.exists()
+            saved = json.loads(path.read_text(encoding="utf-8"))
 
-        self.assertTrue(path.exists())
-        saved = json.loads(path.read_text(encoding="utf-8"))
+        self.assertTrue(saved_exists)
         self.assertEqual(saved["status"], "published_today")
 
     def test_publication_message_surfaces_confirmed_post_url(self) -> None:

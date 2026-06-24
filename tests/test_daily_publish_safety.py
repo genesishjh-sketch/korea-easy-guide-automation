@@ -284,6 +284,8 @@ class DuplicatePublishGuardTests(unittest.TestCase):
             ), patch.object(
                 daily_draft, "find_public_post_published_today", return_value=None
             ), patch.object(
+                daily_draft, "ROOT_DIR", root
+            ), patch.object(
                 daily_draft, "notify_daily_completion"
             ):
                 result = daily_draft.run(site="easy_pc_fix_guide", publish_mode="publish")
@@ -312,6 +314,8 @@ class DuplicatePublishGuardTests(unittest.TestCase):
 
             with patch.object(daily_draft, "run_stage1", return_value=article_dir), patch.object(
                 daily_draft, "run_publish_with_duplicate_guard", return_value=result_path
+            ), patch.object(
+                daily_draft, "ROOT_DIR", Path(tmpdir)
             ), patch.object(daily_draft, "notify_daily_completion"):
                 result = daily_draft.run(
                     seed="duplicate topic",
