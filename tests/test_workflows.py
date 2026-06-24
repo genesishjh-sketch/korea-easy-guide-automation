@@ -57,7 +57,11 @@ class WorkflowSafetyTests(unittest.TestCase):
         self.assertIn("GOOGLE_OAUTH_TOKEN_SEARCH_CONSOLE_JSON", workflow)
         self.assertIn("GOOGLE_OAUTH_TOKEN_ANALYTICS_JSON", workflow)
         self.assertIn("python -m src.pipeline.stage3_weekly_report --site easy_pc_fix_guide", workflow)
+        upload_index = workflow.index("- name: Upload weekly report")
+        upload_block = workflow[upload_index : upload_index + 260]
+        self.assertIn("if: ${{ always() }}", upload_block)
         self.assertIn("reports/easy_pc_fix_guide-weekly-*", workflow)
+        self.assertIn("reports/easy_pc_fix_guide-weekly-failure.json", workflow)
 
 
 if __name__ == "__main__":
