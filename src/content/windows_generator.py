@@ -97,6 +97,8 @@ def _topic_profile(keyword: str, category: str) -> dict:
         title = f"Windows Update Error {error}: What It Means and How to Fix It"
     elif "wifi" in normalized or "wi-fi" in normalized:
         title = "Wi-Fi Button Missing on Windows 11: Simple Fixes for Beginners"
+    elif "bluetooth" in normalized:
+        title = "Bluetooth Not Working on Windows: Beginner-Friendly Fixes"
     elif "sound" in normalized or "audio" in normalized:
         title = "No Sound After Windows Update? Try These Easy Steps First"
     elif "printer" in normalized:
@@ -242,6 +244,14 @@ def _symptoms(text: str, error: str | None) -> list[str]:
             "Ethernet may still work, but wireless networks do not appear.",
             "The issue may start after an update, restart, sleep mode, or driver change.",
         ]
+    if "bluetooth" in text:
+        return [
+            "Bluetooth is missing from Quick Settings or Settings.",
+            "A mouse, keyboard, speaker, earbuds, or phone will not pair.",
+            "The device paired before but no longer connects.",
+            "Bluetooth appears to turn on, then disconnects again.",
+            "The issue may start after a Windows update, restart, airplane mode change, or driver update.",
+        ]
     if "sound" in text or "audio" in text:
         return ["Speakers or headphones produce no sound.", "The volume icon looks normal but nothing plays.", "The issue started after a Windows update or restart.", "Bluetooth headphones may connect but stay silent.", "One app may have sound while another app is muted."]
     if "printer" in text:
@@ -261,6 +271,12 @@ def _meaning(text: str, error: str | None) -> list[str]:
             "Windows may not detect the wireless adapter, the adapter may be disabled, or the network driver may need attention.",
             "It can also happen when airplane mode, power saving, or a temporary driver state hides wireless options.",
             "Because Wi-Fi drivers affect internet access, avoid random driver installers and use official sources only.",
+        ]
+    if "bluetooth" in text:
+        return [
+            "Windows may not detect the Bluetooth adapter, the device may need pairing again, or a driver may need attention.",
+            "It can also happen when airplane mode, battery saving, or a temporary hardware state disables Bluetooth.",
+            "Because Bluetooth problems often involve drivers, avoid random driver tools and use Windows Update, Device Manager, or the device maker's official support page.",
         ]
     if "printer" in text:
         return [
@@ -301,6 +317,14 @@ def _try_first(text: str) -> list[str]:
     ]
     if "wifi" in text or "wi-fi" in text:
         return ["Restart the PC and router.", "Turn airplane mode off.", "Open Settings > Network & internet and check whether Wi-Fi appears.", *base]
+    if "bluetooth" in text:
+        return [
+            "Restart the PC and the Bluetooth device.",
+            "Turn airplane mode off.",
+            "Open Settings > Bluetooth & devices and check whether Bluetooth appears.",
+            "Keep the Bluetooth device charged and close to the PC during pairing.",
+            *base,
+        ]
     if "printer" in text:
         return ["Make sure the printer is turned on.", "Check the cable or Wi-Fi connection.", "Cancel stuck print jobs before adding the printer again.", *base]
     if "sound" in text or "audio" in text:
@@ -326,6 +350,16 @@ def _fixes(text: str, error: str | None) -> list[str]:
             "If Wi-Fi returns after a restart but disappears again, check for pending Windows updates and official driver updates.",
             "If your laptop has a physical wireless switch or keyboard shortcut, make sure it was not turned off accidentally.",
             "If other devices also cannot connect to Wi-Fi, troubleshoot the router or internet service first.",
+        ]
+    if "bluetooth" in text:
+        return [
+            "Open Settings > Bluetooth & devices and confirm Bluetooth is available.",
+            "Remove the old paired device entry only if you can pair it again afterward.",
+            "Run the Bluetooth troubleshooter from Windows Settings when available.",
+            "Check Device Manager for the Bluetooth adapter without installing unknown driver tools.",
+            "Install driver updates from Windows Update or the PC/device maker's official support page.",
+            "If only one accessory fails, test that accessory with another device before changing Windows settings.",
+            "If Bluetooth disappears again after sleep or restart, check for pending Windows updates and official driver updates.",
         ]
     if "printer" in text:
         return [
@@ -360,6 +394,13 @@ def _after_each_step(text: str) -> list[str]:
             [
                 "After each network step, try loading a simple website and checking whether other devices on the same Wi-Fi still work.",
                 "If you temporarily use a phone hotspot, remember that it may use mobile data. Switch back to your normal network after testing.",
+            ]
+        )
+    elif "bluetooth" in text:
+        checks.extend(
+            [
+                "After each Bluetooth step, try pairing only one device at a time so the result is clear.",
+                "If the device pairs but disconnects again, note whether it happens after sleep mode, restart, low battery, or moving away from the PC.",
             ]
         )
     elif "printer" in text:
@@ -411,6 +452,7 @@ def _related_guides(category: str) -> list[str]:
     mapping = {
         "Windows Update": ["How to check your Windows version", "How to free up disk space on Windows", "Windows Update stuck at 100%"],
         "Wi-Fi & Internet": ["Internet connected but not working", "DNS problems on Windows", "How to reset network settings safely"],
+        "Bluetooth & Devices": ["Bluetooth missing from Windows settings", "How to check Device Manager safely", "Bluetooth headphones connected but no sound"],
         "Printer & Scanner": ["How to clear the printer queue", "Printer not showing in Windows", "Scanner not detected on Windows"],
     }
     return mapping.get(category, ["How to start Windows in Safe Mode", "How to check your Windows version", "Beginner PC troubleshooting checklist"])

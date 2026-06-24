@@ -14,15 +14,16 @@ CATEGORY_RULES = [
 ]
 
 WINDOWS_CATEGORY_RULES = [
-    ("Windows Update", ["update", "0x800f0922", "0x80070002", "0x80070005", "0x80070643"]),
     ("Wi-Fi & Internet", ["wifi", "wi-fi", "internet", "dns", "network"]),
-    ("Sound & Microphone", ["sound", "audio", "microphone", "mic", "bluetooth"]),
+    ("Bluetooth & Devices", ["bluetooth", "device not detected", "device manager", "pairing"]),
+    ("Sound & Microphone", ["sound", "audio", "microphone", "mic"]),
     ("Printer & Scanner", ["printer", "scanner", "print queue", "offline"]),
     ("Boot & Recovery", ["boot", "recovery", "safe mode", "blue screen", "bsod"]),
     ("File Explorer", ["file explorer", "folder", "files", "freezing"]),
     ("Windows Search", ["windows search", "search", "indexing"]),
     ("OneDrive & Account", ["onedrive", "account", "pin", "login", "sign in"]),
     ("Beginner PC Tips", ["screenshot", "disk space", "text bigger", "windows version"]),
+    ("Windows Update", ["windows update stuck", "update error", "0x800f0922", "0x80070002", "0x80070005", "0x80070643"]),
     ("Error Codes", ["0x"]),
 ]
 

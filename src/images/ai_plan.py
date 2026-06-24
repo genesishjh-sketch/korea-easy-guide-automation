@@ -49,6 +49,7 @@ def build_article_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
     if candidate.category in {
         "Windows Update",
         "Wi-Fi & Internet",
+        "Bluetooth & Devices",
         "Sound & Microphone",
         "Printer & Scanner",
         "Boot & Recovery",
