@@ -1,0 +1,62 @@
+name: Easy PC Fix Daily Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      seed:
+        description: "Optional Windows topic seed"
+        required: false
+      mode:
+        description: "draft or publish"
+        required: false
+        default: "publish"
+  schedule:
+    - cron: "10 0 * * *"
+
+jobs:
+  daily-publish:
+    runs-on: ubuntu-latest
+    env:
+      APP_ENV: production
+      SITE_KEY: easy_pc_fix_guide
+      EASY_PC_FIX_GUIDE_BLOGGER_BLOG_ID: ${{ vars.EASY_PC_FIX_GUIDE_BLOGGER_BLOG_ID }}
+      EASY_PC_FIX_GUIDE_SITE_URL: ${{ vars.EASY_PC_FIX_GUIDE_SITE_URL || 'https://easypcfixguide.blogspot.com' }}
+      EASY_PC_FIX_GUIDE_SEARCH_CONSOLE_SITE_URL: ${{ vars.EASY_PC_FIX_GUIDE_SEARCH_CONSOLE_SITE_URL || 'https://easypcfixguide.blogspot.com/' }}
+      GOOGLE_OAUTH_CLIENT_SECRET_FILE: .credentials/client_secret.json
+      GOOGLE_OAUTH_TOKEN_FILE: .credentials/google_token.json
+      BLOGGER_PUBLISH_MODE: ${{ github.event.inputs.mode || 'publish' }}
+      REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+      REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+      GOOGLE_SEARCH_PROVIDER: suggest
+      NOTIFICATION_PROVIDER: ${{ vars.NOTIFICATION_PROVIDER }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Write Google OAuth files
+        run: |
+          mkdir -p .credentials
+          printf '%s' '${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET_JSON }}' > .credentials/client_secret.json
+          printf '%s' '${{ secrets.GOOGLE_OAUTH_TOKEN_JSON }}' > .credentials/google_token.json
+      - name: Run Easy PC Fix daily pipeline
+        run: |
+          if [ -n "${{ github.event.inputs.seed }}" ]; then
+            python -m src.pipeline.daily_draft --site easy_pc_fix_guide --mode "${BLOGGER_PUBLISH_MODE}" --seed "${{ github.event.inputs.seed }}"
+          else
+            python -m src.pipeline.daily_draft --site easy_pc_fix_guide --mode "${BLOGGER_PUBLISH_MODE}"
+          fi
+      - name: Submit sitemap
+        if: always()
+        run: python -m src.pipeline.stage3_submit_sitemap --site easy_pc_fix_guide
+      - name: Upload generated outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: easy-pc-fix-daily-output
+          path: |
+            data/generated/easy_pc_fix_guide/
+            reports/
