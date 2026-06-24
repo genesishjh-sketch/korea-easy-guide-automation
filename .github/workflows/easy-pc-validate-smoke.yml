@@ -12,7 +12,9 @@ on:
       - main
     paths:
       - "src/**"
+      - "tests/**"
       - "data/seeds/windows_topic_seeds.json"
+      - ".github/workflows/easy-pc-daily.yml"
       - ".github/workflows/easy-pc-validate-smoke.yml"
 
 jobs:
