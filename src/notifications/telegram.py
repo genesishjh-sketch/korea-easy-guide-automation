@@ -32,15 +32,19 @@ class NotificationClient:
         chunks = split_message(message)
         ok = True
         for chunk in chunks:
-            response = requests.post(
-                f"https://api.telegram.org/bot{self.settings.telegram_bot_token}/sendMessage",
-                json={
-                    "chat_id": self.settings.telegram_chat_id,
-                    "text": chunk,
-                    "disable_web_page_preview": True,
-                },
-                timeout=20,
-            )
+            try:
+                response = requests.post(
+                    f"https://api.telegram.org/bot{self.settings.telegram_bot_token}/sendMessage",
+                    json={
+                        "chat_id": self.settings.telegram_chat_id,
+                        "text": chunk,
+                        "disable_web_page_preview": True,
+                    },
+                    timeout=20,
+                )
+            except requests.RequestException as exc:
+                LOGGER.warning("Telegram notification failed: %s", exc)
+                return False
             if not response.ok:
                 ok = False
                 LOGGER.warning("Telegram notification failed: %s %s", response.status_code, response.text[:500])

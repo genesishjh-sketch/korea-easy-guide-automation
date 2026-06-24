@@ -197,6 +197,26 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertEqual(result["skipped_duplicate_seeds"], ["duplicate topic"])
         self.assertTrue(result["publish_result"].endswith("duplicate_publish_result.json"))
 
+    def test_daily_failure_report_is_written_before_reraising(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            report_dir = Path(tmpdir) / "reports"
+            with patch.object(daily_draft, "ROOT_DIR", Path(tmpdir)), patch.object(
+                daily_draft, "choose_seed", return_value="broken seed"
+            ), patch.object(daily_draft, "run_stage1", side_effect=ValueError("generation failed")), patch.object(
+                daily_draft, "notify_daily_failure"
+            ):
+                with self.assertRaises(ValueError):
+                    daily_draft.run(site="easy_pc_fix_guide", publish_mode="validate")
+
+            report_path = report_dir / "easy_pc_fix_guide-daily-failure.json"
+            self.assertTrue(report_path.exists())
+            payload = json.loads(report_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(payload["seed"], "broken seed")
+        self.assertEqual(payload["mode"], "validate")
+        self.assertEqual(payload["error_type"], "ValueError")
+        self.assertIn("generation failed", payload["error"])
+
 
 class WindowsQualityGateTests(unittest.TestCase):
     def test_windows_articles_require_official_microsoft_source(self) -> None:

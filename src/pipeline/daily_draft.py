@@ -129,6 +129,7 @@ def run(seed: str | None = None, site: str | None = None, publish_mode: str = "d
         notify_daily_completion(result)
         return result
     except Exception as exc:
+        save_daily_failure_report(selected_seed, exc, site, publish_mode)
         notify_daily_failure(selected_seed, exc, site)
         raise
 
@@ -284,6 +285,27 @@ def notify_daily_failure(seed: str, exc: Exception, site: str | None = None) -> 
             ]
         )
     )
+
+
+def save_daily_failure_report(seed: str, exc: Exception, site: str | None = None, mode: str = "draft") -> Path:
+    settings = load_settings(site)
+    output_dir = ROOT_DIR / "reports"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_path = output_dir / f"{settings.site_key}-daily-failure.json"
+    payload = {
+        "site": settings.site_key,
+        "site_name": settings.site_name,
+        "site_url": settings.site_url,
+        "mode": mode,
+        "seed": seed,
+        "status": "failed",
+        "error_type": type(exc).__name__,
+        "error": str(exc),
+        "traceback": traceback.format_exception(type(exc), exc, exc.__traceback__),
+        "created_at": datetime.utcnow().isoformat() + "Z",
+    }
+    output_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    return output_path
 
 
 def build_daily_success_message(result: dict[str, str]) -> str:
