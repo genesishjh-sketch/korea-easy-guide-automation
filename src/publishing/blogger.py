@@ -1,17 +1,11 @@
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Any
 
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
-from src.config import ROOT_DIR, Settings
-
-
-SCOPES = ["https://www.googleapis.com/auth/blogger"]
+from src.config import Settings
+from src.google_auth import BLOGGER_SCOPE, GoogleCredentialsError, get_credentials
 
 
 class BloggerCredentialsError(RuntimeError):
@@ -99,36 +93,8 @@ class BloggerPublisher:
         credentials = self._credentials()
         return build("blogger", "v3", credentials=credentials)
 
-    def _credentials(self) -> Credentials:
-        token_path = self._resolve_path(self.settings.google_oauth_token_file)
-        secret_path_value = self.settings.google_oauth_client_secret_file
-        if not secret_path_value:
-            raise BloggerCredentialsError(
-                "GOOGLE_OAUTH_CLIENT_SECRET_FILE is missing in .env. "
-                "Create a Google Cloud OAuth Desktop client JSON and set its path."
-            )
-
-        secret_path = self._resolve_path(secret_path_value)
-        if not secret_path.exists():
-            raise BloggerCredentialsError(f"OAuth client secret file does not exist: {secret_path}")
-
-        credentials = None
-        if token_path.exists():
-            credentials = Credentials.from_authorized_user_file(str(token_path), SCOPES)
-
-        if credentials and credentials.expired and credentials.refresh_token:
-            credentials.refresh(Request())
-
-        if not credentials or not credentials.valid:
-            flow = InstalledAppFlow.from_client_secrets_file(str(secret_path), SCOPES)
-            credentials = flow.run_local_server(port=0)
-            token_path.parent.mkdir(parents=True, exist_ok=True)
-            token_path.write_text(credentials.to_json(), encoding="utf-8")
-
-        return credentials
-
-    def _resolve_path(self, value: str) -> Path:
-        path = Path(value).expanduser()
-        if not path.is_absolute():
-            path = ROOT_DIR / path
-        return path
+    def _credentials(self):
+        try:
+            return get_credentials(self.settings, [BLOGGER_SCOPE])
+        except GoogleCredentialsError as exc:
+            raise BloggerCredentialsError(str(exc)) from exc

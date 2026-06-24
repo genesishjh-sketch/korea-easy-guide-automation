@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 
 from src.config import ROOT_DIR, Settings
+from src.reporting.analytics import GA4Client
+from src.reporting.search_console import SearchConsoleClient
 
 
 class WeeklyReporter:
@@ -29,10 +31,8 @@ class WeeklyReporter:
             "published_count": sum(1 for item in articles if item.get("blogger_status") == "LIVE"),
             "articles": articles,
             "static_pages": static_pages,
-            "search_console": {
-                "status": "not_connected",
-                "note": "Search Console metrics will be added after Search Console API credentials are configured.",
-            },
+            "search_console": SearchConsoleClient(self.settings).summary(week_start.date(), now.date()),
+            "analytics": GA4Client(self.settings).summary(week_start.date(), now.date()),
             "next_actions": self._next_actions(articles, static_pages),
         }
 
@@ -132,6 +132,40 @@ class WeeklyReporter:
                 lines.append(f"| {page.get('title')} | {page.get('status')} | {page.get('url')} |")
         else:
             lines.append("No static page upload result found.")
+
+        lines.extend(["", "## Search Console", ""])
+        search_console = report.get("search_console", {})
+        lines.append(f"- Status: {search_console.get('status', 'unknown')}")
+        if search_console.get("status") == "connected":
+            totals = search_console.get("totals_from_top_queries", {})
+            lines.append(f"- Top-query clicks: {totals.get('clicks', 0)}")
+            lines.append(f"- Top-query impressions: {totals.get('impressions', 0)}")
+            lines.append("")
+            lines.append("| Query | Clicks | Impressions | Position |")
+            lines.append("|---|---:|---:|---:|")
+            for row in search_console.get("top_queries", []):
+                lines.append(
+                    f"| {row.get('query', '')} | {row.get('clicks', 0)} | {row.get('impressions', 0)} | {row.get('position', 0):.1f} |"
+                )
+        elif search_console.get("note"):
+            lines.append(f"- Note: {search_console.get('note')}")
+        elif search_console.get("error"):
+            lines.append(f"- Error: {search_console.get('error')}")
+
+        lines.extend(["", "## Analytics", ""])
+        analytics = report.get("analytics", {})
+        lines.append(f"- Status: {analytics.get('status', 'unknown')}")
+        if analytics.get("status") == "connected":
+            lines.append("| Page | Views | Active Users | Engagement Rate |")
+            lines.append("|---|---:|---:|---:|")
+            for row in analytics.get("top_pages", []):
+                lines.append(
+                    f"| {row.get('page_path', '')} | {row.get('views', 0)} | {row.get('active_users', 0)} | {row.get('engagement_rate', 0):.2f} |"
+                )
+        elif analytics.get("note"):
+            lines.append(f"- Note: {analytics.get('note')}")
+        elif analytics.get("error"):
+            lines.append(f"- Error: {analytics.get('error')}")
 
         lines.extend(["", "## Next Actions", ""])
         for action in report["next_actions"]:
