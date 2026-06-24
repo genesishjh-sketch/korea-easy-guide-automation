@@ -103,6 +103,8 @@ class EnglishArticleGenerator:
             return "How to Use Kakao T Taxi in Korea as a Foreigner"
         if "ktx" in normalized:
             return "How to Buy KTX Tickets in Korea as a Foreigner"
+        if "t money" in normalized or "t-money" in normalized or "tmoney" in normalized:
+            return "How to Use a T-money Card in Korea: Easy Guide for Foreign Visitors"
         return default_title
 
     def _build_tags(self, candidate: TopicCandidate) -> list[str]:
@@ -116,6 +118,12 @@ class EnglishArticleGenerator:
         return f"Simple English guide to {keyword} for travelers, exchange students, and long-term foreign visitors in Korea."
 
     def _intro(self, keyword: str) -> str:
+        if self._is_tmoney(keyword):
+            return (
+                "A T-money card is one of the easiest things to set up during your first day in Korea. "
+                "It works like a rechargeable transportation card for subways, buses, and many everyday travel moments, "
+                "but foreign visitors often get confused about where to buy it, how to recharge it, and when it is better than paying by single ticket."
+            )
         return (
             f"If you are visiting Korea for the first time, {keyword} can be confusing because local apps, "
             "payment methods, signs, and transport rules may work differently from what you expect. "
@@ -123,6 +131,13 @@ class EnglishArticleGenerator:
         )
 
     def _quick_answer(self, keyword: str) -> list[dict[str, str]]:
+        if self._is_tmoney(keyword):
+            return [
+                {"situation": "Most first-time visitors", "choice": "Buy a T-money card at a convenience store or station sales point"},
+                {"situation": "Using subway and buses often", "choice": "Recharge the card and tap in/out instead of buying single tickets"},
+                {"situation": "Arriving with no Korean cash", "choice": "Use airport transport first, then buy/recharge after finding an ATM or card-friendly store"},
+                {"situation": "Staying only one or two days", "choice": "Still useful if you plan several subway or bus rides"},
+            ]
         if keyword.lower() == "incheon airport to seoul":
             return [
                 {"situation": "Fastest route to Seoul Station", "choice": "AREX Express Train"},
@@ -137,21 +152,49 @@ class EnglishArticleGenerator:
         ]
 
     def _basics(self, keyword: str) -> list[str]:
+        if self._is_tmoney(keyword):
+            return [
+                "T-money is a prepaid transportation card used widely in Seoul and many other parts of Korea. You add balance first, then tap the card when entering and leaving subway gates or when boarding buses.",
+                "The card itself is separate from the balance. Buying a card does not mean it already has enough money for your trip, so check the stored value and recharge before you rely on it for a transfer.",
+                "Foreign visitors should keep a small amount of Korean won available because some recharge machines or store counters may be easier with cash. Card payment availability can vary by location and machine.",
+                "Do not treat the card as a replacement for every payment situation. It is mainly useful for transportation and selected small purchases, while hotels, restaurants, and online services usually require another payment method.",
+            ]
         return [
             f"The most important thing is to check the latest official information before relying on any guide about {keyword}. Korea changes app features, fares, routes, and business rules regularly.",
             "Foreign visitors should also prepare a working internet connection, a saved Korean address, and a translation app before they need help in a busy station, airport, or store.",
+            "If your plan involves transportation, payment, tickets, or local apps, prepare a backup route before the day you need it. This prevents a small payment issue or language problem from turning into a missed train, late check-in, or expensive taxi ride.",
         ]
 
     def _steps(self, keyword: str) -> list[str]:
+        if self._is_tmoney(keyword):
+            return [
+                "Buy a T-money card at a convenience store, subway station sales point, or other authorized location after you arrive in Korea.",
+                "Ask the staff to recharge it or use a recharge machine at a subway station. If you are unsure, start with a modest balance and add more later.",
+                "Tap the card on the reader when entering the subway gate. Wait for the beep or screen confirmation before walking through.",
+                "Tap again when exiting the subway. This matters because the system calculates the correct fare based on your route.",
+                "On buses, tap when boarding and tap again when getting off if the bus system requires it. This helps with transfer discounts and correct fare handling.",
+                "Check your remaining balance at gates, machines, or some convenience stores before taking a long route late at night.",
+                "Keep the card separate from other transit or bank cards when tapping. Multiple cards near the reader can cause an error or failed tap.",
+            ]
         return [
             f"Decide whether {keyword} is mainly a speed, price, comfort, or convenience problem for your trip.",
             "Check your destination in Naver Map or KakaoMap instead of relying only on Google Maps.",
             "Save the Korean name and address of your destination before leaving your hotel or airport.",
             "Prepare a backup option in case your first choice is unavailable, delayed, or difficult to use.",
             "Verify prices, schedules, and operating hours on an official website before making final decisions.",
+            "Take screenshots of key information such as route names, booking numbers, addresses, and operating hours. Screenshots are useful when mobile data is weak or an app reloads at the wrong time.",
+            "After using the service once, save what worked for your next trip day. Korea travel gets much easier when you reuse a verified route, app setting, or payment method.",
         ]
 
     def _mistakes(self, keyword: str) -> list[str]:
+        if self._is_tmoney(keyword):
+            return [
+                "Buying the card but forgetting to add enough balance before entering the station.",
+                "Keeping the card in a wallet with other contactless cards and causing reader errors.",
+                "Assuming every machine or counter will accept the same foreign card payment method.",
+                "Forgetting to tap out correctly, especially when transferring between subway and bus routes.",
+                "Waiting until the last train or late-night bus to solve a low-balance problem.",
+            ]
         return [
             "Assuming every Korean app accepts foreign cards or foreign phone numbers.",
             "Checking only one map app when public transportation routes are involved.",
@@ -160,6 +203,13 @@ class EnglishArticleGenerator:
         ]
 
     def _costs_payment(self, keyword: str) -> list[dict[str, str]]:
+        if self._is_tmoney(keyword):
+            return [
+                {"item": "Card purchase", "detail": "The physical card has a separate purchase cost. Designs and sales locations can vary."},
+                {"item": "Recharge balance", "detail": "Add stored value before riding. Cash is often the simplest backup for recharging."},
+                {"item": "Transport fares", "detail": "Subway and bus fares can change, so check official transport information for current pricing."},
+                {"item": "Refunds", "detail": "Refund rules may depend on remaining balance, card type, and sales location. Ask staff before assuming it is refundable."},
+            ]
         return [
             {"item": "Official price or fare", "detail": "Check the latest fare on an official website or app before making a final decision."},
             {"item": "Foreign cards", "detail": "Some local apps and kiosks may reject certain foreign cards, so keep a backup card or cash."},
@@ -168,6 +218,14 @@ class EnglishArticleGenerator:
         ]
 
     def _tips(self, keyword: str) -> list[dict[str, str]]:
+        if self._is_tmoney(keyword):
+            return [
+                {"title": "Buy it early", "detail": "Getting the card on your first day makes subway and bus travel smoother for the rest of the trip."},
+                {"title": "Keep some cash", "detail": "Cash is a practical backup when a recharge machine or counter does not accept your foreign card."},
+                {"title": "Use one card per person", "detail": "Each traveler should have their own card for normal subway and bus tapping."},
+                {"title": "Check the balance often", "detail": "Low balance is easier to fix before entering a station than when you are rushing for a train."},
+                {"title": "Pair it with Naver Map", "detail": "Use Naver Map or KakaoMap to plan the route, then use T-money to move through the gates and buses."},
+            ]
         return [
             {"title": "Use Korean map apps", "detail": "Naver Map and KakaoMap usually provide better local transit information."},
             {"title": "Keep your destination in Korean", "detail": "This helps taxi drivers, hotel staff, and station workers understand where you need to go."},
@@ -176,6 +234,25 @@ class EnglishArticleGenerator:
         ]
 
     def _faq(self, keyword: str) -> list[dict[str, str]]:
+        if self._is_tmoney(keyword):
+            return [
+                {
+                    "question": "Do tourists need a T-money card in Korea?",
+                    "answer": "Most visitors who use subways or buses should get one. It reduces the need to buy single tickets and makes transfers easier.",
+                },
+                {
+                    "question": "Where can I buy a T-money card?",
+                    "answer": "Common places include convenience stores and subway station sales points. Availability can vary, so ask staff if you do not see one immediately.",
+                },
+                {
+                    "question": "Can I recharge T-money with a foreign card?",
+                    "answer": "Sometimes payment options vary by machine, store, and card issuer. Keep cash or another card as a backup.",
+                },
+                {
+                    "question": "Can one T-money card be used by two people?",
+                    "answer": "For normal travel, each person should use their own card. Sharing one card can cause fare and transfer problems.",
+                },
+            ]
         return [
             {
                 "question": f"Is {keyword} easy for foreigners?",
@@ -190,3 +267,7 @@ class EnglishArticleGenerator:
                 "answer": "For most Korea travel situations, Naver Map or KakaoMap and Papago are the most useful starting apps.",
             },
         ]
+
+    def _is_tmoney(self, keyword: str) -> bool:
+        normalized = keyword.lower()
+        return "t money" in normalized or "t-money" in normalized or "tmoney" in normalized

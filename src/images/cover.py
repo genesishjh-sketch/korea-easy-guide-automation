@@ -82,6 +82,8 @@ def detect_scene(title: str) -> str:
         return "taxi"
     if any(word in text for word in ("naver map", "kakaomap", "map", "navigation")):
         return "map"
+    if any(word in text for word in ("t money", "t-money", "tmoney", "transportation card", "transit card")):
+        return "transport_card"
     if any(word in text for word in ("airport", "incheon", "seoul station", "bus", "transport")):
         return "airport"
     if any(word in text for word in ("coupang", "delivery", "shopping", "store", "convenience")):

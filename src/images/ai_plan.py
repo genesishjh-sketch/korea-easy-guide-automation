@@ -109,6 +109,7 @@ def _visual_subject(scene: str, keyword: str) -> str:
         "esim": "a traveler setting up mobile data on a smartphone after arriving in Korea",
         "taxi": "a visitor confirming a taxi pickup point on a city street in Seoul",
         "map": "a traveler using a navigation app while walking near a Seoul subway exit",
+        "transport_card": "a foreign visitor using a generic prepaid transit card at a Seoul subway gate",
         "shopping": "a visitor using everyday Korean services such as convenience stores, delivery, or shopping",
     }
     return subjects.get(scene, f"a practical Korea travel scene related to {keyword}")
@@ -121,6 +122,7 @@ def _inline_subject(scene: str) -> str:
         "esim": "activating mobile data while keeping passport and travel documents nearby",
         "taxi": "standing at a safe pickup point and matching the taxi information",
         "map": "comparing walking and subway directions near a station exit",
+        "transport_card": "buying, recharging, and tapping a generic transit card at a subway station or convenience store",
         "shopping": "using a self-service kiosk or payment counter in a clean everyday setting",
     }
     return subjects.get(scene, "following the key step clearly and safely")
@@ -133,6 +135,7 @@ def _inline_caption(scene: str) -> str:
         "esim": "Set up mobile data before relying on maps, taxi apps, or translation tools.",
         "taxi": "Confirm the pickup point and destination before the taxi arrives.",
         "map": "Use Korean map apps to check walking, subway, and bus routes before moving.",
+        "transport_card": "Recharge the card before you rely on subway or bus transfers.",
         "shopping": "Check payment options and app requirements before depending on a local service.",
     }
     return captions.get(scene, "Use the visual checklist to make the process easier in Korea.")
