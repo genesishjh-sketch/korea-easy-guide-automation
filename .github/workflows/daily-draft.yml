@@ -1,13 +1,13 @@
 name: Daily Draft Pipeline
 
 on:
+  # Legacy Korea workflow is manual-only while Easy PC Fix Guide is the active
+  # scheduled production site.
   workflow_dispatch:
     inputs:
       seed:
         description: "Optional topic seed"
         required: false
-  schedule:
-    - cron: "0 0 * * *"
 
 jobs:
   daily-draft:
