@@ -12,9 +12,10 @@ from src.pipeline.stage1_generate import run as run_stage1
 from src.pipeline.stage2_publish import run as run_stage2
 
 
-def used_keywords() -> set[str]:
+def used_keywords(site: str | None = None) -> set[str]:
+    settings = load_settings(site)
     values = set()
-    for path in (ROOT_DIR / "data" / "generated").glob("*/*/metadata.json"):
+    for path in Path(settings.generated_output_dir).glob("*/*/metadata.json"):
         try:
             metadata = json.loads(path.read_text(encoding="utf-8"))
         except Exception:
@@ -26,26 +27,31 @@ def used_keywords() -> set[str]:
     return values
 
 
-def choose_seed(explicit_seed: str | None = None) -> str:
+def choose_seed(explicit_seed: str | None = None, site: str | None = None) -> str:
+    settings = load_settings(site)
     if explicit_seed:
         return explicit_seed
-    seeds = json.loads((ROOT_DIR / "data" / "seeds" / "topic_seeds.json").read_text(encoding="utf-8"))
-    used = used_keywords()
+    seed_path = Path(settings.seed_file)
+    if not seed_path.is_absolute():
+        seed_path = ROOT_DIR / seed_path
+    seeds = json.loads(seed_path.read_text(encoding="utf-8"))
+    used = used_keywords(site)
     for seed in seeds:
         if seed.lower() not in used:
             return seed
     return seeds[0]
 
 
-def run(seed: str | None = None) -> dict[str, str]:
-    selected_seed = choose_seed(seed)
+def run(seed: str | None = None, site: str | None = None, publish_mode: str = "draft") -> dict[str, str]:
+    selected_seed = choose_seed(seed, site)
     try:
-        article_dir = run_stage1(selected_seed)
-        result_path = run_stage2(article_dir=article_dir, mode="draft")
+        article_dir = run_stage1(selected_seed, site)
+        result_path = run_stage2(article_dir=article_dir, mode=publish_mode, site=site)
         result = {
             "seed": selected_seed,
             "article_dir": str(article_dir),
             "publish_result": str(result_path),
+            "site": load_settings(site).site_key,
         }
         notify_daily_completion(result)
         return result
@@ -55,7 +61,7 @@ def run(seed: str | None = None) -> dict[str, str]:
 
 
 def notify_daily_completion(result: dict[str, str]) -> None:
-    settings = load_settings()
+    settings = load_settings(result.get("site"))
     NotificationClient(settings).send(build_daily_success_message(result))
 
 
@@ -82,7 +88,7 @@ def notify_daily_failure(seed: str, exc: Exception) -> None:
 
 
 def build_daily_success_message(result: dict[str, str]) -> str:
-    settings = load_settings()
+    settings = load_settings(result.get("site"))
     article_dir = Path(result["article_dir"])
     metadata = read_json(article_dir / "metadata.json")
     publish_result = read_json(Path(result["publish_result"]))
@@ -139,8 +145,10 @@ def read_json(path: Path) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Daily pipeline: collect, generate, and upload a Blogger draft.")
     parser.add_argument("--seed", help="Optional explicit topic seed")
+    parser.add_argument("--site", help="Site profile key, for example: easy_pc_fix_guide")
+    parser.add_argument("--mode", choices=["draft", "publish"], default="draft")
     args = parser.parse_args()
-    result = run(args.seed)
+    result = run(args.seed, args.site, args.mode)
     print(json.dumps(result, ensure_ascii=False, indent=2))
 
 

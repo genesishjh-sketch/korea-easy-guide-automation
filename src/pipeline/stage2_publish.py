@@ -18,8 +18,9 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(messag
 LOGGER = logging.getLogger("stage2")
 
 
-def latest_article_dir() -> Path:
-    generated_root = ROOT_DIR / "data" / "generated"
+def latest_article_dir(site: str | None = None) -> Path:
+    settings = load_settings(site)
+    generated_root = Path(settings.generated_output_dir)
     candidates = [
         path
         for path in generated_root.glob("*/*")
@@ -30,20 +31,21 @@ def latest_article_dir() -> Path:
     return max(candidates, key=lambda path: path.stat().st_mtime)
 
 
-def load_article(article_dir: Path) -> tuple[str, str, list[str]]:
+def load_article(article_dir: Path, site: str | None = None) -> tuple[str, str, list[str]]:
     metadata = json.loads((article_dir / "metadata.json").read_text(encoding="utf-8"))
     article = metadata["article"]
     title = article["title"]
     labels = article.get("tags", [])
     validate_required_images(article_dir)
-    validate_quality(article_dir)
+    validate_quality(article_dir, site)
     html = (article_dir / "article.html").read_text(encoding="utf-8")
     html = rewrite_local_image_paths(html, article_dir)
     return title, html, labels
 
 
-def validate_quality(article_dir: Path) -> None:
-    report = HadesQualityGate().review_article_dir(article_dir)
+def validate_quality(article_dir: Path, site: str | None = None) -> None:
+    settings = load_settings(site)
+    report = HadesQualityGate(settings.content_domain).review_article_dir(article_dir)
     report_path = article_dir / "quality_report.json"
     report_path.write_text(json.dumps(report.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8")
     if not report.passed:
@@ -121,13 +123,13 @@ def save_publish_result(article_dir: Path, result: dict, draft: bool) -> Path:
     return result_path
 
 
-def run(article_dir: Path | None, mode: str | None) -> Path:
-    settings = load_settings()
-    selected_dir = article_dir or latest_article_dir()
+def run(article_dir: Path | None, mode: str | None, site: str | None = None) -> Path:
+    settings = load_settings(site)
+    selected_dir = article_dir or latest_article_dir(site)
     publish_mode = mode or settings.blogger_publish_mode
     draft = publish_mode != "publish"
 
-    title, html, labels = load_article(selected_dir)
+    title, html, labels = load_article(selected_dir, site)
     publisher = BloggerPublisher(settings)
     LOGGER.info("Publishing to Blogger blog_id=%s draft=%s title=%s", settings.blogger_blog_id, draft, title)
     result = publisher.publish(title=title, html=html, labels=labels, draft=draft)
@@ -140,11 +142,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Stage 2: publish a generated article to Blogger.")
     parser.add_argument("--article-dir", help="Generated article directory. Defaults to latest generated article.")
     parser.add_argument("--mode", choices=["draft", "publish"], help="Blogger publishing mode. Default: BLOGGER_PUBLISH_MODE")
+    parser.add_argument("--site", help="Site profile key, for example: easy_pc_fix_guide")
     args = parser.parse_args()
 
     article_dir = Path(args.article_dir).expanduser().resolve() if args.article_dir else None
     try:
-        result_path = run(article_dir, args.mode)
+        result_path = run(article_dir, args.mode, args.site)
     except BloggerCredentialsError as exc:
         raise SystemExit(f"Blogger credential setup required: {exc}") from exc
     print(result_path)

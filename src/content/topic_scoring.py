@@ -13,9 +13,28 @@ CATEGORY_RULES = [
     ("Accommodation", ["hotel", "stay", "airbnb", "guesthouse", "goshiwon"]),
 ]
 
+WINDOWS_CATEGORY_RULES = [
+    ("Windows Update", ["update", "0x800f0922", "0x80070002", "0x80070005", "0x80070643"]),
+    ("Wi-Fi & Internet", ["wifi", "wi-fi", "internet", "dns", "network"]),
+    ("Sound & Microphone", ["sound", "audio", "microphone", "mic", "bluetooth"]),
+    ("Printer & Scanner", ["printer", "scanner", "print queue", "offline"]),
+    ("Boot & Recovery", ["boot", "recovery", "safe mode", "blue screen", "bsod"]),
+    ("File Explorer", ["file explorer", "folder", "files", "freezing"]),
+    ("Windows Search", ["windows search", "search", "indexing"]),
+    ("OneDrive & Account", ["onedrive", "account", "pin", "login", "sign in"]),
+    ("Beginner PC Tips", ["screenshot", "disk space", "text bigger", "windows version"]),
+    ("Error Codes", ["0x"]),
+]
 
-def infer_category(keyword: str) -> str:
+
+def infer_category(keyword: str, content_domain: str = "korea_travel") -> str:
     normalized = keyword.lower()
+    if content_domain == "windows_help":
+        for category, terms in WINDOWS_CATEGORY_RULES:
+            if any(term in normalized for term in terms):
+                return category
+        return "Computer Help"
+
     for category, terms in CATEGORY_RULES:
         if any(term in normalized for term in terms):
             return category
@@ -33,7 +52,7 @@ def infer_intent(keyword: str) -> str:
     return "practical-guide"
 
 
-def build_candidate(seed: str, signals: list[TopicSignal]) -> TopicCandidate:
+def build_candidate(seed: str, signals: list[TopicSignal], content_domain: str = "korea_travel") -> TopicCandidate:
     weighted = Counter()
     for signal in signals:
         weighted[signal.title.lower()] += signal.score
@@ -45,7 +64,7 @@ def build_candidate(seed: str, signals: list[TopicSignal]) -> TopicCandidate:
 
     return TopicCandidate(
         keyword=seed,
-        category=infer_category(seed),
+        category=infer_category(seed, content_domain),
         intent=infer_intent(seed),
         score=score,
         signals=signals,

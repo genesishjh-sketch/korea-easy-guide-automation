@@ -11,7 +11,7 @@ from src.utils.text import clean_space
 
 LOGGER = logging.getLogger(__name__)
 
-SUBREDDITS = [
+DEFAULT_SUBREDDITS = [
     "koreatravel",
     "korea",
     "Living_in_Korea",
@@ -35,11 +35,13 @@ class RedditCollector:
         user_agent: str,
         client_id: str = "",
         client_secret: str = "",
+        subreddits: list[str] | None = None,
         timeout: int = 12,
     ) -> None:
         self.user_agent = user_agent
         self.client_id = client_id
         self.client_secret = client_secret
+        self.subreddits = subreddits or DEFAULT_SUBREDDITS
         self.timeout = timeout
 
     def collect(self, query: str, limit: int = 10) -> list[TopicSignal]:
@@ -49,7 +51,7 @@ class RedditCollector:
                 return oauth_signals
 
         signals: list[TopicSignal] = []
-        for subreddit in SUBREDDITS:
+        for subreddit in self.subreddits:
             url = f"https://www.reddit.com/r/{subreddit}/search.json?q={quote_plus(query)}&restrict_sr=1&sort=relevance&limit={limit}"
             try:
                 response = requests.get(
@@ -102,7 +104,7 @@ class RedditCollector:
                 user_agent=self.user_agent,
             )
             signals: list[TopicSignal] = []
-            for subreddit in SUBREDDITS:
+            for subreddit in self.subreddits:
                 for submission in reddit.subreddit(subreddit).search(query, sort="relevance", limit=limit):
                     title = clean_space(submission.title)
                     if not title:

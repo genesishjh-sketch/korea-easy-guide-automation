@@ -13,7 +13,7 @@ from src.reporting.search_console import SearchConsoleClient
 class WeeklyReporter:
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
-        self.generated_root = ROOT_DIR / "data" / "generated"
+        self.generated_root = Path(settings.generated_output_dir)
 
     def generate(self) -> Path:
         now = datetime.utcnow()
@@ -52,8 +52,8 @@ class WeeklyReporter:
 
         output_dir = ROOT_DIR / "reports"
         output_dir.mkdir(parents=True, exist_ok=True)
-        json_path = output_dir / f"weekly-{now.date().isoformat()}.json"
-        md_path = output_dir / f"weekly-{now.date().isoformat()}.md"
+        json_path = output_dir / f"{self.settings.site_key}-weekly-{now.date().isoformat()}.json"
+        md_path = output_dir / f"{self.settings.site_key}-weekly-{now.date().isoformat()}.md"
         json_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
         md_path.write_text(self._to_markdown(report), encoding="utf-8")
         return md_path

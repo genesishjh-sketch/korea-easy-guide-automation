@@ -1,0 +1,416 @@
+from __future__ import annotations
+
+from datetime import datetime
+import re
+
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+from slugify import slugify
+
+from src.config import ROOT_DIR, Settings
+from src.models import Article, ImageAsset, TopicCandidate
+from src.utils.text import title_case_keyword
+
+
+MICROSOFT_SOURCES = [
+    {"name": "Microsoft Support", "url": "https://support.microsoft.com/windows"},
+    {"name": "Microsoft Learn Windows troubleshooting", "url": "https://learn.microsoft.com/windows/"},
+    {"name": "Windows release health", "url": "https://learn.microsoft.com/windows/release-health/"},
+    {"name": "Windows message center", "url": "https://learn.microsoft.com/windows/release-health/windows-message-center"},
+    {"name": "Microsoft Support: Windows Update troubleshooter", "url": "https://support.microsoft.com/windows/windows-update-troubleshooter"},
+    {"name": "Microsoft Support: Fix Wi-Fi connection issues", "url": "https://support.microsoft.com/windows/fix-wi-fi-connection-issues-in-windows"},
+]
+
+
+class WindowsArticleGenerator:
+    def __init__(self, settings: Settings) -> None:
+        self.settings = settings
+        template_dir = ROOT_DIR / "src" / "content" / "templates"
+        self.env = Environment(
+            loader=FileSystemLoader(template_dir),
+            autoescape=select_autoescape(enabled_extensions=("html", "xml")),
+            trim_blocks=True,
+            lstrip_blocks=True,
+        )
+
+    def generate(
+        self,
+        candidate: TopicCandidate,
+        image: ImageAsset,
+        inline_images: list[ImageAsset] | None = None,
+    ) -> Article:
+        topic = _topic_profile(candidate.keyword, candidate.category)
+        inline_images = inline_images or []
+        context = {
+            "title": topic["title"],
+            "slug": topic["slug"],
+            "category": candidate.category,
+            "tags": self._tags(candidate),
+            "meta_description": topic["meta_description"],
+            "image": image,
+            "inline_images": inline_images,
+            "lead": topic["lead"],
+            "facts": topic["facts"],
+            "quick_summary": topic["quick_summary"],
+            "before_start": topic["before_start"],
+            "symptoms": topic["symptoms"],
+            "meaning": topic["meaning"],
+            "not_to_do": topic["not_to_do"],
+            "try_first": topic["try_first"],
+            "fixes": topic["fixes"],
+            "after_each_step": topic["after_each_step"],
+            "advanced_fixes": topic["advanced_fixes"],
+            "stop_help": topic["stop_help"],
+            "faq": topic["faq"],
+            "related_guides": topic["related_guides"],
+            "sources": topic["sources"],
+        }
+        markdown = self.env.get_template("windows_article.md.j2").render(**context)
+        html = self.env.get_template("windows_article.html.j2").render(**context)
+        return Article(
+            title=topic["title"],
+            slug=topic["slug"],
+            category=candidate.category,
+            tags=context["tags"],
+            meta_description=topic["meta_description"],
+            markdown=markdown,
+            html=html,
+            image=image,
+            sources=topic["sources"],
+            created_at=datetime.utcnow(),
+            inline_images=inline_images,
+        )
+
+    def _tags(self, candidate: TopicCandidate) -> list[str]:
+        tags = [candidate.category, "Windows help", "beginner PC help", "Windows 11", "Windows 10"]
+        for word in candidate.keyword.replace("-", " ").split():
+            if len(word) > 3:
+                tags.append(word.lower())
+        return list(dict.fromkeys(tags))[:10]
+
+
+def _topic_profile(keyword: str, category: str) -> dict:
+    normalized = keyword.lower()
+    error = _error_code(normalized)
+    title_keyword = title_case_keyword(keyword).replace("Wifi", "Wi-Fi")
+
+    if error:
+        title = f"Windows Update Error {error}: What It Means and How to Fix It"
+    elif "wifi" in normalized or "wi-fi" in normalized:
+        title = "Wi-Fi Button Missing on Windows 11: Simple Fixes for Beginners"
+    elif "sound" in normalized or "audio" in normalized:
+        title = "No Sound After Windows Update? Try These Easy Steps First"
+    elif "printer" in normalized:
+        title = "Printer Says Offline on Windows 11? Simple Fixes for Beginners"
+    elif "search" in normalized:
+        title = "Windows Search Not Working: Beginner-Friendly Fixes to Try First"
+    elif "file explorer" in normalized:
+        title = "File Explorer Keeps Freezing on Windows: Simple Fixes for Beginners"
+    elif "safe mode" in normalized:
+        title = "How to Start Windows in Safe Mode: Beginner-Friendly Guide"
+    elif "disk space" in normalized:
+        title = "How to Free Up Disk Space on Windows: Safe Steps for Beginners"
+    else:
+        title = f"{title_keyword}: Easy Windows Fixes for Beginners"
+
+    risk = _risk_level(normalized)
+    data_loss = "Yes" if risk == "High" or any(term in normalized for term in ["disk", "recovery", "reset"]) else "No"
+    estimated = "20 minutes" if risk == "High" else "10 minutes" if risk == "Medium" else "5 minutes"
+
+    return {
+        "title": title,
+        "slug": slugify(title),
+        "meta_description": f"Beginner-friendly Windows help for {keyword}, with safe first steps, risk level, official Microsoft sources, and clear warnings before advanced fixes.",
+        "lead": (
+            "This guide is written for everyday Windows users who want clear steps without risky shortcuts. "
+            "Start with the low-risk checks first, stop if you see signs of data loss, and use the official Microsoft links at the end to confirm current guidance."
+        ),
+        "facts": {
+            "applies_to": "Windows 10 / Windows 11",
+            "risk_level": risk,
+            "data_loss_risk": data_loss,
+            "estimated_time": estimated,
+            "last_checked": datetime.utcnow().strftime("%Y-%m-%d"),
+        },
+        "quick_summary": _quick_summary(keyword, error),
+        "before_start": _before_start(normalized, error),
+        "symptoms": _symptoms(normalized, error),
+        "meaning": _meaning(normalized, error),
+        "not_to_do": _not_to_do(normalized, risk),
+        "try_first": _try_first(normalized),
+        "fixes": _fixes(normalized, error),
+        "after_each_step": _after_each_step(normalized),
+        "advanced_fixes": _advanced_fixes(normalized, risk),
+        "stop_help": [
+            "Important files are missing, hidden, or cannot be opened.",
+            "A drive is not detected, makes unusual noises, or asks for a BitLocker recovery key.",
+            "Blue screen errors repeat after every restart.",
+            "This is a work or school PC and you do not have administrator permission.",
+            "A step mentions reset, recovery, partition, format, Registry, BIOS, or advanced commands and you do not understand the risk.",
+        ],
+        "faq": _faq(keyword, error),
+        "related_guides": _related_guides(category),
+        "sources": MICROSOFT_SOURCES,
+    }
+
+
+def _error_code(text: str) -> str | None:
+    match = re.search(r"0x[a-f0-9]{8}", text)
+    return match.group(0).upper() if match else None
+
+
+def _risk_level(text: str) -> str:
+    if any(term in text for term in ["reset", "format", "partition", "bios", "uefi", "registry", "recovery"]):
+        return "High"
+    if any(term in text for term in ["driver", "sfc", "dism", "service", "update error", "0x"]):
+        return "Medium"
+    return "Low"
+
+
+def _quick_summary(keyword: str, error: str | None) -> list[str]:
+    if error:
+        return [
+            f"{error} usually appears when Windows Update cannot complete normally.",
+            "Start with restart, internet, free disk space, and the Windows Update troubleshooter.",
+            "Do not reset the PC or edit the Registry as the first step.",
+            "If updates keep failing, use Microsoft guidance before trying advanced commands.",
+            "This guide keeps advanced repair steps separate so beginners do not start with risky changes.",
+            "If this is a work or school device, check with the administrator before changing drivers, services, or update settings.",
+        ]
+    return [
+        f"The problem is usually fixable with basic Windows settings, restart, or built-in troubleshooters.",
+        "Try the safest steps first before downloading tools or changing advanced settings.",
+        "Stop if you see missing files, BitLocker prompts, repeated blue screens, or drive errors.",
+        "Use official Microsoft or device-maker pages for drivers and repair instructions.",
+        "Take notes as you go so you can undo a change or explain what happened if you need help.",
+        "This guide separates simple checks from advanced fixes to reduce unnecessary risk.",
+    ]
+
+
+def _before_start(text: str, error: str | None) -> list[str]:
+    base = [
+        "Work slowly and change one thing at a time. If you try five fixes at once, it becomes hard to know which step helped or which step made the problem worse.",
+        "Keep your charger connected if you are using a laptop. Troubleshooting updates, network drivers, printers, or audio devices can take longer than expected, and losing power during a repair can create a second problem.",
+        "Save open documents before you begin. Most beginner steps are low risk, but restarts, troubleshooters, and driver changes can close apps or interrupt unfinished work.",
+        "If this is a company, school, or shared family computer, check whether another person manages it. Some settings may be controlled by an administrator, and forcing changes can break work or school requirements.",
+    ]
+    if error:
+        base.extend(
+            [
+                "For Windows Update errors, do not assume the error code always has one single cause. The same code can appear because of pending restarts, network problems, free-space problems, update cache issues, or a temporary Microsoft-side issue.",
+                "Before trying commands, check whether the update is known to have problems on the Windows release health page. If Microsoft is already investigating an issue, waiting may be safer than changing your PC repeatedly.",
+            ]
+        )
+    elif "wifi" in text or "wi-fi" in text:
+        base.extend(
+            [
+                "For Wi-Fi problems, first separate the PC from the network. If phones and other laptops also cannot connect, the router or internet service may be the real problem, not Windows.",
+                "If Ethernet works but Wi-Fi does not, the issue is more likely related to the wireless adapter, airplane mode, power saving, or the wireless driver.",
+                "If you need internet immediately, use a temporary safe workaround such as Ethernet, phone hotspot, or another trusted network while you complete the checks.",
+            ]
+        )
+    elif "printer" in text:
+        base.extend(
+            [
+                "For printer problems, check the physical printer first. Paper, ink, toner, power, sleep mode, Wi-Fi status, and a stuck queue can all look like a Windows problem.",
+                "If several people use the same printer, ask whether it works for someone else before removing and adding devices on your PC.",
+            ]
+        )
+    else:
+        base.extend(
+            [
+                "If the problem started right after installing an app, connecting a device, or changing a setting, write that down. The timing often matters more than the exact error text.",
+                "Avoid paid repair pop-ups and aggressive cleanup tools. They often make beginners feel rushed, but the safer path is to use Windows settings and official support pages first.",
+            ]
+        )
+    return base
+
+
+def _symptoms(text: str, error: str | None) -> list[str]:
+    if error:
+        return [
+            f"Windows Update shows {error}.",
+            "The update downloads but fails during install.",
+            "The PC may ask you to restart, then show the same error again.",
+            "The update history may show failed install attempts.",
+            "The PC may work normally except for the update problem.",
+        ]
+    if "wifi" in text or "wi-fi" in text:
+        return [
+            "The Wi-Fi button is missing from Quick Settings.",
+            "Only airplane mode or Bluetooth appears.",
+            "The PC cannot see nearby wireless networks.",
+            "Ethernet may still work, but wireless networks do not appear.",
+            "The issue may start after an update, restart, sleep mode, or driver change.",
+        ]
+    if "sound" in text or "audio" in text:
+        return ["Speakers or headphones produce no sound.", "The volume icon looks normal but nothing plays.", "The issue started after a Windows update or restart.", "Bluetooth headphones may connect but stay silent.", "One app may have sound while another app is muted."]
+    if "printer" in text:
+        return ["Windows says the printer is offline.", "Print jobs stay in the queue.", "The printer works on another device but not this PC.", "The printer appears more than once in Settings.", "A document prints only after restarting the printer or computer."]
+    return ["The Windows feature does not respond normally.", "Restarting may help temporarily.", "The issue returns during normal use.", "The problem may affect one account, one device, or one Windows feature.", "Windows may show no clear error message."]
+
+
+def _meaning(text: str, error: str | None) -> list[str]:
+    if error:
+        return [
+            "Windows Update may be blocked by a pending restart, low disk space, a damaged update cache, or a service problem.",
+            "It does not always mean your PC is broken. Many update errors are temporary or related to a specific update package.",
+            "The safest approach is to remove simple blockers first, then check whether Microsoft has listed a known issue.",
+        ]
+    if "wifi" in text or "wi-fi" in text:
+        return [
+            "Windows may not detect the wireless adapter, the adapter may be disabled, or the network driver may need attention.",
+            "It can also happen when airplane mode, power saving, or a temporary driver state hides wireless options.",
+            "Because Wi-Fi drivers affect internet access, avoid random driver installers and use official sources only.",
+        ]
+    if "printer" in text:
+        return [
+            "Windows may be using the wrong printer status, a stuck queue, a disconnected printer, or an outdated printer connection.",
+            "A printer can also appear offline when the printer is asleep, on another Wi-Fi network, or paused in Windows.",
+            "Start with connection and queue checks before removing drivers or changing advanced printer settings.",
+        ]
+    return [
+        "This usually means Windows needs a basic reset of the affected feature, a settings check, or an official troubleshooter.",
+        "Most beginner problems should be handled with reversible steps first.",
+        "Advanced repair should come only after you know the simple checks did not help.",
+    ]
+
+
+def _not_to_do(text: str, risk: str) -> list[str]:
+    values = [
+        "Do not reset your PC yet.",
+        "Do not download random driver tools.",
+        "Do not pay for unknown repair software.",
+        "Do not run commands you do not understand.",
+        "Do not follow a video or forum post if it asks you to disable security features without explaining why.",
+        "Do not delete system files manually.",
+    ]
+    if risk in {"Medium", "High"}:
+        values.append("Do not edit the Registry first.")
+    if risk == "High":
+        values.append("Do not format your drive unless you have a backup.")
+    return values
+
+
+def _try_first(text: str) -> list[str]:
+    base = [
+        "Restart the PC once. A normal restart is different from simply closing the laptop lid.",
+        "Check that Windows is connected to power and the internet.",
+        "Install only updates or drivers offered through Windows Settings or the device maker.",
+        "Write down what changed before the problem started, such as an update, new app, new printer, or new router.",
+        "If you use antivirus, VPN, or device management software, remember that it may affect network, update, or printer behavior.",
+    ]
+    if "wifi" in text or "wi-fi" in text:
+        return ["Restart the PC and router.", "Turn airplane mode off.", "Open Settings > Network & internet and check whether Wi-Fi appears.", *base]
+    if "printer" in text:
+        return ["Make sure the printer is turned on.", "Check the cable or Wi-Fi connection.", "Cancel stuck print jobs before adding the printer again.", *base]
+    if "sound" in text or "audio" in text:
+        return ["Check the volume and output device.", "Disconnect and reconnect headphones or speakers.", "Run the Windows audio troubleshooter.", *base]
+    return base
+
+
+def _fixes(text: str, error: str | None) -> list[str]:
+    if error:
+        return [
+            "Open Settings > Windows Update and select Check for updates again after one restart.",
+            "Free up disk space, especially on the Windows drive, then retry the update.",
+            "Run the Windows Update troubleshooter from Settings > System > Troubleshoot > Other troubleshooters.",
+            "Pause updates briefly, resume them, and try again.",
+            "Check Windows release health to see whether Microsoft has listed a known update issue.",
+        ]
+    if "wifi" in text or "wi-fi" in text:
+        return [
+            "Open Settings > Network & internet and confirm Wi-Fi is available.",
+            "Use Network reset only after basic checks, because it removes and reinstalls network adapters.",
+            "Check Device Manager for the wireless adapter without installing unknown driver tools.",
+            "Install driver updates from Windows Update or the PC maker's support page.",
+            "If Wi-Fi returns after a restart but disappears again, check for pending Windows updates and official driver updates.",
+            "If your laptop has a physical wireless switch or keyboard shortcut, make sure it was not turned off accidentally.",
+            "If other devices also cannot connect to Wi-Fi, troubleshoot the router or internet service first.",
+        ]
+    if "printer" in text:
+        return [
+            "Open Settings > Bluetooth & devices > Printers & scanners and select the correct printer.",
+            "Clear the print queue and try a one-page test print.",
+            "Remove and add the printer again if the connection is stale.",
+            "Use the printer maker's official support page for drivers, not unknown repair tools.",
+            "Make sure Windows is not set to use the wrong copy of the same printer.",
+            "If the printer is shared through another computer, confirm that computer is turned on and connected.",
+        ]
+    return [
+        "Open the related Windows Settings page and check the basic option first.",
+        "Run the relevant Windows troubleshooter.",
+        "Check for Windows updates.",
+        "Restart the affected app or service only if Microsoft guidance recommends it.",
+        "Try the same task in a different user account only if you understand how to switch accounts safely.",
+        "Compare the issue with another device when possible so you know whether the problem is the PC, network, printer, or accessory.",
+        "Keep changes small. Make one change, test it, and then continue.",
+    ]
+
+
+def _after_each_step(text: str) -> list[str]:
+    checks = [
+        "Test the problem again before moving to the next fix. For example, check whether the Wi-Fi button returned, the printer prints one page, or Windows Update starts installing normally.",
+        "If a step changes a setting, write down the original setting first. This makes it easier to undo the change if it does not help.",
+        "If the problem improves for a few minutes and then returns, note the timing. A problem that returns after sleep mode, restart, or reconnecting a device can point to a driver, power, or service issue.",
+        "Do not keep repeating the same failed step many times. If one official troubleshooter or setting change does not help after a reasonable try, move on carefully or stop and ask for help.",
+        "Keep screenshots of unusual messages so you can compare them with official support instructions later.",
+    ]
+    if "wifi" in text or "wi-fi" in text:
+        checks.extend(
+            [
+                "After each network step, try loading a simple website and checking whether other devices on the same Wi-Fi still work.",
+                "If you temporarily use a phone hotspot, remember that it may use mobile data. Switch back to your normal network after testing.",
+            ]
+        )
+    elif "printer" in text:
+        checks.extend(
+            [
+                "After each printer step, send only a one-page test. Avoid sending a large document repeatedly because it can fill the queue again.",
+                "If the printer wakes up but still does not print, check the queue before reinstalling anything.",
+            ]
+        )
+    else:
+        checks.extend(
+            [
+                "After each Windows step, restart only when the setting or troubleshooter asks you to. Unnecessary restarts make the process slower and harder to track.",
+                "If the same error message appears again, keep the exact wording or code for your next search or support request.",
+            ]
+        )
+    return checks
+
+
+def _advanced_fixes(text: str, risk: str) -> list[str]:
+    warning = "Warning: advanced fixes can change Windows system files or settings. Back up important files first and stop if you are not sure."
+    if risk == "Low":
+        return [warning, "No advanced fix is recommended as the first path for this issue. Use official Microsoft guidance if the basic steps fail."]
+    return [
+        warning,
+        "Use SFC or DISM only from official Microsoft instructions and only if basic settings and troubleshooters fail.",
+        "Uninstalling an update, resetting Windows components, or changing drivers should be done carefully and documented before you start.",
+        "Registry, BIOS/UEFI, partition, reset, or format steps should be handled by an experienced person if you do not understand the risk.",
+        "If you decide to use command-line repair, copy commands only from official Microsoft documentation and read what each command does first.",
+        "If the PC contains important school, work, family, or business files, make a backup before any repair that changes system files or drivers.",
+    ]
+
+
+def _faq(keyword: str, error: str | None) -> list[dict[str, str]]:
+    return [
+        {"question": "Should I reset my PC first?", "answer": "No. Resetting is not a first step. Try low-risk settings, restart, troubleshooters, and official Microsoft guidance first."},
+        {"question": "Is it safe to use driver updater tools?", "answer": "Avoid random driver tools. Use Windows Update, your PC maker, or the hardware maker's official website."},
+        {"question": "Can this cause data loss?", "answer": "Basic checks usually do not. Advanced repair, reset, recovery, partition, or format steps can risk data loss, so back up important files first."},
+        {"question": "Does this apply to both Windows 10 and Windows 11?", "answer": "Most beginner steps are similar, but menu names can differ. Check the Applies to box and official Microsoft links."},
+        {"question": "When should I ask for help?", "answer": "Ask for help if files are missing, BitLocker appears, blue screens repeat, a drive is not detected, or this is a managed work or school PC."},
+        {"question": "Can I skip the simple steps and try advanced repair?", "answer": "That is not recommended for beginners. Simple checks are easier to undo and often solve the problem without touching system files or drivers."},
+        {"question": "Why does this guide link to Microsoft sources?", "answer": "Windows settings and update behavior can change. Official Microsoft pages are the safest place to confirm current wording, menus, and known issues."},
+        {"question": "What should I write down before asking someone for help?", "answer": "Write down the error message, when it started, your Windows version, what you already tried, and whether the problem happens on another device or account. This helps support staff avoid repeating the same steps."},
+        {"question": "Should I install a cleanup app to fix this faster?", "answer": "No. Cleanup and repair apps can remove useful files or change settings without explaining the risk. Use built-in Windows settings, official troubleshooters, and official vendor pages first."},
+    ]
+
+
+def _related_guides(category: str) -> list[str]:
+    mapping = {
+        "Windows Update": ["How to check your Windows version", "How to free up disk space on Windows", "Windows Update stuck at 100%"],
+        "Wi-Fi & Internet": ["Internet connected but not working", "DNS problems on Windows", "How to reset network settings safely"],
+        "Printer & Scanner": ["How to clear the printer queue", "Printer not showing in Windows", "Scanner not detected on Windows"],
+    }
+    return mapping.get(category, ["How to start Windows in Safe Mode", "How to check your Windows version", "Beginner PC troubleshooting checklist"])

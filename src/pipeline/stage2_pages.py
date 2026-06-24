@@ -15,11 +15,11 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(messag
 LOGGER = logging.getLogger("stage2_pages")
 
 
-def run() -> Path:
-    settings = load_settings()
+def run(site: str | None = None) -> Path:
+    settings = load_settings(site)
     publisher = BloggerPublisher(settings)
     results = []
-    for page in required_pages(settings.site_name):
+    for page in required_pages(settings.site_name, settings.content_domain):
         LOGGER.info("Upserting Blogger page: %s", page.title)
         result = publisher.upsert_page(page.title, page.html)
         results.append(
@@ -34,7 +34,7 @@ def run() -> Path:
             }
         )
 
-    output_dir = ROOT_DIR / "data" / "generated" / "static_pages"
+    output_dir = Path(settings.generated_output_dir) / "static_pages"
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / "blogger_pages_result.json"
     output_path.write_text(
@@ -55,9 +55,10 @@ def run() -> Path:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Create or update required Blogger static pages.")
-    parser.parse_args()
+    parser.add_argument("--site", help="Site profile key, for example: easy_pc_fix_guide")
+    args = parser.parse_args()
     try:
-        result_path = run()
+        result_path = run(args.site)
     except BloggerCredentialsError as exc:
         raise SystemExit(f"Blogger credential setup required: {exc}") from exc
     print(result_path)

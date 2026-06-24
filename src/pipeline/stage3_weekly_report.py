@@ -9,8 +9,9 @@ from src.reporting.weekly import WeeklyReporter
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate a weekly automation report.")
-    parser.parse_args()
-    settings = load_settings()
+    parser.add_argument("--site", help="Site profile key, for example: easy_pc_fix_guide")
+    args = parser.parse_args()
+    settings = load_settings(args.site)
     path = WeeklyReporter(settings).generate()
     NotificationClient(settings).send(path.read_text(encoding="utf-8"))
     print(path)

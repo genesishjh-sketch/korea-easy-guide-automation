@@ -1,0 +1,207 @@
+<style>
+  .epfg-post {
+    --ink: #172033;
+    --muted: #526173;
+    --line: #d9e3ea;
+    --blue: #2563eb;
+    --green: #0f766e;
+    --amber: #b45309;
+    --red: #b91c1c;
+    color: var(--ink);
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 17px;
+    line-height: 1.72;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+  .epfg-post * { box-sizing: border-box; }
+  .epfg-post figure { margin: 0 0 28px; }
+  .epfg-post img { display: block; width: 100%; height: auto; }
+  .epfg-post__hero,
+  .epfg-post__inline {
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: #f8fbfd;
+  }
+  .epfg-post__caption {
+    margin: 0;
+    padding: 10px 14px;
+    background: #f8fbfd;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .epfg-post__lead {
+    margin: 0 0 24px;
+    padding: 18px 20px;
+    border-left: 5px solid var(--blue);
+    border-radius: 0 12px 12px 0;
+    background: #eef5ff;
+  }
+  .epfg-post h2 {
+    margin: 38px 0 14px;
+    padding-top: 8px;
+    border-top: 1px solid var(--line);
+    font-size: 25px;
+    line-height: 1.25;
+  }
+  .epfg-post h3 { margin: 22px 0 8px; font-size: 20px; }
+  .epfg-post p { margin: 0 0 18px; }
+  .epfg-post a {
+    color: var(--blue);
+    font-weight: 700;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(37, 99, 235, 0.32);
+  }
+  .epfg-post table {
+    width: 100%;
+    margin: 14px 0 26px;
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+  .epfg-post th,
+  .epfg-post td {
+    padding: 13px 15px;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+    vertical-align: top;
+  }
+  .epfg-post th { background: #eaf3ff; color: #17335f; }
+  .epfg-post tr:last-child td { border-bottom: 0; }
+  .epfg-post ol,
+  .epfg-post ul { margin: 0 0 24px; padding-left: 22px; }
+  .epfg-post li { margin: 0 0 10px; }
+  .epfg-post__warning {
+    margin: 18px 0 24px;
+    padding: 16px 18px;
+    border: 1px solid #f1c6c6;
+    border-left: 5px solid var(--red);
+    border-radius: 12px;
+    background: #fff5f5;
+    color: #6b1f1f;
+    font-weight: 700;
+  }
+  @media (max-width: 640px) {
+    .epfg-post { font-size: 16px; }
+    .epfg-post h2 { font-size: 22px; }
+    .epfg-post table { display: block; overflow-x: auto; }
+    .epfg-post th,
+    .epfg-post td { min-width: 170px; }
+  }
+</style>
+
+<article class="epfg-post">
+  <figure class="epfg-post__hero">
+    <img src="{{ image.url or image.path }}" alt="{{ image.alt }}" loading="lazy">
+  </figure>
+
+  <p class="epfg-post__lead">{{ lead }}</p>
+
+  <h2>Quick Summary</h2>
+  <ul>
+    {% for item in quick_summary %}
+    <li>{{ item }}</li>
+    {% endfor %}
+  </ul>
+
+  <h2>Applies to / Risk level / Data loss risk / Last checked</h2>
+  <table>
+    <tr><th>Item</th><th>Details</th></tr>
+    <tr><td>Applies to</td><td>{{ facts.applies_to }}</td></tr>
+    <tr><td>Risk level</td><td>{{ facts.risk_level }}</td></tr>
+    <tr><td>Data loss risk</td><td>{{ facts.data_loss_risk }}</td></tr>
+    <tr><td>Estimated time</td><td>{{ facts.estimated_time }}</td></tr>
+    <tr><td>Last checked</td><td>{{ facts.last_checked }}</td></tr>
+  </table>
+
+  <h2>Before You Start</h2>
+  {% for item in before_start %}
+  <p>{{ item }}</p>
+  {% endfor %}
+
+  <h2>Symptoms</h2>
+  <ul>
+    {% for item in symptoms %}
+    <li>{{ item }}</li>
+    {% endfor %}
+  </ul>
+
+  <h2>What This Usually Means</h2>
+  {% for item in meaning %}
+  <p>{{ item }}</p>
+  {% endfor %}
+
+  {% if inline_images %}
+  <figure class="epfg-post__inline">
+    <img src="{{ inline_images[0].url or inline_images[0].path }}" alt="{{ inline_images[0].alt }}" loading="lazy">
+    <figcaption class="epfg-post__caption">{{ inline_images[0].caption }}</figcaption>
+  </figure>
+  {% endif %}
+
+  <h2>What Not to Do First</h2>
+  <ul>
+    {% for item in not_to_do %}
+    <li>{{ item }}</li>
+    {% endfor %}
+  </ul>
+
+  <h2>Try This First</h2>
+  <ol>
+    {% for item in try_first %}
+    <li>{{ item }}</li>
+    {% endfor %}
+  </ol>
+
+  <h2>Step-by-Step Fixes</h2>
+  <ol>
+    {% for item in fixes %}
+    <li>{{ item }}</li>
+    {% endfor %}
+  </ol>
+
+  <h2>After Each Step</h2>
+  <ul>
+    {% for item in after_each_step %}
+    <li>{{ item }}</li>
+    {% endfor %}
+  </ul>
+
+  <h2>Advanced Fixes</h2>
+  <div class="epfg-post__warning">Back up important files before advanced fixes. Stop if you see missing files, BitLocker recovery, repeated blue screens, or drive errors.</div>
+  <ol>
+    {% for item in advanced_fixes %}
+    <li>{{ item }}</li>
+    {% endfor %}
+  </ol>
+
+  <h2>When to Stop and Get Help</h2>
+  <ul>
+    {% for item in stop_help %}
+    <li>{{ item }}</li>
+    {% endfor %}
+  </ul>
+
+  <h2>FAQ</h2>
+  {% for item in faq %}
+  <h3>{{ item.question }}</h3>
+  <p>{{ item.answer }}</p>
+  {% endfor %}
+
+  <h2>Related Guides</h2>
+  <ul>
+    {% for item in related_guides %}
+    <li>{{ item }}</li>
+    {% endfor %}
+  </ul>
+
+  <h2>Sources</h2>
+  <p>Use official Microsoft sources to confirm current Windows behavior before trying advanced fixes.</p>
+  <ul>
+    {% for source in sources %}
+    <li><a href="{{ source.url }}" target="_blank" rel="noopener noreferrer">{{ source.name }}</a></li>
+    {% endfor %}
+  </ul>
+</article>

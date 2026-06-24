@@ -45,6 +45,9 @@ OFFICIAL_SOURCE_DOMAINS = (
     "kakao.com",
     "apple.com",
     "google.com",
+    "microsoft.com",
+    "learn.microsoft.com",
+    "support.microsoft.com",
 )
 
 BLOCKED_PHRASES = {
@@ -56,6 +59,29 @@ BLOCKED_PHRASES = {
     "sources to check before you go",
     "common mistakes to avoid",
     "what you should know first",
+}
+
+WINDOWS_REQUIRED_HEADINGS = {
+    "Quick Summary",
+    "Applies to / Risk level / Data loss risk / Last checked",
+    "Symptoms",
+    "What This Usually Means",
+    "What Not to Do First",
+    "Try This First",
+    "Step-by-Step Fixes",
+    "Advanced Fixes",
+    "When to Stop and Get Help",
+    "FAQ",
+    "Related Guides",
+    "Sources",
+}
+
+WINDOWS_BLOCKED_PHRASES = {
+    "crack",
+    "kms activator",
+    "activate windows for free",
+    "download this repair tool",
+    "disable antivirus permanently",
 }
 
 
@@ -92,6 +118,9 @@ class HadesQualityGate:
     reviewer_name = "Hades Engineer"
     min_score = 90
 
+    def __init__(self, content_domain: str = "korea_travel") -> None:
+        self.content_domain = content_domain
+
     def review_article_dir(self, article_dir: Path) -> QualityReport:
         html_path = article_dir / "article.html"
         metadata_path = article_dir / "metadata.json"
@@ -125,7 +154,8 @@ class HadesQualityGate:
             faq_questions = len([heading for heading in soup.find_all("h3")])
 
         issues: list[QualityIssue] = []
-        missing_headings = sorted(REQUIRED_HEADINGS - headings)
+        required_headings = WINDOWS_REQUIRED_HEADINGS if self.content_domain == "windows_help" else REQUIRED_HEADINGS
+        missing_headings = sorted(required_headings - headings)
         if missing_headings:
             issues.append(QualityIssue("missing_required_sections", f"Missing sections: {', '.join(missing_headings)}."))
         if len(words) < MIN_WORD_COUNT:
@@ -140,6 +170,9 @@ class HadesQualityGate:
         for phrase in BLOCKED_PHRASES:
             if phrase in text_lower:
                 issues.append(QualityIssue("blocked_phrase", f"Blocked phrase found: {phrase}."))
+
+        if self.content_domain == "windows_help":
+            issues.extend(self._review_windows_article(text_lower, links))
 
         image_plan_path = article_dir / "image_plan.json"
         if image_plan_path.exists():
@@ -173,6 +206,25 @@ class HadesQualityGate:
         }
         return self._report(score, issues, metrics)
 
+    def _review_windows_article(self, text_lower: str, links: list) -> list[QualityIssue]:
+        issues: list[QualityIssue] = []
+        microsoft_links = [
+            link
+            for link in links
+            if any(domain in (link.get("href") or "") for domain in ("microsoft.com", "learn.microsoft.com", "support.microsoft.com"))
+        ]
+        if not microsoft_links:
+            issues.append(QualityIssue("missing_microsoft_source", "Windows help articles require at least one official Microsoft source."))
+        for required in ["applies to", "risk level", "data loss risk", "estimated time", "last checked"]:
+            if required not in text_lower:
+                issues.append(QualityIssue("missing_windows_safety_field", f"Missing Windows safety field: {required}."))
+        if "advanced fixes" in text_lower and "back up important files" not in text_lower:
+            issues.append(QualityIssue("missing_advanced_warning", "Advanced fixes require a clear backup warning."))
+        for phrase in WINDOWS_BLOCKED_PHRASES:
+            if phrase in text_lower:
+                issues.append(QualityIssue("blocked_windows_phrase", f"Blocked Windows phrase found: {phrase}."))
+        return issues
+
     def _review_research_report(self, article_dir: Path) -> tuple[dict[str, int], list[QualityIssue]]:
         report_path = article_dir / "research_report.json"
         metrics = {
@@ -197,6 +249,12 @@ class HadesQualityGate:
             for source in sources
             if any(domain in (source.get("url") or "") for domain in OFFICIAL_SOURCE_DOMAINS)
         ]
+        if self.content_domain == "windows_help":
+            official_sources = [
+                source
+                for source in sources
+                if any(domain in (source.get("url") or "") for domain in ("microsoft.com", "learn.microsoft.com", "support.microsoft.com"))
+            ]
 
         metrics.update(
             {

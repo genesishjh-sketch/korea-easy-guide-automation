@@ -16,8 +16,8 @@ from src.reporting.search_console import SearchConsoleClient
 from src.reporting.weekly import WeeklyReporter
 
 
-def run(today: date | None = None, force: bool = False) -> bool:
-    settings = load_settings()
+def run(today: date | None = None, force: bool = False, site: str | None = None) -> bool:
+    settings = load_settings(site)
     selected_date = today or datetime.utcnow().date()
 
     if not force and selected_date not in {TWO_POST_REVIEW_DATE, THREE_POST_REVIEW_DATE}:
@@ -61,9 +61,10 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Send a Posting Bot alert on cadence review dates.")
     parser.add_argument("--date", help="Override date in YYYY-MM-DD format.")
     parser.add_argument("--force", action="store_true", help="Send alert even if today is not a review date.")
+    parser.add_argument("--site", help="Site profile key, for example: easy_pc_fix_guide")
     args = parser.parse_args()
     selected_date = datetime.strptime(args.date, "%Y-%m-%d").date() if args.date else None
-    run(today=selected_date, force=args.force)
+    run(today=selected_date, force=args.force, site=args.site)
 
 
 if __name__ == "__main__":

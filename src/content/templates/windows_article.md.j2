@@ -1,0 +1,116 @@
+---
+title: "{{ title }}"
+slug: "{{ slug }}"
+category: "{{ category }}"
+tags: {{ tags }}
+meta_description: "{{ meta_description }}"
+image: "{{ image.url or image.path }}"
+---
+
+# {{ title }}
+
+![{{ image.alt }}]({{ image.url or image.path }})
+
+{{ lead }}
+
+## Quick Summary
+
+{% for item in quick_summary -%}
+- {{ item }}
+{% endfor %}
+
+## Applies to / Risk level / Data loss risk / Last checked
+
+| Item | Details |
+|---|---|
+| Applies to | {{ facts.applies_to }} |
+| Risk level | {{ facts.risk_level }} |
+| Data loss risk | {{ facts.data_loss_risk }} |
+| Estimated time | {{ facts.estimated_time }} |
+| Last checked | {{ facts.last_checked }} |
+
+## Before You Start
+
+{% for item in before_start -%}
+{{ item }}
+
+{% endfor -%}
+
+## Symptoms
+
+{% for item in symptoms -%}
+- {{ item }}
+{% endfor %}
+
+## What This Usually Means
+
+{% for item in meaning -%}
+{{ item }}
+
+{% endfor -%}
+
+{% if inline_images -%}
+![{{ inline_images[0].alt }}]({{ inline_images[0].url or inline_images[0].path }})
+
+{{ inline_images[0].caption }}
+
+{% endif -%}
+
+## What Not to Do First
+
+{% for item in not_to_do -%}
+- {{ item }}
+{% endfor %}
+
+## Try This First
+
+{% for item in try_first -%}
+{{ loop.index }}. {{ item }}
+{% endfor %}
+
+## Step-by-Step Fixes
+
+{% for item in fixes -%}
+{{ loop.index }}. {{ item }}
+{% endfor %}
+
+## After Each Step
+
+{% for item in after_each_step -%}
+- {{ item }}
+{% endfor %}
+
+## Advanced Fixes
+
+Back up important files before advanced fixes. Stop if you see missing files, BitLocker recovery, repeated blue screens, or drive errors.
+
+{% for item in advanced_fixes -%}
+{{ loop.index }}. {{ item }}
+{% endfor %}
+
+## When to Stop and Get Help
+
+{% for item in stop_help -%}
+- {{ item }}
+{% endfor %}
+
+## FAQ
+
+{% for item in faq -%}
+### {{ item.question }}
+
+{{ item.answer }}
+
+{% endfor -%}
+
+## Related Guides
+
+{% for item in related_guides -%}
+- {{ item }}
+{% endfor %}
+
+## Sources
+
+{% for source in sources -%}
+- [{{ source.name }}]({{ source.url }})
+{% endfor %}

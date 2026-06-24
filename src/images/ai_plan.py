@@ -45,6 +45,21 @@ class ArticleImagePlan:
 
 
 def build_article_image_plan(candidate: TopicCandidate, title: str) -> ArticleImagePlan:
+    if candidate.category in {
+        "Windows Update",
+        "Wi-Fi & Internet",
+        "Sound & Microphone",
+        "Printer & Scanner",
+        "Boot & Recovery",
+        "File Explorer",
+        "Windows Search",
+        "OneDrive & Account",
+        "Beginner PC Tips",
+        "Error Codes",
+        "Computer Help",
+    }:
+        return build_windows_image_plan(candidate, title)
+
     scene = detect_scene(f"{candidate.keyword} {title}")
     visual_subject = _visual_subject(scene, candidate.keyword)
     style = (
@@ -84,6 +99,43 @@ def build_article_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
         notes=[
             "Do not call paid image APIs in the Python pipeline.",
             "Generate these assets manually with Codex image generation, then save them with the exact filenames.",
+            "Publishing should stop when required image files are missing.",
+        ],
+        images=[hero, inline],
+    )
+
+
+def build_windows_image_plan(candidate: TopicCandidate, title: str) -> ArticleImagePlan:
+    hero = PlannedImage(
+        role="hero",
+        filename="ai-hero.jpg",
+        alt=f"{title} beginner-friendly Windows help visual",
+        caption="A calm beginner-friendly visual for solving this Windows problem safely.",
+        prompt=(
+            f"Create a realistic 16:9 hero image for an English beginner computer help article titled '{title}'. "
+            "Show a clean home desk with a laptop, simple troubleshooting notes, and a calm non-technical user solving a Windows problem. "
+            "Do not show real Microsoft logos, fake Windows UI, readable error codes, brand marks, private information, or text overlays. "
+            "Style: modern trustworthy tech-help editorial photography, bright natural light, clear composition, practical and safe."
+        ),
+    )
+    inline = PlannedImage(
+        role="inline",
+        filename="ai-inline-1.jpg",
+        alt=f"Safe step-by-step troubleshooting setup for {candidate.keyword}",
+        caption="Work through the safe checks first before trying advanced repair steps.",
+        prompt=(
+            f"Create a realistic 16:9 in-article image for a beginner Windows troubleshooting guide about '{candidate.keyword}'. "
+            "Show a simple step-by-step troubleshooting setup: laptop, notebook checklist, router/printer/headphones only if relevant, and a calm workspace. "
+            "Avoid real or fake operating-system screens, no Microsoft logos, no readable UI text, no scary warning overlays, no watermarks."
+        ),
+    )
+    return ArticleImagePlan(
+        mode="codex_generated_no_api",
+        strict=True,
+        notes=[
+            "Do not call paid image APIs in the Python pipeline.",
+            "Generate these assets manually with Codex image generation, then save them with the exact filenames.",
+            "Do not generate fake Windows UI or readable error screens.",
             "Publishing should stop when required image files are missing.",
         ],
         images=[hero, inline],
