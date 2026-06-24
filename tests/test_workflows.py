@@ -34,6 +34,13 @@ class WorkflowSafetyTests(unittest.TestCase):
         self.assertIn("python -m src.pipeline.stage0_preflight --site easy_pc_fix_guide", workflow)
         self.assertIn("reports/easy_pc_fix_guide-preflight.json", workflow)
 
+    def test_easy_pc_publication_check_uploads_report(self) -> None:
+        workflow = (ROOT_DIR / ".github" / "workflows" / "easy-pc-publication-check.yml").read_text(encoding="utf-8")
+
+        self.assertIn("python -m src.pipeline.stage4_publication_check --site easy_pc_fix_guide --after-hour 9", workflow)
+        self.assertIn("actions/upload-artifact", workflow)
+        self.assertIn("reports/easy_pc_fix_guide-publication-check.json", workflow)
+
 
 if __name__ == "__main__":
     unittest.main()

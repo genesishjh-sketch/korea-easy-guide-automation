@@ -4,10 +4,12 @@ import argparse
 from datetime import datetime
 from datetime import timezone
 import json
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import requests
 
+from src.config import ROOT_DIR
 from src.config import load_settings
 from src.notifications.telegram import NotificationClient
 
@@ -46,6 +48,14 @@ def run(site: str | None = None, today: datetime | None = None, after_hour: int 
     }
     NotificationClient(settings).send(build_message(result))
     return result
+
+
+def save_result(result: dict) -> Path:
+    output_dir = ROOT_DIR / "reports"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_path = output_dir / f"{result['site']}-publication-check.json"
+    output_path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+    return output_path
 
 
 def fetch_public_feed(site_url: str) -> dict:
@@ -118,7 +128,11 @@ def main() -> None:
     parser.add_argument("--site", help="Site profile key, for example: easy_pc_fix_guide")
     parser.add_argument("--after-hour", type=int, help="Only count posts published at or after this KST hour.")
     args = parser.parse_args()
-    print(json.dumps(run(args.site, after_hour=args.after_hour), ensure_ascii=False, indent=2, default=str))
+    result = run(args.site, after_hour=args.after_hour)
+    save_result(result)
+    print(json.dumps(result, ensure_ascii=False, indent=2, default=str))
+    if result.get("status") != "published_today":
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":
