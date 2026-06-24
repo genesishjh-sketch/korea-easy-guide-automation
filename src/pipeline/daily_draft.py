@@ -155,10 +155,7 @@ def validate_existing_article(article_dir: Path, site: str | None = None) -> Non
 
 
 def find_public_post(site_url: str, slug: str = "", title: str = "") -> dict | None:
-    try:
-        posts = parse_posts(fetch_public_feed(site_url))
-    except Exception:
-        return None
+    posts = parse_posts(fetch_public_feed(site_url))
     normalized_title = normalize_match_text(title)
     for post in posts:
         if normalized_title and normalize_match_text(post.get("title", "")) == normalized_title:
