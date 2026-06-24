@@ -157,6 +157,9 @@ def main() -> None:
     args = parser.parse_args()
     path = run(args.site)
     print(path)
+    result = json.loads(path.read_text(encoding="utf-8"))
+    if result.get("status") == "fail":
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":

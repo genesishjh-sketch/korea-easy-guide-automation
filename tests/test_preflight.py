@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
+import tempfile
 import unittest
 from unittest.mock import patch
 
@@ -34,6 +37,23 @@ class PreflightTests(unittest.TestCase):
         ]
 
         self.assertEqual(stage0_preflight.overall_status(checks), "fail")
+
+    def test_main_exits_nonzero_when_preflight_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "preflight.json"
+            path.write_text(json.dumps({"status": "fail"}), encoding="utf-8")
+            with patch.object(stage0_preflight, "run", return_value=path), patch("sys.argv", ["stage0_preflight"]):
+                with self.assertRaises(SystemExit) as raised:
+                    stage0_preflight.main()
+
+        self.assertEqual(raised.exception.code, 1)
+
+    def test_main_allows_warning_status(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "preflight.json"
+            path.write_text(json.dumps({"status": "warn"}), encoding="utf-8")
+            with patch.object(stage0_preflight, "run", return_value=path), patch("sys.argv", ["stage0_preflight"]):
+                stage0_preflight.main()
 
 
 if __name__ == "__main__":
