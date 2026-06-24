@@ -23,20 +23,26 @@ def run(site: str | None = None, today: datetime | None = None, after_hour: int 
     feed = fetch_public_feed(settings.site_url)
     posts = parse_posts(feed)
     cutoff = now.replace(hour=after_hour, minute=0, second=0, microsecond=0) if after_hour is not None else None
-    todays_posts = [
+    all_todays_posts = [
         post
         for post in posts
         if post["published_kst"].date() == now.date()
-        and (cutoff is None or post["published_kst"] >= cutoff)
     ]
+    todays_posts = [
+        post
+        for post in all_todays_posts
+        if cutoff is None or post["published_kst"] >= cutoff
+    ]
+    status = publication_status(todays_posts, all_todays_posts, cutoff)
     result = {
         "site": settings.site_key,
         "site_name": settings.site_name,
         "site_url": settings.site_url,
         "checked_at_kst": now.isoformat(),
         "cutoff_kst": cutoff.isoformat() if cutoff else "",
-        "status": "published_today" if todays_posts else "missing_today",
+        "status": status,
         "today_post_count": len(todays_posts),
+        "today_total_post_count": len(all_todays_posts),
         "latest_posts": [
             {
                 "title": post["title"],
@@ -90,9 +96,22 @@ def parse_posts(feed: dict) -> list[dict]:
     return sorted(posts, key=lambda post: post["published_kst"], reverse=True)
 
 
+def publication_status(todays_posts: list[dict], all_todays_posts: list[dict], cutoff: datetime | None) -> str:
+    if todays_posts:
+        return "published_today"
+    if cutoff is not None and all_todays_posts:
+        return "published_today_before_cutoff"
+    return "missing_today"
+
+
+def is_success_status(status: str | None) -> bool:
+    return status in {"published_today", "published_today_before_cutoff"}
+
+
 def build_message(result: dict) -> str:
-    ok = result["status"] == "published_today"
+    ok = is_success_status(result.get("status"))
     cutoff = result.get("cutoff_kst")
+    before_cutoff = result.get("status") == "published_today_before_cutoff"
     lines = [
         "[Posting Bot] 공개 발행 확인",
         "",
@@ -100,8 +119,9 @@ def build_message(result: dict) -> str:
         f"- 사이트: {result['site_url']}",
         f"- 확인시각(KST): {result['checked_at_kst']}",
         f"- 기준시각(KST): {cutoff or '오늘 전체'}",
-        f"- 상태: {'기준 이후 공개 글 확인' if ok else '기준 이후 공개 글 없음'}",
+        f"- 상태: {publication_status_label(result.get('status'))}",
         f"- 기준 이후 공개 글 수: {result['today_post_count']}",
+        f"- 오늘 전체 공개 글 수: {result.get('today_total_post_count', result['today_post_count'])}",
     ]
     todays_latest = [
         post
@@ -116,6 +136,21 @@ def build_message(result: dict) -> str:
                 f"- 최신 글 URL: {first_post.get('url', 'URL 없음')}",
             ]
         )
+    elif before_cutoff:
+        today_latest = [
+            post
+            for post in result.get("latest_posts", [])
+            if str(post.get("published_kst", "")).split("T", 1)[0]
+            == str(result.get("checked_at_kst", "")).split("T", 1)[0]
+        ]
+        if today_latest:
+            first_post = today_latest[0]
+            lines.extend(
+                [
+                    f"- 확인된 오늘 글: {first_post.get('title', '제목 없음')}",
+                    f"- 오늘 글 URL: {first_post.get('url', 'URL 없음')}",
+                ]
+            )
     latest = result.get("latest_posts", [])
     if latest:
         lines.extend(["", "최근 공개 글:"])
@@ -136,6 +171,14 @@ def build_message(result: dict) -> str:
     return "\n".join(lines)
 
 
+def publication_status_label(status: str | None) -> str:
+    if status == "published_today":
+        return "기준 이후 공개 글 확인"
+    if status == "published_today_before_cutoff":
+        return "오늘 공개 글 확인, 기준시각 전 발행"
+    return "기준 이후 공개 글 없음"
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Check whether today's public Blogger post exists.")
     parser.add_argument("--site", help="Site profile key, for example: easy_pc_fix_guide")
@@ -144,7 +187,7 @@ def main() -> None:
     result = run(args.site, after_hour=args.after_hour)
     save_result(result)
     print(json.dumps(result, ensure_ascii=False, indent=2, default=str))
-    if result.get("status") != "published_today":
+    if not is_success_status(result.get("status")):
         raise SystemExit(1)
 
 

@@ -174,6 +174,7 @@ class WeeklyReporter:
                 "note": "발행 확인 artifact가 없고 공개 피드도 확인되지 않았습니다.",
             }
         cutoff = now.replace(hour=9, minute=0, second=0, microsecond=0)
+        all_todays_posts = []
         todays_posts = []
         for post in public_posts.get("posts", []):
             published_raw = post.get("published_kst", "")
@@ -181,17 +182,21 @@ class WeeklyReporter:
                 published_at = datetime.fromisoformat(published_raw)
             except ValueError:
                 continue
-            if published_at.date() == now.date() and published_at >= cutoff:
-                todays_posts.append(post)
+            if published_at.date() == now.date():
+                all_todays_posts.append(post)
+                if published_at >= cutoff:
+                    todays_posts.append(post)
+        status = "published_today" if todays_posts else "published_today_before_cutoff" if all_todays_posts else "missing_today"
         return {
             "site": self.settings.site_key,
             "site_name": self.settings.site_name,
             "site_url": self.settings.site_url,
             "checked_at_kst": now.isoformat(),
             "cutoff_kst": cutoff.isoformat(),
-            "status": "published_today" if todays_posts else "missing_today",
+            "status": status,
             "source": "weekly_public_feed_fallback",
             "today_post_count": len(todays_posts),
+            "today_total_post_count": len(all_todays_posts),
             "latest_posts": public_posts.get("posts", [])[:5],
         }
 
@@ -378,6 +383,8 @@ class WeeklyReporter:
             lines.append(f"  - 참고: {publication_check.get('note')}")
         if publication_check.get("today_post_count") is not None:
             lines.append(f"  - 기준 이후 공개 글 수: {publication_check.get('today_post_count', 0)}")
+        if publication_check.get("today_total_post_count") is not None:
+            lines.append(f"  - 오늘 전체 공개 글 수: {publication_check.get('today_total_post_count', 0)}")
         if publication_check.get("latest_posts"):
             latest = publication_check["latest_posts"][0]
             lines.append(f"  - 최근 글: {latest.get('title', '')}")
@@ -423,6 +430,7 @@ def _status_kr(status: str | None) -> str:
         "warn": "주의",
         "fail": "실패",
         "published_today": "오늘 공개 글 확인",
+        "published_today_before_cutoff": "오늘 공개 글 확인(기준 전 발행)",
         "missing_today": "오늘 공개 글 없음",
         "validated": "검증 완료",
         "draft_uploaded": "초안 업로드",

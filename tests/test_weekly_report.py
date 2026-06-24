@@ -193,6 +193,31 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertEqual(operations["publication_check"]["source"], "weekly_public_feed_fallback")
         self.assertEqual(operations["sitemap_submit"]["status"], "not_persisted")
 
+    def test_operations_result_accepts_today_post_before_cutoff(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+        now = datetime(2026, 6, 25, 9, 40, tzinfo=ZoneInfo("Asia/Seoul"))
+
+        with tempfile.TemporaryDirectory() as tmpdir, patch("src.reporting.weekly.ROOT_DIR", Path(tmpdir)):
+            operations = reporter._operations_result(
+                now=now,
+                public_posts={
+                    "status": "connected",
+                    "posts": [
+                        {
+                            "title": "Early post",
+                            "url": "https://easypcfixguide.blogspot.com/2026/06/early-post.html",
+                            "published_kst": "2026-06-25T00:12:00+09:00",
+                        }
+                    ],
+                },
+                search_console={"status": "connected"},
+            )
+
+        self.assertEqual(operations["publication_check"]["status"], "published_today_before_cutoff")
+        self.assertEqual(operations["publication_check"]["today_post_count"], 0)
+        self.assertEqual(operations["publication_check"]["today_total_post_count"], 1)
+
 
 if __name__ == "__main__":
     unittest.main()
