@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 from datetime import datetime, timedelta
+import json
 from pathlib import Path
 import tempfile
 import unittest
@@ -69,6 +70,14 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                     ],
                 },
                 "static_pages": [],
+                "signal_quality": {
+                    "status": "fallback_only",
+                    "article_count_with_research": 1,
+                    "live_reddit_signal_count": 0,
+                    "fallback_reddit_signal_count": 2,
+                    "google_suggest_signal_count": 3,
+                    "fallback_only_articles": ["Wi-Fi Button Missing on Windows 11"],
+                },
                 "search_console": {"status": "not_configured", "note": "test"},
                 "analytics": {"status": "not_configured", "note": "test"},
                 "operations": {
@@ -101,6 +110,56 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("Preflight: 통과", markdown)
         self.assertIn("발행 확인: 오늘 공개 글 확인", markdown)
         self.assertIn("Sitemap 제출: 제출됨", markdown)
+        self.assertIn("## 수집 신호 품질", markdown)
+        self.assertIn("Reddit fallback 신호 수: 2", markdown)
+        self.assertIn("fallback만 사용한 글", markdown)
+
+    def test_signal_quality_result_summarizes_research_reports(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            article_one = Path(tmpdir) / "one"
+            article_two = Path(tmpdir) / "two"
+            article_one.mkdir()
+            article_two.mkdir()
+            (article_one / "research_report.json").write_text(
+                json.dumps(
+                    {
+                        "live_reddit_signal_count": 0,
+                        "fallback_reddit_signal_count": 2,
+                        "google_suggest_signal_count": 4,
+                        "signal_source_counts": {"reddit_fallback": 2, "google_suggest": 4},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (article_two / "research_report.json").write_text(
+                json.dumps(
+                    {
+                        "live_reddit_signal_count": 3,
+                        "fallback_reddit_signal_count": 1,
+                        "google_suggest_signal_count": 2,
+                        "signal_source_counts": {"reddit": 3, "reddit_fallback": 1, "google_suggest": 2},
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            result = reporter._signal_quality_result(
+                [
+                    {"title": "Fallback only article", "article_dir": str(article_one)},
+                    {"title": "Live Reddit article", "article_dir": str(article_two)},
+                ]
+            )
+
+        self.assertEqual(result["status"], "fallback_only")
+        self.assertEqual(result["article_count_with_research"], 2)
+        self.assertEqual(result["live_reddit_signal_count"], 3)
+        self.assertEqual(result["fallback_reddit_signal_count"], 3)
+        self.assertEqual(result["google_suggest_signal_count"], 6)
+        self.assertEqual(result["signal_source_counts"]["reddit"], 3)
+        self.assertEqual(result["fallback_only_articles"], ["Fallback only article"])
 
     def test_next_actions_do_not_ask_for_first_article_when_public_feed_has_posts(self) -> None:
         settings = load_settings("easy_pc_fix_guide")

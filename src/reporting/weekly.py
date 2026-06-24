@@ -27,6 +27,7 @@ class WeeklyReporter:
         articles = self._collect_articles(week_start)
         public_posts = self._collect_public_posts(week_start)
         static_pages = self._static_pages_result()
+        signal_quality = self._signal_quality_result(articles)
         search_console_client = SearchConsoleClient(self.settings)
         search_console = search_console_client.summary(week_start.date(), now.date())
         indexed_pages = search_console_client.indexed_page_estimate(week_start.date(), now.date())
@@ -54,6 +55,7 @@ class WeeklyReporter:
             "articles": articles,
             "public_posts": public_posts,
             "static_pages": static_pages,
+            "signal_quality": signal_quality,
             "search_console": search_console,
             "indexed_pages": indexed_pages,
             "analytics": GA4Client(self.settings).summary(week_start.date(), now.date()),
@@ -224,6 +226,43 @@ class WeeklyReporter:
             issue_count += len(report.get("issues", []))
         return issue_count
 
+    def _signal_quality_result(self, articles: list[dict]) -> dict:
+        totals = {
+            "article_count_with_research": 0,
+            "live_reddit_signal_count": 0,
+            "fallback_reddit_signal_count": 0,
+            "google_suggest_signal_count": 0,
+        }
+        source_counts: dict[str, int] = {}
+        fallback_articles: list[str] = []
+        for article in articles:
+            research_path = Path(article.get("article_dir", "")) / "research_report.json"
+            if not research_path.exists():
+                continue
+            try:
+                report = json.loads(research_path.read_text(encoding="utf-8"))
+            except json.JSONDecodeError:
+                continue
+            totals["article_count_with_research"] += 1
+            for key in ["live_reddit_signal_count", "fallback_reddit_signal_count", "google_suggest_signal_count"]:
+                totals[key] += int(report.get(key, 0) or 0)
+            for source, count in report.get("signal_source_counts", {}).items():
+                source_counts[source] = source_counts.get(source, 0) + int(count or 0)
+            if int(report.get("fallback_reddit_signal_count", 0) or 0) and not int(
+                report.get("live_reddit_signal_count", 0) or 0
+            ):
+                fallback_articles.append(article.get("title") or article.get("slug") or article.get("article_dir", ""))
+
+        status = "not_uploaded"
+        if totals["article_count_with_research"]:
+            status = "fallback_only" if fallback_articles else "connected"
+        return {
+            "status": status,
+            **totals,
+            "signal_source_counts": dict(sorted(source_counts.items())),
+            "fallback_only_articles": fallback_articles,
+        }
+
     def _next_actions(
         self,
         articles: list[dict],
@@ -314,6 +353,18 @@ class WeeklyReporter:
                 lines.append(f"| {page.get('title')} | {_status_kr(page.get('status'))} | {page.get('url')} |")
         else:
             lines.append("고정 페이지 업로드 결과가 없습니다.")
+
+        lines.extend(["", "## 수집 신호 품질", ""])
+        signal_quality = report.get("signal_quality", {})
+        lines.append(f"- 상태: {_status_kr(signal_quality.get('status', 'not_uploaded'))}")
+        lines.append(f"- research_report 확인 글 수: {signal_quality.get('article_count_with_research', 0)}")
+        lines.append(f"- 실제 Reddit 신호 수: {signal_quality.get('live_reddit_signal_count', 0)}")
+        lines.append(f"- Reddit fallback 신호 수: {signal_quality.get('fallback_reddit_signal_count', 0)}")
+        lines.append(f"- Google Suggest 신호 수: {signal_quality.get('google_suggest_signal_count', 0)}")
+        if signal_quality.get("fallback_only_articles"):
+            lines.append("- fallback만 사용한 글:")
+            for title in signal_quality.get("fallback_only_articles", [])[:5]:
+                lines.append(f"  - {title}")
 
         lines.extend(["", "## Search Console", ""])
         search_console = report.get("search_console", {})
@@ -437,6 +488,7 @@ def _status_kr(status: str | None) -> str:
         "published": "공개 발행",
         "skipped_duplicate": "중복 건너뜀",
         "skipped_daily_limit": "하루 1개 제한으로 건너뜀",
+        "fallback_only": "fallback 사용",
         "failed": "실패",
     }
     return mapping.get(status or "not_uploaded", status or "미업로드")
