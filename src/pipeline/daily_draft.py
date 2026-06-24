@@ -36,10 +36,7 @@ def choose_seed(explicit_seed: str | None = None, site: str | None = None) -> st
     settings = load_settings(site)
     if explicit_seed:
         return explicit_seed
-    seed_path = Path(settings.seed_file)
-    if not seed_path.is_absolute():
-        seed_path = ROOT_DIR / seed_path
-    seeds = json.loads(seed_path.read_text(encoding="utf-8"))
+    seeds = load_seed_list(site)
     if settings.app_env.lower() == "production":
         return choose_seed_for_date(seeds, settings.automation_start_date, date.today())
     used = used_keywords(site)
@@ -47,6 +44,28 @@ def choose_seed(explicit_seed: str | None = None, site: str | None = None) -> st
         if seed.lower() not in used:
             return seed
     return seeds[0]
+
+
+def load_seed_list(site: str | None = None) -> list[str]:
+    settings = load_settings(site)
+    seed_path = Path(settings.seed_file)
+    if not seed_path.is_absolute():
+        seed_path = ROOT_DIR / seed_path
+    return json.loads(seed_path.read_text(encoding="utf-8"))
+
+
+def choose_publish_seed_candidates(explicit_seed: str | None = None, site: str | None = None) -> list[str]:
+    if explicit_seed:
+        return [explicit_seed]
+    settings = load_settings(site)
+    seeds = load_seed_list(site)
+    if settings.app_env.lower() == "production":
+        first = choose_seed_for_date(seeds, settings.automation_start_date, date.today())
+        first_index = seeds.index(first)
+        return seeds[first_index:] + seeds[:first_index]
+    selected = choose_seed(None, site)
+    selected_index = seeds.index(selected)
+    return seeds[selected_index:] + seeds[:selected_index]
 
 
 def choose_seed_for_date(seeds: list[str], start_date: str, today: date) -> str:
@@ -63,25 +82,53 @@ def choose_seed_for_date(seeds: list[str], start_date: str, today: date) -> str:
 def run(seed: str | None = None, site: str | None = None, publish_mode: str = "draft") -> dict[str, str]:
     selected_seed = choose_seed(seed, site)
     try:
-        article_dir = run_stage1(selected_seed, site)
-        if publish_mode == "validate":
-            result_path = run_validation(article_dir, site)
-        elif publish_mode == "publish":
-            result_path = run_publish_with_duplicate_guard(article_dir, site)
+        skipped_duplicate_seeds: list[str] = []
+        if publish_mode == "publish":
+            selected_seed, article_dir, result_path, skipped_duplicate_seeds = run_publish_with_seed_fallback(seed, site)
         else:
-            result_path = run_stage2(article_dir=article_dir, mode=publish_mode, site=site)
+            article_dir = run_stage1(selected_seed, site)
+            if publish_mode == "validate":
+                result_path = run_validation(article_dir, site)
+            else:
+                result_path = run_stage2(article_dir=article_dir, mode=publish_mode, site=site)
         result = {
             "seed": selected_seed,
             "article_dir": str(article_dir),
             "publish_result": str(result_path),
             "site": load_settings(site).site_key,
             "mode": publish_mode,
+            "skipped_duplicate_seeds": skipped_duplicate_seeds,
         }
         notify_daily_completion(result)
         return result
     except Exception as exc:
         notify_daily_failure(selected_seed, exc, site)
         raise
+
+
+def run_publish_with_seed_fallback(seed: str | None = None, site: str | None = None) -> tuple[str, Path, Path, list[str]]:
+    skipped_duplicate_seeds: list[str] = []
+    last_attempt: tuple[str, Path, Path] | None = None
+    for candidate_seed in choose_publish_seed_candidates(seed, site):
+        article_dir = run_stage1(candidate_seed, site)
+        result_path = run_publish_with_duplicate_guard(article_dir, site)
+        last_attempt = (candidate_seed, article_dir, result_path)
+        if is_duplicate_publish_result(result_path):
+            skipped_duplicate_seeds.append(candidate_seed)
+            if seed:
+                break
+            continue
+        return candidate_seed, article_dir, result_path, skipped_duplicate_seeds
+
+    if last_attempt is None:
+        raise ValueError("No topic seeds are available for publishing.")
+    selected_seed, article_dir, result_path = last_attempt
+    return selected_seed, article_dir, result_path, skipped_duplicate_seeds
+
+
+def is_duplicate_publish_result(result_path: Path) -> bool:
+    result = read_json(result_path)
+    return result.get("skipped") is True and result.get("blogger", {}).get("status") == "SKIPPED_DUPLICATE"
 
 
 def run_validation(article_dir: Path, site: str | None = None) -> Path:
@@ -252,6 +299,10 @@ def build_daily_success_message(result: dict[str, str]) -> str:
         f"- URL: {blogger_url}",
         f"- 생성 폴더: {result['article_dir']}",
     ]
+    skipped_duplicate_seeds = result.get("skipped_duplicate_seeds") or []
+    if skipped_duplicate_seeds:
+        lines.append(f"- 중복으로 건너뛴 시드 수: {len(skipped_duplicate_seeds)}")
+        lines.append(f"- 중복 시드: {', '.join(skipped_duplicate_seeds[:5])}")
 
     if issues:
         lines.extend(["", "품질 이슈:"])

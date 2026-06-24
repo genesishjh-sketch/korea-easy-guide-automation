@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 from datetime import datetime
+import json
+from pathlib import Path
+import tempfile
 from zoneinfo import ZoneInfo
 import unittest
 from unittest.mock import patch
@@ -32,6 +35,80 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         with patch.object(daily_draft, "fetch_public_feed", side_effect=RuntimeError("feed unavailable")):
             with self.assertRaises(RuntimeError):
                 daily_draft.find_public_post("https://easypcfixguide.blogspot.com", "any-slug", "Any Title")
+
+    def test_publish_mode_tries_next_seed_when_first_seed_is_duplicate(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+
+            def fake_stage1(seed: str, site: str | None = None) -> Path:
+                article_dir = root / seed.replace(" ", "-")
+                article_dir.mkdir()
+                (article_dir / "metadata.json").write_text(
+                    json.dumps({"article": {"title": seed, "category": "Test", "slug": seed.replace(" ", "-")}}),
+                    encoding="utf-8",
+                )
+                (article_dir / "quality_report.json").write_text(
+                    json.dumps({"score": 100, "passed": True, "issues": []}),
+                    encoding="utf-8",
+                )
+                return article_dir
+
+            def fake_publish(article_dir: Path, site: str | None = None) -> Path:
+                if article_dir.name == "duplicate-topic":
+                    result = {
+                        "skipped": True,
+                        "blogger": {"status": "SKIPPED_DUPLICATE", "url": "https://example.com/old.html"},
+                    }
+                    result_path = article_dir / "duplicate_publish_result.json"
+                else:
+                    result = {"draft": False, "blogger": {"status": "LIVE", "url": "https://example.com/new.html"}}
+                    result_path = article_dir / "blogger_publish_result.json"
+                result_path.write_text(json.dumps(result), encoding="utf-8")
+                return result_path
+
+            with patch.object(
+                daily_draft, "choose_publish_seed_candidates", return_value=["duplicate topic", "fresh topic"]
+            ), patch.object(daily_draft, "run_stage1", side_effect=fake_stage1), patch.object(
+                daily_draft, "run_publish_with_duplicate_guard", side_effect=fake_publish
+            ), patch.object(
+                daily_draft, "notify_daily_completion"
+            ):
+                result = daily_draft.run(site="easy_pc_fix_guide", publish_mode="publish")
+
+        self.assertEqual(result["seed"], "fresh topic")
+        self.assertEqual(result["skipped_duplicate_seeds"], ["duplicate topic"])
+        self.assertTrue(result["publish_result"].endswith("blogger_publish_result.json"))
+
+    def test_explicit_seed_stops_on_duplicate_without_switching_topic(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            article_dir = Path(tmpdir) / "duplicate-topic"
+            article_dir.mkdir()
+            (article_dir / "metadata.json").write_text(
+                json.dumps({"article": {"title": "duplicate topic", "category": "Test", "slug": "duplicate-topic"}}),
+                encoding="utf-8",
+            )
+            (article_dir / "quality_report.json").write_text(
+                json.dumps({"score": 100, "passed": True, "issues": []}),
+                encoding="utf-8",
+            )
+            result_path = article_dir / "duplicate_publish_result.json"
+            result_path.write_text(
+                json.dumps({"skipped": True, "blogger": {"status": "SKIPPED_DUPLICATE"}}),
+                encoding="utf-8",
+            )
+
+            with patch.object(daily_draft, "run_stage1", return_value=article_dir), patch.object(
+                daily_draft, "run_publish_with_duplicate_guard", return_value=result_path
+            ), patch.object(daily_draft, "notify_daily_completion"):
+                result = daily_draft.run(
+                    seed="duplicate topic",
+                    site="easy_pc_fix_guide",
+                    publish_mode="publish",
+                )
+
+        self.assertEqual(result["seed"], "duplicate topic")
+        self.assertEqual(result["skipped_duplicate_seeds"], ["duplicate topic"])
+        self.assertTrue(result["publish_result"].endswith("duplicate_publish_result.json"))
 
 
 class WindowsQualityGateTests(unittest.TestCase):
