@@ -67,6 +67,37 @@ It checks:
 - local Google OAuth files
 - Telegram notification settings
 
+## Reddit OAuth Health
+
+Easy PC Fix Guide can publish with fallback reader questions, but Reddit OAuth is required before topic discovery is considered stable enough for future cadence increases.
+
+Required GitHub Secrets:
+
+```text
+REDDIT_CLIENT_ID
+REDDIT_CLIENT_SECRET
+```
+
+Recommended GitHub Variable:
+
+```text
+EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT
+```
+
+Manual health check:
+
+```bash
+python -m src.pipeline.stage0_reddit_health --site easy_pc_fix_guide --notify
+```
+
+GitHub Actions health check:
+
+```text
+.github/workflows/easy-pc-reddit-health.yml
+```
+
+The health check writes `reports/easy_pc_fix_guide-reddit-health.json`, prints a sanitized action summary in the Actions log, uploads the report as an artifact, and sends the same action summary to the Korean Posting Bot when Telegram is configured.
+
 ## Daily Automation
 
 Validate only, no Blogger publishing:

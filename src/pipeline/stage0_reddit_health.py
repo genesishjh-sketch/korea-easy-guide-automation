@@ -42,18 +42,29 @@ def check_reddit_oauth(settings: Any, query: str, limit: int = 3) -> dict:
         "error_type": "",
         "error": "",
         "action_required": "",
+        "remediation_steps": [],
     }
     if not settings.reddit_user_agent:
         return {
             **base,
             "status": "missing_user_agent",
             "action_required": "REDDIT_USER_AGENT를 설정하세요.",
+            "remediation_steps": [
+                "GitHub Variables에 REDDIT_USER_AGENT 또는 EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT를 설정하세요.",
+                "예: easy-pc-fix-guide/0.1 by your-reddit-username",
+            ],
         }
     if not settings.reddit_client_id or not settings.reddit_client_secret:
         return {
             **base,
             "status": "missing_credentials",
             "action_required": "REDDIT_CLIENT_ID와 REDDIT_CLIENT_SECRET을 GitHub Secrets 또는 .env에 설정하세요.",
+            "remediation_steps": [
+                "Reddit 앱을 script 타입으로 만들고 client id와 secret을 확인하세요.",
+                "GitHub Secrets에 REDDIT_CLIENT_ID를 추가하세요.",
+                "GitHub Secrets에 REDDIT_CLIENT_SECRET을 추가하세요.",
+                "Actions > Easy PC Fix Reddit OAuth Health에서 수동 재실행하세요.",
+            ],
         }
     try:
         import praw
@@ -64,6 +75,10 @@ def check_reddit_oauth(settings: Any, query: str, limit: int = 3) -> dict:
             "error_type": type(exc).__name__,
             "error": str(exc),
             "action_required": "requirements.txt 설치 상태를 확인하세요. praw 패키지가 필요합니다.",
+            "remediation_steps": [
+                "requirements.txt에 praw가 포함되어 있는지 확인하세요.",
+                "GitHub Actions의 Install dependencies 단계 로그를 확인하세요.",
+            ],
         }
 
     try:
@@ -96,6 +111,12 @@ def check_reddit_oauth(settings: Any, query: str, limit: int = 3) -> dict:
             "error_type": type(exc).__name__,
             "error": str(exc),
             "action_required": "Reddit 앱 유형, client id/secret, user agent, Reddit API 권한을 확인하세요.",
+            "remediation_steps": [
+                "Reddit 앱 타입이 script인지 확인하세요.",
+                "GitHub Secrets의 REDDIT_CLIENT_ID와 REDDIT_CLIENT_SECRET 오타를 확인하세요.",
+                "REDDIT_USER_AGENT가 비어 있거나 너무 일반적인 값인지 확인하세요.",
+                "Reddit API 또는 계정 제한 메시지가 있는지 오류 내용을 확인하세요.",
+            ],
         }
 
     if not samples:
@@ -103,6 +124,10 @@ def check_reddit_oauth(settings: Any, query: str, limit: int = 3) -> dict:
             **base,
             "status": "oauth_connected_no_results",
             "action_required": "OAuth 연결은 됐지만 검색 결과가 없습니다. query와 subreddit 목록을 점검하세요.",
+            "remediation_steps": [
+                "더 일반적인 Windows 오류 검색어로 재실행하세요.",
+                "EASY_PC_FIX_GUIDE_REDDIT_SUBREDDITS 목록을 점검하세요.",
+            ],
         }
 
     return {
@@ -113,6 +138,7 @@ def check_reddit_oauth(settings: Any, query: str, limit: int = 3) -> dict:
         "sample_urls": [sample["url"] for sample in samples],
         "samples": samples,
         "action_required": "없음",
+        "remediation_steps": [],
     }
 
 
@@ -143,6 +169,10 @@ def build_message(result: dict) -> str:
         f"- OAuth 신호 수: {result.get('oauth_signal_count', 0)}",
         f"- 조치: {result.get('action_required') or '확인 필요'}",
     ]
+    if result.get("remediation_steps"):
+        lines.extend(["", "다음 조치:"])
+        for step in result.get("remediation_steps", [])[:6]:
+            lines.append(f"- {step}")
     if result.get("error"):
         lines.append(f"- 오류: {result.get('error_type')}: {result.get('error')}")
     if result.get("sample_titles"):
@@ -150,6 +180,24 @@ def build_message(result: dict) -> str:
         for title in result.get("sample_titles", [])[:5]:
             lines.append(f"- {title}")
     return "\n".join(lines)
+
+
+def build_console_summary(result: dict) -> str:
+    payload = {
+        "site": result.get("site"),
+        "site_name": result.get("site_name"),
+        "status": result.get("status"),
+        "query": result.get("query"),
+        "oauth_signal_count": result.get("oauth_signal_count", 0),
+        "action_required": result.get("action_required"),
+        "remediation_steps": result.get("remediation_steps", []),
+        "sample_titles": result.get("sample_titles", [])[:3],
+    }
+    if result.get("error_type"):
+        payload["error_type"] = result.get("error_type")
+    if result.get("error"):
+        payload["error"] = result.get("error")
+    return json.dumps(payload, ensure_ascii=False, indent=2)
 
 
 def main() -> None:
@@ -162,6 +210,7 @@ def main() -> None:
     path = run(args.site, args.query, args.limit, args.notify)
     print(path)
     result = json.loads(path.read_text(encoding="utf-8"))
+    print(build_console_summary(result))
     if result.get("status") not in {"oauth_connected", "oauth_connected_no_results"}:
         raise SystemExit(1)
 

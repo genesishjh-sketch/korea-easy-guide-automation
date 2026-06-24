@@ -25,6 +25,7 @@ class RedditHealthTests(unittest.TestCase):
 
         self.assertEqual(result["status"], "missing_credentials")
         self.assertIn("REDDIT_CLIENT_ID", result["action_required"])
+        self.assertIn("GitHub Secrets에 REDDIT_CLIENT_ID를 추가하세요.", result["remediation_steps"])
 
     def test_reports_oauth_connected_with_sample_titles(self) -> None:
         settings = replace(
@@ -67,7 +68,29 @@ class RedditHealthTests(unittest.TestCase):
 
         self.assertEqual(payload["status"], "missing_credentials")
         notifier.return_value.send_required.assert_called_once()
-        self.assertIn("Reddit OAuth 상태 점검", notifier.return_value.send_required.call_args.args[0])
+        message = notifier.return_value.send_required.call_args.args[0]
+        self.assertIn("Reddit OAuth 상태 점검", message)
+        self.assertIn("다음 조치:", message)
+        self.assertIn("GitHub Secrets에 REDDIT_CLIENT_ID를 추가하세요.", message)
+
+    def test_console_summary_includes_action_without_secret_values(self) -> None:
+        result = {
+            "site": "easy_pc_fix_guide",
+            "site_name": "Easy PC Fix Guide",
+            "status": "missing_credentials",
+            "query": "wifi button missing windows 11",
+            "oauth_signal_count": 0,
+            "action_required": "REDDIT_CLIENT_ID와 REDDIT_CLIENT_SECRET을 GitHub Secrets 또는 .env에 설정하세요.",
+            "remediation_steps": ["GitHub Secrets에 REDDIT_CLIENT_ID를 추가하세요."],
+            "sample_titles": [],
+        }
+
+        summary = stage0_reddit_health.build_console_summary(result)
+        payload = json.loads(summary)
+
+        self.assertEqual(payload["status"], "missing_credentials")
+        self.assertIn("REDDIT_CLIENT_ID", payload["action_required"])
+        self.assertNotIn("super-secret-token", summary)
 
 
 def fake_praw_module(submissions: list) -> object:
