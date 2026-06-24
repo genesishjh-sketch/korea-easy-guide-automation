@@ -29,6 +29,7 @@ def run(today: date | None = None, force: bool = False, site: str | None = None)
     articles = reporter._collect_articles(week_start=datetime.combine(week_start, datetime.min.time()))
     published_count = actual_public_post_count(settings, articles)
     quality_issue_count = reporter._quality_issue_count(articles)
+    signal_quality = reporter._signal_quality_result(articles)
 
     search_console_client = SearchConsoleClient(settings)
     search_console = search_console_client.summary(week_start, selected_date)
@@ -39,6 +40,7 @@ def run(today: date | None = None, force: bool = False, site: str | None = None)
         indexed_pages_estimate=indexed_pages.get("page_count_with_search_data", 0),
         recent_impressions=search_console.get("totals_from_top_queries", {}).get("impressions", 0),
         quality_issue_count=quality_issue_count,
+        signal_quality=signal_quality,
     )
 
     message = build_cadence_alert_message(settings.site_name, settings.site_url, review)

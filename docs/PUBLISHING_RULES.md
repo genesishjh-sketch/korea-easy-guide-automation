@@ -17,6 +17,7 @@
 - Do not automatically increase cadence. Posting Bot should alert for review first.
 - Two-post review requires roughly 20+ published posts, 20+ Search Console indexed/visible pages, and no quality issues.
 - Three-post review requires roughly 50+ published posts, 50+ Search Console indexed/visible pages, no quality issues, and preferably visible Search Console impression growth.
+- Cadence increase review also requires stable topic discovery. If recent posts are fallback-only or Reddit public JSON-only without OAuth signals, keep one post per day until Reddit OAuth collection is stable.
 - Posting Bot sends separate cadence review alerts at 09:30 KST on 2026-07-22 and 2026-08-19.
 
 ## Automation Mode

@@ -23,6 +23,12 @@ class CadenceAlertTests(unittest.TestCase):
         ) as notification:
             reporter.return_value._collect_articles.return_value = []
             reporter.return_value._quality_issue_count.return_value = 0
+            reporter.return_value._signal_quality_result.return_value = {
+                "status": "connected",
+                "reddit_oauth_signal_count": 5,
+                "reddit_public_json_signal_count": 0,
+                "fallback_reddit_signal_count": 0,
+            }
             search_console.return_value.summary.return_value = {
                 "totals_from_top_queries": {"impressions": 100},
             }
@@ -47,6 +53,12 @@ class CadenceAlertTests(unittest.TestCase):
         ) as notification:
             reporter.return_value._collect_articles.return_value = []
             reporter.return_value._quality_issue_count.return_value = 0
+            reporter.return_value._signal_quality_result.return_value = {
+                "status": "connected",
+                "reddit_oauth_signal_count": 5,
+                "reddit_public_json_signal_count": 0,
+                "fallback_reddit_signal_count": 0,
+            }
             search_console.return_value.summary.return_value = {
                 "totals_from_top_queries": {"impressions": 100},
             }

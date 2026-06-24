@@ -40,6 +40,7 @@ class WeeklyReporter:
             indexed_pages_estimate=indexed_pages.get("page_count_with_search_data", 0),
             recent_impressions=search_console.get("totals_from_top_queries", {}).get("impressions", 0),
             quality_issue_count=self._quality_issue_count(articles),
+            signal_quality=signal_quality,
         )
 
         report = {
@@ -476,6 +477,10 @@ class WeeklyReporter:
         lines.append(f"- Search Console 색인/노출 페이지 추정: {cadence.get('indexed_pages_estimate', 0)}개")
         lines.append(f"- 최근 노출 수: {cadence.get('recent_impressions', 0)}")
         lines.append(f"- 품질 이슈 수: {cadence.get('quality_issue_count', 0)}")
+        lines.append(f"- 수집 신호 상태: {_status_kr(cadence.get('signal_quality_status', 'not_uploaded'))}")
+        lines.append(f"- Reddit OAuth 신호 수: {cadence.get('reddit_oauth_signal_count', 0)}")
+        lines.append(f"- Reddit public JSON 신호 수: {cadence.get('reddit_public_json_signal_count', 0)}")
+        lines.append(f"- Reddit fallback 신호 수: {cadence.get('fallback_reddit_signal_count', 0)}")
         lines.append(f"- 하루 2개 검토 기준일: {cadence.get('two_post_review_date')}")
         lines.append(f"- 하루 3개 검토 기준일: {cadence.get('three_post_review_date')}")
         for reason in cadence.get("reasons", []):

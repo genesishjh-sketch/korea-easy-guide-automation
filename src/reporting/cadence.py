@@ -18,6 +18,10 @@ class CadenceReview:
     indexed_pages_estimate: int
     recent_impressions: int
     quality_issue_count: int
+    signal_quality_status: str
+    reddit_oauth_signal_count: int
+    reddit_public_json_signal_count: int
+    fallback_reddit_signal_count: int
     two_post_review_date: str
     three_post_review_date: str
     reasons: list[str]
@@ -32,12 +36,29 @@ def review_cadence(
     indexed_pages_estimate: int,
     recent_impressions: int,
     quality_issue_count: int,
+    signal_quality: dict | None = None,
 ) -> CadenceReview:
     days_since_start = max(0, (today - START_DATE).days + 1)
     reasons: list[str] = []
+    signal_quality = signal_quality or {}
+    signal_quality_status = signal_quality.get("status", "not_uploaded")
+    reddit_oauth_signal_count = int(signal_quality.get("reddit_oauth_signal_count", 0) or 0)
+    reddit_public_json_signal_count = int(signal_quality.get("reddit_public_json_signal_count", 0) or 0)
+    fallback_reddit_signal_count = int(signal_quality.get("fallback_reddit_signal_count", 0) or 0)
+    has_unstable_reddit_collection = signal_quality_status == "fallback_only" or (
+        reddit_public_json_signal_count > 0 and reddit_oauth_signal_count == 0
+    )
 
     if today < TWO_POST_REVIEW_DATE:
         reasons.append("아직 초기 신뢰도 구축 기간입니다. 하루 1개를 유지하세요.")
+        action = "하루 1개 유지"
+        recommendation = "not_ready"
+    elif has_unstable_reddit_collection:
+        if signal_quality_status == "fallback_only":
+            reasons.append("최근 글 수집이 Reddit 실제 신호 없이 fallback 질문에 의존했습니다.")
+        else:
+            reasons.append("Reddit 실제 신호가 OAuth 없이 public JSON 경로에 의존했습니다.")
+        reasons.append("발행량 확대 전 Reddit OAuth 수집 안정성을 먼저 확인하세요.")
         action = "하루 1개 유지"
         recommendation = "not_ready"
     elif indexed_pages_estimate >= 50 and published_posts >= 50 and quality_issue_count == 0 and today >= THREE_POST_REVIEW_DATE:
@@ -68,6 +89,10 @@ def review_cadence(
         indexed_pages_estimate=indexed_pages_estimate,
         recent_impressions=recent_impressions,
         quality_issue_count=quality_issue_count,
+        signal_quality_status=signal_quality_status,
+        reddit_oauth_signal_count=reddit_oauth_signal_count,
+        reddit_public_json_signal_count=reddit_public_json_signal_count,
+        fallback_reddit_signal_count=fallback_reddit_signal_count,
         two_post_review_date=TWO_POST_REVIEW_DATE.isoformat(),
         three_post_review_date=THREE_POST_REVIEW_DATE.isoformat(),
         reasons=reasons,
@@ -87,6 +112,10 @@ def build_cadence_alert_message(site_name: str, site_url: str, review: CadenceRe
             f"- Search Console 색인/노출 페이지 추정: {review.indexed_pages_estimate}개",
             f"- 최근 노출 수: {review.recent_impressions}",
             f"- 품질 이슈 수: {review.quality_issue_count}",
+            f"- 수집 신호 상태: {review.signal_quality_status}",
+            f"- Reddit OAuth 신호 수: {review.reddit_oauth_signal_count}",
+            f"- Reddit public JSON 신호 수: {review.reddit_public_json_signal_count}",
+            f"- Reddit fallback 신호 수: {review.fallback_reddit_signal_count}",
             "",
             "판단 근거:",
             *[f"- {reason}" for reason in review.reasons],
