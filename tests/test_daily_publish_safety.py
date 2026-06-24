@@ -15,6 +15,65 @@ from src.quality.hades import HadesQualityGate
 
 
 class DuplicatePublishGuardTests(unittest.TestCase):
+    def test_daily_success_message_includes_quality_metrics(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            article_dir = Path(tmpdir)
+            publish_result_path = article_dir / "blogger_publish_result.json"
+            (article_dir / "metadata.json").write_text(
+                json.dumps(
+                    {
+                        "article": {
+                            "title": "Wi-Fi Button Missing on Windows 11",
+                            "category": "Wi-Fi & Internet",
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (article_dir / "quality_report.json").write_text(
+                json.dumps(
+                    {
+                        "score": 100,
+                        "passed": True,
+                        "issues": [],
+                        "metrics": {
+                            "word_count": 1512,
+                            "image_count": 2,
+                            "official_link_count": 7,
+                            "faq_question_count": 9,
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            publish_result_path.write_text(
+                json.dumps(
+                    {
+                        "draft": False,
+                        "blogger": {
+                            "status": "LIVE",
+                            "url": "https://easypcfixguide.blogspot.com/2026/06/example.html",
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            message = daily_draft.build_daily_success_message(
+                {
+                    "site": "easy_pc_fix_guide",
+                    "mode": "publish",
+                    "seed": "wifi button missing windows 11",
+                    "article_dir": str(article_dir),
+                    "publish_result": str(publish_result_path),
+                }
+            )
+
+        self.assertIn("- 단어 수: 1512", message)
+        self.assertIn("- 이미지 수: 2", message)
+        self.assertIn("- 공식 링크 수: 7", message)
+        self.assertIn("- FAQ 수: 9", message)
+
     def test_production_uses_launch_queue_before_long_term_seed_list(self) -> None:
         with patch.object(daily_draft, "load_settings") as load_settings:
             load_settings.return_value.app_env = "production"

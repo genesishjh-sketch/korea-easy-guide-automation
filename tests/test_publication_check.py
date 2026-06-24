@@ -62,6 +62,28 @@ class PublicationCheckTests(unittest.TestCase):
         saved = json.loads(path.read_text(encoding="utf-8"))
         self.assertEqual(saved["status"], "published_today")
 
+    def test_publication_message_surfaces_confirmed_post_url(self) -> None:
+        message = stage4_publication_check.build_message(
+            {
+                "site_name": "Easy PC Fix Guide",
+                "site_url": "https://easypcfixguide.blogspot.com",
+                "checked_at_kst": "2026-06-25T09:45:00+09:00",
+                "cutoff_kst": "2026-06-25T09:00:00+09:00",
+                "status": "published_today",
+                "today_post_count": 1,
+                "latest_posts": [
+                    {
+                        "title": "Fresh post",
+                        "url": "https://easypcfixguide.blogspot.com/2026/06/fresh-post.html",
+                        "published_kst": "2026-06-25T09:12:00+09:00",
+                    }
+                ],
+            }
+        )
+
+        self.assertIn("- 확인된 최신 글: Fresh post", message)
+        self.assertIn("- 최신 글 URL: https://easypcfixguide.blogspot.com/2026/06/fresh-post.html", message)
+
 
 if __name__ == "__main__":
     unittest.main()

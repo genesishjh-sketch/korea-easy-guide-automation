@@ -300,6 +300,7 @@ def build_daily_success_message(result: dict[str, str]) -> str:
     draft = publish_result.get("draft", True)
     quality_score = quality_report.get("score", "n/a")
     quality_passed = quality_report.get("passed", False)
+    quality_metrics = quality_report.get("metrics", {})
     issues = quality_report.get("issues", [])
     if mode == "validate":
         status = "검증 완료"
@@ -323,6 +324,10 @@ def build_daily_success_message(result: dict[str, str]) -> str:
         f"- 주제 시드: {result['seed']}",
         f"- 품질점수: {quality_score}/100",
         f"- 품질통과: {'예' if quality_passed else '아니오'}",
+        f"- 단어 수: {quality_metrics.get('word_count', 'n/a')}",
+        f"- 이미지 수: {quality_metrics.get('image_count', 'n/a')}",
+        f"- 공식 링크 수: {quality_metrics.get('official_link_count', 'n/a')}",
+        f"- FAQ 수: {quality_metrics.get('faq_question_count', 'n/a')}",
         f"- URL: {blogger_url}",
         f"- 생성 폴더: {result['article_dir']}",
     ]

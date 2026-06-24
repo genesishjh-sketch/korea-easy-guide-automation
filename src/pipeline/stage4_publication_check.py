@@ -103,6 +103,19 @@ def build_message(result: dict) -> str:
         f"- 상태: {'기준 이후 공개 글 확인' if ok else '기준 이후 공개 글 없음'}",
         f"- 기준 이후 공개 글 수: {result['today_post_count']}",
     ]
+    todays_latest = [
+        post
+        for post in result.get("latest_posts", [])
+        if cutoff and post.get("published_kst", "") >= cutoff
+    ]
+    if ok and todays_latest:
+        first_post = todays_latest[0]
+        lines.extend(
+            [
+                f"- 확인된 최신 글: {first_post.get('title', '제목 없음')}",
+                f"- 최신 글 URL: {first_post.get('url', 'URL 없음')}",
+            ]
+        )
     latest = result.get("latest_posts", [])
     if latest:
         lines.extend(["", "최근 공개 글:"])
