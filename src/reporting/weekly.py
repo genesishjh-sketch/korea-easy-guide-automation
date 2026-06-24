@@ -230,10 +230,13 @@ class WeeklyReporter:
         totals = {
             "article_count_with_research": 0,
             "live_reddit_signal_count": 0,
+            "reddit_oauth_signal_count": 0,
+            "reddit_public_json_signal_count": 0,
             "fallback_reddit_signal_count": 0,
             "google_suggest_signal_count": 0,
         }
         source_counts: dict[str, int] = {}
+        reddit_method_counts: dict[str, int] = {}
         fallback_articles: list[str] = []
         for article in articles:
             research_path = Path(article.get("article_dir", "")) / "research_report.json"
@@ -244,10 +247,18 @@ class WeeklyReporter:
             except json.JSONDecodeError:
                 continue
             totals["article_count_with_research"] += 1
-            for key in ["live_reddit_signal_count", "fallback_reddit_signal_count", "google_suggest_signal_count"]:
+            for key in [
+                "live_reddit_signal_count",
+                "reddit_oauth_signal_count",
+                "reddit_public_json_signal_count",
+                "fallback_reddit_signal_count",
+                "google_suggest_signal_count",
+            ]:
                 totals[key] += int(report.get(key, 0) or 0)
             for source, count in report.get("signal_source_counts", {}).items():
                 source_counts[source] = source_counts.get(source, 0) + int(count or 0)
+            for method, count in report.get("reddit_collection_method_counts", {}).items():
+                reddit_method_counts[method] = reddit_method_counts.get(method, 0) + int(count or 0)
             if int(report.get("fallback_reddit_signal_count", 0) or 0) and not int(
                 report.get("live_reddit_signal_count", 0) or 0
             ):
@@ -260,6 +271,7 @@ class WeeklyReporter:
             "status": status,
             **totals,
             "signal_source_counts": dict(sorted(source_counts.items())),
+            "reddit_collection_method_counts": dict(sorted(reddit_method_counts.items())),
             "fallback_only_articles": fallback_articles,
         }
 
@@ -306,6 +318,10 @@ class WeeklyReporter:
             actions.append("공개 글이 생긴 뒤 Search Console 연결을 확인하세요.")
         if (signal_quality or {}).get("status") == "fallback_only":
             actions.append("Reddit 실제 신호 없이 fallback 질문만 사용한 글이 있습니다. Reddit OAuth 설정을 추가해 주제 수집 품질을 안정화하세요.")
+        elif (signal_quality or {}).get("reddit_public_json_signal_count", 0) and not (signal_quality or {}).get(
+            "reddit_oauth_signal_count", 0
+        ):
+            actions.append("Reddit 실제 신호가 public JSON 경로에만 의존하고 있습니다. 403 차단 가능성을 줄이려면 Reddit OAuth 수집을 점검하세요.")
         actions.append("트래픽과 수익 신호가 보일 때까지 추가 유료 API 비용은 0원 정책을 유지하세요.")
         return actions
 
@@ -362,6 +378,8 @@ class WeeklyReporter:
         lines.append(f"- 상태: {_status_kr(signal_quality.get('status', 'not_uploaded'))}")
         lines.append(f"- research_report 확인 글 수: {signal_quality.get('article_count_with_research', 0)}")
         lines.append(f"- 실제 Reddit 신호 수: {signal_quality.get('live_reddit_signal_count', 0)}")
+        lines.append(f"- Reddit OAuth 신호 수: {signal_quality.get('reddit_oauth_signal_count', 0)}")
+        lines.append(f"- Reddit public JSON 신호 수: {signal_quality.get('reddit_public_json_signal_count', 0)}")
         lines.append(f"- Reddit fallback 신호 수: {signal_quality.get('fallback_reddit_signal_count', 0)}")
         lines.append(f"- Google Suggest 신호 수: {signal_quality.get('google_suggest_signal_count', 0)}")
         if signal_quality.get("fallback_only_articles"):

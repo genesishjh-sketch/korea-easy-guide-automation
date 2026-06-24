@@ -81,6 +81,11 @@ def run(seed: str | None = None, site: str | None = None) -> Path:
 def build_research_report(settings, keyword: str, article, signals: list) -> dict:
     signal_queries = [signal.title for signal in signals[:4] if signal.title]
     signal_source_counts = Counter(signal.source for signal in signals)
+    reddit_method_counts = Counter(
+        (signal.metadata or {}).get("collection_method", "unknown")
+        for signal in signals
+        if signal.source in {"reddit", "reddit_fallback"}
+    )
     queries = [keyword, f"{keyword} official", f"{keyword} beginner fix", *signal_queries]
     if settings.content_domain == "windows_help":
         queries.extend(
@@ -111,7 +116,10 @@ def build_research_report(settings, keyword: str, article, signals: list) -> dic
             f"When should I get help for {keyword}?",
         ],
         "signal_source_counts": dict(sorted(signal_source_counts.items())),
+        "reddit_collection_method_counts": dict(sorted(reddit_method_counts.items())),
         "live_reddit_signal_count": signal_source_counts.get("reddit", 0),
+        "reddit_oauth_signal_count": reddit_method_counts.get("oauth", 0),
+        "reddit_public_json_signal_count": reddit_method_counts.get("public_json", 0),
         "fallback_reddit_signal_count": signal_source_counts.get("reddit_fallback", 0),
         "google_suggest_signal_count": signal_source_counts.get("google_suggest", 0),
         "notes": [

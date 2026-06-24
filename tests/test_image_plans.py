@@ -34,7 +34,13 @@ class ImagePlanTests(unittest.TestCase):
                 "collect",
                 return_value=[
                     TopicSignal("reddit_fallback", "incheon airport to seoul", "Should I use AREX or airport bus?"),
-                    TopicSignal("reddit", "incheon airport to seoul", "Incheon to Seoul advice", url="https://reddit.com/r/test"),
+                    TopicSignal(
+                        "reddit",
+                        "incheon airport to seoul",
+                        "Incheon to Seoul advice",
+                        url="https://reddit.com/r/test",
+                        metadata={"collection_method": "oauth"},
+                    ),
                 ],
             ), patch.object(
                 stage1_generate.GoogleSuggestCollector,
@@ -67,6 +73,8 @@ class ImagePlanTests(unittest.TestCase):
         self.assertEqual(research_report["signal_source_counts"]["reddit_fallback"], 1)
         self.assertEqual(research_report["signal_source_counts"]["google_suggest"], 1)
         self.assertEqual(research_report["live_reddit_signal_count"], 1)
+        self.assertEqual(research_report["reddit_oauth_signal_count"], 1)
+        self.assertEqual(research_report["reddit_public_json_signal_count"], 0)
         self.assertEqual(research_report["fallback_reddit_signal_count"], 1)
         self.assertTrue(hero_exists)
         self.assertTrue(inline_exists)

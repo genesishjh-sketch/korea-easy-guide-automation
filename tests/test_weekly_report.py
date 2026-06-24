@@ -74,6 +74,8 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                     "status": "fallback_only",
                     "article_count_with_research": 1,
                     "live_reddit_signal_count": 0,
+                    "reddit_oauth_signal_count": 0,
+                    "reddit_public_json_signal_count": 0,
                     "fallback_reddit_signal_count": 2,
                     "google_suggest_signal_count": 3,
                     "fallback_only_articles": ["Wi-Fi Button Missing on Windows 11"],
@@ -111,6 +113,8 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("발행 확인: 오늘 공개 글 확인", markdown)
         self.assertIn("Sitemap 제출: 제출됨", markdown)
         self.assertIn("## 수집 신호 품질", markdown)
+        self.assertIn("Reddit OAuth 신호 수: 0", markdown)
+        self.assertIn("Reddit public JSON 신호 수: 0", markdown)
         self.assertIn("Reddit fallback 신호 수: 2", markdown)
         self.assertIn("fallback만 사용한 글", markdown)
 
@@ -127,9 +131,12 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                 json.dumps(
                     {
                         "live_reddit_signal_count": 0,
+                        "reddit_oauth_signal_count": 0,
+                        "reddit_public_json_signal_count": 0,
                         "fallback_reddit_signal_count": 2,
                         "google_suggest_signal_count": 4,
                         "signal_source_counts": {"reddit_fallback": 2, "google_suggest": 4},
+                        "reddit_collection_method_counts": {"fallback": 2},
                     }
                 ),
                 encoding="utf-8",
@@ -138,9 +145,12 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                 json.dumps(
                     {
                         "live_reddit_signal_count": 3,
+                        "reddit_oauth_signal_count": 2,
+                        "reddit_public_json_signal_count": 1,
                         "fallback_reddit_signal_count": 1,
                         "google_suggest_signal_count": 2,
                         "signal_source_counts": {"reddit": 3, "reddit_fallback": 1, "google_suggest": 2},
+                        "reddit_collection_method_counts": {"oauth": 2, "public_json": 1, "fallback": 1},
                     }
                 ),
                 encoding="utf-8",
@@ -156,9 +166,13 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertEqual(result["status"], "fallback_only")
         self.assertEqual(result["article_count_with_research"], 2)
         self.assertEqual(result["live_reddit_signal_count"], 3)
+        self.assertEqual(result["reddit_oauth_signal_count"], 2)
+        self.assertEqual(result["reddit_public_json_signal_count"], 1)
         self.assertEqual(result["fallback_reddit_signal_count"], 3)
         self.assertEqual(result["google_suggest_signal_count"], 6)
         self.assertEqual(result["signal_source_counts"]["reddit"], 3)
+        self.assertEqual(result["reddit_collection_method_counts"]["oauth"], 2)
+        self.assertEqual(result["reddit_collection_method_counts"]["public_json"], 1)
         self.assertEqual(result["fallback_only_articles"], ["Fallback only article"])
 
     def test_next_actions_do_not_ask_for_first_article_when_public_feed_has_posts(self) -> None:
@@ -220,6 +234,26 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         joined = "\n".join(actions)
         self.assertIn("Reddit OAuth 설정", joined)
         self.assertIn("fallback 질문만 사용", joined)
+
+    def test_next_actions_include_public_json_only_warning(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+
+        actions = reporter._next_actions(
+            articles=[{"blogger_status": "LIVE"}],
+            static_pages=[{"title": "About"}, {"title": "Contact"}, {"title": "Privacy Policy"}, {"title": "Disclaimer"}],
+            public_posts={"status": "connected", "posts": [{"title": "Published"}]},
+            operations={"preflight": {"status": "pass"}},
+            signal_quality={
+                "status": "connected",
+                "reddit_oauth_signal_count": 0,
+                "reddit_public_json_signal_count": 4,
+            },
+        )
+
+        joined = "\n".join(actions)
+        self.assertIn("public JSON", joined)
+        self.assertIn("Reddit OAuth 수집", joined)
 
     def test_operations_result_reads_daily_success_and_failure_reports(self) -> None:
         settings = load_settings("easy_pc_fix_guide")

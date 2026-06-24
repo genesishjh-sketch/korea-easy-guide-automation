@@ -92,6 +92,7 @@ class RedditCollector:
                         score=float(data.get("score", 0)) + float(data.get("num_comments", 0)) * 1.5,
                         metadata={
                             "subreddit": subreddit,
+                            "collection_method": "public_json",
                             "num_comments": data.get("num_comments", 0),
                             "created_utc": data.get("created_utc"),
                         },
@@ -114,6 +115,7 @@ class RedditCollector:
                     keyword=query,
                     title=question,
                     score=2.0 + overlap,
+                    metadata={"collection_method": "fallback"},
                 )
             )
         return sorted(fallback_signals, key=lambda item: item.score, reverse=True)[:limit]
@@ -148,6 +150,7 @@ class RedditCollector:
                             score=float(submission.score) + float(submission.num_comments) * 1.5,
                             metadata={
                                 "subreddit": subreddit,
+                                "collection_method": "oauth",
                                 "num_comments": submission.num_comments,
                                 "created_utc": submission.created_utc,
                             },

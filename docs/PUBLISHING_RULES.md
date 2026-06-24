@@ -26,6 +26,8 @@
 - Manual review is replaced by the automated Hades Engineer quality gate.
 - Posting Bot must report daily success or failure, including title, Blogger status, URL, quality score, and action notes.
 - Reddit OAuth credentials are recommended for stable question discovery. If Reddit public JSON is blocked, the pipeline may use fallback reader questions, and preflight should show a warning rather than hiding the reduced data quality.
+- Research reports and weekly reports must separate Reddit OAuth signals, Reddit public JSON signals, and Reddit fallback signals so collection quality problems are visible.
+- If weekly reports show public JSON signals without OAuth signals, treat it as a stability warning because public Reddit JSON can be blocked with 403.
 
 ## Hades Engineer Quality Gate
 
