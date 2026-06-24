@@ -72,6 +72,13 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                 "search_console": {"status": "not_configured", "note": "test"},
                 "analytics": {"status": "not_configured", "note": "test"},
                 "operations": {
+                    "daily_success": {
+                        "status": "published",
+                        "title": "Wi-Fi Button Missing on Windows 11",
+                        "url": "https://easypcfixguide.blogspot.com/2026/06/example.html",
+                        "quality_score": 100,
+                    },
+                    "daily_failure": {"status": "not_uploaded"},
                     "preflight": {"status": "pass", "checks": []},
                     "publication_check": {"status": "published_today", "today_post_count": 1},
                     "sitemap_submit": {
@@ -88,6 +95,9 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("최근 7일 공개 피드 글 수: 1", markdown)
         self.assertIn("Wi-Fi Button Missing on Windows 11", markdown)
         self.assertIn("## 운영 점검", markdown)
+        self.assertIn("최근 일일 성공 리포트: 공개 발행", markdown)
+        self.assertIn("품질점수: 100/100", markdown)
+        self.assertIn("최근 일일 실패 리포트: 미업로드", markdown)
         self.assertIn("Preflight: 통과", markdown)
         self.assertIn("발행 확인: 오늘 공개 글 확인", markdown)
         self.assertIn("Sitemap 제출: 제출됨", markdown)
@@ -123,6 +133,7 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
             static_pages=[{"title": "About"}, {"title": "Contact"}, {"title": "Privacy Policy"}, {"title": "Disclaimer"}],
             public_posts={"status": "connected", "posts": [{"title": "Published"}]},
             operations={
+                "daily_failure": {"status": "failed"},
                 "preflight": {"status": "fail"},
                 "publication_check": {"status": "missing_today"},
                 "sitemap_submit": {"status": "error"},
@@ -131,8 +142,30 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
 
         joined = "\n".join(actions)
         self.assertIn("Preflight 실패", joined)
+        self.assertIn("최근 일일 자동화 실패 리포트", joined)
         self.assertIn("오늘 공개 글을 찾지 못했습니다", joined)
         self.assertIn("sitemap 제출 실패", joined)
+
+    def test_operations_result_reads_daily_success_and_failure_reports(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+
+        with tempfile.TemporaryDirectory() as tmpdir, patch("src.reporting.weekly.ROOT_DIR", Path(tmpdir)):
+            report_dir = Path(tmpdir) / "reports"
+            report_dir.mkdir()
+            (report_dir / "easy_pc_fix_guide-daily-success.json").write_text(
+                '{"status":"published","title":"Published post"}',
+                encoding="utf-8",
+            )
+            (report_dir / "easy_pc_fix_guide-daily-failure.json").write_text(
+                '{"status":"failed","error":"boom"}',
+                encoding="utf-8",
+            )
+
+            operations = reporter._operations_result()
+
+        self.assertEqual(operations["daily_success"]["status"], "published")
+        self.assertEqual(operations["daily_failure"]["status"], "failed")
 
 
 if __name__ == "__main__":

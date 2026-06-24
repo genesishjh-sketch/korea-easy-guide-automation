@@ -145,6 +145,8 @@ class WeeklyReporter:
     def _operations_result(self) -> dict:
         report_dir = ROOT_DIR / "reports"
         return {
+            "daily_success": self._read_report(report_dir / f"{self.settings.site_key}-daily-success.json"),
+            "daily_failure": self._read_report(report_dir / f"{self.settings.site_key}-daily-failure.json"),
             "preflight": self._read_report(report_dir / f"{self.settings.site_key}-preflight.json"),
             "publication_check": self._read_report(report_dir / f"{self.settings.site_key}-publication-check.json"),
             "sitemap_submit": self._read_report(report_dir / f"{self.settings.site_key}-search-console-sitemap-submit.json"),
@@ -187,12 +189,15 @@ class WeeklyReporter:
         has_public_article = has_local_live_article or public_post_count > 0
         operations = operations or {}
         preflight_status = operations.get("preflight", {}).get("status")
+        daily_failure_status = operations.get("daily_failure", {}).get("status")
         publication_status = operations.get("publication_check", {}).get("status")
         sitemap_status = operations.get("sitemap_submit", {}).get("status")
         if preflight_status == "fail":
             actions.append("Preflight 실패 항목을 먼저 복구하세요. 설정, workflow 안전장치, 알림 설정을 확인해야 합니다.")
         elif preflight_status == "warn":
             actions.append("Preflight 주의 항목을 확인하세요. 자동화는 계속되지만 운영 리스크가 있습니다.")
+        if daily_failure_status == "failed":
+            actions.append("최근 일일 자동화 실패 리포트를 확인하세요. daily failure JSON의 오류 타입, 메시지, traceback을 우선 점검해야 합니다.")
         if publication_status == "missing_today":
             actions.append("발행 확인에서 오늘 공개 글을 찾지 못했습니다. daily publish 실행 결과와 Blogger 공개 피드를 확인하세요.")
         elif publication_status == "error":
@@ -298,9 +303,23 @@ class WeeklyReporter:
 
         lines.extend(["", "## 운영 점검", ""])
         operations = report.get("operations", {})
+        daily_success = operations.get("daily_success", {})
+        daily_failure = operations.get("daily_failure", {})
         preflight = operations.get("preflight", {})
         publication_check = operations.get("publication_check", {})
         sitemap_submit = operations.get("sitemap_submit", {})
+        lines.append(f"- 최근 일일 성공 리포트: {_status_kr(daily_success.get('status', 'not_uploaded'))}")
+        if daily_success.get("title"):
+            lines.append(f"  - 제목: {daily_success.get('title', '')}")
+        if daily_success.get("url"):
+            lines.append(f"  - URL: {daily_success.get('url', '')}")
+        if daily_success.get("quality_score") is not None:
+            lines.append(f"  - 품질점수: {daily_success.get('quality_score')}/100")
+        lines.append(f"- 최근 일일 실패 리포트: {_status_kr(daily_failure.get('status', 'not_uploaded'))}")
+        if daily_failure.get("error"):
+            lines.append(f"  - 오류: {daily_failure.get('error')}")
+        if daily_failure.get("seed"):
+            lines.append(f"  - 실패 시드: {daily_failure.get('seed')}")
         lines.append(f"- Preflight: {_status_kr(preflight.get('status', 'not_uploaded'))}")
         if preflight.get("checks"):
             failed_or_warned = [check for check in preflight.get("checks", []) if check.get("status") != "pass"]
@@ -355,5 +374,10 @@ def _status_kr(status: str | None) -> str:
         "fail": "실패",
         "published_today": "오늘 공개 글 확인",
         "missing_today": "오늘 공개 글 없음",
+        "validated": "검증 완료",
+        "draft_uploaded": "초안 업로드",
+        "published": "공개 발행",
+        "skipped_duplicate": "중복 건너뜀",
+        "failed": "실패",
     }
     return mapping.get(status or "not_uploaded", status or "미업로드")
