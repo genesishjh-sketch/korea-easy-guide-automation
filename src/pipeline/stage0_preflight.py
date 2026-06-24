@@ -143,6 +143,7 @@ def check_daily_workflow() -> PreflightCheck:
     required = [
         "Run safety regression tests",
         "python -m unittest discover -v",
+        "python -m src.pipeline.stage0_preflight --site easy_pc_fix_guide",
         "python -m src.pipeline.daily_draft --site easy_pc_fix_guide",
         "env.BLOGGER_PUBLISH_MODE == 'publish'",
         "python -m src.pipeline.stage3_submit_sitemap --site easy_pc_fix_guide",

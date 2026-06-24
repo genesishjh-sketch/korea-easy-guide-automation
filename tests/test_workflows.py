@@ -69,12 +69,15 @@ class WorkflowSafetyTests(unittest.TestCase):
 
         install_index = workflow.index("- name: Install dependencies")
         test_index = workflow.index("- name: Run safety regression tests")
+        preflight_index = workflow.index("- name: Run automation preflight")
         oauth_index = workflow.index("- name: Write Google OAuth files")
         publish_index = workflow.index("- name: Run Easy PC Fix daily pipeline")
 
         self.assertLess(install_index, test_index)
-        self.assertLess(test_index, oauth_index)
+        self.assertLess(test_index, preflight_index)
+        self.assertLess(preflight_index, oauth_index)
         self.assertLess(oauth_index, publish_index)
+        self.assertIn("python -m src.pipeline.stage0_preflight --site easy_pc_fix_guide", workflow)
 
     def test_easy_pc_daily_submits_sitemap_only_for_publish_mode(self) -> None:
         workflow = (ROOT_DIR / ".github" / "workflows" / "easy-pc-daily.yml").read_text(encoding="utf-8")
