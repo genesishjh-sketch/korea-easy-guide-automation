@@ -51,6 +51,14 @@ class WorkflowSafetyTests(unittest.TestCase):
         self.assertIn("actions/upload-artifact", workflow)
         self.assertIn("reports/easy_pc_fix_guide-publication-check.json", workflow)
 
+    def test_easy_pc_weekly_report_has_search_console_analytics_and_artifact(self) -> None:
+        workflow = (ROOT_DIR / ".github" / "workflows" / "easy-pc-weekly-report.yml").read_text(encoding="utf-8")
+
+        self.assertIn("GOOGLE_OAUTH_TOKEN_SEARCH_CONSOLE_JSON", workflow)
+        self.assertIn("GOOGLE_OAUTH_TOKEN_ANALYTICS_JSON", workflow)
+        self.assertIn("python -m src.pipeline.stage3_weekly_report --site easy_pc_fix_guide", workflow)
+        self.assertIn("reports/easy_pc_fix_guide-weekly-*", workflow)
+
 
 if __name__ == "__main__":
     unittest.main()

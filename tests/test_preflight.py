@@ -22,6 +22,18 @@ class PreflightTests(unittest.TestCase):
         self.assertEqual(check.status, "pass")
         self.assertIn("covers source, tests", check.message)
 
+    def test_publication_check_workflow_coverage_pass(self) -> None:
+        check = stage0_preflight.check_publication_check_workflow()
+
+        self.assertEqual(check.status, "pass")
+        self.assertIn("public feed", check.message)
+
+    def test_weekly_report_workflow_coverage_pass(self) -> None:
+        check = stage0_preflight.check_weekly_report_workflow()
+
+        self.assertEqual(check.status, "pass")
+        self.assertIn("Search Console", check.message)
+
     def test_launch_queue_passes_with_seven_topics_from_main_seed_file(self) -> None:
         with patch.object(stage0_preflight, "load_settings") as load_settings:
             load_settings.return_value.content_domain = "windows_help"

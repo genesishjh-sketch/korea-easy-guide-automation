@@ -29,6 +29,8 @@ def run(site: str | None = None) -> Path:
         check_launch_queue(site),
         check_daily_workflow(),
         check_validate_workflow(),
+        check_publication_check_workflow(),
+        check_weekly_report_workflow(),
         check_public_feed(settings.site_url),
         check_local_google_files(settings.google_oauth_client_secret_file, settings.google_oauth_token_file),
         check_telegram_settings(settings.notification_provider, settings.telegram_bot_token, settings.telegram_chat_id),
@@ -126,6 +128,41 @@ def check_validate_workflow() -> PreflightCheck:
     if missing:
         return PreflightCheck("validate_workflow", "fail", f"Missing validate workflow coverage: {', '.join(missing)}")
     return PreflightCheck("validate_workflow", "pass", "Validate workflow covers source, tests, and daily workflow changes.")
+
+
+def check_publication_check_workflow() -> PreflightCheck:
+    path = ROOT_DIR / ".github" / "workflows" / "easy-pc-publication-check.yml"
+    if not path.exists():
+        return PreflightCheck("publication_check_workflow", "fail", "Easy PC publication check workflow is missing.")
+    text = path.read_text(encoding="utf-8")
+    required = [
+        "45 0 * * *",
+        "python -m src.pipeline.stage4_publication_check --site easy_pc_fix_guide --after-hour 9",
+        "if: always()",
+        "reports/easy_pc_fix_guide-publication-check.json",
+    ]
+    missing = [item for item in required if item not in text]
+    if missing:
+        return PreflightCheck("publication_check_workflow", "fail", f"Missing publication check safeguards: {', '.join(missing)}")
+    return PreflightCheck("publication_check_workflow", "pass", "Publication check workflow verifies the public feed after daily publishing and uploads its report.")
+
+
+def check_weekly_report_workflow() -> PreflightCheck:
+    path = ROOT_DIR / ".github" / "workflows" / "easy-pc-weekly-report.yml"
+    if not path.exists():
+        return PreflightCheck("weekly_report_workflow", "fail", "Easy PC weekly report workflow is missing.")
+    text = path.read_text(encoding="utf-8")
+    required = [
+        "40 0 * * 1",
+        "GOOGLE_OAUTH_TOKEN_SEARCH_CONSOLE_JSON",
+        "GOOGLE_OAUTH_TOKEN_ANALYTICS_JSON",
+        "python -m src.pipeline.stage3_weekly_report --site easy_pc_fix_guide",
+        "reports/easy_pc_fix_guide-weekly-*",
+    ]
+    missing = [item for item in required if item not in text]
+    if missing:
+        return PreflightCheck("weekly_report_workflow", "fail", f"Missing weekly report safeguards: {', '.join(missing)}")
+    return PreflightCheck("weekly_report_workflow", "pass", "Weekly report workflow includes Search Console, Analytics, Telegram, and artifact upload wiring.")
 
 
 def check_public_feed(site_url: str) -> PreflightCheck:
