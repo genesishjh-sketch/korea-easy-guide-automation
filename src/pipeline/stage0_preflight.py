@@ -229,7 +229,10 @@ def check_cadence_alert_workflow() -> PreflightCheck:
 
 def check_critical_notifications() -> PreflightCheck:
     required = {
-        "daily_draft.py": "NotificationClient(settings).send_required(build_daily_success_message(result))",
+        "daily_draft.py": [
+            "NotificationClient(settings).send_required(build_daily_success_message(result))",
+            "NotificationClient(settings).send_required(\n        \"\\n\".join(",
+        ],
         "stage3_submit_sitemap.py": "NotificationClient(settings).send_required(build_message(settings.site_name, result))",
         "stage4_publication_check.py": "NotificationClient(settings).send_required(build_message(result))",
         "stage3_weekly_report.py": "NotificationClient(settings).send_required(path.read_text(encoding=\"utf-8\"))",
@@ -242,7 +245,10 @@ def check_critical_notifications() -> PreflightCheck:
         if not path.exists():
             missing.append(filename)
             continue
-        if snippet not in path.read_text(encoding="utf-8"):
+        text = path.read_text(encoding="utf-8")
+        snippets = snippet if isinstance(snippet, list) else [snippet]
+        missing_snippets = [item for item in snippets if item not in text]
+        if missing_snippets:
             missing.append(filename)
     if missing:
         return PreflightCheck(

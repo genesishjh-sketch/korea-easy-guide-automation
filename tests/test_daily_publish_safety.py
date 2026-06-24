@@ -417,6 +417,16 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertIn("- 품질검수 실패로 재시도한 시드 수: 1", message)
         self.assertIn("- 품질 재시도 시드: thin topic", message)
 
+    def test_daily_failure_notification_is_required(self) -> None:
+        with patch.object(daily_draft, "NotificationClient") as notification:
+            daily_draft.notify_daily_failure("broken topic", ValueError("quality failed"), "easy_pc_fix_guide")
+
+        notification.return_value.send_required.assert_called_once()
+        message = notification.return_value.send_required.call_args.args[0]
+        self.assertIn("[Posting Bot] 일일 포스팅 실패", message)
+        self.assertIn("broken topic", message)
+        self.assertIn("quality failed", message)
+
     def test_daily_failure_report_is_written_before_reraising(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             report_dir = Path(tmpdir) / "reports"

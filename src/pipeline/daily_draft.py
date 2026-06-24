@@ -333,7 +333,7 @@ def notify_daily_completion(result: dict[str, str]) -> None:
 def notify_daily_failure(seed: str, exc: Exception, site: str | None = None) -> None:
     settings = load_settings(site)
     error = "".join(traceback.format_exception_only(type(exc), exc)).strip()
-    NotificationClient(settings).send(
+    NotificationClient(settings).send_required(
         "\n".join(
             [
                 "[Posting Bot] 일일 포스팅 실패",
