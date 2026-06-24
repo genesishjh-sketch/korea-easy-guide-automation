@@ -9,6 +9,10 @@ import sys
 
 from src.config import ROOT_DIR
 from src.config import load_settings
+from src.google_auth import ANALYTICS_READONLY_SCOPE
+from src.google_auth import SEARCH_CONSOLE_SUBMIT_SCOPE
+from src.google_auth import resolve_path
+from src.google_auth import token_path_for_scopes
 from src.pipeline.daily_draft import load_launch_seed_list
 from src.pipeline.daily_draft import load_seed_list
 from src.pipeline.stage4_publication_check import fetch_public_feed
@@ -37,6 +41,7 @@ def run(site: str | None = None) -> Path:
         check_critical_notifications(),
         check_public_feed(settings.site_url),
         check_local_google_files(settings.google_oauth_client_secret_file, settings.google_oauth_token_file),
+        check_reporting_google_files(settings.google_oauth_client_secret_file, settings.google_oauth_token_file),
         check_telegram_settings(settings.notification_provider, settings.telegram_bot_token, settings.telegram_chat_id),
     ]
     result = {
@@ -256,6 +261,41 @@ def check_local_google_files(client_secret_file: str, token_file: str) -> Prefli
             f"Local OAuth files missing or unset: {', '.join(missing)}. This is OK in GitHub Actions if secrets are configured.",
         )
     return PreflightCheck("local_google_files", "pass", "Local Google OAuth files are present.")
+
+
+def check_reporting_google_files(client_secret_file: str, token_file: str) -> PreflightCheck:
+    if not client_secret_file or not token_file:
+        return PreflightCheck(
+            "reporting_google_files",
+            "warn",
+            "Search Console/GA4 reporting OAuth files are not fully set locally. "
+            "This is OK in GitHub Actions if reporting token secrets are configured.",
+        )
+
+    secret_path = resolve_path(client_secret_file)
+    search_console_token = token_path_for_scopes(token_file, [SEARCH_CONSOLE_SUBMIT_SCOPE])
+    analytics_token = token_path_for_scopes(token_file, [ANALYTICS_READONLY_SCOPE])
+    missing = []
+    for label, path in [
+        ("GOOGLE_OAUTH_CLIENT_SECRET_FILE", secret_path),
+        ("GOOGLE_OAUTH_TOKEN_SEARCH_CONSOLE_JSON", search_console_token),
+        ("GOOGLE_OAUTH_TOKEN_ANALYTICS_JSON", analytics_token),
+    ]:
+        if not path.exists():
+            missing.append(label)
+
+    if missing:
+        return PreflightCheck(
+            "reporting_google_files",
+            "warn",
+            "Reporting OAuth files missing locally: "
+            f"{', '.join(missing)}. Weekly reports can still work in GitHub Actions if the matching secrets exist.",
+        )
+    return PreflightCheck(
+        "reporting_google_files",
+        "pass",
+        "Search Console and GA4 reporting OAuth token files are present locally.",
+    )
 
 
 def check_telegram_settings(provider: str, bot_token: str, chat_id: str) -> PreflightCheck:

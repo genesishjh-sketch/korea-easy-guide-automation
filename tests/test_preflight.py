@@ -97,6 +97,32 @@ class PreflightTests(unittest.TestCase):
         self.assertEqual(check.status, "warn")
         self.assertIn("feed unavailable", check.message)
 
+    def test_reporting_google_files_warn_when_reporting_tokens_are_missing(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            secret_path = Path(tmpdir) / "client_secret.json"
+            secret_path.write_text("{}", encoding="utf-8")
+            token_path = Path(tmpdir) / "google_token.json"
+
+            check = stage0_preflight.check_reporting_google_files(str(secret_path), str(token_path))
+
+        self.assertEqual(check.status, "warn")
+        self.assertIn("GOOGLE_OAUTH_TOKEN_SEARCH_CONSOLE_JSON", check.message)
+        self.assertIn("GOOGLE_OAUTH_TOKEN_ANALYTICS_JSON", check.message)
+
+    def test_reporting_google_files_pass_when_reporting_tokens_exist(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            secret_path = Path(tmpdir) / "client_secret.json"
+            token_path = Path(tmpdir) / "google_token.json"
+            search_console_path = Path(tmpdir) / "google_token.search-console.json"
+            analytics_path = Path(tmpdir) / "google_token.analytics.json"
+            for path in [secret_path, search_console_path, analytics_path]:
+                path.write_text("{}", encoding="utf-8")
+
+            check = stage0_preflight.check_reporting_google_files(str(secret_path), str(token_path))
+
+        self.assertEqual(check.status, "pass")
+        self.assertIn("Search Console and GA4", check.message)
+
     def test_overall_status_prefers_fail_over_warn(self) -> None:
         checks = [
             stage0_preflight.PreflightCheck("a", "pass", "ok"),
