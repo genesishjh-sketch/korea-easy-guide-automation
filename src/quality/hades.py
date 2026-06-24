@@ -19,7 +19,12 @@ REQUIRED_HEADINGS = {
     "Official Links to Check",
 }
 
-MIN_WORD_COUNT = 1200
+MIN_WORD_COUNT = 1400
+MIN_OFFICIAL_LINKS = 4
+MIN_FAQ_QUESTIONS = 5
+MIN_RESEARCH_QUERIES = 6
+MIN_RESEARCH_SOURCES = 6
+MIN_RESEARCH_READER_QUESTIONS = 5
 
 OFFICIAL_SOURCE_DOMAINS = (
     ".go.kr",
@@ -29,6 +34,8 @@ OFFICIAL_SOURCE_DOMAINS = (
     "tmoney.co.kr",
     "seoul.go.kr",
     "seoulmetro.co.kr",
+    "wowpass.io",
+    "namanecard.com",
     "naver.com",
     "kakao.com",
     "apple.com",
@@ -120,10 +127,10 @@ class HadesQualityGate:
             issues.append(QualityIssue("thin_content", f"Article must contain at least {MIN_WORD_COUNT} words before public publishing."))
         if len(images) < 2:
             issues.append(QualityIssue("missing_images", "Article must include at least one hero image and one inline image."))
-        if len(official_links) < 2:
-            issues.append(QualityIssue("weak_sources", "Article must include at least two official or platform source links."))
-        if faq_questions < 3:
-            issues.append(QualityIssue("weak_faq", "FAQ must include at least three questions."))
+        if len(official_links) < MIN_OFFICIAL_LINKS:
+            issues.append(QualityIssue("weak_sources", f"Article must include at least {MIN_OFFICIAL_LINKS} official or platform source links."))
+        if faq_questions < MIN_FAQ_QUESTIONS:
+            issues.append(QualityIssue("weak_faq", f"FAQ must include at least {MIN_FAQ_QUESTIONS} questions."))
 
         for phrase in BLOCKED_PHRASES:
             if phrase in text_lower:
@@ -147,6 +154,9 @@ class HadesQualityGate:
         if not article.get("tags"):
             issues.append(QualityIssue("missing_tags", "Tags are required."))
 
+        research_metrics, research_issues = self._review_research_report(article_dir)
+        issues.extend(research_issues)
+
         score = max(0, 100 - sum(12 if issue.severity == "error" else 4 for issue in issues))
         metrics = {
             "word_count": len(words),
@@ -154,8 +164,54 @@ class HadesQualityGate:
             "official_link_count": len(official_links),
             "faq_question_count": faq_questions,
             "heading_count": len(headings),
+            **research_metrics,
         }
         return self._report(score, issues, metrics)
+
+    def _review_research_report(self, article_dir: Path) -> tuple[dict[str, int], list[QualityIssue]]:
+        report_path = article_dir / "research_report.json"
+        metrics = {
+            "research_query_count": 0,
+            "research_source_count": 0,
+            "research_official_source_count": 0,
+            "research_reader_question_count": 0,
+        }
+        if not report_path.exists():
+            return metrics, [QualityIssue("missing_research_report", "research_report.json is required before public publishing.")]
+
+        try:
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            return metrics, [QualityIssue("invalid_research_report", "research_report.json must be valid JSON.")]
+
+        queries = report.get("queries", [])
+        sources = report.get("sources", [])
+        reader_questions = report.get("reader_questions", [])
+        official_sources = [
+            source
+            for source in sources
+            if any(domain in (source.get("url") or "") for domain in OFFICIAL_SOURCE_DOMAINS)
+        ]
+
+        metrics.update(
+            {
+                "research_query_count": len(queries),
+                "research_source_count": len(sources),
+                "research_official_source_count": len(official_sources),
+                "research_reader_question_count": len(reader_questions),
+            }
+        )
+
+        issues: list[QualityIssue] = []
+        if len(queries) < MIN_RESEARCH_QUERIES:
+            issues.append(QualityIssue("shallow_research_queries", f"Research must include at least {MIN_RESEARCH_QUERIES} search queries."))
+        if len(sources) < MIN_RESEARCH_SOURCES:
+            issues.append(QualityIssue("shallow_research_sources", f"Research must include at least {MIN_RESEARCH_SOURCES} sources."))
+        if len(official_sources) < 3:
+            issues.append(QualityIssue("weak_official_research", "Research must include at least three official or platform sources."))
+        if len(reader_questions) < MIN_RESEARCH_READER_QUESTIONS:
+            issues.append(QualityIssue("weak_reader_questions", f"Research must include at least {MIN_RESEARCH_READER_QUESTIONS} reader questions or search intents."))
+        return metrics, issues
 
     def _report(self, score: int, issues: list[QualityIssue], metrics: dict[str, int]) -> QualityReport:
         return QualityReport(

@@ -306,7 +306,9 @@ class EnglishArticleGenerator:
         if self._is_tmoney(candidate.keyword):
             return [
                 {"name": "Tmoney official English site", "url": "https://eng.tmoney.co.kr/en/aeb/main/main/readMain.dev"},
-                {"name": "VISITKOREA official travel information", "url": "https://english.visitkorea.or.kr/"},
+                {"name": "VISITKOREA Transportation Cards", "url": "https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=140663"},
                 {"name": "Seoul Metropolitan Government official website", "url": "https://english.seoul.go.kr/"},
+                {"name": "WOWPASS official website", "url": "https://www.wowpass.io/"},
+                {"name": "NAMANE CARD official website", "url": "https://en.namanecard.com/"},
             ]
         return OFFICIAL_SOURCE_MAP.get(candidate.category, OFFICIAL_SOURCE_MAP["Transportation"])

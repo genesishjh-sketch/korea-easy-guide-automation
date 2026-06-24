@@ -19,7 +19,7 @@ Every post must pass automated review before Blogger publishing.
 
 Required checks:
 
-- At least 650 English words.
+- At least 1,400 English words.
 - Required article sections:
   - Quick Answer
   - Before You Start
@@ -32,8 +32,14 @@ Required checks:
 - At least two images:
   - `assets/ai-hero.jpg`
   - `assets/ai-inline-1.jpg`
-- At least two official or platform source links.
-- At least three FAQ questions.
+- At least four official or platform source links in the article.
+- At least five FAQ questions.
+- A `research_report.json` file must exist for every public post.
+- Research must include at least:
+  - six search queries
+  - six source records
+  - three official or platform sources
+  - five reader questions or search intents
 - Meta description and tags must exist.
 - Placeholder, generic old-template, and AI refusal phrases are blocked.
 
@@ -61,6 +67,8 @@ Allowed improvement targets:
 - Expand thin sections.
 - Add missing FAQ entries.
 - Improve source links.
+- Add deeper official-source research.
+- Add reader-question coverage from Reddit, Google suggestions, and search results.
 - Regenerate weak image prompts.
 - Replace missing or poor images.
 - Remove blocked phrases.
