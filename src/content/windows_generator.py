@@ -16,8 +16,51 @@ MICROSOFT_SOURCES = [
     {"name": "Microsoft Learn Windows troubleshooting", "url": "https://learn.microsoft.com/windows/"},
     {"name": "Windows release health", "url": "https://learn.microsoft.com/windows/release-health/"},
     {"name": "Windows message center", "url": "https://learn.microsoft.com/windows/release-health/windows-message-center"},
-    {"name": "Microsoft Support: Windows Update troubleshooter", "url": "https://support.microsoft.com/windows/windows-update-troubleshooter"},
-    {"name": "Microsoft Support: Fix Wi-Fi connection issues", "url": "https://support.microsoft.com/windows/fix-wi-fi-connection-issues-in-windows"},
+]
+
+TOPIC_SOURCE_RULES = [
+    (
+        ("wifi", "wi-fi", "internet", "dns", "network"),
+        [
+            {"name": "Microsoft Support: Wi-Fi and network help", "url": "https://support.microsoft.com/windows/network-wi-fi"},
+            {"name": "Microsoft Support search: Wi-Fi problems", "url": "https://support.microsoft.com/search/results?query=fix%20wi-fi%20connection%20issues%20in%20Windows"},
+        ],
+    ),
+    (
+        ("bluetooth", "pairing"),
+        [
+            {"name": "Microsoft Support search: Bluetooth problems", "url": "https://support.microsoft.com/search/results?query=fix%20bluetooth%20problems%20in%20Windows"},
+            {"name": "Microsoft Support: Bluetooth help", "url": "https://support.microsoft.com/windows/bluetooth"},
+        ],
+    ),
+    (
+        ("printer", "scanner", "print queue"),
+        [
+            {"name": "Microsoft Support search: printer problems", "url": "https://support.microsoft.com/search/results?query=fix%20printer%20connection%20and%20printing%20problems%20in%20Windows"},
+            {"name": "Microsoft Support: Devices and drivers", "url": "https://support.microsoft.com/windows"},
+        ],
+    ),
+    (
+        ("windows update", "update error", "0x"),
+        [
+            {"name": "Microsoft Support search: Windows Update troubleshooter", "url": "https://support.microsoft.com/search/results?query=Windows%20Update%20troubleshooter"},
+            {"name": "Windows release health known issues", "url": "https://learn.microsoft.com/windows/release-health/"},
+        ],
+    ),
+    (
+        ("microsoft store", "photos app", "snipping tool", "calculator app", "settings app", "default apps"),
+        [
+            {"name": "Microsoft Support search: Microsoft Store app problems", "url": "https://support.microsoft.com/search/results?query=Microsoft%20Store%20not%20working%20Windows"},
+            {"name": "Microsoft Support search: Windows apps troubleshooting", "url": "https://support.microsoft.com/search/results?query=Windows%20apps%20troubleshooting"},
+        ],
+    ),
+    (
+        ("safe mode", "blue screen", "automatic repair", "recovery", "bitlocker"),
+        [
+            {"name": "Microsoft Support search: Windows recovery options", "url": "https://support.microsoft.com/search/results?query=Windows%20recovery%20options"},
+            {"name": "Microsoft Support search: Safe Mode Windows", "url": "https://support.microsoft.com/search/results?query=start%20Windows%20in%20safe%20mode"},
+        ],
+    ),
 ]
 
 
@@ -151,13 +194,34 @@ def _topic_profile(keyword: str, category: str) -> dict:
         ],
         "faq": _faq(keyword, error),
         "related_guides": _related_guides(category),
-        "sources": MICROSOFT_SOURCES,
+        "sources": _sources_for_topic(normalized),
     }
 
 
 def _error_code(text: str) -> str | None:
     match = re.search(r"0x[a-f0-9]{8}", text)
     return match.group(0).upper() if match else None
+
+
+def _sources_for_topic(text: str) -> list[dict[str, str]]:
+    sources = [*MICROSOFT_SOURCES]
+    for terms, topic_sources in TOPIC_SOURCE_RULES:
+        if any(term in text for term in terms):
+            sources.extend(topic_sources)
+            break
+    return _unique_sources(sources)[:8]
+
+
+def _unique_sources(sources: list[dict[str, str]]) -> list[dict[str, str]]:
+    unique = []
+    seen = set()
+    for source in sources:
+        url = source.get("url", "")
+        if not url or url in seen:
+            continue
+        seen.add(url)
+        unique.append(source)
+    return unique
 
 
 def _risk_level(text: str) -> str:
