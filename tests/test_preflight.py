@@ -151,9 +151,8 @@ class PreflightTests(unittest.TestCase):
                         "codex_generated_no_api",
                         "Do not call paid image APIs in the Python pipeline.",
                         "IMAGE_ASSET_MODE",
-                        "local_svg",
-                        "APP_ENV",
-                        "production",
+                        "manual_jpg",
+                        'return "svg"',
                     ]
                 ),
                 encoding="utf-8",

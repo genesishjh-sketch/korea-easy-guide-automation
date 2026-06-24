@@ -146,9 +146,8 @@ def check_zero_cost_image_policy() -> PreflightCheck:
             "Do not call paid image APIs in the Python pipeline.",
             "codex_generated_no_api",
             "IMAGE_ASSET_MODE",
-            "local_svg",
-            "APP_ENV",
-            "production",
+            "manual_jpg",
+            "return \"svg\"",
         ]
         if snippet not in image_plan_text
     ]

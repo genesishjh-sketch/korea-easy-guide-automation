@@ -13,6 +13,24 @@ from src.pipeline import stage1_generate
 
 
 class ImagePlanTests(unittest.TestCase):
+    def test_default_uses_local_svg_fallback_filenames(self) -> None:
+        candidate = build_candidate("windows update error 0x80070643", [], "windows_help")
+
+        with patch.dict("os.environ", {}, clear=True):
+            plan = build_article_image_plan(candidate, "Windows Update Error 0x80070643")
+
+        self.assertEqual([image.filename for image in plan.images], ["ai-hero.svg", "ai-inline-1.svg"])
+        self.assertTrue(plan.strict)
+
+    def test_manual_jpg_mode_uses_jpg_filenames(self) -> None:
+        candidate = build_candidate("windows update error 0x80070643", [], "windows_help")
+
+        with patch.dict("os.environ", {"IMAGE_ASSET_MODE": "manual_jpg"}, clear=True):
+            plan = build_article_image_plan(candidate, "Windows Update Error 0x80070643")
+
+        self.assertEqual([image.filename for image in plan.images], ["ai-hero.jpg", "ai-inline-1.jpg"])
+        self.assertTrue(plan.strict)
+
     def test_korea_production_uses_local_svg_fallback_filenames(self) -> None:
         candidate = build_candidate("incheon airport to seoul", [], "korea_travel")
 

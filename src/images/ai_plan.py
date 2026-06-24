@@ -63,11 +63,7 @@ def build_article_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
     }:
         return build_windows_image_plan(candidate, title)
 
-    use_local_svg = (
-        os.getenv("IMAGE_ASSET_MODE", "").lower() == "local_svg"
-        or os.getenv("APP_ENV", "").lower() == "production"
-    )
-    extension = "svg" if use_local_svg else "jpg"
+    extension = _planned_image_extension()
     scene = detect_scene(f"{candidate.keyword} {title}")
     visual_subject = _visual_subject(scene, candidate.keyword)
     style = (
@@ -114,11 +110,7 @@ def build_article_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
 
 
 def build_windows_image_plan(candidate: TopicCandidate, title: str) -> ArticleImagePlan:
-    use_local_svg = (
-        os.getenv("IMAGE_ASSET_MODE", "").lower() == "local_svg"
-        or os.getenv("APP_ENV", "").lower() == "production"
-    )
-    extension = "svg" if use_local_svg else "jpg"
+    extension = _planned_image_extension()
     hero = PlannedImage(
         role="hero",
         filename=f"ai-hero.{extension}",
@@ -165,6 +157,13 @@ def _asset_from_plan(image: PlannedImage, article_dir: Path | None) -> ImageAsse
         credit="Generated with Codex image generation",
         caption=image.caption,
     )
+
+
+def _planned_image_extension() -> str:
+    mode = os.getenv("IMAGE_ASSET_MODE", "").strip().lower()
+    if mode in {"jpg", "jpeg", "raster", "codex_jpg", "manual_jpg"}:
+        return "jpg"
+    return "svg"
 
 
 def _visual_subject(scene: str, keyword: str) -> str:
