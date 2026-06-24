@@ -16,6 +16,7 @@ MICROSOFT_SOURCES = [
     {"name": "Microsoft Learn Windows troubleshooting", "url": "https://learn.microsoft.com/windows/"},
     {"name": "Windows release health", "url": "https://learn.microsoft.com/windows/release-health/"},
     {"name": "Windows message center", "url": "https://learn.microsoft.com/windows/release-health/windows-message-center"},
+    {"name": "Microsoft Support search: Windows troubleshooting", "url": "https://support.microsoft.com/search/results?query=Windows%20troubleshooting"},
 ]
 
 TOPIC_SOURCE_RULES = [
@@ -37,7 +38,14 @@ TOPIC_SOURCE_RULES = [
         ("printer", "scanner", "print queue"),
         [
             {"name": "Microsoft Support search: printer problems", "url": "https://support.microsoft.com/search/results?query=fix%20printer%20connection%20and%20printing%20problems%20in%20Windows"},
-            {"name": "Microsoft Support: Devices and drivers", "url": "https://support.microsoft.com/windows"},
+            {"name": "Microsoft Support search: printer queue", "url": "https://support.microsoft.com/search/results?query=clear%20print%20queue%20Windows"},
+        ],
+    ),
+    (
+        ("usb", "camera", "touchpad", "mouse", "keyboard", "device not recognized", "device manager"),
+        [
+            {"name": "Microsoft Support search: device problems", "url": "https://support.microsoft.com/search/results?query=device%20not%20recognized%20Windows"},
+            {"name": "Microsoft Support search: camera problems", "url": "https://support.microsoft.com/search/results?query=camera%20not%20working%20Windows"},
         ],
     ),
     (
@@ -56,7 +64,35 @@ TOPIC_SOURCE_RULES = [
         ],
     ),
     (
-        ("safe mode", "blue screen", "automatic repair", "recovery", "bitlocker"),
+        ("windows search", "search not working", "indexing"),
+        [
+            {"name": "Microsoft Support search: Windows Search", "url": "https://support.microsoft.com/search/results?query=Windows%20Search%20not%20working"},
+            {"name": "Microsoft Support search: search indexing", "url": "https://support.microsoft.com/search/results?query=Windows%20search%20indexing"},
+        ],
+    ),
+    (
+        ("file explorer", "folder", "downloads folder", "desktop icons", "recycle bin"),
+        [
+            {"name": "Microsoft Support search: File Explorer", "url": "https://support.microsoft.com/search/results?query=File%20Explorer%20not%20responding%20Windows"},
+            {"name": "Microsoft Support search: Windows files and folders", "url": "https://support.microsoft.com/search/results?query=Windows%20files%20and%20folders"},
+        ],
+    ),
+    (
+        ("disk space", "storage space", "storage sense"),
+        [
+            {"name": "Microsoft Support search: free up drive space", "url": "https://support.microsoft.com/search/results?query=free%20up%20drive%20space%20Windows"},
+            {"name": "Microsoft Support search: Storage Sense", "url": "https://support.microsoft.com/search/results?query=Storage%20Sense%20Windows"},
+        ],
+    ),
+    (
+        ("taskbar", "start menu", "notifications", "clock"),
+        [
+            {"name": "Microsoft Support search: Windows taskbar", "url": "https://support.microsoft.com/search/results?query=Windows%20taskbar%20not%20working"},
+            {"name": "Microsoft Support search: Start menu", "url": "https://support.microsoft.com/search/results?query=Start%20menu%20not%20working%20Windows"},
+        ],
+    ),
+    (
+        ("safe mode", "blue screen", "automatic repair", "recovery", "bitlocker", "restore point"),
         [
             {"name": "Microsoft Support search: Windows recovery options", "url": "https://support.microsoft.com/search/results?query=Windows%20recovery%20options"},
             {"name": "Microsoft Support search: Safe Mode Windows", "url": "https://support.microsoft.com/search/results?query=start%20Windows%20in%20safe%20mode"},

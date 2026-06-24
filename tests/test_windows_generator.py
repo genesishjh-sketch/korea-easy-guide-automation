@@ -1,8 +1,14 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
 import unittest
 
+from src.content.topic_scoring import infer_category
 from src.content.windows_generator import _sources_for_topic
+
+
+ROOT_DIR = Path(__file__).resolve().parents[1]
 
 
 class WindowsGeneratorSourceTests(unittest.TestCase):
@@ -27,6 +33,25 @@ class WindowsGeneratorSourceTests(unittest.TestCase):
         urls = [source["url"] for source in _sources_for_topic("windows update error 0x800f0922")]
 
         self.assertEqual(len(urls), len(set(urls)))
+
+    def test_launch_queue_topics_have_enough_microsoft_sources_for_hades(self) -> None:
+        seeds = json.loads((ROOT_DIR / "data" / "seeds" / "windows_launch_queue.json").read_text(encoding="utf-8"))
+
+        for seed in seeds:
+            with self.subTest(seed=seed):
+                sources = _sources_for_topic(seed)
+
+                self.assertGreaterEqual(len(sources), 6)
+                self.assertTrue(
+                    all("microsoft.com" in source["url"] or "learn.microsoft.com" in source["url"] for source in sources)
+                )
+
+    def test_launch_queue_topics_do_not_fall_back_to_generic_computer_help(self) -> None:
+        seeds = json.loads((ROOT_DIR / "data" / "seeds" / "windows_launch_queue.json").read_text(encoding="utf-8"))
+
+        for seed in seeds:
+            with self.subTest(seed=seed):
+                self.assertNotEqual(infer_category(seed, "windows_help"), "Computer Help")
 
 
 if __name__ == "__main__":
