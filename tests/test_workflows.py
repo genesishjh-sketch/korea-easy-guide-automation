@@ -27,6 +27,13 @@ class WorkflowSafetyTests(unittest.TestCase):
         self.assertIn("env.BLOGGER_PUBLISH_MODE == 'publish'", workflow)
         self.assertNotIn("- name: Submit sitemap\n        if: always()", workflow)
 
+    def test_easy_pc_validate_runs_preflight(self) -> None:
+        workflow = (ROOT_DIR / ".github" / "workflows" / "easy-pc-validate-smoke.yml").read_text(encoding="utf-8")
+
+        self.assertIn("- name: Run automation preflight", workflow)
+        self.assertIn("python -m src.pipeline.stage0_preflight --site easy_pc_fix_guide", workflow)
+        self.assertIn("reports/easy_pc_fix_guide-preflight.json", workflow)
+
 
 if __name__ == "__main__":
     unittest.main()

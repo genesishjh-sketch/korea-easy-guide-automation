@@ -1,21 +1,33 @@
 # Korea Easy Guide Automation
 
-Python pipeline for an English Blogger-based Korea travel and daily-life information blog.
+Multi-site Python automation for Blogger-based English blogs.
 
-## Current Stage
+Current sites:
 
-Stage 1, Stage 2, and Stage 3 are implemented:
+- `korea_easy_guide`: Korea travel and daily-life guide
+- `easy_pc_fix_guide`: beginner Windows troubleshooting guide
 
-1. Collect topic signals from Reddit and Google suggestions.
-2. Score and select a posting topic.
-3. Generate an English article from structured templates.
-4. Generate a strict Codex image plan for hero and inline images.
-5. Save Markdown, HTML, and metadata files.
-6. Block Blogger publishing unless the Hades Engineer quality gate passes.
+The active production focus is `easy_pc_fix_guide` at:
 
-The target publishing cadence is one public post per day, including weekends,
-at 09:00 KST. Public publishing is allowed only after automated quality review
-passes. See `docs/PUBLISHING_RULES.md`.
+```text
+https://easypcfixguide.blogspot.com
+```
+
+## What It Does
+
+The pipeline can:
+
+- collect topic signals from Reddit and Google suggestions
+- select a topic seed
+- generate English article HTML/Markdown
+- create an image plan and local fallback assets
+- run the Hades Engineer quality gate
+- publish to Blogger
+- avoid duplicate public posts
+- retry the next topic when an automatic publish candidate is already public
+- submit the Blogger sitemap to Search Console after publish runs
+- send Korean Telegram Posting Bot reports
+- generate Korean weekly reports with Blogger feed, Search Console, and GA4 data
 
 ## Setup
 
@@ -27,94 +39,101 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
-## Run Stage 1
+Set `SITE_KEY` or pass `--site` for multi-site commands.
+
+## Easy PC Preflight
+
+Run this before changing schedules, secrets, or publish mode:
 
 ```bash
-python -m src.pipeline.stage1_generate --seed "incheon airport to seoul"
+python -m src.pipeline.stage0_preflight --site easy_pc_fix_guide
 ```
 
-Outputs are saved under:
+The command writes:
 
 ```text
-data/generated/YYYY-MM-DD/
+reports/easy_pc_fix_guide-preflight.json
 ```
 
-## Project Structure
+It checks:
+
+- site settings
+- topic seed count
+- daily workflow safety steps
+- validate workflow trigger coverage
+- public Blogger feed reachability
+- local Google OAuth files
+- Telegram notification settings
+
+## Daily Automation
+
+Validate only, no Blogger publishing:
+
+```bash
+python -m src.pipeline.daily_draft --site easy_pc_fix_guide --mode validate
+```
+
+Public publish mode:
+
+```bash
+python -m src.pipeline.daily_draft --site easy_pc_fix_guide --mode publish
+```
+
+Scheduled GitHub Actions publish at 09:10 KST daily:
 
 ```text
-korea_blog_automation/
-  .github/workflows/
-  .env.example
-  requirements.txt
-  README.md
-  docs/
-  data/
-    seeds/
-  src/
-    collectors/
-    content/
-    images/
-    pipeline/
-    publishing/
-    reporting/
-    storage/
-    utils/
+.github/workflows/easy-pc-daily.yml
 ```
 
-## GitHub Repository Notes
+The daily workflow runs regression tests before Blogger/OAuth steps. Sitemap submission runs only when `BLOGGER_PUBLISH_MODE` is `publish`.
 
-This folder is ready to become its own GitHub repository. Add these optional
-repository secrets when you want live data:
+## Weekly Report
 
-- `REDDIT_CLIENT_ID`
-- `REDDIT_CLIENT_SECRET`
-- `PEXELS_API_KEY`
+```bash
+python -m src.pipeline.stage3_weekly_report --site easy_pc_fix_guide
+```
 
-The included workflow runs Stage 1 daily and uploads generated articles as
-GitHub Actions artifacts.
+The weekly report is Korean and includes:
 
-Workflow YAML files are stored under `docs/github-workflows/` as templates.
-Move them to `.github/workflows/` after your GitHub token or SSH setup can push
-workflow files.
+- local generated article results
+- Blogger public feed confirmation
+- static page status
+- Search Console summary
+- GA4 summary
+- cadence review for 1 -> 2 -> 3 posts/day
 
-## Run Stage 2
+## Safety Rules
 
-Set up Blogger API credentials first:
+Public publishing is blocked unless:
+
+- Hades score is at least 90
+- issue count is zero
+- required sections exist
+- two images exist
+- research report exists
+- official/platform sources exist
+- Windows posts include safety fields such as risk level, data loss risk, estimated time, and last checked
+
+See:
 
 ```text
-docs/BLOGGER_SETUP.md
+docs/PUBLISHING_RULES.md
+docs/CONTENT_QUALITY_STANDARD.md
+docs/IMAGE_RULES.md
 ```
 
-Then publish the latest generated article as a Blogger draft:
+## Tests
 
 ```bash
-python -m src.pipeline.stage2_publish --mode draft
+python -m unittest discover -v
 ```
 
-Make an existing draft public:
+Tests cover:
 
-```bash
-python -m src.pipeline.stage2_make_public --post-id BLOGGER_POST_ID
-```
-
-Direct public publishing is blocked unless required images and the Hades
-quality report pass:
-
-```bash
-python -m src.pipeline.stage2_publish --mode publish
-```
-
-## Run Daily Draft Pipeline
-
-```bash
-python -m src.pipeline.daily_draft
-```
-
-This chooses the next unused seed, generates an article, and uploads it as a
-Blogger draft.
-
-## Run Weekly Report
-
-```bash
-python -m src.pipeline.stage3_weekly_report
-```
+- duplicate publish protection
+- retrying the next seed after duplicate automatic candidates
+- Windows safety/content blocks
+- sitemap notification messages
+- weekly report public feed logic
+- workflow safety conditions
+- preflight checks
