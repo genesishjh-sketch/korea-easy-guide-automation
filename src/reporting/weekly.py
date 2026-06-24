@@ -61,7 +61,7 @@ class WeeklyReporter:
             "analytics": GA4Client(self.settings).summary(week_start.date(), now.date()),
             "operations": operations,
             "cadence_review": cadence_review.to_dict(),
-            "next_actions": self._next_actions(articles, static_pages, public_posts, operations),
+            "next_actions": self._next_actions(articles, static_pages, public_posts, operations, signal_quality),
         }
 
         output_dir = ROOT_DIR / "reports"
@@ -269,6 +269,7 @@ class WeeklyReporter:
         static_pages: list[dict],
         public_posts: dict | None = None,
         operations: dict | None = None,
+        signal_quality: dict | None = None,
     ) -> list[str]:
         actions = []
         public_post_count = len((public_posts or {}).get("posts", []))
@@ -303,6 +304,8 @@ class WeeklyReporter:
             actions.append("공개 발행 전 Blogger 초안 상태의 글을 확인하세요.")
         if not has_public_article:
             actions.append("공개 글이 생긴 뒤 Search Console 연결을 확인하세요.")
+        if (signal_quality or {}).get("status") == "fallback_only":
+            actions.append("Reddit 실제 신호 없이 fallback 질문만 사용한 글이 있습니다. Reddit OAuth 설정을 추가해 주제 수집 품질을 안정화하세요.")
         actions.append("트래픽과 수익 신호가 보일 때까지 추가 유료 API 비용은 0원 정책을 유지하세요.")
         return actions
 

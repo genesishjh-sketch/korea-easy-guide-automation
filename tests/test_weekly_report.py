@@ -205,6 +205,22 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("오늘 공개 글을 찾지 못했습니다", joined)
         self.assertIn("sitemap 제출 실패", joined)
 
+    def test_next_actions_include_signal_quality_fallback_warning(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+
+        actions = reporter._next_actions(
+            articles=[{"blogger_status": "LIVE"}],
+            static_pages=[{"title": "About"}, {"title": "Contact"}, {"title": "Privacy Policy"}, {"title": "Disclaimer"}],
+            public_posts={"status": "connected", "posts": [{"title": "Published"}]},
+            operations={"preflight": {"status": "pass"}},
+            signal_quality={"status": "fallback_only"},
+        )
+
+        joined = "\n".join(actions)
+        self.assertIn("Reddit OAuth 설정", joined)
+        self.assertIn("fallback 질문만 사용", joined)
+
     def test_operations_result_reads_daily_success_and_failure_reports(self) -> None:
         settings = load_settings("easy_pc_fix_guide")
         reporter = WeeklyReporter(settings)
