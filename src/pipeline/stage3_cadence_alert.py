@@ -42,10 +42,10 @@ def run(today: date | None = None, force: bool = False, site: str | None = None)
     )
 
     message = build_cadence_alert_message(settings.site_name, settings.site_url, review)
-    sent = NotificationClient(settings).send(message)
+    NotificationClient(settings).send_required(message)
     print(message)
-    print(f"sent: {sent}")
-    return sent
+    print("sent: True")
+    return True
 
 
 def actual_public_post_count(settings, articles: list[dict]) -> int:
