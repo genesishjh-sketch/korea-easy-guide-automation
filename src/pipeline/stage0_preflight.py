@@ -31,6 +31,7 @@ def run(site: str | None = None) -> Path:
         check_validate_workflow(),
         check_publication_check_workflow(),
         check_weekly_report_workflow(),
+        check_cadence_alert_workflow(),
         check_critical_notifications(),
         check_public_feed(settings.site_url),
         check_local_google_files(settings.google_oauth_client_secret_file, settings.google_oauth_token_file),
@@ -164,6 +165,23 @@ def check_weekly_report_workflow() -> PreflightCheck:
     if missing:
         return PreflightCheck("weekly_report_workflow", "fail", f"Missing weekly report safeguards: {', '.join(missing)}")
     return PreflightCheck("weekly_report_workflow", "pass", "Weekly report workflow includes Search Console, Analytics, Telegram, and artifact upload wiring.")
+
+
+def check_cadence_alert_workflow() -> PreflightCheck:
+    path = ROOT_DIR / ".github" / "workflows" / "easy-pc-cadence-alert.yml"
+    if not path.exists():
+        return PreflightCheck("cadence_alert_workflow", "fail", "Easy PC cadence alert workflow is missing.")
+    text = path.read_text(encoding="utf-8")
+    required = [
+        "30 0 22 7 *",
+        "30 0 19 8 *",
+        "GOOGLE_OAUTH_TOKEN_SEARCH_CONSOLE_JSON",
+        "python -m src.pipeline.stage3_cadence_alert --site easy_pc_fix_guide",
+    ]
+    missing = [item for item in required if item not in text]
+    if missing:
+        return PreflightCheck("cadence_alert_workflow", "fail", f"Missing cadence alert safeguards: {', '.join(missing)}")
+    return PreflightCheck("cadence_alert_workflow", "pass", "Cadence alert workflow sends Posting Bot review alerts on 2026-07-22 and 2026-08-19.")
 
 
 def check_critical_notifications() -> PreflightCheck:
