@@ -43,6 +43,27 @@ class WorkflowSafetyTests(unittest.TestCase):
         self.assertLess(test_index, oauth_index)
         self.assertLess(oauth_index, draft_index)
 
+    def test_legacy_korea_daily_is_manual_only_while_easy_pc_is_scheduled(self) -> None:
+        korea_workflow = (ROOT_DIR / ".github" / "workflows" / "daily-draft.yml").read_text(encoding="utf-8")
+        easy_pc_workflow = (ROOT_DIR / ".github" / "workflows" / "easy-pc-daily.yml").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("workflow_dispatch:", korea_workflow)
+        self.assertNotIn("schedule:", korea_workflow)
+        self.assertIn('cron: "10 0 * * *"', easy_pc_workflow)
+
+    def test_legacy_korea_cadence_alert_is_manual_only_while_easy_pc_is_scheduled(self) -> None:
+        korea_workflow = (ROOT_DIR / ".github" / "workflows" / "cadence-alert.yml").read_text(encoding="utf-8")
+        easy_pc_workflow = (ROOT_DIR / ".github" / "workflows" / "easy-pc-cadence-alert.yml").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("workflow_dispatch:", korea_workflow)
+        self.assertNotIn("schedule:", korea_workflow)
+        self.assertIn('cron: "30 0 22 7 *"', easy_pc_workflow)
+        self.assertIn('cron: "30 0 19 8 *"', easy_pc_workflow)
+
     def test_easy_pc_daily_runs_safety_tests_before_publish(self) -> None:
         workflow = (ROOT_DIR / ".github" / "workflows" / "easy-pc-daily.yml").read_text(encoding="utf-8")
 
