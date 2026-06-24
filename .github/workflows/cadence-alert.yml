@@ -1,0 +1,38 @@
+name: Cadence Review Alert
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 09:30 KST on 2026-07-22 and 2026-08-19.
+    - cron: "30 0 22 7 *"
+    - cron: "30 0 19 8 *"
+
+jobs:
+  cadence-alert:
+    runs-on: ubuntu-latest
+    env:
+      APP_ENV: production
+      SITE_NAME: ${{ vars.SITE_NAME || 'Korea Easy Guide' }}
+      SITE_URL: ${{ vars.SITE_URL || 'https://koreaeasyguide.blogspot.com' }}
+      SEARCH_CONSOLE_SITE_URL: ${{ vars.SEARCH_CONSOLE_SITE_URL || 'https://koreaeasyguide.blogspot.com/' }}
+      BLOGGER_BLOG_ID: ${{ vars.BLOGGER_BLOG_ID || '288143591612645486' }}
+      GOOGLE_OAUTH_CLIENT_SECRET_FILE: .credentials/client_secret.json
+      GOOGLE_OAUTH_TOKEN_FILE: .credentials/google_token.json
+      NOTIFICATION_PROVIDER: ${{ vars.NOTIFICATION_PROVIDER }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Write Google OAuth files
+        run: |
+          mkdir -p .credentials
+          printf '%s' '${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET_JSON }}' > .credentials/client_secret.json
+          printf '%s' '${{ secrets.GOOGLE_OAUTH_TOKEN_JSON }}' > .credentials/google_token.json
+          printf '%s' '${{ secrets.GOOGLE_OAUTH_TOKEN_SEARCH_CONSOLE_JSON }}' > .credentials/google_token.search-console.json
+      - name: Send cadence review alert
+        run: python -m src.pipeline.stage3_cadence_alert
