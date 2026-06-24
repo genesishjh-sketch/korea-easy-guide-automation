@@ -24,8 +24,18 @@ class WorkflowSafetyTests(unittest.TestCase):
         workflow = (ROOT_DIR / ".github" / "workflows" / "easy-pc-daily.yml").read_text(encoding="utf-8")
 
         self.assertIn("- name: Submit sitemap", workflow)
-        self.assertIn("env.BLOGGER_PUBLISH_MODE == 'publish'", workflow)
-        self.assertNotIn("- name: Submit sitemap\n        if: always()", workflow)
+        self.assertIn("success() && env.BLOGGER_PUBLISH_MODE == 'publish'", workflow)
+        self.assertNotIn("always() && env.BLOGGER_PUBLISH_MODE == 'publish'", workflow)
+
+    def test_easy_pc_daily_uploads_debug_outputs_even_after_failure(self) -> None:
+        workflow = (ROOT_DIR / ".github" / "workflows" / "easy-pc-daily.yml").read_text(encoding="utf-8")
+
+        upload_index = workflow.index("- name: Upload generated outputs")
+        upload_block = workflow[upload_index : upload_index + 260]
+
+        self.assertIn("if: ${{ always() }}", upload_block)
+        self.assertIn("data/generated/easy_pc_fix_guide/", upload_block)
+        self.assertIn("reports/", upload_block)
 
     def test_easy_pc_validate_runs_preflight(self) -> None:
         workflow = (ROOT_DIR / ".github" / "workflows" / "easy-pc-validate-smoke.yml").read_text(encoding="utf-8")
