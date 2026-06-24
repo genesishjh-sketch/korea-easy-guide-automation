@@ -112,24 +112,25 @@ def days_since_automation_start(start_date: str, today: date) -> int:
 
 def run(seed: str | None = None, site: str | None = None, publish_mode: str = "draft") -> dict[str, str]:
     settings = load_settings(site)
-    if publish_mode == "publish" and seed is None:
-        existing_today = find_public_post_published_today(settings.site_url)
-        if existing_today:
-            result = {
-                "seed": "",
-                "article_dir": "",
-                "publish_result": "",
-                "site": settings.site_key,
-                "mode": publish_mode,
-                "skipped_duplicate_seeds": [],
-                "daily_limit_skipped": True,
-                "existing_post": existing_today,
-            }
-            save_daily_success_report(result)
-            notify_daily_completion(result)
-            return result
-    selected_seed = choose_seed(seed, site)
+    selected_seed = seed or ""
     try:
+        if publish_mode == "publish" and seed is None:
+            existing_today = find_public_post_published_today(settings.site_url)
+            if existing_today:
+                result = {
+                    "seed": "",
+                    "article_dir": "",
+                    "publish_result": "",
+                    "site": settings.site_key,
+                    "mode": publish_mode,
+                    "skipped_duplicate_seeds": [],
+                    "daily_limit_skipped": True,
+                    "existing_post": existing_today,
+                }
+                save_daily_success_report(result)
+                notify_daily_completion(result)
+                return result
+        selected_seed = choose_seed(seed, site)
         skipped_duplicate_seeds: list[str] = []
         if publish_mode == "publish":
             selected_seed, article_dir, result_path, skipped_duplicate_seeds = run_publish_with_seed_fallback(seed, site)

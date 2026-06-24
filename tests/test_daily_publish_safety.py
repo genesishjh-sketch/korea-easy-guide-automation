@@ -101,6 +101,24 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertEqual(payload["title"], "Wi-Fi Button Missing on Windows 11")
         self.assertEqual(payload["url"], "https://easypcfixguide.blogspot.com/2026/06/example.html")
 
+    def test_daily_limit_feed_error_is_reported_before_reraising(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            report_dir = Path(tmpdir) / "reports"
+            with patch.object(daily_draft, "ROOT_DIR", Path(tmpdir)), patch.object(
+                daily_draft, "find_public_post_published_today", side_effect=RuntimeError("feed unavailable")
+            ), patch.object(daily_draft, "notify_daily_failure") as notify:
+                with self.assertRaises(RuntimeError):
+                    daily_draft.run(site="easy_pc_fix_guide", publish_mode="publish")
+
+            report_path = report_dir / "easy_pc_fix_guide-daily-failure.json"
+            payload = json.loads(report_path.read_text(encoding="utf-8"))
+
+        notify.assert_called_once()
+        self.assertEqual(payload["seed"], "")
+        self.assertEqual(payload["mode"], "publish")
+        self.assertEqual(payload["error_type"], "RuntimeError")
+        self.assertIn("feed unavailable", payload["error"])
+
     def test_explicit_publish_seed_does_not_use_daily_limit_guard(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             article_dir = Path(tmpdir) / "article"
