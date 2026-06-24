@@ -10,6 +10,29 @@ from src.pipeline import stage3_weekly_report
 
 
 class WeeklyPipelineTests(unittest.TestCase):
+    def test_weekly_success_removes_stale_failure_report(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            report_dir = root / "reports"
+            report_dir.mkdir()
+            stale_failure_path = report_dir / "easy_pc_fix_guide-weekly-failure.json"
+            stale_failure_path.write_text(json.dumps({"status": "failed"}), encoding="utf-8")
+            weekly_markdown_path = root / "weekly.md"
+            weekly_markdown_path.write_text("# Weekly report", encoding="utf-8")
+
+            with patch.object(stage3_weekly_report, "ROOT_DIR", root), patch(
+                "src.pipeline.stage3_weekly_report.WeeklyReporter"
+            ) as reporter, patch("src.pipeline.stage3_weekly_report.NotificationClient") as notifier:
+                reporter.return_value.generate.return_value = weekly_markdown_path
+
+                result_path = stage3_weekly_report.run("easy_pc_fix_guide")
+
+                notifier.return_value.send.assert_called_once_with("# Weekly report")
+                stale_failure_removed = not stale_failure_path.exists()
+
+        self.assertEqual(result_path, weekly_markdown_path)
+        self.assertTrue(stale_failure_removed)
+
     def test_weekly_failure_report_is_written_before_reraising(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             with patch.object(stage3_weekly_report, "ROOT_DIR", Path(tmpdir)), patch(

@@ -320,6 +320,7 @@ def save_daily_success_report(result: dict[str, str]) -> Path:
     output_dir = ROOT_DIR / "reports"
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / f"{settings.site_key}-daily-success.json"
+    failure_path = output_dir / f"{settings.site_key}-daily-failure.json"
     payload = {
         "site": settings.site_key,
         "site_name": settings.site_name,
@@ -340,7 +341,15 @@ def save_daily_success_report(result: dict[str, str]) -> Path:
         "created_at": datetime.utcnow().isoformat() + "Z",
     }
     output_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    remove_stale_report(failure_path)
     return output_path
+
+
+def remove_stale_report(path: Path) -> None:
+    try:
+        path.unlink()
+    except FileNotFoundError:
+        pass
 
 
 def daily_result_status(result: dict, publish_result: dict) -> str:

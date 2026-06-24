@@ -17,6 +17,7 @@ def run(site: str | None = None) -> Path:
     try:
         path = WeeklyReporter(settings).generate()
         NotificationClient(settings).send(path.read_text(encoding="utf-8"))
+        remove_stale_weekly_failure_report(settings.site_key)
         return path
     except Exception as exc:
         save_weekly_failure_report(site, exc)
@@ -40,6 +41,14 @@ def save_weekly_failure_report(site: str | None, exc: Exception) -> Path:
     }
     output_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     return output_path
+
+
+def remove_stale_weekly_failure_report(site_key: str) -> None:
+    output_path = ROOT_DIR / "reports" / f"{site_key}-weekly-failure.json"
+    try:
+        output_path.unlink()
+    except FileNotFoundError:
+        pass
 
 
 def main() -> None:

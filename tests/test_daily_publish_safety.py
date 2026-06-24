@@ -48,6 +48,10 @@ class DuplicatePublishGuardTests(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
+            reports_dir = root / "reports"
+            reports_dir.mkdir()
+            stale_failure_path = reports_dir / "easy_pc_fix_guide-daily-failure.json"
+            stale_failure_path.write_text(json.dumps({"status": "failed"}), encoding="utf-8")
 
             with patch.object(daily_draft, "ROOT_DIR", root):
                 report_path = daily_draft.save_daily_success_report(
@@ -62,12 +66,14 @@ class DuplicatePublishGuardTests(unittest.TestCase):
                 )
 
             payload = json.loads(report_path.read_text(encoding="utf-8"))
+            stale_failure_removed = not stale_failure_path.exists()
 
         self.assertEqual(payload["status"], "published")
         self.assertEqual(payload["title"], "Wi-Fi Button Missing on Windows 11")
         self.assertEqual(payload["quality_score"], 100)
         self.assertEqual(payload["quality_metrics"]["word_count"], 1512)
         self.assertEqual(payload["url"], "https://easypcfixguide.blogspot.com/2026/06/example.html")
+        self.assertTrue(stale_failure_removed)
 
     def test_daily_success_message_includes_quality_metrics(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
