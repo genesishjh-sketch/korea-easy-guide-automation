@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from src.config import ROOT_DIR, Settings
+from src.reporting.cadence import review_cadence
 from src.reporting.analytics import GA4Client
 from src.reporting.search_console import SearchConsoleClient
 
@@ -19,6 +20,17 @@ class WeeklyReporter:
         week_start = now - timedelta(days=7)
         articles = self._collect_articles(week_start)
         static_pages = self._static_pages_result()
+        search_console_client = SearchConsoleClient(self.settings)
+        search_console = search_console_client.summary(week_start.date(), now.date())
+        indexed_pages = search_console_client.indexed_page_estimate(week_start.date(), now.date())
+        published_count = sum(1 for item in articles if item.get("blogger_status") == "LIVE")
+        cadence_review = review_cadence(
+            today=now.date(),
+            published_posts=published_count,
+            indexed_pages_estimate=indexed_pages.get("page_count_with_search_data", 0),
+            recent_impressions=search_console.get("totals_from_top_queries", {}).get("impressions", 0),
+            quality_issue_count=self._quality_issue_count(articles),
+        )
 
         report = {
             "generated_at": now.isoformat(),
@@ -28,11 +40,13 @@ class WeeklyReporter:
             "week_end": now.date().isoformat(),
             "article_count": len(articles),
             "draft_count": sum(1 for item in articles if item.get("blogger_status") == "DRAFT"),
-            "published_count": sum(1 for item in articles if item.get("blogger_status") == "LIVE"),
+            "published_count": published_count,
             "articles": articles,
             "static_pages": static_pages,
-            "search_console": SearchConsoleClient(self.settings).summary(week_start.date(), now.date()),
+            "search_console": search_console,
+            "indexed_pages": indexed_pages,
             "analytics": GA4Client(self.settings).summary(week_start.date(), now.date()),
+            "cadence_review": cadence_review.to_dict(),
             "next_actions": self._next_actions(articles, static_pages),
         }
 
@@ -87,6 +101,20 @@ class WeeklyReporter:
         if not path.exists():
             return []
         return json.loads(path.read_text(encoding="utf-8")).get("pages", [])
+
+    def _quality_issue_count(self, articles: list[dict]) -> int:
+        issue_count = 0
+        for article in articles:
+            quality_path = Path(article.get("article_dir", "")) / "quality_report.json"
+            if not quality_path.exists():
+                continue
+            try:
+                report = json.loads(quality_path.read_text(encoding="utf-8"))
+            except json.JSONDecodeError:
+                issue_count += 1
+                continue
+            issue_count += len(report.get("issues", []))
+        return issue_count
 
     def _next_actions(self, articles: list[dict], static_pages: list[dict]) -> list[str]:
         actions = []
@@ -166,6 +194,19 @@ class WeeklyReporter:
             lines.append(f"- 참고: {analytics.get('note')}")
         elif analytics.get("error"):
             lines.append(f"- 오류: {analytics.get('error')}")
+
+        lines.extend(["", "## 발행량 전환 검토", ""])
+        cadence = report.get("cadence_review", {})
+        lines.append(f"- 권장 조치: {cadence.get('action', '확인 필요')}")
+        lines.append(f"- 운영 일수: {cadence.get('days_since_start', 0)}일")
+        lines.append(f"- 공개 글 수: {cadence.get('published_posts', 0)}개")
+        lines.append(f"- Search Console 색인/노출 페이지 추정: {cadence.get('indexed_pages_estimate', 0)}개")
+        lines.append(f"- 최근 노출 수: {cadence.get('recent_impressions', 0)}")
+        lines.append(f"- 품질 이슈 수: {cadence.get('quality_issue_count', 0)}")
+        lines.append(f"- 하루 2개 검토 기준일: {cadence.get('two_post_review_date')}")
+        lines.append(f"- 하루 3개 검토 기준일: {cadence.get('three_post_review_date')}")
+        for reason in cadence.get("reasons", []):
+            lines.append(f"- 판단 근거: {reason}")
 
         lines.extend(["", "## 다음 할 일", ""])
         for action in report["next_actions"]:

@@ -53,6 +53,40 @@ class SearchConsoleClient:
         except Exception as exc:
             return {"status": "error", "site_url": self.site_url, "error": str(exc)}
 
+    def indexed_page_estimate(self, start_date: date, end_date: date) -> dict[str, Any]:
+        if not self.site_url:
+            return {"status": "not_configured", "note": "SEARCH_CONSOLE_SITE_URL is missing."}
+        try:
+            service = self._service(readonly=True)
+            response = (
+                service.searchanalytics()
+                .query(
+                    siteUrl=self.site_url,
+                    body={
+                        "startDate": start_date.isoformat(),
+                        "endDate": end_date.isoformat(),
+                        "dimensions": ["page"],
+                        "rowLimit": 250,
+                    },
+                )
+                .execute()
+            )
+            pages = [
+                {
+                    "url": row.get("keys", [""])[0],
+                    "clicks": row.get("clicks", 0),
+                    "impressions": row.get("impressions", 0),
+                }
+                for row in response.get("rows", [])
+            ]
+            return {
+                "status": "connected",
+                "page_count_with_search_data": len(pages),
+                "pages": pages,
+            }
+        except Exception as exc:
+            return {"status": "error", "site_url": self.site_url, "error": str(exc)}
+
     def submit_sitemap(self, sitemap_url: str) -> dict[str, Any]:
         try:
             service = self._service(readonly=False)

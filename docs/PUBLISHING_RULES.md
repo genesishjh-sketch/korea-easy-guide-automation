@@ -5,8 +5,18 @@
 - Publish one new post every day, including weekends.
 - Target public publish time: 09:00 KST.
 - Send a Posting Bot daily result report every morning after the daily pipeline finishes.
+- Send a Posting Bot cadence review alert in the weekly report before increasing daily post count.
 - Do not batch-publish multiple new posts on the same day during the early growth phase.
 - If the daily post fails quality checks, skip publishing instead of lowering the standard.
+
+## Cadence Review
+
+- Keep one post per day from 2026-06-24 through 2026-07-21.
+- From 2026-07-22, review whether two posts per day is appropriate.
+- From 2026-08-19, review whether three posts per day is appropriate.
+- Do not automatically increase cadence. Posting Bot should alert for review first.
+- Two-post review requires roughly 20+ published posts, 20+ Search Console indexed/visible pages, and no quality issues.
+- Three-post review requires roughly 50+ published posts, 50+ Search Console indexed/visible pages, no quality issues, and preferably visible Search Console impression growth.
 
 ## Automation Mode
 
