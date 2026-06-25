@@ -73,6 +73,12 @@ class PreflightTests(unittest.TestCase):
         self.assertEqual(check.status, "pass")
         self.assertIn("embedded human-readable summary", check.message)
 
+    def test_publication_check_report_persistence_passes(self) -> None:
+        check = stage0_preflight.check_publication_check_report_persistence()
+
+        self.assertEqual(check.status, "pass")
+        self.assertIn("public feed verification fails", check.message)
+
     def test_seed_file_fails_on_blank_topic_seed(self) -> None:
         with patch.object(stage0_preflight, "load_settings") as load_settings, patch.object(
             stage0_preflight, "load_seed_list", return_value=["wifi button missing windows 11", " "]
@@ -334,6 +340,7 @@ class PreflightTests(unittest.TestCase):
             "check_cadence_alert_workflow",
             "check_reddit_health_workflow",
             "check_reddit_health_report_persistence",
+            "check_publication_check_report_persistence",
             "check_critical_notifications",
             "check_public_feed",
             "check_local_google_files",

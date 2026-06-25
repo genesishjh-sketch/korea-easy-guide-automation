@@ -56,6 +56,7 @@ def run(site: str | None = None) -> Path:
         check_cadence_alert_workflow(),
         check_reddit_health_workflow(),
         check_reddit_health_report_persistence(),
+        check_publication_check_report_persistence(),
         check_critical_notifications(),
         check_public_feed(settings.site_url),
         check_local_google_files(settings.google_oauth_client_secret_file, settings.google_oauth_token_file),
@@ -527,6 +528,33 @@ def check_reddit_health_report_persistence() -> PreflightCheck:
         "reddit_health_report_persistence",
         "pass",
         "Reddit health writes JSON, Markdown, and embedded human-readable summary before notification.",
+    )
+
+
+def check_publication_check_report_persistence() -> PreflightCheck:
+    path = ROOT_DIR / "src" / "pipeline" / "stage4_publication_check.py"
+    if not path.exists():
+        return PreflightCheck("publication_check_report_persistence", "fail", "Publication check pipeline file is missing.")
+    text = path.read_text(encoding="utf-8")
+    required = [
+        "publication_check_failure_result",
+        "save_result(result)",
+        "publication-check.md",
+        "action_items",
+        "notification_error",
+        "raise",
+    ]
+    missing = [item for item in required if item not in text]
+    if missing:
+        return PreflightCheck(
+            "publication_check_report_persistence",
+            "fail",
+            f"Missing publication check failure persistence safeguards: {', '.join(missing)}",
+        )
+    return PreflightCheck(
+        "publication_check_report_persistence",
+        "pass",
+        "Publication check writes JSON/Markdown and action items even when public feed verification fails.",
     )
 
 
