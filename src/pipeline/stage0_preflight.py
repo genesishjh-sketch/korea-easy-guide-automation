@@ -16,6 +16,7 @@ from src.google_auth import resolve_path
 from src.google_auth import token_path_for_scopes
 from src.pipeline.daily_draft import load_launch_seed_list
 from src.pipeline.daily_draft import load_seed_list
+from src.pipeline.daily_draft import used_keywords
 from src.pipeline.stage4_publication_check import fetch_public_feed
 from src.pipeline.stage4_publication_check import parse_posts
 
@@ -33,6 +34,7 @@ def run(site: str | None = None) -> Path:
         check_python_runtime(),
         check_site_settings(site),
         check_seed_file(site),
+        check_seed_inventory(site),
         check_launch_queue(site),
         check_reddit_collection_settings(site),
         check_zero_cost_image_policy(),
@@ -84,6 +86,33 @@ def check_seed_file(site: str | None = None) -> PreflightCheck:
     if len(seeds) < 30:
         return PreflightCheck("seed_file", "warn", f"Only {len(seeds)} topic seeds found; add more for long automation runs.")
     return PreflightCheck("seed_file", "pass", f"{len(seeds)} topic seeds found.")
+
+
+def check_seed_inventory(site: str | None = None) -> PreflightCheck:
+    try:
+        seeds = load_seed_list(site)
+        used = used_keywords(site)
+    except Exception as exc:
+        return PreflightCheck("seed_inventory", "fail", f"Could not inspect seed inventory: {exc}")
+    normalized_seeds = {seed.lower() for seed in seeds}
+    used_seed_count = len(normalized_seeds & used)
+    unused_seed_count = max(0, len(normalized_seeds) - used_seed_count)
+    message = f"{unused_seed_count}/{len(normalized_seeds)} exact-match topic seeds remain unused."
+    if not normalized_seeds:
+        return PreflightCheck("seed_inventory", "fail", "Seed inventory is empty.")
+    if unused_seed_count == 0:
+        return PreflightCheck(
+            "seed_inventory",
+            "fail",
+            f"{message} Add fresh Windows topic seeds before the next unattended publish.",
+        )
+    if unused_seed_count < 14:
+        return PreflightCheck(
+            "seed_inventory",
+            "warn",
+            f"{message} Add at least two weeks of fresh topic seeds soon.",
+        )
+    return PreflightCheck("seed_inventory", "pass", message)
 
 
 def check_launch_queue(site: str | None = None) -> PreflightCheck:

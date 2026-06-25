@@ -122,6 +122,38 @@ class PreflightTests(unittest.TestCase):
         self.assertEqual(check.status, "pass")
         self.assertIn("Reddit OAuth credentials", check.message)
 
+    def test_seed_inventory_passes_when_two_weeks_of_unused_seeds_remain(self) -> None:
+        seeds = [f"topic {index}" for index in range(20)]
+        with patch.object(stage0_preflight, "load_seed_list", return_value=seeds), patch.object(
+            stage0_preflight, "used_keywords", return_value={f"topic {index}" for index in range(6)}
+        ):
+            check = stage0_preflight.check_seed_inventory("easy_pc_fix_guide")
+
+        self.assertEqual(check.status, "pass")
+        self.assertIn("14/20", check.message)
+
+    def test_seed_inventory_warns_when_unused_seeds_are_low(self) -> None:
+        seeds = [f"topic {index}" for index in range(20)]
+        with patch.object(stage0_preflight, "load_seed_list", return_value=seeds), patch.object(
+            stage0_preflight, "used_keywords", return_value={f"topic {index}" for index in range(10)}
+        ):
+            check = stage0_preflight.check_seed_inventory("easy_pc_fix_guide")
+
+        self.assertEqual(check.status, "warn")
+        self.assertIn("10/20", check.message)
+        self.assertIn("two weeks", check.message)
+
+    def test_seed_inventory_fails_when_no_unused_seeds_remain(self) -> None:
+        seeds = [f"topic {index}" for index in range(5)]
+        with patch.object(stage0_preflight, "load_seed_list", return_value=seeds), patch.object(
+            stage0_preflight, "used_keywords", return_value={f"topic {index}" for index in range(5)}
+        ):
+            check = stage0_preflight.check_seed_inventory("easy_pc_fix_guide")
+
+        self.assertEqual(check.status, "fail")
+        self.assertIn("0/5", check.message)
+        self.assertIn("before the next unattended publish", check.message)
+
     def test_zero_cost_image_policy_passes_without_paid_image_envs(self) -> None:
         env = {name: "" for name in stage0_preflight.PAID_IMAGE_ENV_NAMES}
         with patch.dict("os.environ", env):
