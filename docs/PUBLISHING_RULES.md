@@ -4,6 +4,8 @@
 
 - Publish one new post every day, including weekends.
 - Target public publish time: 09:00 KST.
+- Daily GitHub Actions publishing runs at 09:10 KST with a 09:25 KST backup run.
+- The daily limit guard must stop the backup run from publishing a duplicate post if the primary run already published or found a valid same-day post.
 - Send a Posting Bot daily result report every morning after the daily pipeline finishes.
 - Send a Posting Bot cadence review alert in the weekly report before increasing daily post count.
 - Do not batch-publish multiple new posts on the same day during the early growth phase.

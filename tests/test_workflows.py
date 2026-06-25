@@ -52,6 +52,7 @@ class WorkflowSafetyTests(unittest.TestCase):
         self.assertIn("workflow_dispatch:", korea_workflow)
         self.assertNotIn("schedule:", korea_workflow)
         self.assertIn('cron: "10 0 * * *"', easy_pc_workflow)
+        self.assertIn('cron: "25 0 * * *"', easy_pc_workflow)
 
     def test_legacy_korea_cadence_alert_is_manual_only_while_easy_pc_is_scheduled(self) -> None:
         korea_workflow = (ROOT_DIR / ".github" / "workflows" / "cadence-alert.yml").read_text(encoding="utf-8")
@@ -85,6 +86,13 @@ class WorkflowSafetyTests(unittest.TestCase):
         self.assertIn("- name: Submit sitemap", workflow)
         self.assertIn("success() && env.BLOGGER_PUBLISH_MODE == 'publish'", workflow)
         self.assertNotIn("always() && env.BLOGGER_PUBLISH_MODE == 'publish'", workflow)
+
+    def test_easy_pc_daily_has_backup_schedule_after_primary_publish(self) -> None:
+        workflow = (ROOT_DIR / ".github" / "workflows" / "easy-pc-daily.yml").read_text(encoding="utf-8")
+
+        self.assertIn('cron: "10 0 * * *"', workflow)
+        self.assertIn('cron: "25 0 * * *"', workflow)
+        self.assertIn("daily limit guard prevents duplicate publishing", workflow)
 
     def test_easy_pc_daily_uploads_debug_outputs_even_after_failure(self) -> None:
         workflow = (ROOT_DIR / ".github" / "workflows" / "easy-pc-daily.yml").read_text(encoding="utf-8")

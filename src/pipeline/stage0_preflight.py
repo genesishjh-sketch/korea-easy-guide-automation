@@ -210,6 +210,8 @@ def check_daily_workflow() -> PreflightCheck:
     text = path.read_text(encoding="utf-8")
     required = [
         "Run safety regression tests",
+        'cron: "10 0 * * *"',
+        'cron: "25 0 * * *"',
         "python -m unittest discover -v",
         "python -m src.pipeline.stage0_preflight --site easy_pc_fix_guide",
         "python -m src.pipeline.daily_draft --site easy_pc_fix_guide",
