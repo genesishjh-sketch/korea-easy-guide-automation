@@ -26,6 +26,9 @@ class CadenceReview:
     reddit_oauth_signal_count: int
     reddit_public_json_signal_count: int
     fallback_reddit_signal_count: int
+    reddit_health_status: str
+    reddit_health_score: int
+    reddit_health_blocks_cadence_increase: bool
     two_post_review_date: str
     three_post_review_date: str
     reasons: list[str]
@@ -41,20 +44,33 @@ def review_cadence(
     recent_impressions: int,
     quality_issue_count: int,
     signal_quality: dict | None = None,
+    reddit_health: dict | None = None,
 ) -> CadenceReview:
     days_since_start = max(0, (today - START_DATE).days + 1)
     reasons: list[str] = []
     signal_quality = signal_quality or {}
+    reddit_health = reddit_health or {}
     signal_quality_status = signal_quality.get("status", "not_uploaded")
     reddit_oauth_signal_count = int(signal_quality.get("reddit_oauth_signal_count", 0) or 0)
     reddit_public_json_signal_count = int(signal_quality.get("reddit_public_json_signal_count", 0) or 0)
     fallback_reddit_signal_count = int(signal_quality.get("fallback_reddit_signal_count", 0) or 0)
+    reddit_health_status = reddit_health.get("status", "not_uploaded")
+    reddit_health_score = int(reddit_health.get("health_score", 0) or 0)
+    reddit_health_blocks_cadence_increase = bool(reddit_health.get("blocks_cadence_increase", False))
     has_unstable_reddit_collection = signal_quality_status == "fallback_only" or (
         reddit_public_json_signal_count > 0 and reddit_oauth_signal_count == 0
     )
 
     if today < TWO_POST_REVIEW_DATE:
         reasons.append("아직 초기 신뢰도 구축 기간입니다. 하루 1개를 유지하세요.")
+        action = "하루 1개 유지"
+        recommendation = "not_ready"
+    elif reddit_health_blocks_cadence_increase:
+        label = reddit_health.get("status_label") or reddit_health_status
+        reasons.append(f"Reddit OAuth Health가 발행량 증량을 차단 중입니다: {label}.")
+        reasons.append(f"Reddit Health 상태 점수는 {reddit_health_score}/100입니다.")
+        if reddit_health.get("action_required"):
+            reasons.append(f"필요 조치: {reddit_health.get('action_required')}")
         action = "하루 1개 유지"
         recommendation = "not_ready"
     elif has_unstable_reddit_collection:
@@ -97,6 +113,9 @@ def review_cadence(
         reddit_oauth_signal_count=reddit_oauth_signal_count,
         reddit_public_json_signal_count=reddit_public_json_signal_count,
         fallback_reddit_signal_count=fallback_reddit_signal_count,
+        reddit_health_status=reddit_health_status,
+        reddit_health_score=reddit_health_score,
+        reddit_health_blocks_cadence_increase=reddit_health_blocks_cadence_increase,
         two_post_review_date=TWO_POST_REVIEW_DATE.isoformat(),
         three_post_review_date=THREE_POST_REVIEW_DATE.isoformat(),
         reasons=reasons,
@@ -119,6 +138,9 @@ def build_cadence_alert_message(site_name: str, site_url: str, review: CadenceRe
         f"- Reddit OAuth 신호 수: {review.reddit_oauth_signal_count}",
         f"- Reddit public JSON 신호 수: {review.reddit_public_json_signal_count}",
         f"- Reddit fallback 신호 수: {review.fallback_reddit_signal_count}",
+        f"- Reddit Health 상태: {review.reddit_health_status}",
+        f"- Reddit Health 점수: {review.reddit_health_score}/100",
+        f"- Reddit Health 증량 차단: {'예' if review.reddit_health_blocks_cadence_increase else '아니오'}",
         "",
         "판단 근거:",
         *[f"- {reason}" for reason in review.reasons],
@@ -149,6 +171,8 @@ def build_cadence_alert_message(site_name: str, site_url: str, review: CadenceRe
 def needs_reddit_oauth_action(review: CadenceReview) -> bool:
     if review.reddit_oauth_signal_count > 0:
         return False
+    if review.reddit_health_blocks_cadence_increase:
+        return True
     return (
         review.signal_quality_status == "fallback_only"
         or review.reddit_public_json_signal_count > 0

@@ -45,6 +45,7 @@ class WeeklyReporter:
             recent_impressions=search_console.get("totals_from_top_queries", {}).get("impressions", 0),
             quality_issue_count=self._quality_issue_count(articles),
             signal_quality=signal_quality,
+            reddit_health=operations.get("reddit_health", {}),
         )
 
         report = {
@@ -545,6 +546,12 @@ class WeeklyReporter:
         lines.append(f"- Reddit OAuth 신호 수: {cadence.get('reddit_oauth_signal_count', 0)}")
         lines.append(f"- Reddit public JSON 신호 수: {cadence.get('reddit_public_json_signal_count', 0)}")
         lines.append(f"- Reddit fallback 신호 수: {cadence.get('fallback_reddit_signal_count', 0)}")
+        lines.append(f"- Reddit Health 상태: {_status_kr(cadence.get('reddit_health_status', 'not_uploaded'))}")
+        lines.append(f"- Reddit Health 점수: {cadence.get('reddit_health_score', 0)}/100")
+        lines.append(
+            "- Reddit Health 증량 차단: "
+            f"{'예' if cadence.get('reddit_health_blocks_cadence_increase') else '아니오'}"
+        )
         lines.append(f"- 하루 2개 검토 기준일: {cadence.get('two_post_review_date')}")
         lines.append(f"- 하루 3개 검토 기준일: {cadence.get('three_post_review_date')}")
         for reason in cadence.get("reasons", []):

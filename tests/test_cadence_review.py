@@ -21,10 +21,45 @@ class CadenceReviewTests(unittest.TestCase):
                 "reddit_public_json_signal_count": 0,
                 "fallback_reddit_signal_count": 0,
             },
+            reddit_health={
+                "status": "oauth_connected",
+                "health_score": 100,
+                "blocks_cadence_increase": False,
+            },
         )
 
         self.assertEqual(review.current_recommendation, "review_2_posts")
         self.assertEqual(review.action, "하루 2개 전환 검토 가능")
+        self.assertEqual(review.reddit_health_score, 100)
+        self.assertFalse(review.reddit_health_blocks_cadence_increase)
+
+    def test_reddit_health_blocks_cadence_increase_even_when_counts_are_ready(self) -> None:
+        review = review_cadence(
+            today=date(2026, 7, 22),
+            published_posts=25,
+            indexed_pages_estimate=25,
+            recent_impressions=100,
+            quality_issue_count=0,
+            signal_quality={
+                "status": "connected",
+                "reddit_oauth_signal_count": 5,
+                "reddit_public_json_signal_count": 0,
+                "fallback_reddit_signal_count": 0,
+            },
+            reddit_health={
+                "status": "missing_credentials",
+                "status_label": "Reddit OAuth 키 없음",
+                "health_score": 0,
+                "blocks_cadence_increase": True,
+                "action_required": "REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET을 GitHub Secrets 또는 .env에 설정하세요.",
+            },
+        )
+
+        self.assertEqual(review.current_recommendation, "not_ready")
+        self.assertEqual(review.action, "하루 1개 유지")
+        self.assertTrue(review.reddit_health_blocks_cadence_increase)
+        self.assertIn("Reddit OAuth Health", " ".join(review.reasons))
+        self.assertIn("0/100", " ".join(review.reasons))
 
     def test_fallback_only_blocks_cadence_increase_even_when_counts_are_ready(self) -> None:
         review = review_cadence(
@@ -90,6 +125,7 @@ class CadenceReviewTests(unittest.TestCase):
         self.assertIn("필요 조치", message)
         self.assertIn("https://www.reddit.com/prefs/apps", message)
         self.assertIn("REDDIT_CLIENT_ID", message)
+        self.assertIn("Reddit Health 점수: 0/100", message)
         self.assertIn("Easy PC Fix Reddit OAuth Health", message)
 
     def test_cadence_alert_omits_reddit_setup_links_when_oauth_is_stable(self) -> None:

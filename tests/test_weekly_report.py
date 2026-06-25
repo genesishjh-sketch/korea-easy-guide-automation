@@ -121,7 +121,24 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                         "sitemap_url": "https://easypcfixguide.blogspot.com/sitemap.xml",
                     },
                 },
-                "cadence_review": {},
+                "cadence_review": {
+                    "action": "하루 1개 유지",
+                    "days_since_start": 2,
+                    "published_posts": 1,
+                    "indexed_pages_estimate": 0,
+                    "recent_impressions": 0,
+                    "quality_issue_count": 0,
+                    "signal_quality_status": "fallback_only",
+                    "reddit_oauth_signal_count": 0,
+                    "reddit_public_json_signal_count": 0,
+                    "fallback_reddit_signal_count": 2,
+                    "reddit_health_status": "missing_credentials",
+                    "reddit_health_score": 0,
+                    "reddit_health_blocks_cadence_increase": True,
+                    "two_post_review_date": "2026-07-22",
+                    "three_post_review_date": "2026-08-19",
+                    "reasons": ["Reddit OAuth Health가 발행량 증량을 차단 중입니다: Reddit OAuth 키 없음."],
+                },
                 "next_actions": [],
             }
         )
@@ -149,6 +166,10 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("Reddit public JSON 신호 수: 0", markdown)
         self.assertIn("Reddit fallback 신호 수: 2", markdown)
         self.assertIn("fallback만 사용한 글", markdown)
+        self.assertIn("## 발행량 전환 검토", markdown)
+        self.assertIn("Reddit Health 상태: Reddit OAuth 키 없음", markdown)
+        self.assertIn("Reddit Health 점수: 0/100", markdown)
+        self.assertIn("Reddit Health 증량 차단: 예", markdown)
 
     def test_signal_quality_result_summarizes_research_reports(self) -> None:
         settings = load_settings("easy_pc_fix_guide")
