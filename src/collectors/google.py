@@ -28,6 +28,59 @@ FALLBACK_SUGGESTIONS = {
 }
 
 
+WINDOWS_FALLBACK_SUGGESTIONS = {
+    "wifi button missing windows 11": [
+        "wifi option disappeared windows 11",
+        "windows 11 no wifi button only ethernet",
+        "wifi adapter missing device manager windows 11",
+        "network reset windows 11 wifi missing",
+        "windows 11 wifi button missing after update",
+    ],
+    "snipping tool not working windows 11": [
+        "snipping tool not opening windows 11",
+        "windows shift s not working windows 11",
+        "snipping tool screenshot not saving",
+        "repair snipping tool windows 11",
+        "reset snipping tool app windows 11",
+    ],
+    "microsoft store download stuck": [
+        "microsoft store stuck downloading windows 11",
+        "microsoft store pending download not moving",
+        "microsoft store app download stuck at 0",
+        "repair microsoft store windows 11",
+        "microsoft store cache reset beginner",
+    ],
+    "microsoft store apps not updating": [
+        "microsoft store apps not updating windows 11",
+        "microsoft store update pending stuck",
+        "microsoft store library updates not working",
+        "repair microsoft store apps windows 11",
+        "windows app update stuck microsoft store",
+    ],
+    "photos app not opening windows 11": [
+        "photos app crashes on startup windows 11",
+        "microsoft photos not opening windows 11",
+        "repair photos app windows 11",
+        "reset photos app windows 11",
+        "photos app blank screen windows 11",
+    ],
+    "windows update error 0x80073712": [
+        "windows update error 0x80073712 windows 11",
+        "0x80073712 component store corrupted",
+        "fix windows update 0x80073712 safely",
+        "sfc dism 0x80073712 windows update",
+        "windows update troubleshooter 0x80073712",
+    ],
+    "windows update error 0x80070103": [
+        "windows update error 0x80070103 driver update",
+        "0x80070103 windows 11 update failed",
+        "hide driver update 0x80070103",
+        "windows update keeps showing 0x80070103",
+        "is 0x80070103 safe to ignore",
+    ],
+}
+
+
 class GoogleSuggestCollector:
     def __init__(self, timeout: int = 12) -> None:
         self.timeout = timeout
@@ -41,7 +94,7 @@ class GoogleSuggestCollector:
             suggestions = payload[1] if len(payload) > 1 else []
         except Exception as exc:
             LOGGER.warning("Google suggestion collection failed: %s", exc)
-            suggestions = FALLBACK_SUGGESTIONS.get(query.lower(), [])
+            suggestions = fallback_suggestions(query)
 
         return [
             TopicSignal(
@@ -53,3 +106,39 @@ class GoogleSuggestCollector:
             for index, suggestion in enumerate(suggestions[:limit])
             if clean_space(suggestion)
         ]
+
+
+def fallback_suggestions(query: str) -> list[str]:
+    normalized = query.lower().strip()
+    if normalized in FALLBACK_SUGGESTIONS:
+        return FALLBACK_SUGGESTIONS[normalized]
+    if normalized in WINDOWS_FALLBACK_SUGGESTIONS:
+        return WINDOWS_FALLBACK_SUGGESTIONS[normalized]
+    if looks_like_windows_query(normalized):
+        return [
+            f"{normalized} fix",
+            f"{normalized} windows 11",
+            f"{normalized} safe beginner steps",
+            f"{normalized} microsoft support",
+            f"{normalized} after update",
+        ]
+    return []
+
+
+def looks_like_windows_query(query: str) -> bool:
+    return any(
+        term in query
+        for term in [
+            "windows",
+            "microsoft store",
+            "file explorer",
+            "snipping tool",
+            "onedrive",
+            "bluetooth",
+            "printer",
+            "device manager",
+            "taskbar",
+            "start menu",
+            "0x",
+        ]
+    )

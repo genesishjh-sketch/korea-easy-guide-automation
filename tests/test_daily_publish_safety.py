@@ -778,6 +778,53 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertIn("Easy PC Fix Validate Smoke Test", message)
         self.assertIn("Easy PC Fix Daily Publish", message)
 
+    def test_no_notify_run_skips_completion_notification_for_local_validation(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir, patch.object(daily_draft, "ROOT_DIR", Path(tmpdir)), patch.object(
+            daily_draft, "run_stage1"
+        ) as stage1, patch.object(daily_draft, "run_validation") as validation, patch.object(
+            daily_draft, "NotificationClient"
+        ) as notification, patch.object(
+            daily_draft, "load_settings"
+        ) as load_settings:
+            article_dir = Path(tmpdir) / "article"
+            article_dir.mkdir()
+            (article_dir / "metadata.json").write_text(
+                json.dumps({"candidate": {"keyword": "local smoke"}, "article": {"title": "Local Smoke"}}),
+                encoding="utf-8",
+            )
+            (article_dir / "quality_report.json").write_text(
+                json.dumps({"score": 100, "passed": True, "issues": [], "metrics": {}}),
+                encoding="utf-8",
+            )
+            (article_dir / "research_report.json").write_text(json.dumps({}), encoding="utf-8")
+            validation_result = article_dir / "validation_result.json"
+            validation_result.write_text(json.dumps({"mode": "validate", "passed": True}), encoding="utf-8")
+            stage1.return_value = article_dir
+            validation.return_value = validation_result
+            load_settings.return_value.site_key = "easy_pc_fix_guide"
+            load_settings.return_value.site_name = "Easy PC Fix Guide"
+            load_settings.return_value.site_url = "https://easypcfixguide.blogspot.com"
+
+            result = daily_draft.run("local smoke", "easy_pc_fix_guide", "validate", notify=False)
+
+        self.assertEqual(result["seed"], "local smoke")
+        self.assertFalse(notification.called)
+
+    def test_no_notify_run_skips_failure_notification_for_local_validation(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir, patch.object(daily_draft, "ROOT_DIR", Path(tmpdir)), patch.object(
+            daily_draft, "run_stage1", side_effect=ValueError("local failure")
+        ), patch.object(daily_draft, "NotificationClient") as notification, patch.object(
+            daily_draft, "load_settings"
+        ) as load_settings:
+            load_settings.return_value.site_key = "easy_pc_fix_guide"
+            load_settings.return_value.site_name = "Easy PC Fix Guide"
+            load_settings.return_value.site_url = "https://easypcfixguide.blogspot.com"
+
+            with self.assertRaises(ValueError):
+                daily_draft.run("local smoke", "easy_pc_fix_guide", "validate", notify=False)
+
+        self.assertFalse(notification.called)
+
     def test_daily_failure_message_classifies_quality_failures(self) -> None:
         message = daily_draft.build_daily_failure_message(
             "thin topic",

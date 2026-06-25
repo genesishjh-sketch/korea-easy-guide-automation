@@ -121,7 +121,12 @@ def days_since_automation_start(start_date: str, today: date) -> int:
     return max(0, (today - start).days)
 
 
-def run(seed: str | None = None, site: str | None = None, publish_mode: str = "draft") -> dict[str, str]:
+def run(
+    seed: str | None = None,
+    site: str | None = None,
+    publish_mode: str = "draft",
+    notify: bool = True,
+) -> dict[str, str]:
     settings = load_settings(site)
     selected_seed = seed or ""
     try:
@@ -140,7 +145,8 @@ def run(seed: str | None = None, site: str | None = None, publish_mode: str = "d
                     "existing_post": existing_today,
                 }
                 save_daily_success_report(result)
-                notify_daily_completion(result)
+                if notify:
+                    notify_daily_completion(result)
                 return result
         selected_seed = choose_seed(seed, site)
         skipped_duplicate_seeds: list[str] = []
@@ -165,11 +171,13 @@ def run(seed: str | None = None, site: str | None = None, publish_mode: str = "d
             "skipped_quality_seeds": skipped_quality_seeds,
         }
         save_daily_success_report(result)
-        notify_daily_completion(result)
+        if notify:
+            notify_daily_completion(result)
         return result
     except Exception as exc:
         save_daily_failure_report(selected_seed, exc, site, publish_mode)
-        notify_daily_failure(selected_seed, exc, site, publish_mode)
+        if notify:
+            notify_daily_failure(selected_seed, exc, site, publish_mode)
         raise
 
 
@@ -776,8 +784,9 @@ def main() -> None:
     parser.add_argument("--seed", help="Optional explicit topic seed")
     parser.add_argument("--site", help="Site profile key, for example: easy_pc_fix_guide")
     parser.add_argument("--mode", choices=["validate", "draft", "publish"], default="draft")
+    parser.add_argument("--no-notify", action="store_true", help="Skip Posting Bot notifications for local smoke checks.")
     args = parser.parse_args()
-    result = run(args.seed, args.site, args.mode)
+    result = run(args.seed, args.site, args.mode, notify=not args.no_notify)
     print(json.dumps(result, ensure_ascii=False, indent=2))
 
 
