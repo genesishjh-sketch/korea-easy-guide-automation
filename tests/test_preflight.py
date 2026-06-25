@@ -107,6 +107,8 @@ class PreflightTests(unittest.TestCase):
 
         self.assertEqual(check.status, "warn")
         self.assertIn("Public Reddit JSON may return 403", check.message)
+        self.assertIn("https://www.reddit.com/prefs/apps", check.message)
+        self.assertIn("/settings/secrets/actions", check.message)
 
     def test_reddit_collection_passes_with_oauth_credentials(self) -> None:
         with patch.object(stage0_preflight, "load_settings") as load_settings:

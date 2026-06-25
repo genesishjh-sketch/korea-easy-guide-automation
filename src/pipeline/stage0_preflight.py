@@ -122,7 +122,9 @@ def check_reddit_collection_settings(site: str | None = None) -> PreflightCheck:
     return PreflightCheck(
         "reddit_collection",
         "warn",
-        "Reddit OAuth credentials are missing. Public Reddit JSON may return 403, so the pipeline may rely on fallback reader questions.",
+        "Reddit OAuth credentials are missing. Public Reddit JSON may return 403, so the pipeline may rely on fallback reader questions. "
+        "Create a script app at https://www.reddit.com/prefs/apps, then add REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET at "
+        "https://github.com/genesishjh-sketch/korea-easy-guide-automation/settings/secrets/actions.",
     )
 
 
