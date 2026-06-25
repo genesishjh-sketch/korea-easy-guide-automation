@@ -123,6 +123,7 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                     "reddit_public_json_signal_count": 0,
                     "fallback_reddit_signal_count": 2,
                     "google_suggest_signal_count": 3,
+                    "fallback_only_article_count": 1,
                     "fallback_only_articles": ["Wi-Fi Button Missing on Windows 11"],
                     "reddit_collection_diagnostics": [
                         {
@@ -344,6 +345,7 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("Reddit OAuth 신호 수: 0", markdown)
         self.assertIn("Reddit public JSON 신호 수: 0", markdown)
         self.assertIn("Reddit fallback 신호 수: 2", markdown)
+        self.assertIn("fallback만 사용한 글 수: 1건 (고유 제목 1개)", markdown)
         self.assertIn("fallback만 사용한 글", markdown)
         self.assertIn("최근 Reddit 수집 진단", markdown)
         self.assertIn("public JSON 실패 4개", markdown)
@@ -679,12 +681,42 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertEqual(result["reddit_collection_method_counts"]["public_json"], 1)
         self.assertEqual(result["google_suggest_method_counts"]["fallback"], 4)
         self.assertEqual(result["google_suggest_method_counts"]["live"], 2)
+        self.assertEqual(result["fallback_only_article_count"], 1)
         self.assertEqual(result["fallback_only_articles"], ["Fallback only article"])
         self.assertEqual(result["reddit_collection_diagnostics"][0]["title"], "Fallback only article")
         self.assertEqual(result["reddit_collection_diagnostics"][0]["public_json_error_count"], 4)
         self.assertEqual(result["reddit_collection_diagnostics"][0]["failed_subreddits"], ["WindowsHelp", "Windows11"])
         self.assertEqual(result["google_suggest_diagnostics"][0]["title"], "Fallback only article")
         self.assertEqual(result["google_suggest_diagnostics"][0]["fallback_suggestion_count"], 4)
+
+    def test_signal_quality_result_deduplicates_fallback_article_titles(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            article_one = Path(tmpdir) / "one"
+            article_two = Path(tmpdir) / "two"
+            article_one.mkdir()
+            article_two.mkdir()
+            fallback_report = {
+                "live_reddit_signal_count": 0,
+                "fallback_reddit_signal_count": 2,
+                "google_suggest_signal_count": 4,
+                "signal_source_counts": {"reddit_fallback": 2, "google_suggest": 4},
+                "reddit_collection_method_counts": {"fallback": 2},
+            }
+            (article_one / "research_report.json").write_text(json.dumps(fallback_report), encoding="utf-8")
+            (article_two / "research_report.json").write_text(json.dumps(fallback_report), encoding="utf-8")
+
+            result = reporter._signal_quality_result(
+                [
+                    {"title": "Wi-Fi Button Missing on Windows 11", "article_dir": str(article_one)},
+                    {"title": "Wi-Fi Button Missing on Windows 11", "article_dir": str(article_two)},
+                ]
+            )
+
+        self.assertEqual(result["fallback_only_article_count"], 2)
+        self.assertEqual(result["fallback_only_articles"], ["Wi-Fi Button Missing on Windows 11"])
 
     def test_next_actions_do_not_ask_for_first_article_when_public_feed_has_posts(self) -> None:
         settings = load_settings("easy_pc_fix_guide")

@@ -442,6 +442,7 @@ class WeeklyReporter:
         reddit_method_counts: dict[str, int] = {}
         google_method_counts: dict[str, int] = {}
         fallback_articles: list[str] = []
+        fallback_article_count = 0
         reddit_diagnostics: list[dict] = []
         google_diagnostics: list[dict] = []
         for article in articles:
@@ -472,6 +473,7 @@ class WeeklyReporter:
             if int(report.get("fallback_reddit_signal_count", 0) or 0) and not int(
                 report.get("live_reddit_signal_count", 0) or 0
             ):
+                fallback_article_count += 1
                 fallback_articles.append(article.get("title") or article.get("slug") or article.get("article_dir", ""))
             diagnostics = report.get("reddit_collection_diagnostics") or {}
             if diagnostics:
@@ -513,7 +515,8 @@ class WeeklyReporter:
             "signal_source_counts": dict(sorted(source_counts.items())),
             "reddit_collection_method_counts": dict(sorted(reddit_method_counts.items())),
             "google_suggest_method_counts": dict(sorted(google_method_counts.items())),
-            "fallback_only_articles": fallback_articles,
+            "fallback_only_article_count": fallback_article_count,
+            "fallback_only_articles": list(dict.fromkeys(fallback_articles)),
             "reddit_collection_diagnostics": reddit_diagnostics,
             "google_suggest_diagnostics": google_diagnostics,
         }
@@ -718,6 +721,11 @@ class WeeklyReporter:
         lines.append(f"- Google Suggest live 신호 수: {signal_quality.get('google_suggest_live_signal_count', 0)}")
         lines.append(f"- Google Suggest fallback 신호 수: {signal_quality.get('google_suggest_fallback_signal_count', 0)}")
         if signal_quality.get("fallback_only_articles"):
+            lines.append(
+                "- fallback만 사용한 글 수: "
+                f"{signal_quality.get('fallback_only_article_count', len(signal_quality.get('fallback_only_articles', [])))}건 "
+                f"(고유 제목 {len(signal_quality.get('fallback_only_articles', []))}개)"
+            )
             lines.append("- fallback만 사용한 글:")
             for title in signal_quality.get("fallback_only_articles", [])[:5]:
                 lines.append(f"  - {title}")
