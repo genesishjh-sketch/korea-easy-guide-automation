@@ -246,6 +246,20 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                     "publication_check": {
                         "status": "published_today",
                         "today_post_count": 1,
+                        "human_summary": "\n".join(
+                            [
+                                "[Posting Bot] 공개 발행 확인",
+                                "",
+                                "- 상태: 기준 이후 공개 글 확인",
+                                "- 발행 증거 판정: 공개 피드와 workflow는 확인, 일일 리포트는 발행 리포트 아님",
+                            ]
+                        ),
+                        "latest_posts": [
+                            {
+                                "title": "Wi-Fi Button Missing on Windows 11",
+                                "url": "https://easypcfixguide.blogspot.com/2026/06/wi-fi-button-missing-on-windows-11.html",
+                            }
+                        ],
                         "publication_evidence": {
                             "status": "feed_and_workflow_confirmed_report_not_publish",
                             "label": "공개 피드와 workflow는 확인, 일일 리포트는 발행 리포트 아님",
@@ -338,8 +352,10 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("앱 타입은 반드시 script를 선택하세요.", markdown)
         self.assertIn("Easy PC Fix Reddit OAuth Health workflow를 Run workflow로 실행하세요.", markdown)
         self.assertIn("발행 확인: 오늘 공개 글 확인", markdown)
+        self.assertIn("발행 확인 요약: 상태: 기준 이후 공개 글 확인", markdown)
         self.assertIn("발행 증거 판정: 공개 피드와 workflow는 확인, 일일 리포트는 발행 리포트 아님", markdown)
         self.assertIn("추가 확인 필요: 예", markdown)
+        self.assertIn("최근 글 URL: https://easypcfixguide.blogspot.com/2026/06/wi-fi-button-missing-on-windows-11.html", markdown)
         self.assertIn("Sitemap 제출: 제출됨", markdown)
         self.assertIn("색인 안내: sitemap 제출은 Google에 새 글을 알려주는 단계", markdown)
         self.assertIn("예상 대기: 보통 며칠", markdown)

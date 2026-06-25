@@ -937,6 +937,9 @@ class WeeklyReporter:
             lines.append(f"  - 확인 기준: {publication_check.get('source')}")
         if publication_check.get("note"):
             lines.append(f"  - 참고: {publication_check.get('note')}")
+        publication_summary = _publication_check_summary(publication_check)
+        if publication_summary:
+            lines.append(f"  - 발행 확인 요약: {publication_summary}")
         if publication_check.get("today_post_count") is not None:
             lines.append(f"  - 기준 이후 공개 글 수: {publication_check.get('today_post_count', 0)}")
         if publication_check.get("today_total_post_count") is not None:
@@ -951,6 +954,8 @@ class WeeklyReporter:
         if publication_check.get("latest_posts"):
             latest = publication_check["latest_posts"][0]
             lines.append(f"  - 최근 글: {latest.get('title', '')}")
+            if latest.get("url"):
+                lines.append(f"  - 최근 글 URL: {latest.get('url')}")
         lines.append(f"- Sitemap 제출: {_status_kr(sitemap_submit.get('status', 'not_uploaded'))}")
         if sitemap_submit.get("note"):
             lines.append(f"  - 참고: {sitemap_submit.get('note')}")
@@ -1072,6 +1077,19 @@ def _format_article_status_counts(counts: dict) -> str:
     if not counts:
         return "없음"
     return ", ".join(f"{_status_kr(str(status))} {count}개" for status, count in counts.items())
+
+
+def _publication_check_summary(publication_check: dict) -> str:
+    summary = str(publication_check.get("human_summary") or "").strip()
+    if not summary:
+        return ""
+    for line in summary.splitlines():
+        normalized = line.strip()
+        if not normalized or normalized.startswith("[Posting Bot]"):
+            continue
+        if normalized.startswith("- 상태:") or normalized.startswith("- 발행 증거 판정:"):
+            return normalized.removeprefix("- ").strip()
+    return ""
 
 
 def _monitoring_item(label: str, target_date, today, common: dict, action: str) -> dict:
