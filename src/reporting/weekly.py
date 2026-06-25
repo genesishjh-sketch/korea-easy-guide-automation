@@ -67,6 +67,7 @@ class WeeklyReporter:
             "analytics": GA4Client(self.settings).summary(week_start.date(), now.date()),
             "operations": operations,
             "cadence_review": cadence_review.to_dict(),
+            "quality_issues": self._quality_issues_result(articles),
             "next_actions": self._next_actions(articles, static_pages, public_posts, operations, signal_quality),
         }
 
@@ -234,6 +235,37 @@ class WeeklyReporter:
                 continue
             issue_count += len(report.get("issues", []))
         return issue_count
+
+    def _quality_issues_result(self, articles: list[dict]) -> list[dict]:
+        results = []
+        for article in articles:
+            quality_path = Path(article.get("article_dir", "")) / "quality_report.json"
+            if not quality_path.exists():
+                continue
+            try:
+                report = json.loads(quality_path.read_text(encoding="utf-8"))
+            except json.JSONDecodeError as exc:
+                results.append(
+                    {
+                        "title": article.get("title") or article.get("slug") or article.get("article_dir", ""),
+                        "article_dir": article.get("article_dir", ""),
+                        "code": "invalid_quality_report",
+                        "message": str(exc),
+                        "severity": "error",
+                    }
+                )
+                continue
+            for issue in report.get("issues", []):
+                results.append(
+                    {
+                        "title": article.get("title") or article.get("slug") or article.get("article_dir", ""),
+                        "article_dir": article.get("article_dir", ""),
+                        "code": issue.get("code", "unknown"),
+                        "message": issue.get("message", ""),
+                        "severity": issue.get("severity", ""),
+                    }
+                )
+        return results
 
     def _signal_quality_result(self, articles: list[dict]) -> dict:
         totals = {
@@ -556,6 +588,13 @@ class WeeklyReporter:
         lines.append(f"- 하루 3개 검토 기준일: {cadence.get('three_post_review_date')}")
         for reason in cadence.get("reasons", []):
             lines.append(f"- 판단 근거: {reason}")
+        quality_issues = report.get("quality_issues", [])
+        if quality_issues:
+            lines.append("- 품질 이슈 상세:")
+            for issue in quality_issues[:5]:
+                lines.append(
+                    f"  - {issue.get('title', '')}: {issue.get('code', 'unknown')} - {issue.get('message', '')}"
+                )
 
         lines.extend(["", "## 다음 할 일", ""])
         for action in report["next_actions"]:

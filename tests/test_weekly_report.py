@@ -139,6 +139,14 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                     "three_post_review_date": "2026-08-19",
                     "reasons": ["Reddit OAuth Health가 발행량 증량을 차단 중입니다: Reddit OAuth 키 없음."],
                 },
+                "quality_issues": [
+                    {
+                        "title": "Windows Update Error 0x80070643",
+                        "code": "missing_required_image_assets",
+                        "message": "Missing image assets: assets/ai-hero.jpg, assets/ai-inline-1.jpg.",
+                        "severity": "error",
+                    }
+                ],
                 "next_actions": [],
             }
         )
@@ -170,6 +178,46 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("Reddit Health 상태: Reddit OAuth 키 없음", markdown)
         self.assertIn("Reddit Health 점수: 0/100", markdown)
         self.assertIn("Reddit Health 증량 차단: 예", markdown)
+        self.assertIn("품질 이슈 상세", markdown)
+        self.assertIn("Windows Update Error 0x80070643", markdown)
+        self.assertIn("missing_required_image_assets", markdown)
+
+    def test_quality_issues_result_summarizes_article_quality_reports(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            article_dir = Path(tmpdir) / "article"
+            article_dir.mkdir()
+            (article_dir / "quality_report.json").write_text(
+                json.dumps(
+                    {
+                        "score": 88,
+                        "passed": False,
+                        "issues": [
+                            {
+                                "code": "missing_required_image_assets",
+                                "message": "Missing image assets: assets/ai-hero.jpg, assets/ai-inline-1.jpg.",
+                                "severity": "error",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            result = reporter._quality_issues_result(
+                [
+                    {
+                        "title": "Windows Update Error 0x80070643",
+                        "article_dir": str(article_dir),
+                    }
+                ]
+            )
+
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["title"], "Windows Update Error 0x80070643")
+        self.assertEqual(result[0]["code"], "missing_required_image_assets")
 
     def test_signal_quality_result_summarizes_research_reports(self) -> None:
         settings = load_settings("easy_pc_fix_guide")
