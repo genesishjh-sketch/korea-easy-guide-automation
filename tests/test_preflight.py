@@ -67,7 +67,10 @@ class PreflightTests(unittest.TestCase):
         self.assertIn("OAuth", check.message)
 
     def test_seed_file_fails_on_blank_topic_seed(self) -> None:
-        with patch.object(stage0_preflight, "load_seed_list", return_value=["wifi button missing windows 11", " "]):
+        with patch.object(stage0_preflight, "load_settings") as load_settings, patch.object(
+            stage0_preflight, "load_seed_list", return_value=["wifi button missing windows 11", " "]
+        ):
+            load_settings.return_value.content_domain = "windows_help"
             check = stage0_preflight.check_seed_file("easy_pc_fix_guide")
 
         self.assertEqual(check.status, "fail")
@@ -75,12 +78,38 @@ class PreflightTests(unittest.TestCase):
 
     def test_seed_file_fails_on_duplicate_topic_seed(self) -> None:
         seeds = ["wifi button missing windows 11", "WiFi button missing windows 11", "printer offline windows 11"]
-        with patch.object(stage0_preflight, "load_seed_list", return_value=seeds):
+        with patch.object(stage0_preflight, "load_settings") as load_settings, patch.object(
+            stage0_preflight, "load_seed_list", return_value=seeds
+        ):
+            load_settings.return_value.content_domain = "windows_help"
             check = stage0_preflight.check_seed_file("easy_pc_fix_guide")
 
         self.assertEqual(check.status, "fail")
         self.assertIn("Duplicate topic seeds", check.message)
         self.assertIn("wifi button missing windows 11", check.message.lower())
+
+    def test_seed_file_fails_on_weak_windows_topic_seed(self) -> None:
+        seeds = ["windows error", *[f"printer offline windows 11 model {i}" for i in range(29)]]
+        with patch.object(stage0_preflight, "load_settings") as load_settings, patch.object(
+            stage0_preflight, "load_seed_list", return_value=seeds
+        ):
+            load_settings.return_value.content_domain = "windows_help"
+            check = stage0_preflight.check_seed_file("easy_pc_fix_guide")
+
+        self.assertEqual(check.status, "fail")
+        self.assertIn("Weak Windows topic seeds", check.message)
+        self.assertIn("specific error codes", check.message)
+
+    def test_seed_file_allows_specific_windows_topic_seed(self) -> None:
+        seeds = [f"windows update error 0x8007000{i}" for i in range(30)]
+        with patch.object(stage0_preflight, "load_settings") as load_settings, patch.object(
+            stage0_preflight, "load_seed_list", return_value=seeds
+        ):
+            load_settings.return_value.content_domain = "windows_help"
+            check = stage0_preflight.check_seed_file("easy_pc_fix_guide")
+
+        self.assertEqual(check.status, "pass")
+        self.assertIn("30 topic seeds found", check.message)
 
     def test_critical_notifications_are_required(self) -> None:
         check = stage0_preflight.check_critical_notifications()

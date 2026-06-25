@@ -82,6 +82,7 @@ def check_site_settings(site: str | None = None) -> PreflightCheck:
 
 
 def check_seed_file(site: str | None = None) -> PreflightCheck:
+    settings = load_settings(site)
     try:
         seeds = load_seed_list(site)
     except Exception as exc:
@@ -100,9 +101,36 @@ def check_seed_file(site: str | None = None) -> PreflightCheck:
             "fail",
             f"Duplicate topic seeds found: {', '.join(duplicates[:5])}. Remove duplicates before unattended publishing.",
         )
+    if settings.content_domain == "windows_help":
+        weak_seeds = weak_windows_topic_seeds(seeds)
+        if weak_seeds:
+            return PreflightCheck(
+                "seed_file",
+                "fail",
+                f"Weak Windows topic seeds found: {', '.join(weak_seeds[:5])}. Use specific error codes, symptoms, apps, or Windows features.",
+            )
     if len(seeds) < 30:
         return PreflightCheck("seed_file", "warn", f"Only {len(seeds)} topic seeds found; add more for long automation runs.")
     return PreflightCheck("seed_file", "pass", f"{len(seeds)} topic seeds found.")
+
+
+def weak_windows_topic_seeds(seeds: list[str]) -> list[str]:
+    generic = {
+        "error",
+        "windows error",
+        "windows problem",
+        "computer problem",
+        "pc problem",
+        "windows help",
+        "fix windows",
+        "windows issue",
+    }
+    weak = []
+    for seed in seeds:
+        normalized = str(seed).strip().lower()
+        if normalized in generic or len(normalized.split()) < 3:
+            weak.append(str(seed).strip())
+    return weak
 
 
 def check_seed_inventory(site: str | None = None) -> PreflightCheck:
