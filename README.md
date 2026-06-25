@@ -143,6 +143,7 @@ GitHub Actions health check:
 ```
 
 The health check writes `reports/easy_pc_fix_guide-reddit-health.json`, prints a sanitized action summary in the Actions log, uploads the report as an artifact, and sends the same action summary to the Korean Posting Bot when Telegram is configured.
+It checks every configured subreddit and reports tested subreddits, matched subreddits, and per-subreddit signal counts so OAuth stability is visible before cadence increases.
 
 ## Daily Automation
 

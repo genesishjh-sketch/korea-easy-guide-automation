@@ -68,6 +68,44 @@ class RedditHealthTests(unittest.TestCase):
         self.assertEqual(result["first_successful_subreddit"], "WindowsHelp")
         self.assertEqual(result["per_subreddit_counts"], {"WindowsHelp": 1})
 
+    def test_oauth_health_checks_all_configured_subreddits(self) -> None:
+        settings = replace(
+            load_settings("easy_pc_fix_guide"),
+            reddit_client_id="client",
+            reddit_client_secret="secret",
+            reddit_user_agent="easy-pc-fix-guide/0.1",
+            reddit_subreddits=["WindowsHelp", "Windows11", "pchelp"],
+        )
+        submissions_by_subreddit = {
+            "WindowsHelp": [
+                types.SimpleNamespace(
+                    title="Wi-Fi button disappeared after update",
+                    permalink="/r/WindowsHelp/comments/abc/test/",
+                    score=12,
+                    num_comments=7,
+                )
+            ],
+            "Windows11": [],
+            "pchelp": [
+                types.SimpleNamespace(
+                    title="Bluetooth missing after sleep on Windows 11",
+                    permalink="/r/pchelp/comments/def/test/",
+                    score=5,
+                    num_comments=3,
+                )
+            ],
+        }
+
+        with patch.dict("sys.modules", {"praw": fake_praw_module_by_subreddit(submissions_by_subreddit)}):
+            result = stage0_reddit_health.check_reddit_oauth(settings, "wifi button missing windows 11")
+
+        self.assertEqual(result["status"], "oauth_connected")
+        self.assertEqual(result["oauth_signal_count"], 2)
+        self.assertEqual(result["tested_subreddits"], ["WindowsHelp", "Windows11", "pchelp"])
+        self.assertEqual(result["matched_subreddits"], ["WindowsHelp", "pchelp"])
+        self.assertEqual(result["first_successful_subreddit"], "WindowsHelp")
+        self.assertEqual(result["per_subreddit_counts"], {"WindowsHelp": 1, "Windows11": 0, "pchelp": 1})
+
     def test_oauth_connected_no_results_reports_tested_subreddits(self) -> None:
         settings = replace(
             load_settings("easy_pc_fix_guide"),
@@ -237,6 +275,26 @@ def fake_praw_module_by_query(submissions_by_query: dict[str, list]) -> object:
 
         def subreddit(self, name: str) -> FakeSubreddit:
             return FakeSubreddit()
+
+    return types.SimpleNamespace(Reddit=FakeReddit)
+
+
+def fake_praw_module_by_subreddit(submissions_by_subreddit: dict[str, list]) -> object:
+    class FakeSubreddit:
+        def __init__(self, name: str) -> None:
+            self.name = name
+
+        def search(self, query: str, sort: str, limit: int):
+            return submissions_by_subreddit.get(self.name, [])[:limit]
+
+    class FakeReddit:
+        def __init__(self, client_id: str, client_secret: str, user_agent: str) -> None:
+            self.client_id = client_id
+            self.client_secret = client_secret
+            self.user_agent = user_agent
+
+        def subreddit(self, name: str) -> FakeSubreddit:
+            return FakeSubreddit(name)
 
     return types.SimpleNamespace(Reddit=FakeReddit)
 

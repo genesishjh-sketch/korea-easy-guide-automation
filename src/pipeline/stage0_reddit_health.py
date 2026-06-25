@@ -183,7 +183,6 @@ def check_reddit_oauth(settings: Any, query: str, limit: int = 3) -> dict:
             if subreddit_samples:
                 matched_subreddits.append(subreddit)
                 samples.extend(subreddit_samples)
-                break
     except Exception as exc:
         return {
             **base,
