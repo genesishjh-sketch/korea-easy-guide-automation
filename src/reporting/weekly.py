@@ -184,6 +184,7 @@ class WeeklyReporter:
         ):
             publication_check = self._publication_check_from_public_posts(now, public_posts)
         sitemap_submit = self._read_report(report_dir / f"{self.settings.site_key}-search-console-sitemap-submit.json")
+        sitemap_submit = self._normalize_sitemap_submit_report(sitemap_submit)
         if self._sitemap_report_is_not_current(sitemap_submit, now) and (public_posts or search_console):
             sitemap_submit = {
                 "status": "not_persisted",
@@ -234,8 +235,24 @@ class WeeklyReporter:
             return False
         submitted_at = _parse_datetime(str(sitemap_submit.get("submitted_at", "")))
         if submitted_at is None:
-            return True
+            return sitemap_submit.get("timestamp_status") != "legacy_missing_submitted_at"
         return submitted_at.date() != now.date()
+
+    def _normalize_sitemap_submit_report(self, sitemap_submit: dict) -> dict:
+        if (
+            sitemap_submit.get("status") == "submitted"
+            and sitemap_submit.get("sitemap_url")
+            and not sitemap_submit.get("submitted_at")
+        ):
+            return {
+                **sitemap_submit,
+                "note": (
+                    sitemap_submit.get("note")
+                    or "sitemap 제출 성공 리포트입니다. 이전 형식이라 submitted_at은 기록되지 않았습니다."
+                ),
+                "timestamp_status": "legacy_missing_submitted_at",
+            }
+        return sitemap_submit
 
     def _daily_failure_for_current_day(self, daily_failure: dict, now: datetime | None) -> dict:
         if daily_failure.get("status") != "failed" or now is None:

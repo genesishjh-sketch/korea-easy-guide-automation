@@ -1161,6 +1161,35 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertEqual(operations["sitemap_submit"]["status"], "submitted")
         self.assertEqual(operations["sitemap_submit"]["submitted_at"], "2026-06-25T00:15:00Z")
 
+    def test_operations_result_accepts_legacy_submitted_sitemap_report_without_timestamp(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+        now = datetime(2026, 6, 25, 9, 40, tzinfo=ZoneInfo("Asia/Seoul"))
+
+        with tempfile.TemporaryDirectory() as tmpdir, patch("src.reporting.weekly.ROOT_DIR", Path(tmpdir)):
+            report_dir = Path(tmpdir) / "reports"
+            report_dir.mkdir()
+            (report_dir / "easy_pc_fix_guide-search-console-sitemap-submit.json").write_text(
+                json.dumps(
+                    {
+                        "status": "submitted",
+                        "site_url": "https://easypcfixguide.blogspot.com/",
+                        "sitemap_url": "https://easypcfixguide.blogspot.com/sitemap.xml",
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            operations = reporter._operations_result(
+                now=now,
+                public_posts={"status": "connected", "posts": []},
+                search_console={"status": "connected"},
+            )
+
+        self.assertEqual(operations["sitemap_submit"]["status"], "submitted")
+        self.assertEqual(operations["sitemap_submit"]["timestamp_status"], "legacy_missing_submitted_at")
+        self.assertIn("submitted_at", operations["sitemap_submit"]["note"])
+
     def test_operations_result_marks_stale_sitemap_report_as_not_persisted(self) -> None:
         settings = load_settings("easy_pc_fix_guide")
         reporter = WeeklyReporter(settings)
