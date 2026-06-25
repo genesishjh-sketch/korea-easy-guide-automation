@@ -107,6 +107,51 @@ class Stage2ImageGateTests(unittest.TestCase):
 
         self.assertIn("missing_image_plan", {issue.code for issue in report.issues})
 
+    def test_hades_blocks_weak_image_alt_and_caption_text(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            article_dir = Path(tmpdir)
+            assets_dir = article_dir / "assets"
+            assets_dir.mkdir()
+            (assets_dir / "ai-hero.jpg").write_bytes(b"hero")
+            (assets_dir / "ai-inline-1.jpg").write_bytes(b"inline")
+            (article_dir / "image_plan.json").write_text(
+                json.dumps(
+                    {
+                        "strict": True,
+                        "images": [
+                            {
+                                "url": "assets/ai-hero.jpg",
+                                "filename": "ai-hero.jpg",
+                                "required": True,
+                                "alt": "Hero",
+                                "caption": "Hero image.",
+                            },
+                            {
+                                "url": "assets/ai-inline-1.jpg",
+                                "filename": "ai-inline-1.jpg",
+                                "required": True,
+                                "alt": "Inline",
+                                "caption": "Inline image.",
+                            },
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            html = """
+            <article>
+              <h2>Quick Answer</h2>
+              <img src="assets/ai-hero.jpg" alt="Hero">
+              <img src="assets/ai-inline-1.jpg" alt="Inline">
+            </article>
+            """
+
+            report = HadesQualityGate().review_html(html, article_dir, {"article": {}})
+
+        issue_codes = {issue.code for issue in report.issues}
+        self.assertIn("weak_image_alt_text", issue_codes)
+        self.assertIn("weak_image_caption", issue_codes)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -224,6 +224,7 @@ class HadesQualityGate:
             required_images = [image for image in image_plan.get("images", []) if image.get("required", True)]
             if len(required_images) < 2:
                 issues.append(QualityIssue("weak_image_plan", "Image plan must include at least two required images."))
+            issues.extend(_review_image_descriptions(required_images))
             missing_assets = []
             invalid_urls = []
             for image in required_images:
@@ -505,6 +506,36 @@ def _section_links_by_h2(soup: BeautifulSoup) -> dict[str, list[str]]:
                 links.extend(_href(link) for link in find_all("a"))
         sections[title] = [link for link in links if link]
     return sections
+
+
+def _review_image_descriptions(images: list[dict]) -> list[QualityIssue]:
+    weak_alt = []
+    weak_caption = []
+    generic_alt_values = {"hero", "inline", "image", "photo", "picture", "cover", "visual"}
+    for image in images:
+        filename = image.get("filename") or image.get("url") or "unknown image"
+        alt = str(image.get("alt") or "").strip()
+        caption = str(image.get("caption") or "").strip()
+        if len(alt.split()) < 5 or alt.casefold() in generic_alt_values:
+            weak_alt.append(filename)
+        if len(caption.split()) < 7:
+            weak_caption.append(filename)
+    issues = []
+    if weak_alt:
+        issues.append(
+            QualityIssue(
+                "weak_image_alt_text",
+                f"Required images need descriptive alt text tied to the topic: {', '.join(weak_alt)}.",
+            )
+        )
+    if weak_caption:
+        issues.append(
+            QualityIssue(
+                "weak_image_caption",
+                f"Required images need helpful captions for readers: {', '.join(weak_caption)}.",
+            )
+        )
+    return issues
 
 
 def _href(link: object) -> str:

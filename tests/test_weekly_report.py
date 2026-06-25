@@ -680,6 +680,7 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("블로그 내부 검색 링크 3개 이상", joined)
         self.assertIn("이미지 문제가 감지", joined)
         self.assertIn("hero/inline 이미지 2개", joined)
+        self.assertIn("alt/caption", joined)
         self.assertIn("공식 출처 문제가 감지", joined)
         self.assertIn("Microsoft Support/Learn 직접 링크", joined)
 

@@ -318,6 +318,7 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertIn("Related Guides 내부 링크 문제", message)
         self.assertIn("블로그 내부 검색 링크 3개 이상", message)
         self.assertIn("이미지 문제가 감지", message)
+        self.assertIn("alt/caption", message)
         self.assertIn("공식 출처 문제가 감지", message)
 
     def test_operational_status_allows_cadence_increase_only_with_oauth_signals(self) -> None:

@@ -44,6 +44,17 @@ class ImagePlanTests(unittest.TestCase):
         self.assertIn("command prompts", combined_prompts)
         self.assertIn("registry editors", combined_prompts)
 
+    def test_windows_image_plan_has_descriptive_alt_and_captions(self) -> None:
+        candidate = build_candidate("windows update error 0x80070643", [], "windows_help")
+
+        plan = build_article_image_plan(candidate, "Windows Update Error 0x80070643")
+
+        for image in plan.images:
+            with self.subTest(filename=image.filename):
+                self.assertGreaterEqual(len(image.alt.split()), 5)
+                self.assertGreaterEqual(len(image.caption.split()), 7)
+                self.assertNotIn(image.alt.lower(), {"hero", "inline", "image", "photo", "picture"})
+
     def test_korea_production_uses_local_svg_fallback_filenames(self) -> None:
         candidate = build_candidate("incheon airport to seoul", [], "korea_travel")
 
