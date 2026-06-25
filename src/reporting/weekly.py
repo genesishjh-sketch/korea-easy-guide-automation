@@ -301,6 +301,7 @@ class WeeklyReporter:
         publication_status = operations.get("publication_check", {}).get("status")
         sitemap_status = operations.get("sitemap_submit", {}).get("status")
         operational_status = operations.get("daily_success", {}).get("operational_status", {})
+        reddit_health = operations.get("reddit_health", {})
         if preflight_status == "fail":
             actions.append("Preflight 실패 항목을 먼저 복구하세요. 설정, workflow 안전장치, 알림 설정을 확인해야 합니다.")
         elif preflight_status == "warn":
@@ -342,6 +343,12 @@ class WeeklyReporter:
         if operational_status and not operational_status.get("ready_for_cadence_increase", False):
             actions.append(
                 "일일 운영 상태 기준으로 아직 발행량 증량 준비가 아닙니다. 품질 통과와 Reddit OAuth 수집 안정성을 모두 확인한 뒤 증량하세요."
+            )
+        if reddit_health.get("blocks_cadence_increase"):
+            action_required = reddit_health.get("action_required") or "Reddit OAuth 상태를 점검하세요."
+            actions.append(
+                f"Reddit OAuth Health가 발행량 증량을 차단 중입니다. {action_required} "
+                f"상태 점수: {reddit_health.get('health_score', 0)}/100."
             )
         actions.append("트래픽과 수익 신호가 보일 때까지 추가 유료 API 비용은 0원 정책을 유지하세요.")
         return actions

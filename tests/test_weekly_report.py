@@ -317,6 +317,31 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("아직 발행량 증량 준비가 아닙니다", joined)
         self.assertIn("Reddit OAuth 수집 안정성", joined)
 
+    def test_next_actions_include_reddit_health_cadence_block(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+
+        actions = reporter._next_actions(
+            articles=[{"blogger_status": "LIVE"}],
+            static_pages=[{"title": "About"}, {"title": "Contact"}, {"title": "Privacy Policy"}, {"title": "Disclaimer"}],
+            public_posts={"status": "connected", "posts": [{"title": "Published"}]},
+            operations={
+                "preflight": {"status": "pass"},
+                "reddit_health": {
+                    "status": "missing_credentials",
+                    "health_score": 0,
+                    "blocks_cadence_increase": True,
+                    "action_required": "REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET을 GitHub Secrets 또는 .env에 설정하세요.",
+                },
+            },
+            signal_quality={"status": "connected"},
+        )
+
+        joined = "\n".join(actions)
+        self.assertIn("Reddit OAuth Health가 발행량 증량을 차단 중", joined)
+        self.assertIn("상태 점수: 0/100", joined)
+        self.assertIn("REDDIT_CLIENT_ID", joined)
+
     def test_operations_result_reads_daily_success_and_failure_reports(self) -> None:
         settings = load_settings("easy_pc_fix_guide")
         reporter = WeeklyReporter(settings)
