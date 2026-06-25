@@ -918,6 +918,30 @@ class WindowsQualityGateTests(unittest.TestCase):
             <article>
               <h2>Related Guides</h2>
               <ul>
+                <li><a href="https://easypcfixguide.blogspot.com/search?q=How+to+check+your+Windows+version">How to check your Windows version</a></li>
+                <li><a href="https://easypcfixguide.blogspot.com/search?q=How+to+free+up+disk+space+on+Windows">How to free up disk space on Windows</a></li>
+                <li><a href="https://easypcfixguide.blogspot.com/search?q=Windows+Update+stuck+at+100%25">Windows Update stuck at 100%</a></li>
+              </ul>
+            </article>
+            """,
+            "html.parser",
+        )
+        issues = gate._review_windows_article(
+            soup,
+            "applies to risk level data loss risk estimated time last checked advanced fixes back up important files",
+            links=[],
+        )
+
+        self.assertNotIn("weak_related_guides", {issue.code for issue in issues})
+        self.assertNotIn("weak_related_guide_links", {issue.code for issue in issues})
+
+    def test_windows_articles_require_internal_related_guide_links(self) -> None:
+        gate = HadesQualityGate("windows_help")
+        soup = BeautifulSoup(
+            """
+            <article>
+              <h2>Related Guides</h2>
+              <ul>
                 <li>How to check your Windows version</li>
                 <li>How to free up disk space on Windows</li>
                 <li>Windows Update stuck at 100%</li>
@@ -932,7 +956,7 @@ class WindowsQualityGateTests(unittest.TestCase):
             links=[],
         )
 
-        self.assertNotIn("weak_related_guides", {issue.code for issue in issues})
+        self.assertIn("weak_related_guide_links", {issue.code for issue in issues})
 
     def test_windows_articles_block_onedrive_update_context_mismatch(self) -> None:
         gate = HadesQualityGate("windows_help")

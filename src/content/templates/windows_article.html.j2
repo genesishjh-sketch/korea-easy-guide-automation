@@ -197,7 +197,7 @@
   <h2>Related Guides</h2>
   <ul>
     {% for item in related_guides %}
-    <li>{{ item }}</li>
+    <li><a href="{{ item.url }}" target="_blank" rel="noopener noreferrer">{{ item.title }}</a></li>
     {% endfor %}
   </ul>
 

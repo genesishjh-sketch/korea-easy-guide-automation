@@ -9,6 +9,7 @@ from src.content.windows_generator import _fixes
 from src.content.windows_generator import _meaning
 from src.content.windows_generator import _quick_summary
 from src.content.windows_generator import _error_title
+from src.content.windows_generator import _related_guides
 from src.content.windows_generator import _sources_for_topic
 from src.content.windows_generator import _symptoms
 
@@ -57,6 +58,13 @@ class WindowsGeneratorSourceTests(unittest.TestCase):
         urls = [source["url"] for source in _sources_for_topic("microsoft store not opening windows 11")]
 
         self.assertTrue(any("Microsoft%20Store" in url for url in urls))
+
+    def test_related_guides_use_internal_blog_search_links(self) -> None:
+        guides = _related_guides("Apps & Settings", "https://easypcfixguide.blogspot.com")
+
+        self.assertGreaterEqual(len(guides), 3)
+        self.assertTrue(all(guide["title"] for guide in guides))
+        self.assertTrue(all(guide["url"].startswith("https://easypcfixguide.blogspot.com/search?q=") for guide in guides))
 
     def test_sources_are_unique(self) -> None:
         urls = [source["url"] for source in _sources_for_topic("windows update error 0x800f0922")]

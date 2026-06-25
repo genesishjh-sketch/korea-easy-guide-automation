@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 import re
+from urllib.parse import quote_plus
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from slugify import slugify
@@ -126,7 +127,7 @@ class WindowsArticleGenerator:
         image: ImageAsset,
         inline_images: list[ImageAsset] | None = None,
     ) -> Article:
-        topic = _topic_profile(candidate.keyword, candidate.category)
+        topic = _topic_profile(candidate.keyword, candidate.category, self.settings.site_url)
         inline_images = inline_images or []
         context = {
             "title": topic["title"],
@@ -176,7 +177,7 @@ class WindowsArticleGenerator:
         return list(dict.fromkeys(tags))[:10]
 
 
-def _topic_profile(keyword: str, category: str) -> dict:
+def _topic_profile(keyword: str, category: str, site_url: str = "") -> dict:
     normalized = keyword.lower()
     error = _error_code(normalized)
     title_keyword = title_case_keyword(keyword).replace("Wifi", "Wi-Fi")
@@ -238,7 +239,7 @@ def _topic_profile(keyword: str, category: str) -> dict:
             "A step mentions reset, recovery, partition, format, Registry, BIOS, or advanced commands and you do not understand the risk.",
         ],
         "faq": _faq(keyword, error),
-        "related_guides": _related_guides(category),
+        "related_guides": _related_guides(category, site_url),
         "sources": _sources_for_topic(normalized),
     }
 
@@ -615,7 +616,7 @@ def _faq(keyword: str, error: str | None) -> list[dict[str, str]]:
     ]
 
 
-def _related_guides(category: str) -> list[str]:
+def _related_guides(category: str, site_url: str = "") -> list[dict[str, str]]:
     mapping = {
         "Windows Update": ["How to check your Windows version", "How to free up disk space on Windows", "Windows Update stuck at 100%"],
         "Wi-Fi & Internet": ["Internet connected but not working", "DNS problems on Windows", "How to reset network settings safely"],
@@ -623,4 +624,12 @@ def _related_guides(category: str) -> list[str]:
         "Apps & Settings": ["Microsoft Store not opening", "How to change default apps safely", "Windows Settings app not opening"],
         "Printer & Scanner": ["How to clear the printer queue", "Printer not showing in Windows", "Scanner not detected on Windows"],
     }
-    return mapping.get(category, ["How to start Windows in Safe Mode", "How to check your Windows version", "Beginner PC troubleshooting checklist"])
+    titles = mapping.get(category, ["How to start Windows in Safe Mode", "How to check your Windows version", "Beginner PC troubleshooting checklist"])
+    base_url = (site_url or "").rstrip("/")
+    return [
+        {
+            "title": title,
+            "url": f"{base_url}/search?q={quote_plus(title)}" if base_url else f"/search?q={quote_plus(title)}",
+        }
+        for title in titles
+    ]

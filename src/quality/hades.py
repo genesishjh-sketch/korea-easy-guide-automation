@@ -323,11 +323,20 @@ class HadesQualityGate:
 
     def _review_windows_related_guides(self, soup: BeautifulSoup) -> list[QualityIssue]:
         related_items = _section_list_items_by_h2(soup).get("related guides", [])
+        related_links = _section_links_by_h2(soup).get("related guides", [])
         if len(related_items) < 3:
             return [
                 QualityIssue(
                     "weak_related_guides",
                     "Windows help articles require at least three Related Guides items for topic clustering.",
+                )
+            ]
+        internal_links = [url for url in related_links if "/search?q=" in url or "easypcfixguide.blogspot.com" in url]
+        if len(internal_links) < 3:
+            return [
+                QualityIssue(
+                    "weak_related_guide_links",
+                    "Windows help articles require at least three internal Related Guides links.",
                 )
             ]
         return []
@@ -480,6 +489,21 @@ def _section_list_items_by_h2(soup: BeautifulSoup) -> dict[str, list[str]]:
             if find_all:
                 items.extend(item.get_text(" ", strip=True) for item in find_all("li"))
         sections[title] = [item for item in items if item]
+    return sections
+
+
+def _section_links_by_h2(soup: BeautifulSoup) -> dict[str, list[str]]:
+    sections: dict[str, list[str]] = {}
+    for heading in soup.find_all("h2"):
+        title = heading.get_text(" ", strip=True).casefold()
+        links = []
+        for sibling in heading.next_siblings:
+            if getattr(sibling, "name", None) == "h2":
+                break
+            find_all = getattr(sibling, "find_all", None)
+            if find_all:
+                links.extend(_href(link) for link in find_all("a"))
+        sections[title] = [link for link in links if link]
     return sections
 
 
