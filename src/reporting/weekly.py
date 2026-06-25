@@ -352,7 +352,10 @@ class WeeklyReporter:
 
     def _quality_issue_count(self, articles: list[dict]) -> int:
         issue_count = 0
+        resolved_seed_keywords = _resolved_seed_keywords(articles)
         for article in articles:
+            if not _quality_report_is_actionable(article, resolved_seed_keywords):
+                continue
             quality_path = Path(article.get("article_dir", "")) / "quality_report.json"
             if not quality_path.exists():
                 continue
@@ -366,7 +369,10 @@ class WeeklyReporter:
 
     def _quality_issues_result(self, articles: list[dict]) -> list[dict]:
         results = []
+        resolved_seed_keywords = _resolved_seed_keywords(articles)
         for article in articles:
+            if not _quality_report_is_actionable(article, resolved_seed_keywords):
+                continue
             quality_path = Path(article.get("article_dir", "")) / "quality_report.json"
             if not quality_path.exists():
                 continue
@@ -1092,6 +1098,39 @@ def _article_validation_status(validation: dict) -> str:
     if validation.get("mode") == "validate" and validation.get("passed") is False:
         return "failed"
     return "not_uploaded"
+
+
+def _quality_report_is_actionable(article: dict, resolved_seed_keywords: set[str] | None = None) -> bool:
+    if article.get("blogger_status") in {"LIVE", "DRAFT"}:
+        return True
+    article_status = article.get("article_status")
+    if article_status == "validated":
+        return True
+    if article_status == "failed":
+        seed_keyword = str(article.get("seed_keyword") or "").casefold()
+        return not seed_keyword or seed_keyword not in (resolved_seed_keywords or set())
+    return False
+
+
+def _resolved_seed_keywords(articles: list[dict]) -> set[str]:
+    resolved = set()
+    for article in articles:
+        seed_keyword = str(article.get("seed_keyword") or "").casefold()
+        if not seed_keyword:
+            continue
+        if article.get("blogger_status") in {"LIVE", "DRAFT"} or article.get("article_status") == "validated":
+            resolved.add(seed_keyword)
+            continue
+        quality_path = Path(article.get("article_dir", "")) / "quality_report.json"
+        if not quality_path.exists():
+            continue
+        try:
+            quality_report = json.loads(quality_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            continue
+        if quality_report.get("passed") is True:
+            resolved.add(seed_keyword)
+    return resolved
 
 
 def _parse_datetime(value: str) -> datetime | None:

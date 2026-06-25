@@ -487,6 +487,7 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                     {
                         "title": "Windows Update Error 0x80070643",
                         "article_dir": str(article_dir),
+                        "article_status": "failed",
                     }
                 ]
             )
@@ -494,6 +495,106 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0]["title"], "Windows Update Error 0x80070643")
         self.assertEqual(result[0]["code"], "missing_required_image_assets")
+
+    def test_quality_issues_ignore_orphan_generated_candidates(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            article_dir = Path(tmpdir) / "orphan"
+            article_dir.mkdir()
+            (article_dir / "quality_report.json").write_text(
+                json.dumps(
+                    {
+                        "score": 88,
+                        "passed": False,
+                        "issues": [
+                            {
+                                "code": "topic_alignment_mismatch",
+                                "message": "Discarded fallback candidate did not match the seed.",
+                                "severity": "error",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            result = reporter._quality_issues_result(
+                [
+                    {
+                        "title": "Discarded Candidate",
+                        "article_dir": str(article_dir),
+                        "article_status": "not_uploaded",
+                        "blogger_status": None,
+                    }
+                ]
+            )
+            issue_count = reporter._quality_issue_count(
+                [
+                    {
+                        "title": "Discarded Candidate",
+                        "article_dir": str(article_dir),
+                        "article_status": "not_uploaded",
+                        "blogger_status": None,
+                    }
+                ]
+            )
+
+        self.assertEqual(result, [])
+        self.assertEqual(issue_count, 0)
+
+    def test_quality_issues_ignore_failed_candidate_when_same_seed_later_passed(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            failed_dir = Path(tmpdir) / "failed"
+            passed_dir = Path(tmpdir) / "passed"
+            failed_dir.mkdir()
+            passed_dir.mkdir()
+            (failed_dir / "quality_report.json").write_text(
+                json.dumps(
+                    {
+                        "score": 88,
+                        "passed": False,
+                        "issues": [
+                            {
+                                "code": "topic_alignment_mismatch",
+                                "message": "First generated candidate did not match the seed.",
+                                "severity": "error",
+                            }
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (passed_dir / "quality_report.json").write_text(
+                json.dumps({"score": 100, "passed": True, "issues": []}),
+                encoding="utf-8",
+            )
+            articles = [
+                {
+                    "title": "Wi-Fi Button Missing on Windows 11",
+                    "article_dir": str(failed_dir),
+                    "seed_keyword": "wifi keeps disconnecting windows 11",
+                    "article_status": "failed",
+                    "blogger_status": None,
+                },
+                {
+                    "title": "Wi-Fi Keeps Disconnecting on Windows 11",
+                    "article_dir": str(passed_dir),
+                    "seed_keyword": "wifi keeps disconnecting windows 11",
+                    "article_status": "validated",
+                    "blogger_status": None,
+                },
+            ]
+
+            result = reporter._quality_issues_result(articles)
+            issue_count = reporter._quality_issue_count(articles)
+
+        self.assertEqual(result, [])
+        self.assertEqual(issue_count, 0)
 
     def test_signal_quality_result_summarizes_research_reports(self) -> None:
         settings = load_settings("easy_pc_fix_guide")
