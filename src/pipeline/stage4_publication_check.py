@@ -60,6 +60,7 @@ def run(site: str | None = None, today: datetime | None = None, after_hour: int 
             for post in posts[:5]
         ],
     }
+    result["publication_evidence"] = assess_publication_evidence(result)
     NotificationClient(settings).send_required(build_message(result))
     return result
 
@@ -219,6 +220,58 @@ def classify_daily_success_context(report: dict) -> dict:
     }
 
 
+def assess_publication_evidence(result: dict) -> dict:
+    public_feed_ok = is_success_status(result.get("status"))
+    workflow_status = (result.get("daily_workflow") or {}).get("status")
+    workflow_ok = workflow_status == "success"
+    workflow_problem = workflow_status in {"failed", "unknown"}
+    daily_success = result.get("daily_success") or {}
+    daily_context = result.get("daily_success_context") or classify_daily_success_context(daily_success)
+    publish_related_report = bool(daily_context.get("publish_related"))
+
+    if public_feed_ok and workflow_ok and publish_related_report:
+        return {
+            "status": "confirmed",
+            "label": "공개 피드, workflow, 발행 리포트 일치",
+            "note": "발행 증거가 서로 일치합니다.",
+            "needs_attention": False,
+        }
+    if public_feed_ok and workflow_ok and not publish_related_report:
+        return {
+            "status": "feed_and_workflow_confirmed_report_not_publish",
+            "label": "공개 피드와 workflow는 확인, 일일 리포트는 발행 리포트 아님",
+            "note": daily_context.get("note") or "최근 일일 성공 리포트가 공개 발행 결과가 아닙니다.",
+            "needs_attention": True,
+        }
+    if public_feed_ok:
+        return {
+            "status": "feed_confirmed_needs_workflow_check",
+            "label": "공개 피드 확인, workflow/리포트 점검 필요",
+            "note": "공개 글은 확인됐지만 workflow 또는 일일 리포트 증거가 완전히 일치하지 않습니다.",
+            "needs_attention": True,
+        }
+    if workflow_ok or publish_related_report:
+        return {
+            "status": "workflow_or_report_without_public_feed",
+            "label": "workflow/리포트는 있으나 공개 피드 글 없음",
+            "note": "발행 지연, Blogger 공개 실패, feed 반영 지연 가능성을 확인하세요.",
+            "needs_attention": True,
+        }
+    if workflow_problem:
+        return {
+            "status": "workflow_problem",
+            "label": "workflow 상태 점검 필요",
+            "note": "Daily workflow가 실패했거나 상태를 확인하지 못했습니다.",
+            "needs_attention": True,
+        }
+    return {
+        "status": "missing_publication_evidence",
+        "label": "공개 발행 증거 없음",
+        "note": "공개 피드, workflow, 일일 발행 리포트에서 공개 발행 증거를 찾지 못했습니다.",
+        "needs_attention": True,
+    }
+
+
 def publication_status(todays_posts: list[dict], all_todays_posts: list[dict], cutoff: datetime | None) -> str:
     if todays_posts:
         return "published_today"
@@ -267,6 +320,12 @@ def build_message(result: dict) -> str:
         lines.append(f"- 최근 일일 리포트 구분: {daily_success_context.get('label')}")
         if daily_success_context.get("note"):
             lines.append(f"  - 참고: {daily_success_context.get('note')}")
+    evidence = result.get("publication_evidence") or assess_publication_evidence(result)
+    lines.append(f"- 발행 증거 판정: {evidence.get('label', '확인 필요')}")
+    if evidence.get("note"):
+        lines.append(f"  - 판정 참고: {evidence.get('note')}")
+    if evidence.get("needs_attention"):
+        lines.append("  - 추가 확인 필요: 예")
     operational_status = daily_success.get("operational_status") or {}
     if operational_status:
         lines.extend(

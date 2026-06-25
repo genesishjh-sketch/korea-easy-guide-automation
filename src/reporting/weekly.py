@@ -564,6 +564,13 @@ class WeeklyReporter:
             lines.append(f"  - 기준 이후 공개 글 수: {publication_check.get('today_post_count', 0)}")
         if publication_check.get("today_total_post_count") is not None:
             lines.append(f"  - 오늘 전체 공개 글 수: {publication_check.get('today_total_post_count', 0)}")
+        evidence = publication_check.get("publication_evidence") or {}
+        if evidence:
+            lines.append(f"  - 발행 증거 판정: {evidence.get('label', '확인 필요')}")
+            if evidence.get("note"):
+                lines.append(f"  - 판정 참고: {evidence.get('note')}")
+            if evidence.get("needs_attention") is not None:
+                lines.append(f"  - 추가 확인 필요: {'예' if evidence.get('needs_attention') else '아니오'}")
         if publication_check.get("latest_posts"):
             latest = publication_check["latest_posts"][0]
             lines.append(f"  - 최근 글: {latest.get('title', '')}")

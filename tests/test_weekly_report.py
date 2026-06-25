@@ -124,7 +124,16 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                             }
                         ],
                     },
-                    "publication_check": {"status": "published_today", "today_post_count": 1},
+                    "publication_check": {
+                        "status": "published_today",
+                        "today_post_count": 1,
+                        "publication_evidence": {
+                            "status": "feed_and_workflow_confirmed_report_not_publish",
+                            "label": "공개 피드와 workflow는 확인, 일일 리포트는 발행 리포트 아님",
+                            "note": "최근 일일 성공 리포트는 validate 실행 결과이며 공개 발행 결과가 아닙니다.",
+                            "needs_attention": True,
+                        },
+                    },
                     "sitemap_submit": {
                         "status": "submitted",
                         "sitemap_url": "https://easypcfixguide.blogspot.com/sitemap.xml",
@@ -180,6 +189,8 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("Redirect URI: http://localhost:8080", markdown)
         self.assertIn("REDDIT_CLIENT_SECRET = Reddit 앱 상세 화면의 secret", markdown)
         self.assertIn("발행 확인: 오늘 공개 글 확인", markdown)
+        self.assertIn("발행 증거 판정: 공개 피드와 workflow는 확인, 일일 리포트는 발행 리포트 아님", markdown)
+        self.assertIn("추가 확인 필요: 예", markdown)
         self.assertIn("Sitemap 제출: 제출됨", markdown)
         self.assertIn("## 수집 신호 품질", markdown)
         self.assertIn("Reddit OAuth 신호 수: 0", markdown)

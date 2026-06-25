@@ -48,6 +48,8 @@ class PublicationCheckTests(unittest.TestCase):
         self.assertEqual(result["daily_workflow"]["status"], "success")
         self.assertEqual(result["daily_success"]["operational_status"]["ready_for_cadence_increase"], False)
         self.assertEqual(result["daily_success_context"]["status"], "validation_only")
+        self.assertEqual(result["publication_evidence"]["status"], "feed_and_workflow_confirmed_report_not_publish")
+        self.assertTrue(result["publication_evidence"]["needs_attention"])
         notification.return_value.send_required.assert_called_once()
 
     def test_run_accepts_today_post_before_cutoff(self) -> None:
@@ -76,6 +78,7 @@ class PublicationCheckTests(unittest.TestCase):
         self.assertEqual(result["today_post_count"], 0)
         self.assertEqual(result["today_total_post_count"], 1)
         self.assertEqual(result["daily_workflow"]["status"], "no_run_today")
+        self.assertEqual(result["publication_evidence"]["status"], "feed_confirmed_needs_workflow_check")
         notification.return_value.send_required.assert_called_once()
 
     def test_run_raises_when_publication_check_notification_fails(self) -> None:
@@ -212,6 +215,12 @@ class PublicationCheckTests(unittest.TestCase):
                         "status_label": "발행 품질 OK, 수집 안정성 점검 필요",
                     },
                 },
+                "publication_evidence": {
+                    "status": "feed_and_workflow_confirmed_report_not_publish",
+                    "label": "공개 피드와 workflow는 확인, 일일 리포트는 발행 리포트 아님",
+                    "note": "최근 일일 성공 리포트는 validate 실행 결과이며 공개 발행 결과가 아닙니다.",
+                    "needs_attention": True,
+                },
                 "latest_posts": [
                     {
                         "title": "Fresh post",
@@ -227,6 +236,8 @@ class PublicationCheckTests(unittest.TestCase):
         self.assertIn("- Daily workflow 상태: 오늘 실행 성공", message)
         self.assertIn("- 최근 일일 리포트 구분: 검증 모드 리포트", message)
         self.assertIn("공개 발행 결과가 아닙니다", message)
+        self.assertIn("- 발행 증거 판정: 공개 피드와 workflow는 확인, 일일 리포트는 발행 리포트 아님", message)
+        self.assertIn("추가 확인 필요: 예", message)
         self.assertIn("- 최근 일일 운영 상태: 발행 품질 OK, 수집 안정성 점검 필요", message)
         self.assertIn("발행량 증량 준비: 아니오", message)
 
@@ -241,6 +252,24 @@ class PublicationCheckTests(unittest.TestCase):
 
         self.assertEqual(result["status"], "validation_only")
         self.assertFalse(result["publish_related"])
+
+    def test_assess_publication_evidence_flags_workflow_success_without_feed(self) -> None:
+        result = stage4_publication_check.assess_publication_evidence(
+            {
+                "status": "missing_today",
+                "daily_workflow": {"status": "success"},
+                "daily_success": {"status": "published", "mode": "publish"},
+                "daily_success_context": {
+                    "status": "publish_related",
+                    "publish_related": True,
+                    "label": "발행 workflow 리포트",
+                },
+            }
+        )
+
+        self.assertEqual(result["status"], "workflow_or_report_without_public_feed")
+        self.assertTrue(result["needs_attention"])
+        self.assertIn("공개 피드", result["label"])
 
     def test_publication_message_explains_before_cutoff_post(self) -> None:
         message = stage4_publication_check.build_message(
