@@ -72,6 +72,11 @@ def save_result(result: dict) -> Path:
     output_dir = ROOT_DIR / "reports"
     output_dir.mkdir(parents=True, exist_ok=True)
     result = publication_result_with_defaults(result)
+    action_items = result.get("action_items") or publication_action_items(result)
+    result = {
+        **result,
+        "action_items": action_items,
+    }
     summary = result.get("human_summary") or build_message(result)
     result = {
         **result,
@@ -377,7 +382,7 @@ def build_message(result: dict) -> str:
     daily_success = result.get("daily_success") or {}
     daily_success_context = result.get("daily_success_context") or classify_daily_success_context(daily_success)
     if daily_success_context.get("status") != "not_uploaded":
-        lines.append(f"- 최근 일일 리포트 구분: {daily_success_context.get('label')}")
+        lines.append(f"- 최근 일일 리포트 구분: {daily_success_context.get('label') or '판단 필요'}")
         if daily_success_context.get("note"):
             lines.append(f"  - 참고: {daily_success_context.get('note')}")
     evidence = result.get("publication_evidence") or assess_publication_evidence(result)
@@ -442,13 +447,12 @@ def build_message(result: dict) -> str:
             if post.get("url"):
                 lines.append(f"  {post['url']}")
     if not ok:
+        action_items = result.get("action_items") or publication_action_items(result)
         lines.extend(
             [
                 "",
                 "조치 필요:",
-                "- GitHub Actions daily publish 실행 결과를 확인하세요.",
-                "- Blogger 인증 또는 Hades 품질검수 실패가 있었는지 확인하세요.",
-                "- 글이 발행됐지만 feed 반영이 늦는 경우 10~20분 후 다시 확인하세요.",
+                *[f"- {item}" for item in action_items],
             ]
         )
     elif workflow.get("status") in {"no_run_today", "failed", "unknown"}:
@@ -470,6 +474,44 @@ def build_message(result: dict) -> str:
             ]
         )
     return "\n".join(lines)
+
+
+def publication_action_items(result: dict) -> list[str]:
+    status = result.get("status")
+    evidence = result.get("publication_evidence") or assess_publication_evidence(result)
+    workflow = result.get("daily_workflow") or {}
+    daily_context = result.get("daily_success_context") or classify_daily_success_context(result.get("daily_success") or {})
+    if status == "duplicate_today":
+        return [
+            "오늘 공개 글 URL 목록을 확인하고 수동 발행/예약 발행/백업 workflow 중복 실행 여부를 점검하세요.",
+            "하루 1개 운영 기준을 유지하려면 중복 글을 임시 비공개 또는 삭제할지 판단하세요.",
+            "GitHub Actions Easy PC Fix Daily Publish의 primary/backup 실행 로그와 daily limit guard 결과를 확인하세요.",
+        ]
+    if is_success_status(status) and evidence.get("needs_attention"):
+        items = [
+            "공개 글은 확인됐지만 workflow 또는 daily-success 리포트와 증거가 완전히 일치하지 않습니다.",
+            "GitHub Actions Easy PC Fix Daily Publish 실행 결과와 publication-check artifact를 함께 확인하세요.",
+        ]
+        if daily_context.get("status") == "validation_only":
+            items.append("최근 daily-success 파일이 검증 모드 결과라면 publish mode 실행 artifact가 별도로 있는지 확인하세요.")
+        if workflow.get("status") in {"failed", "partial_failure", "unknown", "no_run_today"}:
+            items.append("Daily workflow 상태가 불안정하므로 실패한 run 로그와 Blogger 공개 피드를 대조하세요.")
+        return items
+    if not is_success_status(status):
+        items = [
+            "GitHub Actions Easy PC Fix Daily Publish 실행 결과를 확인하세요.",
+            "Blogger 인증 또는 Hades 품질검수 실패가 있었는지 daily-failure.json과 Actions 로그를 확인하세요.",
+            "글이 발행됐지만 feed 반영이 늦는 경우 10~20분 후 publication check를 다시 실행하세요.",
+        ]
+        if workflow.get("status") in {"failed", "partial_failure"}:
+            items.append("오늘 Daily workflow 실패 기록이 있으므로 실패한 primary/backup run의 로그를 먼저 확인하세요.")
+        if daily_context.get("status") == "validation_only":
+            items.append("최근 daily-success가 validate 결과이므로 실제 publish mode 실행 여부를 확인하세요.")
+        return items
+    return [
+        "공개 발행 증거가 확인됐습니다. Search Console sitemap 제출과 URL 검사 대기 상태를 확인하세요.",
+        "하루 1개 운영 리듬을 유지하고 다음 publication check에서 중복 발행이 없는지 확인하세요.",
+    ]
 
 
 def publication_status_label(status: str | None) -> str:

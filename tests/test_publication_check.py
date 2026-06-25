@@ -123,6 +123,9 @@ class PublicationCheckTests(unittest.TestCase):
         sent_message = notification.return_value.send_required.call_args.args[0]
         self.assertIn("오늘 공개 글 2개 이상 감지", sent_message)
         self.assertIn("하루 1개 운영 기준을 초과", sent_message)
+        saved = json.loads((Path(self._tmpdir.name) / "reports" / "easy_pc_fix_guide-publication-check.json").read_text(encoding="utf-8"))
+        self.assertIn("수동 발행/예약 발행/백업 workflow", "\n".join(saved["action_items"]))
+        self.assertIn("중복 글", "\n".join(saved["action_items"]))
 
     def test_run_raises_when_publication_check_notification_fails(self) -> None:
         post = {
@@ -235,8 +238,60 @@ class PublicationCheckTests(unittest.TestCase):
 
         self.assertTrue(saved_exists)
         self.assertEqual(saved["status"], "published_today")
+        self.assertIn("action_items", saved)
+        self.assertIn("증거가 완전히 일치하지 않습니다", "\n".join(saved["action_items"]))
         self.assertIn("human_summary", saved)
         self.assertIn("[Posting Bot] 공개 발행 확인", markdown)
+
+    def test_save_result_writes_missing_publication_action_items(self) -> None:
+        result = {
+            "site": "easy_pc_fix_guide",
+            "site_name": "Easy PC Fix Guide",
+            "site_url": "https://easypcfixguide.blogspot.com",
+            "checked_at_kst": "2026-06-25T09:45:00+09:00",
+            "cutoff_kst": "2026-06-25T09:00:00+09:00",
+            "status": "missing_today",
+            "today_post_count": 0,
+            "today_total_post_count": 0,
+            "daily_workflow": {"status": "failed"},
+            "daily_success_context": {"status": "validation_only", "publish_related": False},
+            "latest_posts": [],
+        }
+        with tempfile.TemporaryDirectory() as tmpdir, patch.object(stage4_publication_check, "ROOT_DIR", Path(tmpdir)):
+            path = stage4_publication_check.save_result(result)
+            saved = json.loads(path.read_text(encoding="utf-8"))
+            markdown = (Path(tmpdir) / "reports" / "easy_pc_fix_guide-publication-check.md").read_text(encoding="utf-8")
+
+        joined = "\n".join(saved["action_items"])
+        self.assertIn("Easy PC Fix Daily Publish 실행 결과", joined)
+        self.assertIn("daily-failure.json", joined)
+        self.assertIn("실패한 primary/backup run", joined)
+        self.assertIn("validate 결과", joined)
+        self.assertIn("조치 필요:", markdown)
+        self.assertIn("daily-failure.json", markdown)
+
+    def test_publication_message_uses_fallback_daily_context_label(self) -> None:
+        message = stage4_publication_check.build_message(
+            {
+                "site": "easy_pc_fix_guide",
+                "site_name": "Easy PC Fix Guide",
+                "site_url": "https://easypcfixguide.blogspot.com",
+                "checked_at_kst": "2026-06-25T09:45:00+09:00",
+                "cutoff_kst": "2026-06-25T09:00:00+09:00",
+                "status": "missing_today",
+                "today_post_count": 0,
+                "today_total_post_count": 0,
+                "daily_success_context": {"status": "validation_only"},
+                "publication_evidence": {
+                    "label": "공개 발행 증거 없음",
+                    "needs_attention": True,
+                },
+                "latest_posts": [],
+            }
+        )
+
+        self.assertIn("최근 일일 리포트 구분: 판단 필요", message)
+        self.assertNotIn("None", message)
 
     def test_daily_workflow_status_summarizes_today_success_run(self) -> None:
         runs = [
