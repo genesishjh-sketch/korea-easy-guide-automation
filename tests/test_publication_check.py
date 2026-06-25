@@ -152,6 +152,30 @@ class PublicationCheckTests(unittest.TestCase):
         self.assertEqual(saved["status"], "published_today")
         self.assertEqual(saved["publication_evidence"]["status"], "feed_and_workflow_confirmed_report_unavailable")
 
+    def test_run_can_skip_notification_for_local_smoke_check(self) -> None:
+        post = {
+            "title": "Fresh post",
+            "url": "https://easypcfixguide.blogspot.com/2026/06/fresh-post.html",
+            "published_kst": datetime(2026, 6, 25, 9, 12, tzinfo=ZoneInfo("Asia/Seoul")),
+        }
+
+        with patch.object(stage4_publication_check, "fetch_public_feed", return_value={}), patch.object(
+            stage4_publication_check, "parse_posts", return_value=[post]
+        ), patch.object(
+            stage4_publication_check, "check_daily_workflow_status", return_value={"status": "success", "today_run_count": 1}
+        ), patch.object(
+            stage4_publication_check, "read_daily_success_report", return_value={"status": "published", "mode": "publish"}
+        ), patch("src.pipeline.stage4_publication_check.NotificationClient") as notification:
+            result = stage4_publication_check.run(
+                "easy_pc_fix_guide",
+                today=datetime(2026, 6, 25, 9, 45, tzinfo=ZoneInfo("Asia/Seoul")),
+                after_hour=9,
+                notify=False,
+            )
+
+        self.assertEqual(result["status"], "published_today")
+        notification.assert_not_called()
+
     def test_main_accepts_today_post_before_cutoff(self) -> None:
         early_result = {
             "site": "easy_pc_fix_guide",
@@ -165,10 +189,12 @@ class PublicationCheckTests(unittest.TestCase):
             "latest_posts": [],
         }
 
-        with patch.object(stage4_publication_check, "run", return_value=early_result), patch.object(
+        with patch.object(stage4_publication_check, "run", return_value=early_result) as run, patch.object(
             stage4_publication_check, "save_result"
-        ), patch("sys.argv", ["stage4_publication_check"]):
+        ), patch("sys.argv", ["stage4_publication_check", "--no-notify"]):
             stage4_publication_check.main()
+
+        run.assert_called_once_with(None, after_hour=None, notify=False)
 
     def test_main_exits_nonzero_when_public_post_is_missing(self) -> None:
         missing_result = {
