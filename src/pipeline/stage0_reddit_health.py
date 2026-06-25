@@ -140,11 +140,13 @@ def check_reddit_oauth(settings: Any, query: str, limit: int = 3) -> dict:
     if not settings.reddit_client_id or not settings.reddit_client_secret:
         data_access_submitted_at = getattr(settings, "reddit_data_access_request_submitted_at", "")
         action_required, remediation_steps = missing_credentials_guidance(data_access_submitted_at)
+        data_access_status = "approval_pending" if data_access_submitted_at else "not_submitted"
         return {
             **base,
             "status": "missing_credentials",
             **reddit_health_metadata("missing_credentials"),
             "data_access_request_submitted_at": data_access_submitted_at,
+            "data_access_request_status": data_access_status,
             "action_required": action_required,
             "remediation_steps": remediation_steps,
         }
@@ -295,9 +297,11 @@ def missing_credentials_guidance(data_access_submitted_at: str = "") -> tuple[st
     if data_access_submitted_at:
         return (
             f"Reddit Data Access Request는 {data_access_submitted_at}에 제출 완료했습니다. "
+            "승인 전에는 Reddit 앱 생성이 Responsible Builder Policy/Data API 안내에서 막힐 수 있습니다. "
             f"승인 메일을 받은 뒤 {reddit_oauth_secret_label()}을 GitHub Secrets 또는 .env에 설정하세요.",
             [
                 "Reddit 승인 메일을 기다리세요.",
+                "승인 메일 전에는 Reddit 앱 생성 버튼을 다시 눌러도 같은 정책 안내에서 막힐 수 있습니다.",
                 "승인 후 Reddit 앱을 script 타입으로 만들고 client id와 secret을 확인하세요.",
                 f"GitHub Secrets에 {REDDIT_CLIENT_ID_SECRET}를 추가하세요.",
                 f"GitHub Secrets에 {REDDIT_CLIENT_SECRET_SECRET}을 추가하세요.",
@@ -369,6 +373,12 @@ def build_message(result: dict) -> str:
     ]
     if result.get("data_access_request_submitted_at"):
         lines.append(f"- Data Access Request 제출일: {result.get('data_access_request_submitted_at')}")
+    if result.get("data_access_request_status"):
+        status_label = {
+            "approval_pending": "승인 대기",
+            "not_submitted": "미제출",
+        }.get(result.get("data_access_request_status"), result.get("data_access_request_status"))
+        lines.append(f"- Data Access Request 상태: {status_label}")
     if result.get("remediation_steps"):
         lines.extend(["", "다음 조치:"])
         for step in result.get("remediation_steps", [])[:6]:
@@ -443,6 +453,8 @@ def build_console_summary(result: dict) -> str:
     }
     if result.get("data_access_request_submitted_at"):
         payload["data_access_request_submitted_at"] = result.get("data_access_request_submitted_at")
+    if result.get("data_access_request_status"):
+        payload["data_access_request_status"] = result.get("data_access_request_status")
     if result.get("error_type"):
         payload["error_type"] = result.get("error_type")
     if result.get("error"):
@@ -470,6 +482,8 @@ def build_markdown_report(result: dict) -> str:
     ]
     if result.get("data_access_request_submitted_at"):
         lines.extend(["", f"- Data Access Request submitted at: {result.get('data_access_request_submitted_at')}"])
+    if result.get("data_access_request_status"):
+        lines.append(f"- Data Access Request status: {result.get('data_access_request_status')}")
     if result.get("remediation_steps"):
         lines.extend(["", "## Remediation Steps", ""])
         lines.extend(f"- {step}" for step in result.get("remediation_steps", []))
