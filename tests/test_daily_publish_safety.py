@@ -795,8 +795,8 @@ class WindowsQualityGateTests(unittest.TestCase):
                             {"name": "Microsoft Support", "url": "https://support.microsoft.com/windows"},
                             {"name": "Microsoft Learn", "url": "https://learn.microsoft.com/windows/"},
                             {"name": "Release Health", "url": "https://learn.microsoft.com/windows/release-health/"},
-                            {"name": "Windows Update", "url": "https://support.microsoft.com/windows/windows-update"},
-                            {"name": "Microsoft Account", "url": "https://support.microsoft.com/account-billing"},
+                            {"name": "Windows Update", "url": "https://support.microsoft.com/en-us/windows/windows-update-troubleshooter-19bc41ca-ad72-ae67-af3c-89ce169755dd"},
+                            {"name": "Microsoft Store official help", "url": "https://support.microsoft.com/microsoft-store"},
                             {"name": "Microsoft Store", "url": "https://support.microsoft.com/microsoft-store"},
                         ],
                     }
@@ -826,7 +826,7 @@ class WindowsQualityGateTests(unittest.TestCase):
               <a href="https://support.microsoft.com/windows">Microsoft Support</a>
               <a href="https://learn.microsoft.com/windows/">Microsoft Learn</a>
               <a href="https://learn.microsoft.com/windows/release-health/">Windows release health</a>
-              <a href="https://support.microsoft.com/windows/windows-update">Windows Update</a>
+              <a href="https://support.microsoft.com/en-us/windows/windows-update-troubleshooter-19bc41ca-ad72-ae67-af3c-89ce169755dd">Windows Update</a>
               <p>{filler}</p>
             </article>
             """
@@ -885,7 +885,7 @@ class WindowsQualityGateTests(unittest.TestCase):
               <a href="https://support.microsoft.com/windows">Microsoft Support</a>
               <a href="https://learn.microsoft.com/windows/">Microsoft Learn</a>
               <a href="https://learn.microsoft.com/windows/release-health/">Windows release health</a>
-              <a href="https://support.microsoft.com/windows/windows-update">Windows Update</a>
+              <a href="https://support.microsoft.com/en-us/windows/windows-update-troubleshooter-19bc41ca-ad72-ae67-af3c-89ce169755dd">Windows Update</a>
               <p>{filler}</p>
             </article>
             """
@@ -982,6 +982,57 @@ class WindowsQualityGateTests(unittest.TestCase):
 
         self.assertIn("shallow_sources_section_microsoft_links", {issue.code for issue in issues})
 
+    def test_windows_articles_reject_known_bad_microsoft_shortcuts(self) -> None:
+        gate = HadesQualityGate("windows_help")
+        soup = BeautifulSoup(
+            """
+            <article>
+              <h2>Sources</h2>
+              <a href="https://support.microsoft.com/windows">Microsoft Support</a>
+              <a href="https://learn.microsoft.com/windows/">Microsoft Learn</a>
+              <a href="https://learn.microsoft.com/windows/release-health/">Windows release health</a>
+              <a href="https://support.microsoft.com/windows/network-wi-fi">Dead Wi-Fi shortcut</a>
+            </article>
+            """,
+            "html.parser",
+        )
+        issues = gate._review_windows_article(
+            soup,
+            "applies to risk level data loss risk estimated time last checked advanced fixes back up important files",
+            links=soup.find_all("a"),
+        )
+
+        self.assertIn("dead_microsoft_shortcut_links", {issue.code for issue in issues})
+
+    def test_windows_research_rejects_known_bad_microsoft_shortcuts(self) -> None:
+        gate = HadesQualityGate("windows_help")
+        with tempfile.TemporaryDirectory() as tmpdir:
+            article_dir = Path(tmpdir)
+            (article_dir / "research_report.json").write_text(
+                json.dumps(
+                    {
+                        "queries": [f"query {i}" for i in range(6)],
+                        "reader_questions": [f"question {i}" for i in range(5)],
+                        "sources": [
+                            {"name": "Microsoft Support", "url": "https://support.microsoft.com/windows"},
+                            {"name": "Microsoft Learn", "url": "https://learn.microsoft.com/windows/"},
+                            {"name": "Release Health", "url": "https://learn.microsoft.com/windows/release-health/"},
+                            {"name": "Dead Wi-Fi shortcut", "url": "https://support.microsoft.com/windows/network-wi-fi"},
+                            {
+                                "name": "Windows Update troubleshooter",
+                                "url": "https://support.microsoft.com/en-us/windows/windows-update-troubleshooter-19bc41ca-ad72-ae67-af3c-89ce169755dd",
+                            },
+                            {"name": "Microsoft Store", "url": "https://support.microsoft.com/microsoft-store"},
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            _metrics, issues = gate._review_research_report(article_dir)
+
+        self.assertIn("dead_microsoft_research_links", {issue.code for issue in issues})
+
     def test_windows_safety_table_requires_concrete_values(self) -> None:
         gate = HadesQualityGate("windows_help")
         soup = BeautifulSoup(
@@ -1005,7 +1056,7 @@ class WindowsQualityGateTests(unittest.TestCase):
               <a href="https://support.microsoft.com/windows">Microsoft Support</a>
               <a href="https://learn.microsoft.com/windows/">Microsoft Learn</a>
               <a href="https://learn.microsoft.com/windows/release-health/">Windows release health</a>
-              <a href="https://support.microsoft.com/windows/windows-update">Windows Update</a>
+              <a href="https://support.microsoft.com/en-us/windows/windows-update-troubleshooter-19bc41ca-ad72-ae67-af3c-89ce169755dd">Windows Update</a>
             </article>
             """,
             "html.parser",
@@ -1246,7 +1297,7 @@ class WindowsQualityGateTests(unittest.TestCase):
               <a href="https://support.microsoft.com/windows">Microsoft Support</a>
               <a href="https://learn.microsoft.com/windows/">Microsoft Learn</a>
               <a href="https://learn.microsoft.com/windows/release-health/">Windows release health</a>
-              <a href="https://support.microsoft.com/windows/windows-update">Windows Update</a>
+              <a href="https://support.microsoft.com/en-us/windows/windows-update-troubleshooter-19bc41ca-ad72-ae67-af3c-89ce169755dd">Windows Update</a>
               <p>{filler}</p>
             </article>
             """

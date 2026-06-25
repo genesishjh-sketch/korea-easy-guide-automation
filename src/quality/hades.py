@@ -28,6 +28,19 @@ MIN_RESEARCH_READER_QUESTIONS = 5
 MIN_WINDOWS_MICROSOFT_LINKS = 4
 MIN_WINDOWS_DIRECT_MICROSOFT_LINKS = 2
 
+KNOWN_BAD_MICROSOFT_SHORTCUT_URLS = {
+    "https://support.microsoft.com/windows/network-wi-fi",
+    "https://support.microsoft.com/windows/bluetooth",
+    "https://support.microsoft.com/windows/printers-scanners",
+    "https://support.microsoft.com/windows/windows-update",
+    "https://support.microsoft.com/windows/microsoft-store",
+    "https://support.microsoft.com/windows/file-explorer",
+    "https://support.microsoft.com/windows/recovery-options-in-windows",
+    "https://support.microsoft.com/windows/free-up-drive-space-in-windows",
+    "https://support.microsoft.com/windows/start-your-pc-in-safe-mode-in-windows",
+    "https://support.microsoft.com/account-billing",
+}
+
 OFFICIAL_SOURCE_DOMAINS = (
     ".go.kr",
     "visitkorea.or.kr",
@@ -287,11 +300,20 @@ class HadesQualityGate:
         issues: list[QualityIssue] = []
         microsoft_links = [_href(link) for link in links if _is_microsoft_url(_href(link))]
         direct_microsoft_links = [url for url in microsoft_links if _is_direct_microsoft_url(url)]
+        bad_microsoft_links = sorted(url for url in microsoft_links if _is_known_bad_microsoft_shortcut_url(url))
         if len(microsoft_links) < MIN_WINDOWS_MICROSOFT_LINKS:
             issues.append(
                 QualityIssue(
                     "weak_microsoft_sources",
                     f"Windows help articles require at least {MIN_WINDOWS_MICROSOFT_LINKS} official Microsoft source links.",
+                )
+            )
+        if bad_microsoft_links:
+            issues.append(
+                QualityIssue(
+                    "dead_microsoft_shortcut_links",
+                    "Replace known-bad Microsoft shortcut URLs with live support.microsoft.com/en-us/windows or Learn pages: "
+                    f"{', '.join(bad_microsoft_links)}.",
                 )
             )
         if not microsoft_links:
@@ -485,8 +507,14 @@ class HadesQualityGate:
                 for source in official_sources
                 if _is_direct_microsoft_url(source.get("url") or "")
             ]
+            bad_microsoft_sources = [
+                source
+                for source in official_sources
+                if _is_known_bad_microsoft_shortcut_url(source.get("url") or "")
+            ]
         else:
             direct_official_sources = official_sources
+            bad_microsoft_sources = []
 
         metrics.update(
             {
@@ -518,6 +546,15 @@ class HadesQualityGate:
                     QualityIssue(
                         "shallow_microsoft_research",
                         "Windows research must include direct Microsoft pages, not only Microsoft search result URLs.",
+                    )
+                )
+            if bad_microsoft_sources:
+                bad_urls = sorted(source.get("url") or "" for source in bad_microsoft_sources)
+                issues.append(
+                    QualityIssue(
+                        "dead_microsoft_research_links",
+                        "Research report contains known-bad Microsoft shortcut URLs: "
+                        f"{', '.join(bad_urls)}.",
                     )
                 )
         if len(reader_questions) < MIN_RESEARCH_READER_QUESTIONS:
@@ -754,9 +791,16 @@ def _is_microsoft_url(url: str) -> bool:
 def _is_direct_microsoft_url(url: str) -> bool:
     if not _is_microsoft_url(url):
         return False
+    if _is_known_bad_microsoft_shortcut_url(url):
+        return False
     blocked_fragments = (
         "support.microsoft.com/search/results",
         "support.microsoft.com/search?",
         "bing.com/search",
     )
     return not any(fragment in url for fragment in blocked_fragments)
+
+
+def _is_known_bad_microsoft_shortcut_url(url: str) -> bool:
+    normalized = url.rstrip("/")
+    return normalized in KNOWN_BAD_MICROSOFT_SHORTCUT_URLS

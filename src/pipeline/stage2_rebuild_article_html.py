@@ -6,10 +6,11 @@ from pathlib import Path
 
 from src.config import ROOT_DIR, load_settings
 from src.content.generator import EnglishArticleGenerator
+from src.content.windows_generator import WindowsArticleGenerator
 from src.models import ImageAsset, TopicCandidate
 
 
-def rebuild_article_html(article_dir: Path) -> Path:
+def rebuild_article_html(article_dir: Path, site: str | None = None) -> Path:
     metadata_path = article_dir / "metadata.json"
     if not metadata_path.exists():
         raise FileNotFoundError(f"metadata.json not found: {metadata_path}")
@@ -46,7 +47,9 @@ def rebuild_article_html(article_dir: Path) -> Path:
         for image in article_data.get("inline_images", [])
     ]
 
-    article = EnglishArticleGenerator(load_settings()).generate(candidate, image, inline_images)
+    settings = load_settings(site)
+    generator = WindowsArticleGenerator(settings) if settings.content_domain == "windows_help" else EnglishArticleGenerator(settings)
+    article = generator.generate(candidate, image, inline_images)
     (article_dir / "article.html").write_text(article.html, encoding="utf-8")
 
     metadata["article"] = {
@@ -81,17 +84,18 @@ def article_dirs(root: Path) -> list[Path]:
     )
 
 
-def run(root: Path | None) -> list[Path]:
+def run(root: Path | None, site: str | None = None) -> list[Path]:
     selected_root = root or ROOT_DIR / "data" / "generated"
-    return [rebuild_article_html(path) for path in article_dirs(selected_root)]
+    return [rebuild_article_html(path, site) for path in article_dirs(selected_root)]
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Rebuild generated article.html files from metadata and the current template.")
     parser.add_argument("--root", help="Generated root or a single article directory. Defaults to data/generated.")
+    parser.add_argument("--site", help="Site profile key, for example: easy_pc_fix_guide")
     args = parser.parse_args()
     root = Path(args.root).expanduser().resolve() if args.root else None
-    for output_path in run(root):
+    for output_path in run(root, args.site):
         print(output_path)
 
 

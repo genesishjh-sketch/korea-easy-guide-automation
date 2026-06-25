@@ -9,7 +9,7 @@ from src.publishing.blogger import BloggerCredentialsError, BloggerPublisher
 from src.config import load_settings
 
 
-def run(article_dir: Path) -> Path:
+def run(article_dir: Path, site: str | None = None) -> Path:
     metadata_path = article_dir / "metadata.json"
     publish_result_path = article_dir / "blogger_publish_result.json"
     if not metadata_path.exists() or not publish_result_path.exists():
@@ -17,9 +17,9 @@ def run(article_dir: Path) -> Path:
 
     publish_result = json.loads(publish_result_path.read_text(encoding="utf-8"))
     post_id = publish_result["blogger"]["id"]
-    title, html, labels = load_article(article_dir)
+    title, html, labels = load_article(article_dir, site)
 
-    publisher = BloggerPublisher(load_settings())
+    publisher = BloggerPublisher(load_settings(site))
     result = publisher.update_post(post_id=post_id, title=title, html=html, labels=labels)
 
     result_path = article_dir / "blogger_refresh_result.json"
@@ -45,9 +45,10 @@ def run(article_dir: Path) -> Path:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Refresh an existing Blogger post from local generated HTML.")
     parser.add_argument("--article-dir", required=True)
+    parser.add_argument("--site", help="Site profile key, for example: easy_pc_fix_guide")
     args = parser.parse_args()
     try:
-        result_path = run(Path(args.article_dir).expanduser().resolve())
+        result_path = run(Path(args.article_dir).expanduser().resolve(), args.site)
     except BloggerCredentialsError as exc:
         raise SystemExit(f"Blogger credential setup required: {exc}") from exc
     print(result_path)
