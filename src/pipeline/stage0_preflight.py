@@ -412,7 +412,7 @@ def check_critical_notifications() -> PreflightCheck:
     required = {
         "daily_draft.py": [
             "NotificationClient(settings).send_required(build_daily_success_message(result))",
-            "NotificationClient(settings).send_required(\n        \"\\n\".join(",
+            "NotificationClient(settings).send_required(build_daily_failure_message(seed, exc, site))",
         ],
         "stage3_submit_sitemap.py": "NotificationClient(settings).send_required(build_message(settings.site_name, result))",
         "stage4_publication_check.py": "NotificationClient(settings).send_required(build_message(result))",

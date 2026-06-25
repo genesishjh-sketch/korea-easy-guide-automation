@@ -335,24 +335,66 @@ def notify_daily_completion(result: dict[str, str]) -> None:
 
 def notify_daily_failure(seed: str, exc: Exception, site: str | None = None) -> None:
     settings = load_settings(site)
+    NotificationClient(settings).send_required(build_daily_failure_message(seed, exc, site))
+
+
+def build_daily_failure_message(seed: str, exc: Exception, site: str | None = None) -> str:
+    settings = load_settings(site)
     error = "".join(traceback.format_exception_only(type(exc), exc)).strip()
-    NotificationClient(settings).send_required(
-        "\n".join(
-            [
-                "[Posting Bot] 일일 포스팅 실패",
-                "",
-                f"- 블로그: {settings.site_name}",
-                f"- 사이트: {settings.site_url}",
-                f"- 주제 시드: {seed}",
-                f"- 오류: {error}",
-                "",
-                "조치 필요:",
-                "- 품질검수 실패면 글/이미지/출처를 보강해야 합니다.",
-                "- Blogger 인증 실패면 OAuth 토큰을 갱신해야 합니다.",
-                "- 이미지 누락이면 Codex 이미지 생성 후 다시 실행해야 합니다.",
-            ]
-        )
+    action_items = daily_failure_action_items(error)
+    report_path = ROOT_DIR / "reports" / f"{settings.site_key}-daily-failure.json"
+    return "\n".join(
+        [
+            "[Posting Bot] 일일 포스팅 실패",
+            "",
+            f"- 블로그: {settings.site_name}",
+            f"- 사이트: {settings.site_url}",
+            f"- 주제 시드: {seed}",
+            f"- 오류 유형: {type(exc).__name__}",
+            f"- 오류: {error}",
+            f"- 실패 리포트: {report_path}",
+            "",
+            "우선 조치:",
+            *[f"- {item}" for item in action_items],
+            "",
+            "재실행:",
+            "- GitHub Actions > Easy PC Fix Validate Smoke Test에서 같은 seed로 검증 실행",
+            "- 검증 통과 후 Easy PC Fix Daily Publish를 수동 실행",
+        ]
     )
+
+
+def daily_failure_action_items(error: str) -> list[str]:
+    error_lower = error.casefold()
+    if "hades quality gate failed" in error_lower or "quality" in error_lower:
+        return [
+            "Hades 품질검수 실패입니다. quality_report.json의 issue code를 먼저 확인하세요.",
+            "공식 Microsoft 출처, 이미지 계획, 안전 경고, 명령어 경고, 본문 길이를 보강하세요.",
+        ]
+    if "oauth" in error_lower or "credentials" in error_lower or "unauthorized" in error_lower:
+        return [
+            "인증 문제 가능성이 큽니다. Google OAuth 토큰과 GitHub Secrets 값을 확인하세요.",
+            "Blogger, Search Console, Analytics 권한이 같은 Google 계정에 연결되어 있는지 확인하세요.",
+        ]
+    if "image" in error_lower or "asset" in error_lower:
+        return [
+            "이미지 또는 image_plan 문제입니다. assets 폴더와 image_plan.json의 required 파일명을 확인하세요.",
+            "유료 이미지 API 없이 local SVG fallback 또는 Codex 생성 이미지가 들어갔는지 확인하세요.",
+        ]
+    if "duplicate" in error_lower:
+        return [
+            "중복 글 감지입니다. 같은 주제가 이미 공개됐는지 Blogger 공개 피드를 확인하세요.",
+            "topic seed 목록에서 사용된 시드를 제거하거나 더 구체적인 새 오류 주제로 바꾸세요.",
+        ]
+    if "reddit" in error_lower:
+        return [
+            "Reddit 수집 문제입니다. Reddit OAuth Health workflow와 research_report.json의 수집 진단을 확인하세요.",
+            "REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET 설정 여부를 확인하세요.",
+        ]
+    return [
+        "reports 폴더의 daily-failure.json traceback을 확인하세요.",
+        "같은 seed로 validate mode를 먼저 재실행해 발행 전 단계에서 원인을 좁히세요.",
+    ]
 
 
 def save_daily_failure_report(seed: str, exc: Exception, site: str | None = None, mode: str = "draft") -> Path:

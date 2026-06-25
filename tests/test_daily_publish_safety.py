@@ -572,6 +572,31 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertIn("[Posting Bot] 일일 포스팅 실패", message)
         self.assertIn("broken topic", message)
         self.assertIn("quality failed", message)
+        self.assertIn("- 오류 유형: ValueError", message)
+        self.assertIn("실패 리포트:", message)
+        self.assertIn("Easy PC Fix Validate Smoke Test", message)
+        self.assertIn("Easy PC Fix Daily Publish", message)
+
+    def test_daily_failure_message_classifies_quality_failures(self) -> None:
+        message = daily_draft.build_daily_failure_message(
+            "thin topic",
+            ValueError("Hades quality gate failed with score 76/90: thin_content"),
+            "easy_pc_fix_guide",
+        )
+
+        self.assertIn("Hades 품질검수 실패", message)
+        self.assertIn("quality_report.json", message)
+        self.assertIn("공식 Microsoft 출처", message)
+
+    def test_daily_failure_message_classifies_auth_failures(self) -> None:
+        message = daily_draft.build_daily_failure_message(
+            "auth topic",
+            RuntimeError("OAuth credentials unauthorized"),
+            "easy_pc_fix_guide",
+        )
+
+        self.assertIn("인증 문제 가능성", message)
+        self.assertIn("Google OAuth 토큰", message)
 
     def test_daily_failure_report_is_written_before_reraising(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
