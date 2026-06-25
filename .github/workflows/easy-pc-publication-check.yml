@@ -30,4 +30,6 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: easy-pc-fix-publication-check
-          path: reports/easy_pc_fix_guide-publication-check.json
+          path: |
+            reports/easy_pc_fix_guide-publication-check.json
+            reports/easy_pc_fix_guide-publication-check.md
