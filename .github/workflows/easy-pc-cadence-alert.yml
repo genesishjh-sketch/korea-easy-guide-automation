@@ -36,3 +36,10 @@ jobs:
           printf '%s' '${{ secrets.GOOGLE_OAUTH_TOKEN_SEARCH_CONSOLE_JSON }}' > .credentials/google_token.search-console.json
       - name: Send Easy PC Fix cadence review alert
         run: python -m src.pipeline.stage3_cadence_alert --site easy_pc_fix_guide
+      - name: Upload cadence alert report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: easy-pc-fix-cadence-alert
+          path: |
+            reports/easy_pc_fix_guide-cadence-alert-*.json
