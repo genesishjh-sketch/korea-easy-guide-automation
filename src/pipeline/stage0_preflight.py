@@ -419,6 +419,8 @@ def check_validate_workflow() -> PreflightCheck:
         '".github/workflows/easy-pc-validate-smoke.yml"',
         "Run safety regression tests",
         "python -m src.pipeline.daily_draft --site easy_pc_fix_guide --mode validate",
+        "if: ${{ always() }}",
+        "reports/",
     ]
     missing = [item for item in required if item not in text]
     if missing:

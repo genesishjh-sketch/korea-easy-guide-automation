@@ -117,7 +117,10 @@ class WorkflowSafetyTests(unittest.TestCase):
 
         self.assertIn("- name: Run automation preflight", workflow)
         self.assertIn("python -m src.pipeline.stage0_preflight --site easy_pc_fix_guide", workflow)
-        self.assertIn("reports/easy_pc_fix_guide-preflight.json", workflow)
+        upload_index = workflow.index("- name: Upload validation outputs")
+        upload_block = workflow[upload_index : upload_index + 260]
+        self.assertIn("if: ${{ always() }}", upload_block)
+        self.assertIn("reports/", upload_block)
         self.assertIn("REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}", workflow)
         self.assertIn("REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}", workflow)
         self.assertIn("EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT", workflow)
