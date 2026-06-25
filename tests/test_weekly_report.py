@@ -77,12 +77,17 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                 ),
                 encoding="utf-8",
             )
+            (article_dir / "validation_result.json").write_text(
+                json.dumps({"mode": "validate", "passed": True}),
+                encoding="utf-8",
+            )
 
             reporter = WeeklyReporter(replace(settings, generated_output_dir=str(Path(tmpdir))))
             result = reporter._collect_articles(datetime.utcnow() - timedelta(days=7))
 
         self.assertEqual(result[0]["seed_keyword"], "bluetooth not working windows 11")
         self.assertEqual(result[0]["content_domain"], "windows_help")
+        self.assertEqual(result[0]["article_status"], "validated")
 
     def test_markdown_includes_public_feed_section(self) -> None:
         settings = load_settings("easy_pc_fix_guide")
@@ -312,6 +317,7 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                         "content_domain": "windows_help",
                         "category": "Bluetooth & Devices",
                         "blogger_status": "LIVE",
+                        "article_status": "LIVE",
                     }
                 ],
                 "public_posts": {"status": "connected", "posts": []},
@@ -326,9 +332,46 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
             }
         )
 
-        self.assertIn("| 제목 | 시드 | 도메인 | 카테고리 | Blogger 상태 |", markdown)
+        self.assertIn("| 제목 | 시드 | 도메인 | 카테고리 | 처리 상태 |", markdown)
         self.assertIn("bluetooth not working windows 11", markdown)
         self.assertIn("windows_help", markdown)
+
+    def test_markdown_article_list_marks_validation_only_articles(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+        markdown = reporter._to_markdown(
+            {
+                "site_name": settings.site_name,
+                "site_url": settings.site_url,
+                "week_start": "2026-06-18",
+                "week_end": "2026-06-25",
+                "article_count": 1,
+                "draft_count": 0,
+                "published_count": 0,
+                "local_published_count": 0,
+                "articles": [
+                    {
+                        "title": "Bluetooth Not Working on Windows",
+                        "seed_keyword": "bluetooth not working windows 11",
+                        "content_domain": "windows_help",
+                        "category": "Bluetooth & Devices",
+                        "article_status": "validated",
+                    }
+                ],
+                "public_posts": {"status": "connected", "posts": []},
+                "static_pages": [],
+                "signal_quality": {},
+                "search_console": {"status": "not_configured"},
+                "analytics": {"status": "not_configured"},
+                "operations": {},
+                "cadence_review": {},
+                "quality_issues": [],
+                "next_actions": [],
+            }
+        )
+
+        self.assertIn("검증 완료", markdown)
+        self.assertNotIn("미업로드", markdown.split("## Blogger 공개 피드 확인")[0])
 
     def test_quality_issues_result_summarizes_article_quality_reports(self) -> None:
         settings = load_settings("easy_pc_fix_guide")

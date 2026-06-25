@@ -93,7 +93,10 @@ class WeeklyReporter:
             research_report = self._read_report(article_dir / "research_report.json")
             publish_result_path = article_dir / "blogger_publish_result.json"
             update_result_path = article_dir / "blogger_update_result.json"
+            validation_result_path = article_dir / "validation_result.json"
             blogger = self._best_blogger_result([publish_result_path, update_result_path])
+            validation = self._read_report(validation_result_path)
+            article_status = blogger.get("status") or _article_validation_status(validation)
             articles.append(
                 {
                     "title": article.get("title"),
@@ -105,6 +108,7 @@ class WeeklyReporter:
                     "article_dir": str(article_dir),
                     "blogger_id": blogger.get("id"),
                     "blogger_status": blogger.get("status"),
+                    "article_status": article_status,
                     "blogger_url": blogger.get("url"),
                     "updated": blogger.get("updated"),
                 }
@@ -473,13 +477,13 @@ class WeeklyReporter:
             "",
         ]
         if report["articles"]:
-            lines.append("| 제목 | 시드 | 도메인 | 카테고리 | Blogger 상태 |")
+            lines.append("| 제목 | 시드 | 도메인 | 카테고리 | 처리 상태 |")
             lines.append("|---|---|---|---|---|")
             for article in report["articles"]:
                 lines.append(
                     f"| {article.get('title') or ''} | {article.get('seed_keyword') or ''} | "
                     f"{article.get('content_domain') or ''} | {article.get('category') or ''} | "
-                    f"{_status_kr(article.get('blogger_status'))} |"
+                    f"{_status_kr(article.get('article_status') or article.get('blogger_status'))} |"
                 )
         else:
             lines.append("이번 기간에 생성된 글이 없습니다.")
@@ -768,3 +772,11 @@ def _status_kr(status: str | None) -> str:
         "oauth_error": "OAuth 오류",
     }
     return mapping.get(status or "not_uploaded", status or "미업로드")
+
+
+def _article_validation_status(validation: dict) -> str:
+    if validation.get("mode") == "validate" and validation.get("passed") is True:
+        return "validated"
+    if validation.get("mode") == "validate" and validation.get("passed") is False:
+        return "failed"
+    return "not_uploaded"
