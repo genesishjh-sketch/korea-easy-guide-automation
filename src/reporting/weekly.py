@@ -299,6 +299,9 @@ class WeeklyReporter:
                 if published_at >= cutoff:
                     todays_posts.append(post)
         status = publication_status(todays_posts, all_todays_posts, cutoff)
+        before_cutoff_window = now < cutoff and not all_todays_posts
+        if before_cutoff_window:
+            status = "pending_today_before_cutoff"
         public_feed_ok = is_success_status(status)
         duplicate_today = status == "duplicate_today"
         return {
@@ -316,6 +319,8 @@ class WeeklyReporter:
                 "status": (
                     "weekly_duplicate_publication_detected"
                     if duplicate_today
+                    else "weekly_public_feed_before_cutoff"
+                    if before_cutoff_window
                     else "weekly_public_feed_confirmed"
                     if public_feed_ok
                     else "weekly_public_feed_missing_today"
@@ -323,6 +328,8 @@ class WeeklyReporter:
                 "label": (
                     "주간 보고 공개 피드 기준 오늘 글 2개 이상 감지"
                     if duplicate_today
+                    else "주간 보고 실행 시각이 발행 기준 전"
+                    if before_cutoff_window
                     else "주간 보고 공개 피드 기준 확인"
                     if public_feed_ok
                     else "주간 보고 공개 피드 기준 오늘 글 없음"
@@ -330,13 +337,15 @@ class WeeklyReporter:
                 "note": (
                     "하루 1개 운영 기준을 초과했습니다. 자동 발행 중복 또는 예약 발행 충돌 가능성을 확인하세요."
                     if duplicate_today
+                    else "아직 09:00 KST 발행 확인 기준 전입니다. 오늘 발행 여부는 Daily workflow 실행 후 다시 확인합니다."
+                    if before_cutoff_window
                     else (
                     "발행 확인 workflow artifact가 없거나 오래되어 공개 Blogger feed로 재계산했습니다."
                     if public_feed_ok
                     else "공개 Blogger feed에서 오늘 공개 글을 찾지 못했습니다."
                     )
                 ),
-                "needs_attention": not public_feed_ok or duplicate_today,
+                "needs_attention": (not public_feed_ok and not before_cutoff_window) or duplicate_today,
             },
         }
 
@@ -1065,6 +1074,7 @@ def _status_kr(status: str | None) -> str:
         "fail": "실패",
         "published_today": "오늘 공개 글 확인",
         "published_today_before_cutoff": "오늘 공개 글 확인(기준 전 발행)",
+        "pending_today_before_cutoff": "발행 확인 기준 전",
         "duplicate_today": "오늘 공개 글 2개 이상",
         "missing_today": "오늘 공개 글 없음",
         "partial_failure": "일부 실행 실패",

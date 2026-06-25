@@ -1473,6 +1473,43 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         )
         self.assertTrue(operations["publication_check"]["publication_evidence"]["needs_attention"])
 
+    def test_operations_result_marks_weekly_public_feed_before_cutoff_as_pending(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+        now = datetime(2026, 6, 25, 1, 40, tzinfo=ZoneInfo("Asia/Seoul"))
+
+        with tempfile.TemporaryDirectory() as tmpdir, patch("src.reporting.weekly.ROOT_DIR", Path(tmpdir)):
+            operations = reporter._operations_result(
+                now=now,
+                public_posts={"status": "connected", "posts": []},
+                search_console={"status": "connected"},
+            )
+
+        self.assertEqual(operations["publication_check"]["status"], "pending_today_before_cutoff")
+        self.assertEqual(
+            operations["publication_check"]["publication_evidence"]["status"],
+            "weekly_public_feed_before_cutoff",
+        )
+        self.assertFalse(operations["publication_check"]["publication_evidence"]["needs_attention"])
+
+    def test_next_actions_do_not_warn_for_publication_before_cutoff_pending(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+
+        actions = reporter._next_actions(
+            articles=[{"blogger_status": "LIVE"}],
+            static_pages=[{"title": "About"}, {"title": "Contact"}, {"title": "Privacy Policy"}, {"title": "Disclaimer"}],
+            public_posts={"status": "connected", "posts": [{"title": "Published"}]},
+            operations={
+                "preflight": {"status": "pass"},
+                "publication_check": {"status": "pending_today_before_cutoff"},
+                "sitemap_submit": {"status": "submitted"},
+            },
+            signal_quality={"status": "connected"},
+        )
+
+        self.assertNotIn("오늘 공개 글을 찾지 못했습니다", "\n".join(actions))
+
 
 if __name__ == "__main__":
     unittest.main()
