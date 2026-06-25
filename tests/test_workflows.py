@@ -148,10 +148,20 @@ class WorkflowSafetyTests(unittest.TestCase):
 
         self.assertIn("GOOGLE_OAUTH_TOKEN_SEARCH_CONSOLE_JSON", workflow)
         self.assertIn("GOOGLE_OAUTH_TOKEN_ANALYTICS_JSON", workflow)
+        self.assertIn("REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}", workflow)
+        self.assertIn("REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}", workflow)
+        self.assertIn("EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT", workflow)
+        self.assertIn("- name: Run Reddit OAuth health check for weekly context", workflow)
+        self.assertIn("python -m src.pipeline.stage0_reddit_health --site easy_pc_fix_guide", workflow)
         self.assertIn("python -m src.pipeline.stage3_weekly_report --site easy_pc_fix_guide", workflow)
+        health_index = workflow.index("- name: Run Reddit OAuth health check for weekly context")
+        report_index = workflow.index("- name: Generate and send weekly report")
+        self.assertLess(health_index, report_index)
         upload_index = workflow.index("- name: Upload weekly report")
         upload_block = workflow[upload_index : upload_index + 260]
         self.assertIn("if: ${{ always() }}", upload_block)
+        self.assertIn("reports/easy_pc_fix_guide-reddit-health.json", workflow)
+        self.assertIn("reports/easy_pc_fix_guide-reddit-health.md", workflow)
         self.assertIn("reports/easy_pc_fix_guide-weekly-*", workflow)
         self.assertIn("reports/easy_pc_fix_guide-weekly-failure.json", workflow)
 
