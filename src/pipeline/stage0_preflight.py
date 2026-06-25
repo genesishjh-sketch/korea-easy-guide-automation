@@ -23,6 +23,9 @@ from src.pipeline.stage4_publication_check import fetch_public_feed
 from src.pipeline.stage4_publication_check import parse_posts
 from src.utils.reddit_setup import GITHUB_SECRETS_URL
 from src.utils.reddit_setup import REDDIT_APPS_URL
+from src.utils.reddit_setup import REDDIT_DATA_ACCESS_REQUEST_URL
+from src.utils.reddit_setup import REDDIT_RESPONSIBLE_BUILDER_POLICY_URL
+from src.utils.reddit_setup import reddit_data_access_request_guide
 from src.utils.reddit_setup import reddit_oauth_secret_label
 from src.utils.reddit_setup import user_action_checklist
 
@@ -607,8 +610,11 @@ def build_setup_actions(checks: list[PreflightCheck]) -> list[dict]:
                     ),
                     "links": {
                         "reddit_apps": REDDIT_APPS_URL,
+                        "reddit_data_access_request": REDDIT_DATA_ACCESS_REQUEST_URL,
+                        "responsible_builder_policy": REDDIT_RESPONSIBLE_BUILDER_POLICY_URL,
                         "github_secrets": GITHUB_SECRETS_URL,
                     },
+                    "reddit_data_access_request_guide": reddit_data_access_request_guide(),
                     "user_action_checklist": user_action_checklist(
                         "Easy PC Fix Guide Automation",
                         "easy-pc-fix-guide/0.1 by posting-automation-alert-bot",
@@ -745,6 +751,11 @@ def build_preflight_markdown(result: dict) -> str:
                 lines.append("- 링크:")
                 for label, url in links.items():
                     lines.append(f"  - {label}: {url}")
+            access_request = action.get("reddit_data_access_request_guide") or []
+            if access_request:
+                lines.append("- Data Access Request 입력 가이드:")
+                for item in access_request:
+                    lines.append(f"  - {item}")
             checklist = action.get("user_action_checklist") or []
             if checklist:
                 lines.append("- 사용자가 직접 할 일:")

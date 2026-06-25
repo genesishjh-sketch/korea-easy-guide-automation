@@ -12,12 +12,15 @@ from src.notifications.telegram import NotificationClient
 from src.pipeline.daily_draft import load_seed_list
 from src.utils.reddit_setup import GITHUB_SECRETS_URL
 from src.utils.reddit_setup import REDDIT_APPS_URL
+from src.utils.reddit_setup import REDDIT_DATA_ACCESS_REQUEST_URL
+from src.utils.reddit_setup import REDDIT_RESPONSIBLE_BUILDER_POLICY_URL
 from src.utils.reddit_setup import REDDIT_CLIENT_ID_SECRET
 from src.utils.reddit_setup import REDDIT_CLIENT_SECRET_SECRET
 from src.utils.reddit_setup import DEFAULT_REDDIT_REDIRECT_URI
 from src.utils.reddit_setup import DEFAULT_REDDIT_USER_AGENT
 from src.utils.reddit_setup import github_secret_mapping
 from src.utils.reddit_setup import reddit_app_field_guide
+from src.utils.reddit_setup import reddit_data_access_request_guide
 from src.utils.reddit_setup import reddit_oauth_secret_label
 from src.utils.reddit_setup import user_action_checklist
 from src.utils.text import clean_space
@@ -303,12 +306,15 @@ def setup_links(settings: Any) -> dict:
     recommended_user_agent = settings.reddit_user_agent or DEFAULT_REDDIT_USER_AGENT
     return {
         "reddit_apps_url": REDDIT_APPS_URL,
+        "reddit_data_access_request_url": REDDIT_DATA_ACCESS_REQUEST_URL,
+        "reddit_responsible_builder_policy_url": REDDIT_RESPONSIBLE_BUILDER_POLICY_URL,
         "github_actions_secrets_url": GITHUB_SECRETS_URL,
         "recommended_app_type": "script",
         "recommended_app_name": recommended_app_name,
         "recommended_redirect_uri": DEFAULT_REDDIT_REDIRECT_URI,
         "recommended_user_agent": recommended_user_agent,
         "reddit_app_field_guide": reddit_app_field_guide(recommended_app_name, recommended_user_agent),
+        "reddit_data_access_request_guide": reddit_data_access_request_guide(),
         "github_secret_mapping": github_secret_mapping(),
         "user_action_checklist": user_action_checklist(recommended_app_name, recommended_user_agent),
     }
@@ -356,6 +362,8 @@ def build_message(result: dict) -> str:
                 "",
                 "설정 링크:",
                 f"- Reddit 앱 생성/확인: {setup.get('reddit_apps_url')}",
+                f"- Reddit Data Access Request: {setup.get('reddit_data_access_request_url')}",
+                f"- Responsible Builder Policy: {setup.get('reddit_responsible_builder_policy_url')}",
                 f"- GitHub Secrets 입력: {setup.get('github_actions_secrets_url')}",
                 f"- Reddit 앱 타입: {setup.get('recommended_app_type')}",
                 f"- Redirect URI: {setup.get('recommended_redirect_uri')}",
@@ -370,9 +378,13 @@ def build_message(result: dict) -> str:
             lines.extend(["", "GitHub에 넣을 값:"])
             for step in setup.get("github_secret_mapping", [])[:3]:
                 lines.append(f"- {step}")
+        if setup.get("reddit_data_access_request_guide"):
+            lines.extend(["", "Data Access Request 입력 가이드:"])
+            for step in setup.get("reddit_data_access_request_guide", []):
+                lines.append(f"- {step}")
         if setup.get("user_action_checklist"):
             lines.extend(["", "사용자가 직접 해야 할 일:"])
-            for step in setup.get("user_action_checklist", [])[:7]:
+            for step in setup.get("user_action_checklist", []):
                 lines.append(f"- {step}")
     if result.get("error"):
         lines.append(f"- 오류: {result.get('error_type')}: {result.get('error')}")
@@ -447,12 +459,17 @@ def build_markdown_report(result: dict) -> str:
                 "## Setup Links",
                 "",
                 f"- Reddit apps: {setup.get('reddit_apps_url', '')}",
+                f"- Reddit Data Access Request: {setup.get('reddit_data_access_request_url', '')}",
+                f"- Responsible Builder Policy: {setup.get('reddit_responsible_builder_policy_url', '')}",
                 f"- GitHub Actions secrets: {setup.get('github_actions_secrets_url', '')}",
                 f"- Recommended app type: {setup.get('recommended_app_type', '')}",
                 f"- Recommended redirect URI: {setup.get('recommended_redirect_uri', '')}",
                 f"- Recommended user agent: {setup.get('recommended_user_agent', '')}",
             ]
         )
+        if setup.get("reddit_data_access_request_guide"):
+            lines.extend(["", "## Data Access Request Guide", ""])
+            lines.extend(f"- {step}" for step in setup.get("reddit_data_access_request_guide", []))
         if setup.get("user_action_checklist"):
             lines.extend(["", "## User Action Checklist", ""])
             lines.extend(f"- {step}" for step in setup.get("user_action_checklist", []))

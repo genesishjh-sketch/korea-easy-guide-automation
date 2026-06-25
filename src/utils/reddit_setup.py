@@ -2,6 +2,11 @@ from __future__ import annotations
 
 
 REDDIT_APPS_URL = "https://www.reddit.com/prefs/apps"
+REDDIT_DATA_ACCESS_REQUEST_URL = (
+    "https://support.reddithelp.com/hc/en-us/requests/new?"
+    "tf_42139884615700=api_request_type_developer_clone&ticket_form_id=14868593862164"
+)
+REDDIT_RESPONSIBLE_BUILDER_POLICY_URL = "https://support.reddithelp.com/hc/articles/42728983564564"
 GITHUB_SECRETS_URL = "https://github.com/genesishjh-sketch/korea-easy-guide-automation/settings/secrets/actions"
 REDDIT_CLIENT_ID_SECRET = "REDDIT_CLIENT_ID"
 REDDIT_CLIENT_SECRET_SECRET = "REDDIT_CLIENT_SECRET"
@@ -39,8 +44,21 @@ def user_action_checklist(recommended_app_name: str, recommended_user_agent: str
         f"Reddit 앱 페이지에서 create app 또는 create another app을 누르고 이름을 '{recommended_app_name}'로 입력하세요.",
         "앱 타입은 반드시 script를 선택하세요. web app이나 installed app이 아닙니다.",
         f"redirect uri에는 {DEFAULT_REDDIT_REDIRECT_URI}를 그대로 입력하세요.",
+        "Reddit이 Responsible Builder Policy/Data API 등록 안내를 표시하면 Data Access Request를 제출하고 승인을 기다리세요.",
         "생성 후 앱 이름 아래의 짧은 client id를 GitHub Secret REDDIT_CLIENT_ID에 저장하세요.",
         "앱 상세의 secret 값을 GitHub Secret REDDIT_CLIENT_SECRET에 저장하세요.",
         f"GitHub Variable EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT가 비어 있으면 '{recommended_user_agent}'로 저장하세요.",
         "저장 후 Actions > Easy PC Fix Reddit OAuth Health workflow를 Run workflow로 실행하세요.",
+    ]
+
+
+def reddit_data_access_request_guide() -> list[str]:
+    return [
+        "Request type: Data Access Request",
+        "Role: I'm a developer",
+        "Inquiry: I'm a developer and want to build a Reddit App that does not work in the Devvit ecosystem.",
+        "Reddit account name: Primary-Tax3188",
+        "Purpose: read-only topic research for beginner Windows troubleshooting posts; no posting, voting, messaging, moderation, or Reddit write actions.",
+        "Source/platform URL: https://github.com/genesishjh-sketch/korea-easy-guide-automation",
+        "Target subreddits: r/WindowsHelp, r/Windows11, r/techsupport, r/pchelp",
     ]

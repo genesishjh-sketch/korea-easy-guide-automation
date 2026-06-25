@@ -109,9 +109,11 @@ EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT
 Setup links:
 
 - Reddit apps: https://www.reddit.com/prefs/apps
+- Reddit Data Access Request: https://support.reddithelp.com/hc/en-us/requests/new?tf_42139884615700=api_request_type_developer_clone&ticket_form_id=14868593862164
+- Responsible Builder Policy: https://support.reddithelp.com/hc/articles/42728983564564
 - GitHub Actions Secrets: https://github.com/genesishjh-sketch/korea-easy-guide-automation/settings/secrets/actions
 
-Create the Reddit app as `script`, then copy the app client id and secret into the two GitHub Secrets above. The health check never prints secret values; it only reports whether OAuth can collect live Reddit signals.
+Create the Reddit app as `script`, then copy the app client id and secret into the two GitHub Secrets above. If Reddit shows the Responsible Builder Policy/Data API registration message instead of creating the app, submit the Data Access Request first and wait for approval. The health check never prints secret values; it only reports whether OAuth can collect live Reddit signals.
 
 Suggested Reddit app fields:
 
@@ -138,9 +140,22 @@ User action checklist:
 3. Enter name: Easy PC Fix Guide Automation.
 4. Select app type: script.
 5. Enter redirect uri: http://localhost:8080.
-6. Copy the short client id under the app name into GitHub Secret REDDIT_CLIENT_ID.
-7. Copy the app secret into GitHub Secret REDDIT_CLIENT_SECRET.
-8. Run Actions > Easy PC Fix Reddit OAuth Health.
+6. If Reddit blocks creation with the Responsible Builder Policy/Data API message, submit the Data Access Request.
+7. Copy the short client id under the app name into GitHub Secret REDDIT_CLIENT_ID.
+8. Copy the app secret into GitHub Secret REDDIT_CLIENT_SECRET.
+9. Run Actions > Easy PC Fix Reddit OAuth Health.
+```
+
+Data Access Request draft:
+
+```text
+Request type: Data Access Request
+Role: I'm a developer
+Inquiry: I'm a developer and want to build a Reddit App that does not work in the Devvit ecosystem.
+Reddit account name: Primary-Tax3188
+Purpose: read-only topic research for beginner Windows troubleshooting posts; no posting, voting, messaging, moderation, or Reddit write actions.
+Source/platform URL: https://github.com/genesishjh-sketch/korea-easy-guide-automation
+Target subreddits: r/WindowsHelp, r/Windows11, r/techsupport, r/pchelp
 ```
 
 Manual health check:

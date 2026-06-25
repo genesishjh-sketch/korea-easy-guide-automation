@@ -4,8 +4,11 @@ import unittest
 
 from src.utils.reddit_setup import GITHUB_SECRETS_URL
 from src.utils.reddit_setup import REDDIT_APPS_URL
+from src.utils.reddit_setup import REDDIT_DATA_ACCESS_REQUEST_URL
+from src.utils.reddit_setup import REDDIT_RESPONSIBLE_BUILDER_POLICY_URL
 from src.utils.reddit_setup import github_secret_mapping
 from src.utils.reddit_setup import reddit_app_field_guide
+from src.utils.reddit_setup import reddit_data_access_request_guide
 from src.utils.reddit_setup import reddit_oauth_secret_label
 from src.utils.reddit_setup import user_action_checklist
 
@@ -13,6 +16,8 @@ from src.utils.reddit_setup import user_action_checklist
 class RedditSetupTests(unittest.TestCase):
     def test_reddit_setup_links_and_secret_label_are_centralized(self) -> None:
         self.assertEqual(REDDIT_APPS_URL, "https://www.reddit.com/prefs/apps")
+        self.assertIn("support.reddithelp.com", REDDIT_DATA_ACCESS_REQUEST_URL)
+        self.assertIn("42728983564564", REDDIT_RESPONSIBLE_BUILDER_POLICY_URL)
         self.assertIn("/settings/secrets/actions", GITHUB_SECRETS_URL)
         self.assertEqual(reddit_oauth_secret_label(), "REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET")
 
@@ -43,7 +48,17 @@ class RedditSetupTests(unittest.TestCase):
         self.assertIn("http://localhost:8080", joined)
         self.assertIn("REDDIT_CLIENT_ID", joined)
         self.assertIn("REDDIT_CLIENT_SECRET", joined)
+        self.assertIn("Data Access Request", joined)
         self.assertIn("Easy PC Fix Reddit OAuth Health", joined)
+
+    def test_reddit_data_access_request_guide_matches_project(self) -> None:
+        guide = reddit_data_access_request_guide()
+        joined = "\n".join(guide)
+
+        self.assertIn("Primary-Tax3188", joined)
+        self.assertIn("read-only topic research", joined)
+        self.assertIn("https://github.com/genesishjh-sketch/korea-easy-guide-automation", joined)
+        self.assertIn("r/WindowsHelp", joined)
 
 
 if __name__ == "__main__":
