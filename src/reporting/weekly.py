@@ -502,6 +502,14 @@ class WeeklyReporter:
             lines.append(f"  - URL: {daily_success.get('url', '')}")
         if daily_success.get("quality_score") is not None:
             lines.append(f"  - 품질점수: {daily_success.get('quality_score')}/100")
+        skipped_duplicate_seeds = daily_success.get("skipped_duplicate_seeds") or []
+        if skipped_duplicate_seeds:
+            lines.append(f"  - 중복으로 건너뛴 시드 수: {len(skipped_duplicate_seeds)}")
+            lines.append(f"  - 중복 시드: {', '.join(skipped_duplicate_seeds[:5])}")
+        skipped_quality_seeds = daily_success.get("skipped_quality_seeds") or []
+        if skipped_quality_seeds:
+            lines.append(f"  - 품질검수 실패로 재시도한 시드 수: {len(skipped_quality_seeds)}")
+            lines.append(f"  - 품질 재시도 시드: {', '.join(skipped_quality_seeds[:5])}")
         operational_status = daily_success.get("operational_status") or {}
         if operational_status:
             lines.append(f"  - 운영 상태: {operational_status.get('status_label', '확인 필요')}")

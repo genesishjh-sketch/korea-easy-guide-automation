@@ -96,6 +96,8 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                             "ready_for_cadence_increase": False,
                             "status_label": "발행 품질 OK, 수집 안정성 점검 필요",
                         },
+                        "skipped_duplicate_seeds": ["wifi button missing windows 11"],
+                        "skipped_quality_seeds": ["thin windows update topic"],
                     },
                     "daily_failure": {"status": "not_uploaded"},
                     "reddit_health": {
@@ -197,6 +199,10 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("리포트 구분: 검증 모드 리포트", markdown)
         self.assertIn("공개 발행 결과가 아닙니다", markdown)
         self.assertIn("품질점수: 100/100", markdown)
+        self.assertIn("중복으로 건너뛴 시드 수: 1", markdown)
+        self.assertIn("중복 시드: wifi button missing windows 11", markdown)
+        self.assertIn("품질검수 실패로 재시도한 시드 수: 1", markdown)
+        self.assertIn("품질 재시도 시드: thin windows update topic", markdown)
         self.assertIn("운영 상태: 발행 품질 OK, 수집 안정성 점검 필요", markdown)
         self.assertIn("발행량 증량 준비: 아니오", markdown)
         self.assertIn("최근 일일 실패 리포트: 미업로드", markdown)
