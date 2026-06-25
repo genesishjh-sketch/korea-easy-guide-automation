@@ -37,8 +37,9 @@ jobs:
       - name: Run Reddit OAuth health check
         run: |
           QUERY="${{ github.event.inputs.query || 'wifi button missing windows 11' }}"
-          NOTIFY="${{ github.event.inputs.notify || 'true' }}"
-          if [ "$NOTIFY" = "true" ]; then
+          NOTIFY="${{ github.event.inputs.notify || 'false' }}"
+          EVENT_NAME="${{ github.event_name }}"
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ "$NOTIFY" = "true" ]; then
             python -m src.pipeline.stage0_reddit_health --site easy_pc_fix_guide --query "$QUERY" --notify
           else
             python -m src.pipeline.stage0_reddit_health --site easy_pc_fix_guide --query "$QUERY"
@@ -48,4 +49,6 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: easy-pc-fix-reddit-health
-          path: reports/easy_pc_fix_guide-reddit-health.json
+          path: |
+            reports/easy_pc_fix_guide-reddit-health.json
+            reports/easy_pc_fix_guide-reddit-health.md
