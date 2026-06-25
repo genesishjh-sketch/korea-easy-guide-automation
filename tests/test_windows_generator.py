@@ -217,6 +217,19 @@ class WindowsGeneratorSourceTests(unittest.TestCase):
                     all("microsoft.com" in source["url"] or "learn.microsoft.com" in source["url"] for source in sources)
                 )
 
+    def test_all_easy_pc_topic_seeds_have_enough_microsoft_sources_for_hades(self) -> None:
+        seeds = json.loads((ROOT_DIR / "data" / "seeds" / "windows_topic_seeds.json").read_text(encoding="utf-8"))
+
+        for seed in seeds:
+            with self.subTest(seed=seed):
+                sources = _sources_for_topic(seed)
+
+                self.assertGreaterEqual(len(sources), 6)
+                self.assertGreaterEqual(_direct_microsoft_document_count([source["url"] for source in sources]), 2)
+                self.assertTrue(
+                    all("microsoft.com" in source["url"] or "learn.microsoft.com" in source["url"] for source in sources)
+                )
+
     def test_beginner_pc_tip_seeds_have_enough_microsoft_sources_for_hades(self) -> None:
         seeds = [
             "how to make text bigger on windows",
@@ -237,6 +250,13 @@ class WindowsGeneratorSourceTests(unittest.TestCase):
 
     def test_launch_queue_topics_do_not_fall_back_to_generic_computer_help(self) -> None:
         seeds = json.loads((ROOT_DIR / "data" / "seeds" / "windows_launch_queue.json").read_text(encoding="utf-8"))
+
+        for seed in seeds:
+            with self.subTest(seed=seed):
+                self.assertNotEqual(infer_category(seed, "windows_help"), "Computer Help")
+
+    def test_all_easy_pc_topic_seeds_do_not_fall_back_to_generic_computer_help(self) -> None:
+        seeds = json.loads((ROOT_DIR / "data" / "seeds" / "windows_topic_seeds.json").read_text(encoding="utf-8"))
 
         for seed in seeds:
             with self.subTest(seed=seed):

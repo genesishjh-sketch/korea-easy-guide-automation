@@ -15,17 +15,17 @@ CATEGORY_RULES = [
 ]
 
 WINDOWS_CATEGORY_RULES = [
-    ("Wi-Fi & Internet", ["wifi", "wi-fi", "internet", "dns", "network"]),
-    ("Bluetooth & Devices", ["bluetooth", "device not detected", "device not recognized", "device manager", "pairing", "usb", "camera", "touchpad", "mouse", "keyboard"]),
+    ("Wi-Fi & Internet", ["wifi", "wi-fi", "internet", "dns", "network", "airplane mode"]),
+    ("Bluetooth & Devices", ["bluetooth", "device not detected", "device not recognized", "device manager", "pairing", "usb", "camera", "touchpad", "mouse", "keyboard", "external hard drive", "sd card", "second monitor", "driver"]),
     ("Sound & Microphone", ["sound", "audio", "microphone", "mic", "headphones", "realtek"]),
     ("Printer & Scanner", ["printer", "scanner", "print queue", "offline"]),
-    ("Boot & Recovery", ["boot", "recovery", "restore point", "safe mode", "blue screen", "bsod"]),
-    ("File Explorer", ["file explorer", "folder", "files", "freezing", "desktop icons", "recycle bin"]),
+    ("Boot & Recovery", ["boot", "recovery", "restore point", "safe mode", "blue screen", "bsod", "automatic repair", "restarting screen", "preparing automatic repair", "black screen", "blank desktop"]),
+    ("File Explorer", ["file explorer", "folder", "files", "freezing", "desktop icons", "recycle bin", "cannot find file", "pdf files"]),
     ("Windows Search", ["windows search", "search", "indexing"]),
-    ("OneDrive & Account", ["onedrive", "account", "pin", "login", "sign in"]),
-    ("Apps & Settings", ["settings app", "microsoft store", "photos app", "snipping tool", "calculator app", "default apps", "default browser", "uninstall apps", "taskbar", "start menu", "notifications", "clock"]),
-    ("Beginner PC Tips", ["screenshot", "disk space", "storage space", "text bigger", "windows version"]),
-    ("Windows Update", ["windows update stuck", "update error", "0x800f0922", "0x80070002", "0x80070005", "0x80070643"]),
+    ("OneDrive & Account", ["onedrive", "account", "pin", "login", "sign in", "password sign in", "fingerprint", "windows hello"]),
+    ("Apps & Settings", ["settings app", "microsoft store", "photos app", "snipping tool", "calculator app", "default apps", "default browser", "uninstall apps", "taskbar", "start menu", "notifications", "clock", "startup apps", "windows explorer"]),
+    ("Beginner PC Tips", ["screenshot", "disk space", "storage space", "text bigger", "windows version", "slow after update", "high disk", "high cpu", "high memory", "battery draining", "sleep mode", "wake from sleep", "screen brightness", "display resolution", "night light", "troubleshooter", "activated", "storage space"]),
+    ("Windows Update", ["windows update", "update error", "pending restart", "download stuck", "install error", "cleanup safe", "0x800f0922", "0x80070002", "0x80070005", "0x80070643"]),
     ("Error Codes", ["0x"]),
 ]
 

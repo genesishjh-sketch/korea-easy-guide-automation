@@ -22,7 +22,24 @@ MICROSOFT_SOURCES = [
 
 TOPIC_SOURCE_RULES = [
     (
-        ("text bigger", "make text bigger", "text size", "display scale", "screen resolution", "magnifier", "high contrast"),
+        ("slow after update", "startup apps", "high disk", "high cpu", "high memory", "battery draining", "sleep mode", "wake from sleep"),
+        [
+            {
+                "name": "Microsoft Support search: improve Windows PC performance",
+                "url": "https://support.microsoft.com/search/results?query=improve%20Windows%20PC%20performance",
+            },
+            {
+                "name": "Microsoft Support search: startup apps in Windows",
+                "url": "https://support.microsoft.com/search/results?query=startup%20apps%20Windows",
+            },
+            {
+                "name": "Microsoft Support search: battery and power in Windows",
+                "url": "https://support.microsoft.com/search/results?query=battery%20power%20sleep%20Windows",
+            },
+        ],
+    ),
+    (
+        ("text bigger", "make text bigger", "text size", "display scale", "screen resolution", "screen brightness", "second monitor", "display resolution", "night light", "magnifier", "high contrast"),
         [
             {
                 "name": "Microsoft Support: Change the size of text in Windows",
@@ -64,7 +81,7 @@ TOPIC_SOURCE_RULES = [
         ],
     ),
     (
-        ("windows version", "which version", "check windows version", "32-bit", "64-bit", "system type"),
+        ("windows version", "which version", "check windows version", "32-bit", "64-bit", "system type", "activated", "activation", "troubleshooter"),
         [
             {
                 "name": "Microsoft Support: Find information about your Windows device",
@@ -93,7 +110,7 @@ TOPIC_SOURCE_RULES = [
         ],
     ),
     (
-        ("wifi", "wi-fi", "internet", "dns", "network"),
+        ("wifi", "wi-fi", "internet", "dns", "network", "airplane mode"),
         [
             {
                 "name": "Microsoft Support: Fix Wi-Fi connection issues in Windows",
@@ -140,10 +157,19 @@ TOPIC_SOURCE_RULES = [
         ],
     ),
     (
-        ("usb", "camera", "touchpad", "mouse", "keyboard", "device not recognized", "device manager"),
+        ("usb", "camera", "touchpad", "mouse", "keyboard", "device not recognized", "device manager", "external hard drive", "sd card", "monitor", "driver"),
         [
             {"name": "Microsoft Support search: device problems", "url": "https://support.microsoft.com/search/results?query=device%20not%20recognized%20Windows"},
             {"name": "Microsoft Support search: camera problems", "url": "https://support.microsoft.com/search/results?query=camera%20not%20working%20Windows"},
+            {"name": "Microsoft Support search: drivers in Windows", "url": "https://support.microsoft.com/search/results?query=drivers%20in%20Windows"},
+        ],
+    ),
+    (
+        ("sound", "audio", "microphone", "headphones", "realtek"),
+        [
+            {"name": "Microsoft Support search: sound problems in Windows", "url": "https://support.microsoft.com/search/results?query=sound%20problems%20Windows"},
+            {"name": "Microsoft Support search: microphone problems in Windows", "url": "https://support.microsoft.com/search/results?query=microphone%20problems%20Windows"},
+            {"name": "Microsoft Support search: audio drivers in Windows", "url": "https://support.microsoft.com/search/results?query=audio%20drivers%20Windows"},
         ],
     ),
     (
@@ -165,10 +191,11 @@ TOPIC_SOURCE_RULES = [
         ],
     ),
     (
-        ("microsoft store", "photos app", "calculator app", "settings app", "default apps"),
+        ("microsoft store", "photos app", "calculator app", "settings app", "default apps", "default browser", "uninstall apps", "taskbar", "start menu", "notifications", "clock", "windows explorer"),
         [
             {"name": "Microsoft Support search: Microsoft Store app problems", "url": "https://support.microsoft.com/search/results?query=Microsoft%20Store%20not%20working%20Windows"},
             {"name": "Microsoft Support search: Windows apps troubleshooting", "url": "https://support.microsoft.com/search/results?query=Windows%20apps%20troubleshooting"},
+            {"name": "Microsoft Support search: Windows settings and personalization", "url": "https://support.microsoft.com/search/results?query=Windows%20settings%20taskbar%20start%20menu"},
         ],
     ),
     (
@@ -179,10 +206,11 @@ TOPIC_SOURCE_RULES = [
         ],
     ),
     (
-        ("file explorer", "folder", "downloads folder", "desktop icons", "recycle bin"),
+        ("file explorer", "folder", "downloads folder", "desktop icons", "recycle bin", "cannot find file", "pdf files"),
         [
             {"name": "Microsoft Support search: File Explorer", "url": "https://support.microsoft.com/search/results?query=File%20Explorer%20not%20responding%20Windows"},
             {"name": "Microsoft Support search: Windows files and folders", "url": "https://support.microsoft.com/search/results?query=Windows%20files%20and%20folders"},
+            {"name": "Microsoft Support search: default apps and file types", "url": "https://support.microsoft.com/search/results?query=default%20apps%20file%20types%20Windows"},
         ],
     ),
     (
@@ -200,10 +228,19 @@ TOPIC_SOURCE_RULES = [
         ],
     ),
     (
-        ("safe mode", "blue screen", "automatic repair", "recovery", "bitlocker", "restore point"),
+        ("safe mode", "blue screen", "automatic repair", "recovery", "bitlocker", "restore point", "restarting screen", "preparing automatic repair", "black screen", "blank desktop"),
         [
             {"name": "Microsoft Support search: Windows recovery options", "url": "https://support.microsoft.com/search/results?query=Windows%20recovery%20options"},
             {"name": "Microsoft Support search: Safe Mode Windows", "url": "https://support.microsoft.com/search/results?query=start%20Windows%20in%20safe%20mode"},
+            {"name": "Microsoft Support search: startup repair Windows", "url": "https://support.microsoft.com/search/results?query=startup%20repair%20Windows"},
+        ],
+    ),
+    (
+        ("pin", "windows hello", "fingerprint", "password sign in", "sign in option", "login"),
+        [
+            {"name": "Microsoft Support search: Windows sign-in options", "url": "https://support.microsoft.com/search/results?query=Windows%20sign-in%20options"},
+            {"name": "Microsoft Support search: Windows Hello", "url": "https://support.microsoft.com/search/results?query=Windows%20Hello"},
+            {"name": "Microsoft Support search: PIN sign-in Windows", "url": "https://support.microsoft.com/search/results?query=PIN%20sign-in%20Windows"},
         ],
     ),
 ]

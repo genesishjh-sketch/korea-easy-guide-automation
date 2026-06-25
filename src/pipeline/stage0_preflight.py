@@ -44,6 +44,7 @@ def run(site: str | None = None) -> Path:
         check_site_settings(site),
         check_seed_file(site),
         check_seed_inventory(site),
+        check_all_seed_quality(site),
         check_launch_queue(site),
         check_launch_queue_quality(site),
         check_reddit_collection_settings(site),
@@ -171,6 +172,32 @@ def check_seed_inventory(site: str | None = None) -> PreflightCheck:
             f"{message} Add at least two weeks of fresh topic seeds soon.",
         )
     return PreflightCheck("seed_inventory", "pass", message)
+
+
+def check_all_seed_quality(site: str | None = None) -> PreflightCheck:
+    settings = load_settings(site)
+    if settings.content_domain != "windows_help":
+        return PreflightCheck("all_seed_quality", "pass", "No Windows seed quality sweep is required for this site.")
+    try:
+        seeds = load_seed_list(site)
+    except Exception as exc:
+        return PreflightCheck("all_seed_quality", "fail", f"Could not load seed quality inputs: {exc}")
+
+    seed_set = set(seeds)
+    validations = [validate_seed(seed, seed_set, used=set(), site=site, generate=False) for seed in seeds]
+    failures = [item for item in validations if item.status != "pass"]
+    if failures:
+        details = "; ".join(f"{item.seed}: {', '.join(item.issues)}" for item in failures[:8])
+        return PreflightCheck(
+            "all_seed_quality",
+            "fail",
+            f"Long-term seed quality failed for {len(failures)}/{len(validations)} topic(s): {details}",
+        )
+    return PreflightCheck(
+        "all_seed_quality",
+        "pass",
+        f"{len(validations)}/{len(seeds)} long-term topics have specific categories and enough Microsoft sources.",
+    )
 
 
 def check_launch_queue(site: str | None = None) -> PreflightCheck:
@@ -669,6 +696,7 @@ def build_setup_actions(checks: list[PreflightCheck]) -> list[dict]:
         elif check.name in {
             "site_settings",
             "seed_file",
+            "all_seed_quality",
             "launch_queue",
             "launch_queue_quality",
             "daily_workflow",

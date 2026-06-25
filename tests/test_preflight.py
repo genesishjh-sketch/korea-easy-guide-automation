@@ -118,6 +118,24 @@ class PreflightTests(unittest.TestCase):
         self.assertEqual(check.status, "pass")
         self.assertIn("30 topic seeds found", check.message)
 
+    def test_all_seed_quality_fails_on_generic_or_weak_windows_topic(self) -> None:
+        seeds = ["windows problem", "wifi button missing windows 11"]
+        with patch.object(stage0_preflight, "load_settings") as load_settings, patch.object(
+            stage0_preflight, "load_seed_list", return_value=seeds
+        ):
+            load_settings.return_value.content_domain = "windows_help"
+            check = stage0_preflight.check_all_seed_quality("easy_pc_fix_guide")
+
+        self.assertEqual(check.status, "fail")
+        self.assertIn("Long-term seed quality failed", check.message)
+        self.assertIn("windows problem", check.message)
+
+    def test_current_easy_pc_seed_file_passes_long_term_quality_sweep(self) -> None:
+        check = stage0_preflight.check_all_seed_quality("easy_pc_fix_guide")
+
+        self.assertEqual(check.status, "pass")
+        self.assertIn("long-term topics", check.message)
+
     def test_critical_notifications_are_required(self) -> None:
         check = stage0_preflight.check_critical_notifications()
 
@@ -266,6 +284,7 @@ class PreflightTests(unittest.TestCase):
             "check_site_settings",
             "check_seed_file",
             "check_seed_inventory",
+            "check_all_seed_quality",
             "check_launch_queue",
             "check_launch_queue_quality",
             "check_zero_cost_image_policy",
