@@ -192,7 +192,12 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                                 "name": "seed_inventory",
                                 "status": "pass",
                                 "message": "83/103 exact-match topic seeds remain unused.",
-                            }
+                            },
+                            {
+                                "name": "launch_queue_quality",
+                                "status": "pass",
+                                "message": "14/14 launch topics have specific categories and enough Microsoft sources.",
+                            },
                         ],
                     },
                     "publication_check": {
@@ -263,6 +268,7 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("최근 일일 실패 리포트: 미업로드", markdown)
         self.assertIn("Preflight: 통과", markdown)
         self.assertIn("시드 재고: 통과 - 83/103 exact-match topic seeds remain unused.", markdown)
+        self.assertIn("Launch queue 품질: 통과 - 14/14 launch topics have specific categories", markdown)
         self.assertIn("Reddit OAuth Health: Reddit OAuth 키 없음", markdown)
         self.assertIn("상태 점수: 0/100", markdown)
         self.assertIn("발행량 증량 차단: 예", markdown)

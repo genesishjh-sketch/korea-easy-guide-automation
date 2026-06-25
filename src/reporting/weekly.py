@@ -632,10 +632,15 @@ class WeeklyReporter:
                 lines.append(
                     f"  - 시드 재고: {_status_kr(seed_inventory.get('status'))} - {seed_inventory.get('message')}"
                 )
+            launch_queue_quality = next((check for check in preflight.get("checks", []) if check.get("name") == "launch_queue_quality"), None)
+            if launch_queue_quality:
+                lines.append(
+                    f"  - Launch queue 품질: {_status_kr(launch_queue_quality.get('status'))} - {launch_queue_quality.get('message')}"
+                )
             failed_or_warned = [check for check in preflight.get("checks", []) if check.get("status") != "pass"]
             if failed_or_warned:
                 for check in failed_or_warned:
-                    if check.get("name") == "seed_inventory":
+                    if check.get("name") in {"seed_inventory", "launch_queue_quality"}:
                         continue
                     lines.append(f"  - {check.get('name')}: {_status_kr(check.get('status'))} - {check.get('message')}")
             else:
