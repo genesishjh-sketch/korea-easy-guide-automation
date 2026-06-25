@@ -456,6 +456,7 @@ def check_weekly_report_workflow() -> PreflightCheck:
         "REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}",
         "REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}",
         "python -m src.pipeline.stage0_reddit_health --site easy_pc_fix_guide",
+        "continue-on-error: true",
         "reports/easy_pc_fix_guide-reddit-health.json",
         "python -m src.pipeline.stage3_weekly_report --site easy_pc_fix_guide",
         "reports/easy_pc_fix_guide-weekly-*",
