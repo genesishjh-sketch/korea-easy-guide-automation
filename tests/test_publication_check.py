@@ -273,6 +273,24 @@ class PublicationCheckTests(unittest.TestCase):
         self.assertTrue(result["needs_attention"])
         self.assertIn("공개 피드", result["label"])
 
+    def test_assess_publication_evidence_accepts_missing_report_when_feed_and_workflow_match(self) -> None:
+        result = stage4_publication_check.assess_publication_evidence(
+            {
+                "status": "published_today",
+                "daily_workflow": {"status": "success"},
+                "daily_success": {"status": "not_uploaded"},
+                "daily_success_context": {
+                    "status": "not_uploaded",
+                    "publish_related": False,
+                    "label": "일일 성공 리포트 없음",
+                },
+            }
+        )
+
+        self.assertEqual(result["status"], "feed_and_workflow_confirmed_report_unavailable")
+        self.assertFalse(result["needs_attention"])
+        self.assertIn("artifact", result["label"])
+
     def test_publication_message_explains_before_cutoff_post(self) -> None:
         message = stage4_publication_check.build_message(
             {

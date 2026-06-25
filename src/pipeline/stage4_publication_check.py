@@ -236,6 +236,13 @@ def assess_publication_evidence(result: dict) -> dict:
             "note": "발행 증거가 서로 일치합니다.",
             "needs_attention": False,
         }
+    if public_feed_ok and workflow_ok and daily_context.get("status") == "not_uploaded":
+        return {
+            "status": "feed_and_workflow_confirmed_report_unavailable",
+            "label": "공개 피드와 workflow 확인, 일일 리포트 artifact 없음",
+            "note": "발행 확인 workflow는 별도 실행이라 daily-success artifact가 없을 수 있습니다. 공개 피드와 Daily workflow 성공을 기준으로 확인했습니다.",
+            "needs_attention": False,
+        }
     if public_feed_ok and workflow_ok and not publish_related_report:
         return {
             "status": "feed_and_workflow_confirmed_report_not_publish",
