@@ -86,6 +86,20 @@ def check_seed_file(site: str | None = None) -> PreflightCheck:
         seeds = load_seed_list(site)
     except Exception as exc:
         return PreflightCheck("seed_file", "fail", f"Could not load seed file: {exc}")
+    blank_count = sum(1 for seed in seeds if not str(seed).strip())
+    if blank_count:
+        return PreflightCheck("seed_file", "fail", f"Seed file contains {blank_count} blank topic seed(s).")
+    normalized_counts: dict[str, int] = {}
+    for seed in seeds:
+        normalized = str(seed).strip().lower()
+        normalized_counts[normalized] = normalized_counts.get(normalized, 0) + 1
+    duplicates = sorted(seed for seed, count in normalized_counts.items() if count > 1)
+    if duplicates:
+        return PreflightCheck(
+            "seed_file",
+            "fail",
+            f"Duplicate topic seeds found: {', '.join(duplicates[:5])}. Remove duplicates before unattended publishing.",
+        )
     if len(seeds) < 30:
         return PreflightCheck("seed_file", "warn", f"Only {len(seeds)} topic seeds found; add more for long automation runs.")
     return PreflightCheck("seed_file", "pass", f"{len(seeds)} topic seeds found.")

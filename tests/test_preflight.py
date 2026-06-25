@@ -66,6 +66,22 @@ class PreflightTests(unittest.TestCase):
         self.assertEqual(check.status, "pass")
         self.assertIn("OAuth", check.message)
 
+    def test_seed_file_fails_on_blank_topic_seed(self) -> None:
+        with patch.object(stage0_preflight, "load_seed_list", return_value=["wifi button missing windows 11", " "]):
+            check = stage0_preflight.check_seed_file("easy_pc_fix_guide")
+
+        self.assertEqual(check.status, "fail")
+        self.assertIn("blank topic seed", check.message)
+
+    def test_seed_file_fails_on_duplicate_topic_seed(self) -> None:
+        seeds = ["wifi button missing windows 11", "WiFi button missing windows 11", "printer offline windows 11"]
+        with patch.object(stage0_preflight, "load_seed_list", return_value=seeds):
+            check = stage0_preflight.check_seed_file("easy_pc_fix_guide")
+
+        self.assertEqual(check.status, "fail")
+        self.assertIn("Duplicate topic seeds", check.message)
+        self.assertIn("wifi button missing windows 11", check.message.lower())
+
     def test_critical_notifications_are_required(self) -> None:
         check = stage0_preflight.check_critical_notifications()
 
