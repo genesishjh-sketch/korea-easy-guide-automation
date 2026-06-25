@@ -683,8 +683,65 @@ def save_seed_plan_report(seed_plan: dict) -> Path:
     output_dir = ROOT_DIR / "reports"
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / f"{seed_plan['site']}-daily-seed-plan.json"
+    markdown_path = output_dir / f"{seed_plan['site']}-daily-seed-plan.md"
+    seed_plan["human_summary"] = build_seed_plan_message(seed_plan)
+    seed_plan["markdown_report"] = str(markdown_path)
     output_path.write_text(json.dumps(seed_plan, ensure_ascii=False, indent=2), encoding="utf-8")
+    markdown_path.write_text(build_seed_plan_markdown(seed_plan), encoding="utf-8")
     return output_path
+
+
+def build_seed_plan_markdown(seed_plan: dict) -> str:
+    preview = seed_plan.get("candidate_preview") or []
+    lines = [
+        f"# 일일 포스팅 시드 계획: {seed_plan.get('site_name', '')}",
+        "",
+        f"- 사이트: {seed_plan.get('site_url', '')}",
+        f"- 기준일: {seed_plan.get('today_kst', '')} KST",
+        f"- 실행환경: {seed_plan.get('app_env', '')}",
+        f"- 시드 소스: {seed_plan.get('active_seed_source', '')}",
+        f"- 날짜 기준 시드: {seed_plan.get('date_selected_seed') or seed_plan.get('selected_seed', '')}",
+        f"- 날짜 기준 시드 상태: {seed_plan_status_label(seed_plan.get('date_selected_seed_status'))}",
+        f"- 오늘 선택 시드: {seed_plan.get('selected_seed', '')}",
+        f"- 다음 발행 가능 시드: {seed_plan.get('next_publishable_seed') or '없음'}",
+        f"- 다음 발행 가능 시드 상태: {seed_plan_status_label(seed_plan.get('next_publishable_seed_status'))}",
+        f"- 후보 상태 집계: {format_seed_plan_status_counts(seed_plan.get('candidate_status_counts') or {})}",
+        f"- 활성 시드 수: {seed_plan.get('active_seed_count', 0)}",
+        f"- 미사용 활성 시드 수: {seed_plan.get('unused_active_seed_count', 0)}",
+        f"- 메모: {seed_plan.get('note', '')}",
+        "",
+        "## 후보 미리보기",
+        "",
+    ]
+    if preview:
+        lines.append("| 순서 | 시드 | 카테고리 | 상태 | Microsoft 출처 | 이슈 |")
+        lines.append("|---:|---|---|---|---:|---|")
+        for index, item in enumerate(preview[:10], 1):
+            precheck = item.get("quality_precheck") or {}
+            issues = ", ".join(precheck.get("issues") or [])
+            source_text = (
+                f"{precheck.get('microsoft_source_count', 0)} / 직접 "
+                f"{precheck.get('direct_microsoft_source_count', 0)}"
+                if precheck
+                else ""
+            )
+            lines.append(
+                f"| {index} | {item.get('seed', '')} | {item.get('category', '')} | "
+                f"{seed_plan_status_label(seed_plan_candidate_status(item))} | {source_text} | {issues or '-'} |"
+            )
+    else:
+        lines.append("후보가 없습니다.")
+    lines.extend(
+        [
+            "",
+            "## 운영 해석",
+            "",
+            "- 날짜 기준 시드가 이미 생성/검증 또는 공개 이력이 있으면 다음 발행 가능 시드로 우회합니다.",
+            "- Reddit 승인 전에도 공식 Microsoft 출처와 fallback 질문으로 하루 1개 발행은 계속할 수 있습니다.",
+            "- 발행량 증량은 Reddit OAuth Health와 Search Console/품질 상태가 안정될 때까지 보류합니다.",
+        ]
+    )
+    return "\n".join(lines)
 
 
 def save_daily_success_report(result: dict[str, str]) -> Path:

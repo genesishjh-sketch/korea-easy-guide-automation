@@ -169,6 +169,23 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                         "skipped_duplicate_seeds": ["wifi button missing windows 11"],
                         "skipped_quality_seeds": ["thin windows update topic"],
                     },
+                    "daily_seed_plan": {
+                        "mode": "plan",
+                        "today_kst": "2026-06-25",
+                        "active_seed_source": "long_term",
+                        "date_selected_seed": "wifi button missing windows 11",
+                        "date_selected_seed_status": "already_published_or_duplicate",
+                        "selected_seed": "wifi button missing windows 11",
+                        "next_publishable_seed": "how to check windows version",
+                        "next_publishable_seed_status": "ready",
+                        "candidate_status_counts": {
+                            "already_generated_or_validated": 49,
+                            "already_published_or_duplicate": 1,
+                            "ready": 53,
+                        },
+                        "unused_active_seed_count": 53,
+                        "note": "Seed plan is ready.",
+                    },
                     "daily_failure": {"status": "not_uploaded"},
                     "reddit_health": {
                         "status": "missing_credentials",
@@ -329,6 +346,14 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("품질 재시도 시드: thin windows update topic", markdown)
         self.assertIn("운영 상태: 발행 품질 OK, 수집 안정성 점검 필요", markdown)
         self.assertIn("발행량 증량 준비: 아니오", markdown)
+        self.assertIn("일일 시드 계획: 계획 완료", markdown)
+        self.assertIn("계획 기준일: 2026-06-25 KST", markdown)
+        self.assertIn("날짜 기준 시드: wifi button missing windows 11", markdown)
+        self.assertIn("날짜 기준 시드 상태: 공개/중복 이력 있음", markdown)
+        self.assertIn("다음 발행 가능 시드: how to check windows version", markdown)
+        self.assertIn("다음 발행 가능 시드 상태: 발행 가능", markdown)
+        self.assertIn("후보 상태 집계: 생성/검증 이력 있음 49개, 공개/중복 이력 있음 1개, 발행 가능 53개", markdown)
+        self.assertIn("미사용 활성 시드 수: 53", markdown)
         self.assertIn("최근 일일 실패 리포트: 미업로드", markdown)
         self.assertIn("Preflight: 통과", markdown)
         self.assertIn("무인 발행 준비: 예", markdown)

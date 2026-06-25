@@ -202,6 +202,10 @@ class WeeklyReporter:
         return {
             "daily_success": daily_success,
             "daily_success_context": daily_success_context,
+            "daily_seed_plan": self._seed_plan_for_current_day(
+                self._read_report(report_dir / f"{self.settings.site_key}-daily-seed-plan.json"),
+                now,
+            ),
             "daily_failure": daily_failure,
             "preflight": self._read_report(report_dir / f"{self.settings.site_key}-preflight.json"),
             "reddit_health": self._reddit_health_for_current_day(
@@ -296,6 +300,19 @@ class WeeklyReporter:
             "action_required": "Reddit Health 리포트가 오늘 실행된 결과가 아닙니다. workflow를 다시 실행해 최신 상태를 확인하세요.",
             "previous_status": reddit_health.get("status", "unknown"),
             "previous_checked_at": reddit_health.get("checked_at", ""),
+        }
+
+    def _seed_plan_for_current_day(self, seed_plan: dict, now: datetime | None) -> dict:
+        if now is None or seed_plan.get("status") == "not_uploaded":
+            return seed_plan
+        today = now.astimezone(KST).date().isoformat()
+        if seed_plan.get("today_kst") == today:
+            return seed_plan
+        return {
+            **seed_plan,
+            "status": "stale_seed_plan",
+            "previous_today_kst": seed_plan.get("today_kst", ""),
+            "note": "이전 일일 시드 계획입니다. 오늘 plan workflow가 아직 실행되지 않았거나 artifact가 보존되지 않았습니다.",
         }
 
     def _publication_check_from_public_posts(self, now: datetime, public_posts: dict) -> dict:
@@ -796,6 +813,7 @@ class WeeklyReporter:
         operations = report.get("operations", {})
         daily_success = operations.get("daily_success", {})
         daily_success_context = operations.get("daily_success_context") or classify_daily_success_context(daily_success)
+        daily_seed_plan = operations.get("daily_seed_plan", {})
         daily_failure = operations.get("daily_failure", {})
         preflight = operations.get("preflight", {})
         reddit_health = operations.get("reddit_health", {})
@@ -839,6 +857,32 @@ class WeeklyReporter:
                 "  - 발행량 증량 준비: "
                 f"{'예' if operational_status.get('ready_for_cadence_increase') else '아니오'}"
             )
+        lines.append(f"- 일일 시드 계획: {_status_kr(daily_seed_plan.get('status', daily_seed_plan.get('mode', 'not_uploaded')))}")
+        if daily_seed_plan.get("previous_today_kst"):
+            lines.append(f"  - 이전 계획 기준일: {daily_seed_plan.get('previous_today_kst')}")
+        if daily_seed_plan.get("today_kst"):
+            lines.append(f"  - 계획 기준일: {daily_seed_plan.get('today_kst')} KST")
+        if daily_seed_plan.get("active_seed_source"):
+            lines.append(f"  - 시드 소스: {daily_seed_plan.get('active_seed_source')}")
+        if daily_seed_plan.get("date_selected_seed"):
+            lines.append(f"  - 날짜 기준 시드: {daily_seed_plan.get('date_selected_seed')}")
+            lines.append(
+                f"  - 날짜 기준 시드 상태: {_seed_plan_status_kr(daily_seed_plan.get('date_selected_seed_status'))}"
+            )
+        if daily_seed_plan.get("next_publishable_seed") is not None:
+            lines.append(f"  - 다음 발행 가능 시드: {daily_seed_plan.get('next_publishable_seed') or '없음'}")
+            lines.append(
+                f"  - 다음 발행 가능 시드 상태: {_seed_plan_status_kr(daily_seed_plan.get('next_publishable_seed_status'))}"
+            )
+        if daily_seed_plan.get("candidate_status_counts"):
+            lines.append(
+                "  - 후보 상태 집계: "
+                f"{_format_seed_plan_status_counts_kr(daily_seed_plan.get('candidate_status_counts') or {})}"
+            )
+        if daily_seed_plan.get("unused_active_seed_count") is not None:
+            lines.append(f"  - 미사용 활성 시드 수: {daily_seed_plan.get('unused_active_seed_count')}")
+        if daily_seed_plan.get("note"):
+            lines.append(f"  - 참고: {daily_seed_plan.get('note')}")
         lines.append(f"- 최근 일일 실패 리포트: {_status_kr(daily_failure.get('status', 'not_uploaded'))}")
         if daily_failure.get("note"):
             lines.append(f"  - 참고: {daily_failure.get('note')}")
@@ -1167,8 +1211,28 @@ def _status_kr(status: str | None) -> str:
         "oauth_error": "OAuth 오류",
         "reddit_health_missing": "Reddit Health 리포트 없음",
         "stale_reddit_health": "이전 Reddit Health 리포트",
+        "plan": "계획 완료",
+        "planned": "계획 완료",
+        "stale_seed_plan": "이전 시드 계획",
     }
     return mapping.get(status or "not_uploaded", status or "미업로드")
+
+
+def _seed_plan_status_kr(status: str | None) -> str:
+    mapping = {
+        "ready": "발행 가능",
+        "already_generated_or_validated": "생성/검증 이력 있음",
+        "already_published_or_duplicate": "공개/중복 이력 있음",
+        "quality_precheck_warning": "품질 사전점검 필요",
+        "not_available": "후보 없음",
+    }
+    return mapping.get(status or "", status or "확인 필요")
+
+
+def _format_seed_plan_status_counts_kr(counts: dict) -> str:
+    if not counts:
+        return "없음"
+    return ", ".join(f"{_seed_plan_status_kr(str(status))} {count}개" for status, count in counts.items())
 
 
 def _article_validation_status(validation: dict) -> str:

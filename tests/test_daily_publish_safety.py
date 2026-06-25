@@ -662,13 +662,19 @@ class DuplicatePublishGuardTests(unittest.TestCase):
                 result = daily_draft.run(site="easy_pc_fix_guide", publish_mode="plan", notify=False)
 
             report_path = root / "reports" / "easy_pc_fix_guide-daily-seed-plan.json"
+            markdown_path = root / "reports" / "easy_pc_fix_guide-daily-seed-plan.md"
             payload = json.loads(report_path.read_text(encoding="utf-8"))
+            markdown = markdown_path.read_text(encoding="utf-8")
 
         run_stage1.assert_not_called()
         notification.assert_not_called()
         self.assertEqual(result["status"], "planned")
         self.assertEqual(result["publish_result"], str(report_path))
         self.assertEqual(payload["selected_seed"], "wifi button missing")
+        self.assertEqual(payload["markdown_report"], str(markdown_path))
+        self.assertIn("[Posting Bot] 일일 포스팅 시드 계획", payload["human_summary"])
+        self.assertIn("# 일일 포스팅 시드 계획: Easy PC Fix Guide", markdown)
+        self.assertIn("오늘 선택 시드: wifi button missing", markdown)
 
     def test_seed_plan_message_includes_candidate_flags(self) -> None:
         message = daily_draft.build_seed_plan_message(
