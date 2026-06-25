@@ -10,6 +10,7 @@ from zoneinfo import ZoneInfo
 
 from src.config import ROOT_DIR
 from src.config import load_settings
+from src.content.topic_scoring import infer_category
 from src.notifications.telegram import NotificationClient
 from src.pipeline.stage4_publication_check import fetch_public_feed
 from src.pipeline.stage4_publication_check import parse_posts
@@ -85,6 +86,16 @@ def load_active_seed_list(site: str | None = None) -> list[str]:
     return seeds
 
 
+def load_active_seed_list_for_date(site: str | None, selected_date: date) -> tuple[list[str], str, int]:
+    settings = load_settings(site)
+    seeds = load_seed_list(site)
+    launch_seeds = load_launch_seed_list(site)
+    days_since_start = days_since_automation_start(settings.automation_start_date, selected_date)
+    if settings.app_env.lower() == "production" and launch_seeds and days_since_start < len(launch_seeds):
+        return launch_seeds, "launch_queue", days_since_start
+    return seeds, "long_term", days_since_start
+
+
 def load_seed_file(seed_file: str) -> list[str]:
     seed_path = Path(seed_file)
     if not seed_path.is_absolute():
@@ -104,6 +115,76 @@ def choose_publish_seed_candidates(explicit_seed: str | None = None, site: str |
     selected = choose_seed(None, site)
     selected_index = seeds.index(selected)
     return seeds[selected_index:] + seeds[:selected_index]
+
+
+def build_seed_plan(
+    explicit_seed: str | None = None,
+    site: str | None = None,
+    now: datetime | None = None,
+) -> dict:
+    settings = load_settings(site)
+    selected_date = (now or datetime.now(KST)).astimezone(KST).date()
+    active_seeds, active_seed_source, days_since_start = load_active_seed_list_for_date(site, selected_date)
+    if not active_seeds and not explicit_seed:
+        raise ValueError("Seed file must contain at least one topic seed.")
+    publish_used = used_keywords(site, include_validation=False)
+    generated_used = used_keywords(site, include_validation=True)
+    if explicit_seed:
+        selected_seed = explicit_seed
+        date_selected_seed = explicit_seed
+        candidates = [explicit_seed]
+        active_seed_source = "explicit"
+    elif settings.app_env.lower() == "production":
+        date_selected_seed = choose_seed_for_date(active_seeds, settings.automation_start_date, selected_date)
+        selected_seed = date_selected_seed
+        selected_index = active_seeds.index(selected_seed)
+        candidates = active_seeds[selected_index:] + active_seeds[:selected_index]
+    else:
+        date_selected_seed = active_seeds[0]
+        selected_seed = next((seed for seed in active_seeds if seed.lower() not in generated_used), active_seeds[0])
+        selected_index = active_seeds.index(selected_seed)
+        candidates = active_seeds[selected_index:] + active_seeds[:selected_index]
+
+    candidate_preview = [
+        {
+            "seed": seed,
+            "category": infer_category(seed, settings.content_domain),
+            "already_published_or_duplicate": seed.lower() in publish_used,
+            "already_generated_or_validated": seed.lower() in generated_used,
+        }
+        for seed in candidates[:10]
+    ]
+    unused_count = sum(1 for seed in active_seeds if seed.lower() not in generated_used)
+    plan = {
+        "site": settings.site_key,
+        "site_name": settings.site_name,
+        "site_url": settings.site_url,
+        "mode": "plan",
+        "app_env": settings.app_env,
+        "content_domain": settings.content_domain,
+        "today_kst": selected_date.isoformat(),
+        "automation_start_date": settings.automation_start_date,
+        "days_since_automation_start": days_since_start,
+        "active_seed_source": active_seed_source,
+        "active_seed_count": len(active_seeds),
+        "main_seed_count": len(load_seed_list(site)),
+        "launch_seed_count": len(load_launch_seed_list(site)),
+        "date_selected_seed": date_selected_seed,
+        "selected_seed": selected_seed,
+        "candidate_count": len(candidates),
+        "candidate_preview": candidate_preview,
+        "used_publish_seed_count": len(publish_used),
+        "used_generated_seed_count": len(generated_used),
+        "unused_active_seed_count": unused_count,
+        "created_at": datetime.utcnow().isoformat() + "Z",
+    }
+    if active_seed_source == "launch_queue":
+        plan["note"] = "Launch queue is still active; long-term seeds will resume after the launch queue window."
+    elif unused_count == 0 and not explicit_seed:
+        plan["note"] = "All active seeds already have generated artifacts; production mode can still rotate by date."
+    else:
+        plan["note"] = "Seed plan is ready."
+    return plan
 
 
 def choose_seed_for_date(seeds: list[str], start_date: str, today: date) -> str:
@@ -130,6 +211,22 @@ def run(
     settings = load_settings(site)
     selected_seed = seed or ""
     try:
+        if publish_mode == "plan":
+            seed_plan = build_seed_plan(seed, site)
+            result_path = save_seed_plan_report(seed_plan)
+            result = {
+                "seed": seed_plan.get("selected_seed", ""),
+                "article_dir": "",
+                "publish_result": str(result_path),
+                "site": settings.site_key,
+                "mode": publish_mode,
+                "status": "planned",
+                "candidate_count": seed_plan.get("candidate_count", 0),
+                "active_seed_source": seed_plan.get("active_seed_source", ""),
+            }
+            if notify:
+                notify_seed_plan(seed_plan, site)
+            return result
         if publish_mode == "publish" and seed is None:
             existing_today = find_public_post_published_today(settings.site_url)
             if existing_today:
@@ -353,6 +450,44 @@ def notify_daily_failure(seed: str, exc: Exception, site: str | None = None, mod
     NotificationClient(settings).send_required(build_daily_failure_message(seed, exc, site, mode))
 
 
+def notify_seed_plan(seed_plan: dict, site: str | None = None) -> None:
+    settings = load_settings(site)
+    NotificationClient(settings).send_required(build_seed_plan_message(seed_plan))
+
+
+def build_seed_plan_message(seed_plan: dict) -> str:
+    preview = seed_plan.get("candidate_preview") or []
+    preview_lines = []
+    for index, item in enumerate(preview[:5], 1):
+        flags = []
+        if item.get("already_published_or_duplicate"):
+            flags.append("공개/중복 이력 있음")
+        if item.get("already_generated_or_validated"):
+            flags.append("생성/검증 이력 있음")
+        flag_text = f" ({', '.join(flags)})" if flags else ""
+        preview_lines.append(f"- {index}. {item.get('seed')} / {item.get('category')}{flag_text}")
+    if not preview_lines:
+        preview_lines.append("- 후보 없음")
+    return "\n".join(
+        [
+            "[Posting Bot] 일일 포스팅 시드 계획",
+            "",
+            f"- 블로그: {seed_plan.get('site_name')}",
+            f"- 사이트: {seed_plan.get('site_url')}",
+            f"- 기준일: {seed_plan.get('today_kst')} KST",
+            f"- 실행환경: {seed_plan.get('app_env')}",
+            f"- 시드 소스: {seed_plan.get('active_seed_source')}",
+            f"- 오늘 선택 시드: {seed_plan.get('selected_seed')}",
+            f"- 후보 수: {seed_plan.get('candidate_count')}",
+            f"- 미사용 활성 시드 수: {seed_plan.get('unused_active_seed_count')}",
+            f"- 메모: {seed_plan.get('note')}",
+            "",
+            "후보 미리보기:",
+            *preview_lines,
+        ]
+    )
+
+
 def build_daily_failure_message(seed: str, exc: Exception, site: str | None = None, mode: str = "draft") -> str:
     settings = load_settings(site)
     error = "".join(traceback.format_exception_only(type(exc), exc)).strip()
@@ -430,6 +565,14 @@ def save_daily_failure_report(seed: str, exc: Exception, site: str | None = None
         "created_at": datetime.utcnow().isoformat() + "Z",
     }
     output_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    return output_path
+
+
+def save_seed_plan_report(seed_plan: dict) -> Path:
+    output_dir = ROOT_DIR / "reports"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_path = output_dir / f"{seed_plan['site']}-daily-seed-plan.json"
+    output_path.write_text(json.dumps(seed_plan, ensure_ascii=False, indent=2), encoding="utf-8")
     return output_path
 
 
@@ -839,7 +982,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Daily pipeline: collect, generate, and upload a Blogger draft.")
     parser.add_argument("--seed", help="Optional explicit topic seed")
     parser.add_argument("--site", help="Site profile key, for example: easy_pc_fix_guide")
-    parser.add_argument("--mode", choices=["validate", "draft", "publish"], default="draft")
+    parser.add_argument("--mode", choices=["plan", "validate", "draft", "publish"], default="draft")
     parser.add_argument("--no-notify", action="store_true", help="Skip Posting Bot notifications for local smoke checks.")
     args = parser.parse_args()
     result = run(args.seed, args.site, args.mode, notify=not args.no_notify)

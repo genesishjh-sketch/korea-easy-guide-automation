@@ -4,6 +4,7 @@ from datetime import datetime
 import json
 from pathlib import Path
 import tempfile
+from types import SimpleNamespace
 from zoneinfo import ZoneInfo
 import unittest
 from unittest.mock import patch
@@ -564,6 +565,92 @@ class DuplicatePublishGuardTests(unittest.TestCase):
                 seed = daily_draft.choose_seed(site="easy_pc_fix_guide")
 
         self.assertEqual(seed, "long term one")
+
+    def test_build_seed_plan_summarizes_launch_queue_candidates(self) -> None:
+        settings = SimpleNamespace(
+            site_key="easy_pc_fix_guide",
+            site_name="Easy PC Fix Guide",
+            site_url="https://easypcfixguide.blogspot.com",
+            app_env="production",
+            automation_start_date="2026-06-24",
+            content_domain="windows_help",
+        )
+        with patch.object(daily_draft, "load_settings", return_value=settings), patch.object(
+            daily_draft, "load_seed_list", return_value=["long term topic"]
+        ), patch.object(
+            daily_draft, "load_launch_seed_list", return_value=["launch day one", "wifi button missing"]
+        ), patch.object(
+            daily_draft, "used_keywords", side_effect=[{"launch day one"}, {"launch day one", "wifi button missing"}]
+        ):
+            plan = daily_draft.build_seed_plan(
+                site="easy_pc_fix_guide",
+                now=datetime(2026, 6, 25, 9, 0, tzinfo=ZoneInfo("Asia/Seoul")),
+            )
+
+        self.assertEqual(plan["active_seed_source"], "launch_queue")
+        self.assertEqual(plan["selected_seed"], "wifi button missing")
+        self.assertEqual(plan["candidate_count"], 2)
+        self.assertEqual(plan["unused_active_seed_count"], 0)
+        self.assertEqual(plan["candidate_preview"][0]["category"], "Wi-Fi & Internet")
+
+    def test_plan_mode_writes_seed_plan_without_generating_article(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            settings = SimpleNamespace(site_key="easy_pc_fix_guide")
+            seed_plan = {
+                "site": "easy_pc_fix_guide",
+                "site_name": "Easy PC Fix Guide",
+                "site_url": "https://easypcfixguide.blogspot.com",
+                "mode": "plan",
+                "selected_seed": "wifi button missing",
+                "candidate_count": 1,
+                "active_seed_source": "long_term",
+                "candidate_preview": [],
+            }
+            with patch.object(daily_draft, "ROOT_DIR", root), patch.object(
+                daily_draft, "load_settings", return_value=settings
+            ), patch.object(daily_draft, "build_seed_plan", return_value=seed_plan), patch.object(
+                daily_draft, "run_stage1"
+            ) as run_stage1, patch.object(
+                daily_draft, "NotificationClient"
+            ) as notification:
+                result = daily_draft.run(site="easy_pc_fix_guide", publish_mode="plan", notify=False)
+
+            report_path = root / "reports" / "easy_pc_fix_guide-daily-seed-plan.json"
+            payload = json.loads(report_path.read_text(encoding="utf-8"))
+
+        run_stage1.assert_not_called()
+        notification.assert_not_called()
+        self.assertEqual(result["status"], "planned")
+        self.assertEqual(result["publish_result"], str(report_path))
+        self.assertEqual(payload["selected_seed"], "wifi button missing")
+
+    def test_seed_plan_message_includes_candidate_flags(self) -> None:
+        message = daily_draft.build_seed_plan_message(
+            {
+                "site_name": "Easy PC Fix Guide",
+                "site_url": "https://easypcfixguide.blogspot.com",
+                "today_kst": "2026-06-25",
+                "app_env": "production",
+                "active_seed_source": "long_term",
+                "selected_seed": "wifi button missing",
+                "candidate_count": 1,
+                "unused_active_seed_count": 0,
+                "note": "Seed plan is ready.",
+                "candidate_preview": [
+                    {
+                        "seed": "wifi button missing",
+                        "category": "Wi-Fi & Internet",
+                        "already_published_or_duplicate": True,
+                        "already_generated_or_validated": True,
+                    }
+                ],
+            }
+        )
+
+        self.assertIn("[Posting Bot] 일일 포스팅 시드 계획", message)
+        self.assertIn("wifi button missing / Wi-Fi & Internet", message)
+        self.assertIn("공개/중복 이력 있음", message)
 
     def test_used_keywords_can_ignore_validation_only_artifacts(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir, patch.object(daily_draft, "load_settings") as load_settings:
