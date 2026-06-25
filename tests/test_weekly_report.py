@@ -843,6 +843,7 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
             quality_issues=[
                 {"code": "weak_related_guide_links", "message": "Related guide links missing."},
                 {"code": "missing_required_image_assets", "message": "Missing image assets."},
+                {"code": "unsafe_windows_image_label", "message": "Image label mentions screenshot."},
                 {"code": "shallow_microsoft_sources", "message": "Direct Microsoft sources missing."},
                 {"code": "topic_alignment_mismatch", "message": "Topic seed mismatch."},
             ],
@@ -854,6 +855,9 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("이미지 문제가 감지", joined)
         self.assertIn("hero/inline 이미지 2개", joined)
         self.assertIn("alt/caption", joined)
+        self.assertIn("Windows 이미지 안전 문제가 감지", joined)
+        self.assertIn("readable error text", joined)
+        self.assertIn("Registry Editor", joined)
         self.assertIn("공식 출처 문제가 감지", joined)
         self.assertIn("Microsoft Support/Learn 직접 링크", joined)
         self.assertIn("주제 일치 문제가 감지", joined)

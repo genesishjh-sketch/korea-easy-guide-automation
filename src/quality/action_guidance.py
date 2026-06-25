@@ -15,10 +15,17 @@ def quality_issue_actions(quality_issues: list[dict]) -> list[str]:
         "weak_image_plan",
         "weak_image_alt_text",
         "weak_image_caption",
+        "unsafe_windows_image_label",
+        "unsafe_windows_image_prompt",
     } & codes:
         actions.append(
             "품질검수에서 이미지 문제가 감지되었습니다. hero/inline 이미지 2개, strict image_plan, 주제와 연결된 alt/caption이 "
             "생성됐는지 확인하세요."
+        )
+    if {"unsafe_windows_image_label", "unsafe_windows_image_prompt"} & codes:
+        actions.append(
+            "Windows 이미지 안전 문제가 감지되었습니다. fake Windows UI, readable error text, command prompt, Registry Editor를 "
+            "보여주는 이미지/프롬프트를 제거하고 abstract checklist, shield, restart arrow 같은 안전한 설명형 비주얼로 바꾸세요."
         )
     if {"weak_sources", "weak_microsoft_sources", "missing_microsoft_source", "shallow_microsoft_sources"} & codes:
         actions.append(

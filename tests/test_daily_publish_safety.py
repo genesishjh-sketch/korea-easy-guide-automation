@@ -359,6 +359,7 @@ class DuplicatePublishGuardTests(unittest.TestCase):
                         "issues": [
                             {"code": "weak_related_guide_links", "message": "Missing internal related guide links."},
                             {"code": "missing_required_image_assets", "message": "Missing image assets."},
+                            {"code": "unsafe_windows_image_prompt", "message": "Image prompt allows fake Windows UI."},
                             {"code": "shallow_microsoft_sources", "message": "Direct Microsoft source links missing."},
                             {"code": "topic_alignment_mismatch", "message": "Topic seed mismatch."},
                         ],
@@ -392,6 +393,9 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertIn("블로그 내부 검색 링크 3개 이상", message)
         self.assertIn("이미지 문제가 감지", message)
         self.assertIn("alt/caption", message)
+        self.assertIn("Windows 이미지 안전 문제가 감지", message)
+        self.assertIn("fake Windows UI", message)
+        self.assertIn("abstract checklist", message)
         self.assertIn("공식 출처 문제가 감지", message)
         self.assertIn("주제 일치 문제가 감지", message)
 
