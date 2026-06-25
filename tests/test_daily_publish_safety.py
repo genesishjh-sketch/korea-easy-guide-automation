@@ -173,6 +173,9 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertEqual(payload["status"], "skipped_daily_limit")
         self.assertEqual(payload["title"], "Wi-Fi Button Missing on Windows 11")
         self.assertEqual(payload["url"], "https://easypcfixguide.blogspot.com/2026/06/example.html")
+        self.assertTrue(payload["operational_status"]["publish_quality_ok"])
+        self.assertEqual(payload["operational_status"]["collection_status"], "not_run_daily_limit")
+        self.assertEqual(payload["operational_status"]["status_label"], "오늘 공개 글 확인, 추가 발행 정상 스킵")
 
     def test_daily_limit_feed_error_is_reported_before_reraising(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -308,6 +311,30 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertIn("https://www.reddit.com/prefs/apps", message)
         self.assertIn("REDDIT_CLIENT_ID", message)
         self.assertIn("Easy PC Fix Reddit OAuth Health", message)
+
+    def test_daily_limit_success_message_does_not_look_like_quality_failure(self) -> None:
+        message = daily_draft.build_daily_success_message(
+            {
+                "site": "easy_pc_fix_guide",
+                "mode": "publish",
+                "daily_limit_skipped": True,
+                "existing_post": {
+                    "title": "Wi-Fi Button Missing on Windows 11",
+                    "url": "https://easypcfixguide.blogspot.com/2026/06/example.html",
+                    "published_kst": "2026-06-25T00:12:10+09:00",
+                },
+            }
+        )
+
+        self.assertIn("오늘 공개 글 이미 있음, 추가 발행 건너뜀", message)
+        self.assertIn("- Blogger 상태: existing_public_post", message)
+        self.assertIn("- 기존 공개 시각: 2026-06-25T00:12:10+09:00", message)
+        self.assertIn("- 품질검수: 오늘 이미 공개된 글이 있어 새 글 생성/검수 없음", message)
+        self.assertIn("- 운영 상태: 오늘 공개 글 확인, 추가 발행 정상 스킵", message)
+        self.assertIn("- 발행 품질 안정성: 안정", message)
+        self.assertNotIn("- 품질통과: 아니오", message)
+        self.assertNotIn("- 품질점수: n/a/100", message)
+        self.assertNotIn("- Reddit fallback 신호 수: 0", message)
 
     def test_daily_success_message_includes_quality_issue_actions(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

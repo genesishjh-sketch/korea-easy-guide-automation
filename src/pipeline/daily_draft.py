@@ -431,8 +431,12 @@ def save_daily_success_report(result: dict[str, str]) -> Path:
     article = metadata.get("article", {})
     blogger = publish_result.get("blogger", {})
     existing_post = result.get("existing_post") or {}
-    reddit_signal_quality = build_reddit_signal_quality(research_report)
-    operational_status = build_operational_status(quality_report, reddit_signal_quality)
+    if result.get("daily_limit_skipped"):
+        reddit_signal_quality = {}
+        operational_status = build_daily_limit_operational_status()
+    else:
+        reddit_signal_quality = build_reddit_signal_quality(research_report)
+        operational_status = build_operational_status(quality_report, reddit_signal_quality)
     output_dir = ROOT_DIR / "reports"
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / daily_success_report_name(settings.site_key, mode)
@@ -513,23 +517,53 @@ def build_daily_success_message(result: dict[str, str]) -> str:
     existing_post = result.get("existing_post") or {}
     skipped = publish_result.get("skipped", False)
     draft = publish_result.get("draft", True)
+    daily_limit_skipped = bool(result.get("daily_limit_skipped"))
     quality_score = quality_report.get("score", "n/a")
     quality_passed = quality_report.get("passed", False)
     quality_metrics = quality_report.get("metrics", {})
     issues = quality_report.get("issues", [])
-    reddit_signal_quality = build_reddit_signal_quality(research_report)
-    operational_status = build_operational_status(quality_report, reddit_signal_quality)
+    if daily_limit_skipped:
+        reddit_signal_quality = {}
+        operational_status = build_daily_limit_operational_status()
+    else:
+        reddit_signal_quality = build_reddit_signal_quality(research_report)
+        operational_status = build_operational_status(quality_report, reddit_signal_quality)
     if mode == "validate":
         status = "검증 완료"
-    elif result.get("daily_limit_skipped"):
+    elif daily_limit_skipped:
         status = "오늘 공개 글 이미 있음, 추가 발행 건너뜀"
     elif skipped:
         status = "중복 공개 글 감지, 발행 건너뜀"
     else:
         status = "초안 업로드 완료" if draft else "공개 발행 완료"
-    blogger_status = blogger.get("status") or "unknown"
+    blogger_status = "existing_public_post" if daily_limit_skipped else blogger.get("status") or "unknown"
     blogger_url = blogger.get("url") or existing_post.get("url") or "발행 없음"
     title = article.get("title", "") or existing_post.get("title", "제목 없음")
+    if daily_limit_skipped:
+        quality_lines = [
+            f"- 기존 공개 시각: {existing_post.get('published_kst', '') or '확인 필요'}",
+            "- 품질검수: 오늘 이미 공개된 글이 있어 새 글 생성/검수 없음",
+            "- 수집 상태: 새 수집 없음",
+            f"- 운영 상태: {operational_status.get('status_label')}",
+            f"- 발행 품질 안정성: {'안정' if operational_status.get('publish_quality_ok') else '점검 필요'}",
+            f"- 수집 안정성: {operational_status.get('collection_status_label')}",
+        ]
+    else:
+        quality_lines = [
+            f"- 품질점수: {quality_score}/100",
+            f"- 품질통과: {'예' if quality_passed else '아니오'}",
+            f"- 단어 수: {quality_metrics.get('word_count', 'n/a')}",
+            f"- 이미지 수: {quality_metrics.get('image_count', 'n/a')}",
+            f"- 공식 링크 수: {quality_metrics.get('official_link_count', 'n/a')}",
+            f"- FAQ 수: {quality_metrics.get('faq_question_count', 'n/a')}",
+            f"- Reddit 실제 신호 수: {reddit_signal_quality.get('live_reddit_signal_count', 0)}",
+            f"- Reddit OAuth 신호 수: {reddit_signal_quality.get('reddit_oauth_signal_count', 0)}",
+            f"- Reddit public JSON 신호 수: {reddit_signal_quality.get('reddit_public_json_signal_count', 0)}",
+            f"- Reddit fallback 신호 수: {reddit_signal_quality.get('fallback_reddit_signal_count', 0)}",
+            f"- 운영 상태: {operational_status.get('status_label')}",
+            f"- 발행 품질 안정성: {'안정' if operational_status.get('publish_quality_ok') else '점검 필요'}",
+            f"- 수집 안정성: {operational_status.get('collection_status_label')}",
+        ]
 
     lines = [
         "[Posting Bot] 매일 아침 포스팅 결과 보고",
@@ -542,19 +576,7 @@ def build_daily_success_message(result: dict[str, str]) -> str:
         f"- 제목: {title}",
         f"- 카테고리: {article.get('category', '미분류')}",
         f"- 주제 시드: {result.get('seed', '')}",
-        f"- 품질점수: {quality_score}/100",
-        f"- 품질통과: {'예' if quality_passed else '아니오'}",
-        f"- 단어 수: {quality_metrics.get('word_count', 'n/a')}",
-        f"- 이미지 수: {quality_metrics.get('image_count', 'n/a')}",
-        f"- 공식 링크 수: {quality_metrics.get('official_link_count', 'n/a')}",
-        f"- FAQ 수: {quality_metrics.get('faq_question_count', 'n/a')}",
-        f"- Reddit 실제 신호 수: {reddit_signal_quality.get('live_reddit_signal_count', 0)}",
-        f"- Reddit OAuth 신호 수: {reddit_signal_quality.get('reddit_oauth_signal_count', 0)}",
-        f"- Reddit public JSON 신호 수: {reddit_signal_quality.get('reddit_public_json_signal_count', 0)}",
-        f"- Reddit fallback 신호 수: {reddit_signal_quality.get('fallback_reddit_signal_count', 0)}",
-        f"- 운영 상태: {operational_status.get('status_label')}",
-        f"- 발행 품질 안정성: {'안정' if operational_status.get('publish_quality_ok') else '점검 필요'}",
-        f"- 수집 안정성: {operational_status.get('collection_status_label')}",
+        *quality_lines,
         f"- URL: {blogger_url}",
         f"- 생성 폴더: {result.get('article_dir', '')}",
     ]
@@ -687,6 +709,16 @@ def build_operational_status(quality_report: dict, reddit_signal_quality: dict) 
         "collection_status_label": collection_label,
         "ready_for_cadence_increase": ready_for_cadence_increase,
         "status_label": status_label,
+    }
+
+
+def build_daily_limit_operational_status() -> dict:
+    return {
+        "publish_quality_ok": True,
+        "collection_status": "not_run_daily_limit",
+        "collection_status_label": "정상: 하루 1개 제한으로 새 수집 없음",
+        "ready_for_cadence_increase": False,
+        "status_label": "오늘 공개 글 확인, 추가 발행 정상 스킵",
     }
 
 
