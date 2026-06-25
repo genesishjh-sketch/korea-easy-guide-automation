@@ -209,6 +209,8 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertEqual(payload["mode"], "publish")
         self.assertEqual(payload["error_type"], "RuntimeError")
         self.assertIn("feed unavailable", payload["error"])
+        self.assertIn("[Posting Bot] 일일 포스팅 실패", payload["human_summary"])
+        self.assertIn("같은 seed로 validate mode를 먼저 재실행", "\n".join(payload["action_items"]))
 
     def test_explicit_publish_seed_does_not_use_daily_limit_guard(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1021,6 +1023,10 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertEqual(payload["mode"], "validate")
         self.assertEqual(payload["error_type"], "ValueError")
         self.assertIn("generation failed", payload["error"])
+        self.assertIn("ValueError: generation failed", payload["error_summary"])
+        self.assertIn("우선 조치:", payload["human_summary"])
+        self.assertIn("easy_pc_fix_guide-daily-validation-failure.json", payload["human_summary"])
+        self.assertTrue(payload["action_items"])
 
 
 class WindowsQualityGateTests(unittest.TestCase):

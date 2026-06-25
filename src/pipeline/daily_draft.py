@@ -552,6 +552,8 @@ def save_daily_failure_report(seed: str, exc: Exception, site: str | None = None
     output_dir = ROOT_DIR / "reports"
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / daily_failure_report_name(settings.site_key, mode)
+    error = "".join(traceback.format_exception_only(type(exc), exc)).strip()
+    action_items = daily_failure_action_items(error, mode, settings.site_key)
     payload = {
         "site": settings.site_key,
         "site_name": settings.site_name,
@@ -561,6 +563,9 @@ def save_daily_failure_report(seed: str, exc: Exception, site: str | None = None
         "status": "failed",
         "error_type": type(exc).__name__,
         "error": str(exc),
+        "error_summary": error,
+        "action_items": action_items,
+        "human_summary": build_daily_failure_message(seed, exc, site, mode),
         "traceback": traceback.format_exception(type(exc), exc, exc.__traceback__),
         "created_at": datetime.utcnow().isoformat() + "Z",
     }
