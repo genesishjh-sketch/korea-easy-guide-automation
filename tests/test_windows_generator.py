@@ -5,7 +5,12 @@ from pathlib import Path
 import unittest
 
 from src.content.topic_scoring import infer_category
+from src.content.windows_generator import _fixes
+from src.content.windows_generator import _meaning
+from src.content.windows_generator import _quick_summary
+from src.content.windows_generator import _error_title
 from src.content.windows_generator import _sources_for_topic
+from src.content.windows_generator import _symptoms
 
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
@@ -23,6 +28,30 @@ class WindowsGeneratorSourceTests(unittest.TestCase):
 
         self.assertTrue(any("Windows Update" in name for name in names))
         self.assertTrue(any("release health" in name.lower() for name in names))
+
+    def test_onedrive_error_topics_keep_onedrive_title_and_sources(self) -> None:
+        title = _error_title("onedrive error 0x8004de40", "0X8004DE40")
+        names = [source["name"] for source in _sources_for_topic("onedrive error 0x8004de40")]
+
+        self.assertEqual(title, "OneDrive Error 0X8004DE40: What It Means and How to Fix It")
+        self.assertTrue(any("OneDrive" in name for name in names))
+        self.assertFalse(title.startswith("Windows Update Error"))
+
+    def test_onedrive_error_body_sections_do_not_use_windows_update_fix_copy(self) -> None:
+        text = "onedrive error 0x8004de40"
+        combined = "\n".join(
+            [
+                *_quick_summary(text, "0X8004DE40"),
+                *_symptoms(text, "0X8004DE40"),
+                *_meaning(text, "0X8004DE40"),
+                *_fixes(text, "0X8004DE40"),
+            ]
+        )
+
+        self.assertIn("OneDrive", combined)
+        self.assertIn("Microsoft account", combined)
+        self.assertNotIn("Windows Update troubleshooter", combined)
+        self.assertNotIn("Windows Update shows 0X8004DE40", combined)
 
     def test_app_topics_include_store_or_apps_sources(self) -> None:
         urls = [source["url"] for source in _sources_for_topic("microsoft store not opening windows 11")]

@@ -21,6 +21,14 @@ MICROSOFT_SOURCES = [
 
 TOPIC_SOURCE_RULES = [
     (
+        ("onedrive",),
+        [
+            {"name": "Microsoft Support: OneDrive help and learning", "url": "https://support.microsoft.com/onedrive"},
+            {"name": "Microsoft Support search: OneDrive sync problems", "url": "https://support.microsoft.com/search/results?query=OneDrive%20sync%20problems"},
+            {"name": "Microsoft Support search: OneDrive error codes", "url": "https://support.microsoft.com/search/results?query=OneDrive%20error%20code"},
+        ],
+    ),
+    (
         ("wifi", "wi-fi", "internet", "dns", "network"),
         [
             {"name": "Microsoft Support: Wi-Fi and network help", "url": "https://support.microsoft.com/windows/network-wi-fi"},
@@ -174,7 +182,7 @@ def _topic_profile(keyword: str, category: str) -> dict:
     title_keyword = title_case_keyword(keyword).replace("Wifi", "Wi-Fi")
 
     if error:
-        title = f"Windows Update Error {error}: What It Means and How to Fix It"
+        title = _error_title(normalized, error)
     elif "wifi" in normalized or "wi-fi" in normalized:
         title = "Wi-Fi Button Missing on Windows 11: Simple Fixes for Beginners"
     elif "bluetooth" in normalized:
@@ -240,6 +248,16 @@ def _error_code(text: str) -> str | None:
     return match.group(0).upper() if match else None
 
 
+def _error_title(text: str, error: str) -> str:
+    if "onedrive" in text:
+        return f"OneDrive Error {error}: What It Means and How to Fix It"
+    if "microsoft store" in text or "store" in text:
+        return f"Microsoft Store Error {error}: What It Means and How to Fix It"
+    if "windows update" in text or "update error" in text:
+        return f"Windows Update Error {error}: What It Means and How to Fix It"
+    return f"Windows Error {error}: What It Means and How to Fix It"
+
+
 def _sources_for_topic(text: str) -> list[dict[str, str]]:
     sources = [*MICROSOFT_SOURCES]
     for terms, topic_sources in TOPIC_SOURCE_RULES:
@@ -270,6 +288,16 @@ def _risk_level(text: str) -> str:
 
 
 def _quick_summary(keyword: str, error: str | None) -> list[str]:
+    normalized = keyword.lower()
+    if error and "onedrive" in normalized:
+        return [
+            f"{error} usually points to a OneDrive sign-in or connection problem.",
+            "Start with internet, date and time, Microsoft account sign-in, and OneDrive restart checks.",
+            "Do not unlink, reset, or reinstall OneDrive as the first step.",
+            "If OneDrive still cannot connect, use Microsoft OneDrive guidance before trying advanced repair steps.",
+            "This guide keeps account and sync checks separate from advanced fixes so beginners do not risk files unnecessarily.",
+            "If this is a work or school OneDrive account, check with the administrator before changing account or sync settings.",
+        ]
     if error:
         return [
             f"{error} usually appears when Windows Update cannot complete normally.",
@@ -296,7 +324,15 @@ def _before_start(text: str, error: str | None) -> list[str]:
         "Save open documents before you begin. Most beginner steps are low risk, but restarts, troubleshooters, and driver changes can close apps or interrupt unfinished work.",
         "If this is a company, school, or shared family computer, check whether another person manages it. Some settings may be controlled by an administrator, and forcing changes can break work or school requirements.",
     ]
-    if error:
+    if error and "onedrive" in text:
+        base.extend(
+            [
+                "For OneDrive errors, first separate account sign-in, internet connection, and sync status. The same error can appear because the PC is offline, the Microsoft account needs attention, or OneDrive cannot reach the service.",
+                "Do not delete local OneDrive folders while troubleshooting. If Files On-Demand is enabled, some files may exist online only, so deleting the wrong folder can create confusion or data loss risk.",
+                "If this is a work or school OneDrive account, your organization may control sign-in, storage, or sync policies. Check with the administrator before unlinking or resetting OneDrive.",
+            ]
+        )
+    elif error:
         base.extend(
             [
                 "For Windows Update errors, do not assume the error code always has one single cause. The same code can appear because of pending restarts, network problems, free-space problems, update cache issues, or a temporary Microsoft-side issue.",
@@ -329,6 +365,14 @@ def _before_start(text: str, error: str | None) -> list[str]:
 
 
 def _symptoms(text: str, error: str | None) -> list[str]:
+    if error and "onedrive" in text:
+        return [
+            f"OneDrive shows {error} or says it cannot connect.",
+            "OneDrive may stay signed out or ask you to sign in again.",
+            "Files may stop syncing even though the PC is connected to the internet.",
+            "The OneDrive cloud icon may show a warning, paused state, or connection message.",
+            "Other websites may work normally while OneDrive still has trouble connecting.",
+        ]
     if error:
         return [
             f"Windows Update shows {error}.",
@@ -361,6 +405,12 @@ def _symptoms(text: str, error: str | None) -> list[str]:
 
 
 def _meaning(text: str, error: str | None) -> list[str]:
+    if error and "onedrive" in text:
+        return [
+            "OneDrive may be unable to reach Microsoft services, complete sign-in, or refresh account credentials.",
+            "It does not always mean your files are lost. In many cases, the PC is connected but OneDrive itself needs account, network, or sync attention.",
+            "The safest approach is to confirm connection and sign-in first, then use official OneDrive support steps before resetting the app.",
+        ]
     if error:
         return [
             "Windows Update may be blocked by a pending restart, low disk space, a damaged update cache, or a service problem.",
@@ -430,10 +480,26 @@ def _try_first(text: str) -> list[str]:
         return ["Make sure the printer is turned on.", "Check the cable or Wi-Fi connection.", "Cancel stuck print jobs before adding the printer again.", *base]
     if "sound" in text or "audio" in text:
         return ["Check the volume and output device.", "Disconnect and reconnect headphones or speakers.", "Run the Windows audio troubleshooter.", *base]
+    if "onedrive" in text:
+        return [
+            "Open a normal website to confirm the internet connection works.",
+            "Check that the date, time, and time zone are correct.",
+            "Open OneDrive from the taskbar cloud icon and check whether it is paused or signed out.",
+            "Sign in to your Microsoft account in a browser to confirm the account itself works.",
+            *base,
+        ]
     return base
 
 
 def _fixes(text: str, error: str | None) -> list[str]:
+    if error and "onedrive" in text:
+        return [
+            "Select the OneDrive cloud icon in the taskbar and check whether sync is paused. Resume syncing if it is paused.",
+            "Confirm your internet connection works, then try signing in to your Microsoft account in a browser.",
+            "Check Windows date, time, and time zone settings because incorrect time can break sign-in.",
+            "Restart OneDrive from the Start menu, then watch whether the cloud icon reconnects.",
+            "Use Microsoft's OneDrive support pages for sign-in, sync, and error-code guidance before unlinking or resetting OneDrive.",
+        ]
     if error:
         return [
             "Open Settings > Windows Update and select Check for updates again after one restart.",
