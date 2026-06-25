@@ -11,7 +11,10 @@ on:
         required: false
         default: "validate"
   schedule:
+    # 09:10 KST primary daily publish.
     - cron: "10 0 * * *"
+    # 09:25 KST backup. The daily limit guard prevents duplicate publishing.
+    - cron: "25 0 * * *"
 
 jobs:
   daily-publish:
