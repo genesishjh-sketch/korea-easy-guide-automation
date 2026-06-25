@@ -326,6 +326,12 @@ def build_message(result: dict) -> str:
         lines.append(f"  - 판정 참고: {evidence.get('note')}")
     if evidence.get("needs_attention"):
         lines.append("  - 추가 확인 필요: 예")
+        if before_cutoff:
+            lines.append("  - 주의: 오늘 글은 확인됐지만 기준시각 이후 자동 발행 증거는 아직 부족합니다.")
+        if daily_success_context.get("status") == "validation_only":
+            lines.append("  - 리포트 주의: 최근 daily-success 파일은 검수 결과이며 발행 완료 리포트가 아닙니다.")
+        if result.get("status") == "published_today" and not daily_success_context.get("publish_related"):
+            lines.append("  - 다음 확인: 공개 URL과 오늘 Daily publish 리포트가 같은 실행에서 나온 결과인지 확인하세요.")
     operational_status = daily_success.get("operational_status") or {}
     if operational_status:
         lines.extend(

@@ -238,6 +238,8 @@ class PublicationCheckTests(unittest.TestCase):
         self.assertIn("공개 발행 결과가 아닙니다", message)
         self.assertIn("- 발행 증거 판정: 공개 피드와 workflow는 확인, 일일 리포트는 발행 리포트 아님", message)
         self.assertIn("추가 확인 필요: 예", message)
+        self.assertIn("검수 결과이며 발행 완료 리포트가 아닙니다", message)
+        self.assertIn("공개 URL과 오늘 Daily publish 리포트가 같은 실행에서 나온 결과인지 확인하세요", message)
         self.assertIn("- 최근 일일 운영 상태: 발행 품질 OK, 수집 안정성 점검 필요", message)
         self.assertIn("발행량 증량 준비: 아니오", message)
 
@@ -295,6 +297,7 @@ class PublicationCheckTests(unittest.TestCase):
         self.assertIn("오늘 공개 글 확인, 기준시각 전 발행", message)
         self.assertIn("- 확인된 오늘 글: Early post", message)
         self.assertIn("- 오늘 전체 공개 글 수: 1", message)
+        self.assertIn("오늘 글은 확인됐지만 기준시각 이후 자동 발행 증거는 아직 부족합니다", message)
         self.assertIn("공개 글은 확인됐지만 Daily workflow 상태 점검이 필요합니다.", message)
 
 
