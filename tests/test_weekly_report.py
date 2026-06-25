@@ -195,6 +195,15 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                                 "REDDIT_CLIENT_SECRET = Reddit 앱 상세 화면의 secret",
                                 "EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT = 권장 User-Agent 문자열",
                             ],
+                            "user_action_checklist": [
+                                "Reddit 앱 페이지에서 create app 또는 create another app을 누르고 이름을 'Easy PC Fix Guide Automation'로 입력하세요.",
+                                "앱 타입은 반드시 script를 선택하세요. web app이나 installed app이 아닙니다.",
+                                "redirect uri에는 http://localhost:8080를 그대로 입력하세요.",
+                                "생성 후 앱 이름 아래의 짧은 client id를 GitHub Secret REDDIT_CLIENT_ID에 저장하세요.",
+                                "앱 상세의 secret 값을 GitHub Secret REDDIT_CLIENT_SECRET에 저장하세요.",
+                                "GitHub Variable EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT가 비어 있으면 'easy-pc-fix-guide/0.1 by posting-automation-alert-bot'로 저장하세요.",
+                                "저장 후 Actions > Easy PC Fix Reddit OAuth Health workflow를 Run workflow로 실행하세요.",
+                            ],
                         },
                     },
                     "preflight": {
@@ -313,6 +322,9 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("Reddit 앱 타입: script", markdown)
         self.assertIn("Redirect URI: http://localhost:8080", markdown)
         self.assertIn("REDDIT_CLIENT_SECRET = Reddit 앱 상세 화면의 secret", markdown)
+        self.assertIn("사용자가 직접 할 일", markdown)
+        self.assertIn("앱 타입은 반드시 script를 선택하세요.", markdown)
+        self.assertIn("Easy PC Fix Reddit OAuth Health workflow를 Run workflow로 실행하세요.", markdown)
         self.assertIn("발행 확인: 오늘 공개 글 확인", markdown)
         self.assertIn("발행 증거 판정: 공개 피드와 workflow는 확인, 일일 리포트는 발행 리포트 아님", markdown)
         self.assertIn("추가 확인 필요: 예", markdown)

@@ -810,6 +810,10 @@ class WeeklyReporter:
                 lines.append("  - GitHub 입력값:")
                 for item in setup_links.get("github_secret_mapping", [])[:3]:
                     lines.append(f"    - {item}")
+            if setup_links.get("user_action_checklist"):
+                lines.append("  - 사용자가 직접 할 일:")
+                for item in setup_links.get("user_action_checklist", [])[:7]:
+                    lines.append(f"    - {item}")
         lines.append(f"- 발행 확인: {_status_kr(publication_check.get('status', 'not_uploaded'))}")
         if publication_check.get("source"):
             lines.append(f"  - 확인 기준: {publication_check.get('source')}")

@@ -208,6 +208,9 @@ class RedditHealthTests(unittest.TestCase):
         self.assertIn("Reddit 앱 입력값:", message)
         self.assertIn("client secret: Reddit 앱 상세 화면의 secret 값을 REDDIT_CLIENT_SECRET에 저장하세요.", message)
         self.assertIn("GitHub에 넣을 값:", message)
+        self.assertIn("사용자가 직접 해야 할 일:", message)
+        self.assertIn("앱 타입은 반드시 script를 선택하세요.", message)
+        self.assertIn("Easy PC Fix Reddit OAuth Health workflow를 Run workflow로 실행하세요.", message)
         self.assertIn("검색어 재시도 기록:", message)
 
     def test_run_persists_reports_before_notification_failure(self) -> None:

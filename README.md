@@ -127,7 +127,20 @@ Secret mapping:
 ```text
 REDDIT_CLIENT_ID = short client id shown under the Reddit app name
 REDDIT_CLIENT_SECRET = secret shown in the Reddit app details
-EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT = easy-pc-fix-guide/0.1 by your-reddit-username
+EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT = easy-pc-fix-guide/0.1 by posting-automation-alert-bot
+```
+
+User action checklist:
+
+```text
+1. Open https://www.reddit.com/prefs/apps.
+2. Click create app or create another app.
+3. Enter name: Easy PC Fix Guide Automation.
+4. Select app type: script.
+5. Enter redirect uri: http://localhost:8080.
+6. Copy the short client id under the app name into GitHub Secret REDDIT_CLIENT_ID.
+7. Copy the app secret into GitHub Secret REDDIT_CLIENT_SECRET.
+8. Run Actions > Easy PC Fix Reddit OAuth Health.
 ```
 
 Manual health check:
