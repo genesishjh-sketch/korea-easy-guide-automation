@@ -98,6 +98,18 @@ WINDOWS_ADVANCED_ONLY_TERMS = {
     "diskpart",
 }
 
+WINDOWS_COMMAND_REPAIR_TERMS = {
+    "sfc",
+    "dism",
+    "chkdsk",
+    "cmd",
+    "powershell",
+    "command prompt",
+    "command-line",
+    "command line",
+    "diskpart",
+}
+
 WINDOWS_TOPIC_CONTEXT_CONFLICTS = {
     "onedrive": {
         "topic_markers": ("onedrive",),
@@ -272,10 +284,38 @@ class HadesQualityGate:
             issues.append(QualityIssue("missing_advanced_warning", "Advanced fixes require a clear backup warning."))
         if soup is not None:
             issues.extend(self._review_windows_advanced_only_terms(soup))
+        issues.extend(self._review_windows_command_safety(text_lower))
         issues.extend(self._review_windows_topic_context(text_lower))
         for phrase in WINDOWS_BLOCKED_PHRASES:
             if phrase in text_lower:
                 issues.append(QualityIssue("blocked_windows_phrase", f"Blocked Windows phrase found: {phrase}."))
+        return issues
+
+    def _review_windows_command_safety(self, text_lower: str) -> list[QualityIssue]:
+        found_terms = sorted(term for term in WINDOWS_COMMAND_REPAIR_TERMS if term in text_lower)
+        if not found_terms:
+            return []
+
+        issues: list[QualityIssue] = []
+        if "do not run commands you do not understand" not in text_lower:
+            issues.append(
+                QualityIssue(
+                    "missing_command_understanding_warning",
+                    "Windows command-line repair mentions require a warning not to run commands the reader does not understand.",
+                )
+            )
+        official_command_guard = (
+            "copy commands only from official microsoft documentation" in text_lower
+            or "use sfc or dism only from official microsoft instructions" in text_lower
+            or "official microsoft instructions" in text_lower
+        )
+        if not official_command_guard:
+            issues.append(
+                QualityIssue(
+                    "missing_official_command_source_warning",
+                    "Windows command-line repair mentions require guidance to use only official Microsoft command instructions.",
+                )
+            )
         return issues
 
     def _review_windows_topic_context(self, text_lower: str) -> list[QualityIssue]:

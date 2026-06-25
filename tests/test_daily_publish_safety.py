@@ -776,6 +776,37 @@ class WindowsQualityGateTests(unittest.TestCase):
 
         self.assertIn("advanced_fix_in_beginner_section", {issue.code for issue in issues})
 
+    def test_windows_command_repairs_require_beginner_safety_warnings(self) -> None:
+        gate = HadesQualityGate("windows_help")
+        issues = gate._review_windows_article(
+            None,
+            (
+                "applies to risk level data loss risk estimated time last checked advanced fixes "
+                "back up important files run powershell and dism to repair windows"
+            ),
+            links=[],
+        )
+
+        issue_codes = {issue.code for issue in issues}
+        self.assertIn("missing_command_understanding_warning", issue_codes)
+        self.assertIn("missing_official_command_source_warning", issue_codes)
+
+    def test_windows_command_repairs_pass_with_official_command_warnings(self) -> None:
+        gate = HadesQualityGate("windows_help")
+        issues = gate._review_windows_article(
+            None,
+            (
+                "applies to risk level data loss risk estimated time last checked advanced fixes "
+                "back up important files do not run commands you do not understand "
+                "use sfc or dism only from official microsoft instructions"
+            ),
+            links=[],
+        )
+
+        issue_codes = {issue.code for issue in issues}
+        self.assertNotIn("missing_command_understanding_warning", issue_codes)
+        self.assertNotIn("missing_official_command_source_warning", issue_codes)
+
     def test_windows_articles_block_onedrive_update_context_mismatch(self) -> None:
         gate = HadesQualityGate("windows_help")
         issues = gate._review_windows_article(
