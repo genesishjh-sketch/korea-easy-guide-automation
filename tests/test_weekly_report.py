@@ -958,6 +958,64 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertEqual(operations["sitemap_submit"]["previous_status"], "submitted")
         self.assertEqual(operations["sitemap_submit"]["previous_submitted_at"], "2026-06-24T00:15:00Z")
 
+    def test_operations_result_marks_stale_daily_failure_as_previous_failure(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+        now = datetime(2026, 6, 25, 9, 40, tzinfo=ZoneInfo("Asia/Seoul"))
+
+        with tempfile.TemporaryDirectory() as tmpdir, patch("src.reporting.weekly.ROOT_DIR", Path(tmpdir)):
+            report_dir = Path(tmpdir) / "reports"
+            report_dir.mkdir()
+            (report_dir / "easy_pc_fix_guide-daily-failure.json").write_text(
+                json.dumps(
+                    {
+                        "status": "failed",
+                        "created_at": "2026-06-24T09:10:00Z",
+                        "error": "old failure",
+                        "seed": "old seed",
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            operations = reporter._operations_result(now=now)
+
+        self.assertEqual(operations["daily_failure"]["status"], "stale_failure")
+        self.assertEqual(operations["daily_failure"]["previous_status"], "failed")
+        self.assertEqual(operations["daily_failure"]["previous_created_at"], "2026-06-24T09:10:00Z")
+
+        actions = reporter._next_actions(
+            articles=[],
+            static_pages=[{"title": "About"}, {"title": "Contact"}, {"title": "Privacy Policy"}, {"title": "Disclaimer"}],
+            public_posts={"status": "connected", "posts": [{"title": "Published"}]},
+            operations={"daily_failure": operations["daily_failure"], "preflight": {"status": "pass"}},
+        )
+        self.assertNotIn("최근 일일 자동화 실패 리포트", "\n".join(actions))
+
+    def test_operations_result_keeps_current_daily_failure_as_failed(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+        now = datetime(2026, 6, 25, 9, 40, tzinfo=ZoneInfo("Asia/Seoul"))
+
+        with tempfile.TemporaryDirectory() as tmpdir, patch("src.reporting.weekly.ROOT_DIR", Path(tmpdir)):
+            report_dir = Path(tmpdir) / "reports"
+            report_dir.mkdir()
+            (report_dir / "easy_pc_fix_guide-daily-failure.json").write_text(
+                json.dumps(
+                    {
+                        "status": "failed",
+                        "created_at": "2026-06-25T00:10:00Z",
+                        "error": "today failure",
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            operations = reporter._operations_result(now=now)
+
+        self.assertEqual(operations["daily_failure"]["status"], "failed")
+        self.assertEqual(operations["daily_failure"]["error"], "today failure")
+
     def test_operations_result_accepts_today_post_before_cutoff(self) -> None:
         settings = load_settings("easy_pc_fix_guide")
         reporter = WeeklyReporter(settings)

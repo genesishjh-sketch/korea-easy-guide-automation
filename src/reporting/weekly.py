@@ -186,10 +186,14 @@ class WeeklyReporter:
                 "previous_status": sitemap_submit.get("status", "not_uploaded"),
                 "previous_submitted_at": sitemap_submit.get("submitted_at", ""),
             }
+        daily_failure = self._daily_failure_for_current_day(
+            self._read_report(report_dir / f"{self.settings.site_key}-daily-failure.json"),
+            now,
+        )
         return {
             "daily_success": daily_success,
             "daily_success_context": daily_success_context,
-            "daily_failure": self._read_report(report_dir / f"{self.settings.site_key}-daily-failure.json"),
+            "daily_failure": daily_failure,
             "preflight": self._read_report(report_dir / f"{self.settings.site_key}-preflight.json"),
             "reddit_health": self._read_report(report_dir / f"{self.settings.site_key}-reddit-health.json"),
             "publication_check": publication_check,
@@ -224,6 +228,22 @@ class WeeklyReporter:
         if submitted_at is None:
             return True
         return submitted_at.date() != now.date()
+
+    def _daily_failure_for_current_day(self, daily_failure: dict, now: datetime | None) -> dict:
+        if daily_failure.get("status") != "failed" or now is None:
+            return daily_failure
+        created_at = _parse_datetime(str(daily_failure.get("created_at", "")))
+        if created_at and created_at.astimezone(KST).date() == now.astimezone(KST).date():
+            return daily_failure
+        return {
+            "status": "stale_failure",
+            "note": "이전 일일 실패 리포트입니다. 오늘 실패로 보지 않습니다.",
+            "previous_status": daily_failure.get("status", "failed"),
+            "previous_created_at": daily_failure.get("created_at", ""),
+            "error_type": daily_failure.get("error_type", ""),
+            "error": daily_failure.get("error", ""),
+            "seed": daily_failure.get("seed", ""),
+        }
 
     def _publication_check_from_public_posts(self, now: datetime, public_posts: dict) -> dict:
         if public_posts.get("status") != "connected":
@@ -669,6 +689,10 @@ class WeeklyReporter:
                 f"{'예' if operational_status.get('ready_for_cadence_increase') else '아니오'}"
             )
         lines.append(f"- 최근 일일 실패 리포트: {_status_kr(daily_failure.get('status', 'not_uploaded'))}")
+        if daily_failure.get("note"):
+            lines.append(f"  - 참고: {daily_failure.get('note')}")
+        if daily_failure.get("previous_created_at"):
+            lines.append(f"  - 이전 실패 시각: {daily_failure.get('previous_created_at')}")
         if daily_failure.get("error"):
             lines.append(f"  - 오류: {daily_failure.get('error')}")
         if daily_failure.get("seed"):
@@ -824,6 +848,7 @@ def _status_kr(status: str | None) -> str:
         "public_json_connected": "public JSON 연결",
         "no_reddit_signals": "Reddit 신호 없음",
         "failed": "실패",
+        "stale_failure": "이전 실패 리포트",
         "oauth_connected": "OAuth 연결 확인",
         "oauth_connected_no_results": "OAuth 연결됨, 결과 없음",
         "missing_credentials": "Reddit OAuth 키 없음",
