@@ -224,7 +224,42 @@ class PublicationCheckTests(unittest.TestCase):
 
         self.assertEqual(result["status"], "success")
         self.assertEqual(result["today_run_count"], 1)
+        self.assertEqual(result["success_run_count"], 1)
+        self.assertEqual(result["failed_run_count"], 0)
+        self.assertEqual(result["in_progress_run_count"], 0)
         self.assertEqual(result["latest_run"]["head_sha"], "abcdef1")
+
+    def test_daily_workflow_status_flags_mixed_success_and_failure_runs(self) -> None:
+        runs = [
+            {
+                "id": 124,
+                "event": "schedule",
+                "status": "completed",
+                "conclusion": "success",
+                "created_at": "2026-06-25T00:25:07Z",
+                "html_url": "https://github.com/run/124",
+                "head_sha": "abcdeffedcba",
+            },
+            {
+                "id": 123,
+                "event": "schedule",
+                "status": "completed",
+                "conclusion": "failure",
+                "created_at": "2026-06-25T00:10:07Z",
+                "html_url": "https://github.com/run/123",
+                "head_sha": "abcdef123456",
+            },
+        ]
+
+        with patch.object(stage4_publication_check, "fetch_daily_workflow_runs", return_value=runs):
+            result = stage4_publication_check.check_daily_workflow_status(
+                datetime(2026, 6, 25, 9, 45, tzinfo=ZoneInfo("Asia/Seoul"))
+            )
+
+        self.assertEqual(result["status"], "partial_failure")
+        self.assertEqual(result["today_run_count"], 2)
+        self.assertEqual(result["success_run_count"], 1)
+        self.assertEqual(result["failed_run_count"], 1)
 
     def test_daily_workflow_status_reports_no_run_today(self) -> None:
         with patch.object(stage4_publication_check, "fetch_daily_workflow_runs", return_value=[]):
@@ -282,6 +317,8 @@ class PublicationCheckTests(unittest.TestCase):
         self.assertIn("- 확인된 최신 글: Fresh post", message)
         self.assertIn("- 최신 글 URL: https://easypcfixguide.blogspot.com/2026/06/fresh-post.html", message)
         self.assertIn("- Daily workflow 상태: 오늘 실행 성공", message)
+        self.assertIn("- 오늘 Daily workflow 성공 수: 0", message)
+        self.assertIn("- 오늘 Daily workflow 실패 수: 0", message)
         self.assertIn("- 최근 일일 리포트 구분: 검증 모드 리포트", message)
         self.assertIn("공개 발행 결과가 아닙니다", message)
         self.assertIn("- 발행 증거 판정: 공개 피드와 workflow는 확인, 일일 리포트는 발행 리포트 아님", message)
@@ -290,6 +327,49 @@ class PublicationCheckTests(unittest.TestCase):
         self.assertIn("공개 URL과 오늘 Daily publish 리포트가 같은 실행에서 나온 결과인지 확인하세요", message)
         self.assertIn("- 최근 일일 운영 상태: 발행 품질 OK, 수집 안정성 점검 필요", message)
         self.assertIn("발행량 증량 준비: 아니오", message)
+
+    def test_publication_message_warns_about_partial_workflow_failure(self) -> None:
+        message = stage4_publication_check.build_message(
+            {
+                "site_name": "Easy PC Fix Guide",
+                "site_url": "https://easypcfixguide.blogspot.com",
+                "checked_at_kst": "2026-06-25T09:45:00+09:00",
+                "cutoff_kst": "2026-06-25T09:00:00+09:00",
+                "status": "published_today",
+                "today_post_count": 1,
+                "today_total_post_count": 1,
+                "daily_workflow": {
+                    "status": "partial_failure",
+                    "today_run_count": 2,
+                    "success_run_count": 1,
+                    "failed_run_count": 1,
+                    "in_progress_run_count": 0,
+                    "latest_run": {
+                        "created_at_kst": "2026-06-25T09:25:07+09:00",
+                        "conclusion": "success",
+                        "url": "https://github.com/run/124",
+                    },
+                },
+                "daily_success": {"status": "published", "mode": "publish"},
+                "daily_success_context": {
+                    "status": "publish_related",
+                    "publish_related": True,
+                    "label": "발행 workflow 리포트",
+                },
+                "latest_posts": [
+                    {
+                        "title": "Fresh post",
+                        "url": "https://easypcfixguide.blogspot.com/2026/06/fresh-post.html",
+                        "published_kst": "2026-06-25T09:12:00+09:00",
+                    }
+                ],
+            }
+        )
+
+        self.assertIn("- Daily workflow 상태: 오늘 일부 실행 실패", message)
+        self.assertIn("- 오늘 Daily workflow 실패 수: 1", message)
+        self.assertIn("오늘 Daily workflow 실패 기록도 있습니다", message)
+        self.assertIn("실패한 primary/backup 실행 로그", message)
 
     def test_classifies_publish_related_daily_success_report(self) -> None:
         result = stage4_publication_check.classify_daily_success_context({"status": "published", "mode": "publish"})

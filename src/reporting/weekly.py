@@ -1043,6 +1043,7 @@ def _status_kr(status: str | None) -> str:
         "published_today_before_cutoff": "오늘 공개 글 확인(기준 전 발행)",
         "duplicate_today": "오늘 공개 글 2개 이상",
         "missing_today": "오늘 공개 글 없음",
+        "partial_failure": "일부 실행 실패",
         "validated": "검증 완료",
         "draft_uploaded": "초안 업로드",
         "published": "공개 발행",

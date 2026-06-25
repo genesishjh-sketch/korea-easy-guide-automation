@@ -113,13 +113,29 @@ def check_daily_workflow_status(now: datetime, repository: str = DEFAULT_GITHUB_
         return {
             "status": "no_run_today",
             "today_run_count": 0,
+            "success_run_count": 0,
+            "failed_run_count": 0,
+            "in_progress_run_count": 0,
             "note": "오늘 Easy PC Daily workflow 실행 기록이 아직 없습니다.",
         }
 
     latest = today_runs[0]
+    success_run_count = sum(
+        1
+        for run in today_runs
+        if run.get("status") == "completed" and run.get("conclusion") == "success"
+    )
+    failed_run_count = sum(
+        1
+        for run in today_runs
+        if run.get("status") == "completed" and run.get("conclusion") not in {"success", "skipped"}
+    )
+    in_progress_run_count = sum(1 for run in today_runs if run.get("status") != "completed")
     latest_status = latest.get("status")
     latest_conclusion = latest.get("conclusion")
-    if latest_status == "completed" and latest_conclusion == "success":
+    if failed_run_count and success_run_count:
+        status = "partial_failure"
+    elif latest_status == "completed" and latest_conclusion == "success":
         status = "success"
     elif latest_status == "completed":
         status = "failed"
@@ -128,6 +144,9 @@ def check_daily_workflow_status(now: datetime, repository: str = DEFAULT_GITHUB_
     return {
         "status": status,
         "today_run_count": len(today_runs),
+        "success_run_count": success_run_count,
+        "failed_run_count": failed_run_count,
+        "in_progress_run_count": in_progress_run_count,
         "latest_run": latest,
     }
 
@@ -221,7 +240,7 @@ def assess_publication_evidence(result: dict) -> dict:
     public_feed_ok = is_success_status(result.get("status"))
     workflow_status = (result.get("daily_workflow") or {}).get("status")
     workflow_ok = workflow_status == "success"
-    workflow_problem = workflow_status in {"failed", "unknown"}
+    workflow_problem = workflow_status in {"failed", "partial_failure", "unknown"}
     daily_success = result.get("daily_success") or {}
     daily_context = result.get("daily_success_context") or classify_daily_success_context(daily_success)
     publish_related_report = bool(daily_context.get("publish_related"))
@@ -311,6 +330,9 @@ def build_message(result: dict) -> str:
             [
                 f"- Daily workflow 상태: {daily_workflow_status_label(workflow.get('status'))}",
                 f"- 오늘 Daily workflow 실행 수: {workflow.get('today_run_count', 0)}",
+                f"- 오늘 Daily workflow 성공 수: {workflow.get('success_run_count', 0)}",
+                f"- 오늘 Daily workflow 실패 수: {workflow.get('failed_run_count', 0)}",
+                f"- 오늘 Daily workflow 진행 중 수: {workflow.get('in_progress_run_count', 0)}",
             ]
         )
         latest_run = workflow.get("latest_run") or {}
@@ -406,6 +428,15 @@ def build_message(result: dict) -> str:
                 "- GitHub Actions Easy PC Fix Daily Publish 실행 기록과 다음 백업 스케줄을 확인하세요.",
             ]
         )
+    elif workflow.get("status") == "partial_failure":
+        lines.extend(
+            [
+                "",
+                "운영 참고:",
+                "- 공개 글은 확인됐지만 오늘 Daily workflow 실패 기록도 있습니다.",
+                "- GitHub Actions에서 실패한 primary/backup 실행 로그를 확인하세요.",
+            ]
+        )
     return "\n".join(lines)
 
 
@@ -422,6 +453,7 @@ def publication_status_label(status: str | None) -> str:
 def daily_workflow_status_label(status: str | None) -> str:
     labels = {
         "success": "오늘 실행 성공",
+        "partial_failure": "오늘 일부 실행 실패",
         "failed": "오늘 실행 실패",
         "in_progress": "실행 중",
         "no_run_today": "오늘 실행 기록 없음",
