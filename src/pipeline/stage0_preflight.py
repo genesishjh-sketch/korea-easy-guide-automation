@@ -57,6 +57,7 @@ def run(site: str | None = None) -> Path:
         check_reddit_health_workflow(),
         check_reddit_health_report_persistence(),
         check_publication_check_report_persistence(),
+        check_daily_failure_report_persistence(),
         check_critical_notifications(),
         check_public_feed(settings.site_url),
         check_local_google_files(settings.google_oauth_client_secret_file, settings.google_oauth_token_file),
@@ -555,6 +556,35 @@ def check_publication_check_report_persistence() -> PreflightCheck:
         "publication_check_report_persistence",
         "pass",
         "Publication check writes JSON/Markdown and action items even when public feed verification fails.",
+    )
+
+
+def check_daily_failure_report_persistence() -> PreflightCheck:
+    path = ROOT_DIR / "src" / "pipeline" / "daily_draft.py"
+    if not path.exists():
+        return PreflightCheck("daily_failure_report_persistence", "fail", "Daily draft pipeline file is missing.")
+    text = path.read_text(encoding="utf-8")
+    required = [
+        "save_daily_failure_report(selected_seed, exc, site, publish_mode)",
+        "daily_failure_action_items(error, mode, settings.site_key)",
+        "build_daily_failure_message(seed, exc, site, mode)",
+        "\"error_summary\": error",
+        "\"action_items\": action_items",
+        "\"human_summary\": build_daily_failure_message",
+        "\"traceback\": traceback.format_exception",
+        "daily_failure_report_name(settings.site_key, mode)",
+    ]
+    missing = [item for item in required if item not in text]
+    if missing:
+        return PreflightCheck(
+            "daily_failure_report_persistence",
+            "fail",
+            f"Missing daily failure report persistence safeguards: {', '.join(missing)}",
+        )
+    return PreflightCheck(
+        "daily_failure_report_persistence",
+        "pass",
+        "Daily publish failures write JSON action items, human summary, and traceback before notification.",
     )
 
 
