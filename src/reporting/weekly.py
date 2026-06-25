@@ -337,6 +337,7 @@ class WeeklyReporter:
         operational_status = daily_success.get("operational_status", {})
         reddit_health = operations.get("reddit_health", {})
         preflight_checks = operations.get("preflight", {}).get("checks", []) or []
+        seed_inventory_check = next((check for check in preflight_checks if check.get("name") == "seed_inventory"), {})
         launch_queue_check = next((check for check in preflight_checks if check.get("name") == "launch_queue"), {})
         if preflight_status == "fail":
             actions.append("Preflight 실패 항목을 먼저 복구하세요. 설정, workflow 안전장치, 알림 설정을 확인해야 합니다.")
@@ -350,6 +351,16 @@ class WeeklyReporter:
                 )
             else:
                 actions.append(f"Launch queue 상태를 확인하세요. {launch_message}")
+        if seed_inventory_check.get("status") in {"warn", "fail"}:
+            seed_message = seed_inventory_check.get("message", "")
+            if seed_inventory_check.get("status") == "fail":
+                actions.append(
+                    f"Windows topic seed 재고가 소진되었습니다. 다음 무인 발행 전에 새 오류/증상 시드를 추가하세요. {seed_message}"
+                )
+            else:
+                actions.append(
+                    f"Windows topic seed 재고가 낮습니다. 최소 2주치 이상 새 주제를 보충하세요. {seed_message}"
+                )
         if daily_failure_status == "failed":
             actions.append("최근 일일 자동화 실패 리포트를 확인하세요. daily failure JSON의 오류 타입, 메시지, traceback을 우선 점검해야 합니다.")
         if publication_status == "missing_today":

@@ -404,6 +404,62 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("Launch queue가 소진", joined)
         self.assertIn("장기 Windows topic seed 목록", joined)
 
+    def test_next_actions_include_seed_inventory_warning(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+
+        actions = reporter._next_actions(
+            articles=[{"blogger_status": "LIVE"}],
+            static_pages=[{"title": "About"}, {"title": "Contact"}, {"title": "Privacy Policy"}, {"title": "Disclaimer"}],
+            public_posts={"status": "connected", "posts": [{"title": "Published"}]},
+            operations={
+                "preflight": {
+                    "status": "warn",
+                    "checks": [
+                        {
+                            "name": "seed_inventory",
+                            "status": "warn",
+                            "message": "8/103 exact-match topic seeds remain unused. Add at least two weeks of fresh topic seeds soon.",
+                        }
+                    ],
+                },
+            },
+            signal_quality={"status": "connected"},
+        )
+
+        joined = "\n".join(actions)
+        self.assertIn("Windows topic seed 재고가 낮습니다", joined)
+        self.assertIn("최소 2주치 이상", joined)
+        self.assertIn("8/103 exact-match topic seeds remain unused", joined)
+
+    def test_next_actions_include_seed_inventory_failure(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+
+        actions = reporter._next_actions(
+            articles=[{"blogger_status": "LIVE"}],
+            static_pages=[{"title": "About"}, {"title": "Contact"}, {"title": "Privacy Policy"}, {"title": "Disclaimer"}],
+            public_posts={"status": "connected", "posts": [{"title": "Published"}]},
+            operations={
+                "preflight": {
+                    "status": "fail",
+                    "checks": [
+                        {
+                            "name": "seed_inventory",
+                            "status": "fail",
+                            "message": "0/103 exact-match topic seeds remain unused. Add fresh Windows topic seeds before the next unattended publish.",
+                        }
+                    ],
+                },
+            },
+            signal_quality={"status": "connected"},
+        )
+
+        joined = "\n".join(actions)
+        self.assertIn("Windows topic seed 재고가 소진되었습니다", joined)
+        self.assertIn("다음 무인 발행 전", joined)
+        self.assertIn("0/103 exact-match topic seeds remain unused", joined)
+
     def test_next_actions_include_signal_quality_fallback_warning(self) -> None:
         settings = load_settings("easy_pc_fix_guide")
         reporter = WeeklyReporter(settings)
