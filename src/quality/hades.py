@@ -65,7 +65,7 @@ BLOCKED_PHRASES = {
 
 WINDOWS_REQUIRED_HEADINGS = {
     "Quick Summary",
-    "Applies to / Risk level / Data loss risk / Last checked",
+    "Applies to / Risk level / Data loss risk / Estimated time / Last checked",
     "Symptoms",
     "What This Usually Means",
     "What Not to Do First",

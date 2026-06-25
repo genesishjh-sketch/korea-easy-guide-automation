@@ -559,6 +559,81 @@ class DuplicatePublishGuardTests(unittest.TestCase):
 
 
 class WindowsQualityGateTests(unittest.TestCase):
+    def test_windows_articles_require_estimated_time_in_safety_heading(self) -> None:
+        gate = HadesQualityGate("windows_help")
+        with tempfile.TemporaryDirectory() as tmpdir:
+            article_dir = Path(tmpdir)
+            assets_dir = article_dir / "assets"
+            assets_dir.mkdir()
+            (assets_dir / "hero.jpg").write_bytes(b"hero")
+            (assets_dir / "inline.jpg").write_bytes(b"inline")
+            (article_dir / "image_plan.json").write_text(
+                json.dumps(
+                    {
+                        "strict": True,
+                        "images": [
+                            {"filename": "hero.jpg", "required": True},
+                            {"filename": "inline.jpg", "required": True},
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (article_dir / "research_report.json").write_text(
+                json.dumps(
+                    {
+                        "queries": [f"query {i}" for i in range(6)],
+                        "reader_questions": [f"question {i}" for i in range(5)],
+                        "sources": [
+                            {"name": "Microsoft Support", "url": "https://support.microsoft.com/windows"},
+                            {"name": "Microsoft Learn", "url": "https://learn.microsoft.com/windows/"},
+                            {"name": "Release Health", "url": "https://learn.microsoft.com/windows/release-health/"},
+                            {"name": "Windows Update", "url": "https://support.microsoft.com/windows/windows-update"},
+                            {"name": "Microsoft Account", "url": "https://support.microsoft.com/account-billing"},
+                            {"name": "Microsoft Store", "url": "https://support.microsoft.com/microsoft-store"},
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            filler = " ".join(["safe beginner windows troubleshooting guidance"] * 300)
+            html = f"""
+            <article>
+              <h2>Quick Summary</h2>
+              <h2>Applies to / Risk level / Data loss risk / Last checked</h2>
+              <p>Applies to Windows 11. Risk level low. Data loss risk low. Estimated time 10 minutes. Last checked today.</p>
+              <h2>Symptoms</h2>
+              <h2>What This Usually Means</h2>
+              <h2>What Not to Do First</h2>
+              <h2>Try This First</h2>
+              <h2>Step-by-Step Fixes</h2>
+              <h2>Advanced Fixes</h2>
+              <p>Back up important files before advanced fixes.</p>
+              <h2>When to Stop and Get Help</h2>
+              <h2>FAQ</h2>
+              <h3>Question 1?</h3><h3>Question 2?</h3><h3>Question 3?</h3><h3>Question 4?</h3><h3>Question 5?</h3>
+              <h2>Related Guides</h2>
+              <h2>Sources</h2>
+              <img src="assets/hero.jpg" alt="Hero">
+              <img src="assets/inline.jpg" alt="Inline">
+              <a href="https://support.microsoft.com/windows">Microsoft Support</a>
+              <a href="https://learn.microsoft.com/windows/">Microsoft Learn</a>
+              <a href="https://learn.microsoft.com/windows/release-health/">Windows release health</a>
+              <a href="https://support.microsoft.com/windows/windows-update">Windows Update</a>
+              <p>{filler}</p>
+            </article>
+            """
+
+            report = gate.review_html(
+                html,
+                article_dir,
+                {"article": {"meta_description": "Safe Windows help.", "tags": ["Windows"]}},
+            )
+
+        messages = " ".join(issue.message for issue in report.issues)
+        self.assertIn("missing_required_sections", {issue.code for issue in report.issues})
+        self.assertIn("Applies to / Risk level / Data loss risk / Estimated time / Last checked", messages)
+
     def test_windows_articles_require_official_microsoft_source(self) -> None:
         gate = HadesQualityGate("windows_help")
         issues = gate._review_windows_article(
