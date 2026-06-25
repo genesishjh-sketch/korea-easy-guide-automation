@@ -111,6 +111,16 @@ WINDOWS_ADVANCED_ONLY_TERMS = {
     "powershell",
     "command prompt",
     "diskpart",
+    "reset this pc",
+    "factory reset",
+    "system restore",
+    "reinstall windows",
+    "uninstall driver",
+    "delete driver",
+    "delete the driver",
+    "roll back driver",
+    "rollback driver",
+    "driver rollback",
 }
 
 WINDOWS_COMMAND_REPAIR_TERMS = {
@@ -664,13 +674,15 @@ def _review_windows_image_plan(images: list[dict]) -> list[QualityIssue]:
     unsafe_visual_labels = []
     weak_prompt_guards = []
     screenshot_terms = (
-        "screenshot",
-        "screen capture",
         "windows ui",
+        "ui screenshot",
+        "screen capture of windows",
         "windows settings screen",
         "error screen",
         "real windows screen",
         "fake windows screen",
+        "fake screenshot",
+        "real screenshot",
     )
     for image in images:
         filename = image.get("filename") or image.get("url") or "unknown image"

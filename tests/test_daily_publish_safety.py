@@ -1392,6 +1392,81 @@ class WindowsQualityGateTests(unittest.TestCase):
 
         self.assertIn("advanced_fix_in_beginner_section", {issue.code for issue in issues})
 
+    def test_windows_articles_keep_reset_and_driver_removal_out_of_beginner_fix_sections(self) -> None:
+        gate = HadesQualityGate("windows_help")
+        soup = BeautifulSoup(
+            """
+            <article>
+              <h2>Try This First</h2>
+              <p>Do not start with Reset this PC, factory reset, System Restore, or uninstall driver steps.</p>
+              <h2>Step-by-Step Fixes</h2>
+              <p>Avoid delete driver or roll back driver instructions until the advanced section.</p>
+              <h2>Advanced Fixes</h2>
+              <p>Back up important files before advanced fixes.</p>
+            </article>
+            """,
+            "html.parser",
+        )
+        issues = gate._review_windows_article(
+            soup,
+            "applies to risk level data loss risk estimated time last checked advanced fixes back up important files",
+            links=[],
+        )
+
+        issue_messages = "\n".join(issue.message for issue in issues)
+        self.assertIn("advanced_fix_in_beginner_section", {issue.code for issue in issues})
+        self.assertIn("reset this pc", issue_messages)
+        self.assertIn("uninstall driver", issue_messages)
+        self.assertIn("roll back driver", issue_messages)
+
+    def test_windows_image_review_allows_screenshot_topic_words_without_fake_ui(self) -> None:
+        gate = HadesQualityGate("windows_help")
+        with tempfile.TemporaryDirectory() as tmpdir:
+            article_dir = Path(tmpdir)
+            assets_dir = article_dir / "assets"
+            assets_dir.mkdir()
+            (assets_dir / "ai-hero.svg").write_text("<svg></svg>", encoding="utf-8")
+            (assets_dir / "ai-inline-1.svg").write_text("<svg></svg>", encoding="utf-8")
+            (article_dir / "image_plan.json").write_text(
+                json.dumps(
+                    {
+                        "strict": True,
+                        "images": [
+                            {
+                                "filename": "ai-hero.svg",
+                                "url": "assets/ai-hero.svg",
+                                "required": True,
+                                "alt": "How to Take a Screenshot on Windows beginner help visual",
+                                "caption": "A calm beginner-friendly visual for learning screenshot options safely.",
+                                "prompt": (
+                                    "Do not show fake Windows UI, readable error codes, readable letters or numbers, "
+                                    "command prompts, or registry editors. Avoid fake screenshots."
+                                ),
+                            },
+                            {
+                                "filename": "ai-inline-1.svg",
+                                "url": "assets/ai-inline-1.svg",
+                                "required": True,
+                                "alt": "Safe step by step screenshot help visual",
+                                "caption": "Use safe built-in Windows screenshot options before advanced repair.",
+                                "prompt": (
+                                    "Avoid real or fake operating-system screens, readable UI text, readable letters or numbers, "
+                                    "command prompts, and registry editors."
+                                ),
+                            },
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            report = gate.review_html(
+                "<article><h2>Quick Summary</h2><p>safe screenshot topic</p></article>",
+                article_dir,
+                {"article": {"meta_description": "Safe Windows screenshot help.", "tags": ["Windows"]}},
+            )
+
+        self.assertNotIn("unsafe_windows_image_label", {issue.code for issue in report.issues})
+
     def test_windows_command_repairs_require_beginner_safety_warnings(self) -> None:
         gate = HadesQualityGate("windows_help")
         issues = gate._review_windows_article(
