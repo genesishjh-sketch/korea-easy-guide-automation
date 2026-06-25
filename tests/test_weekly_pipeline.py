@@ -37,7 +37,7 @@ class WeeklyPipelineTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             with patch.object(stage3_weekly_report, "ROOT_DIR", Path(tmpdir)), patch(
                 "src.pipeline.stage3_weekly_report.WeeklyReporter"
-            ) as reporter:
+            ) as reporter, patch("src.pipeline.stage3_weekly_report.NotificationClient") as notifier:
                 reporter.return_value.generate.side_effect = RuntimeError("weekly failed")
 
                 with self.assertRaises(RuntimeError):
@@ -50,6 +50,11 @@ class WeeklyPipelineTests(unittest.TestCase):
         self.assertEqual(payload["status"], "failed")
         self.assertEqual(payload["error_type"], "RuntimeError")
         self.assertIn("weekly failed", payload["error"])
+        notifier.return_value.send_required.assert_called_once()
+        message = notifier.return_value.send_required.call_args.args[0]
+        self.assertIn("[Posting Bot] 주간 리포트 실패", message)
+        self.assertIn("weekly failed", message)
+        self.assertIn("Easy PC Fix Weekly Report", message)
 
     def test_weekly_notification_failure_is_reported_before_reraising(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -71,6 +76,25 @@ class WeeklyPipelineTests(unittest.TestCase):
 
         self.assertEqual(payload["status"], "failed")
         self.assertIn("telegram failed", payload["error"])
+
+    def test_weekly_failure_message_classifies_reporting_auth_failures(self) -> None:
+        message = stage3_weekly_report.build_weekly_failure_message(
+            "easy_pc_fix_guide",
+            RuntimeError("Search Console OAuth credentials expired"),
+        )
+
+        self.assertIn("[Posting Bot] 주간 리포트 실패", message)
+        self.assertIn("Google 보고서 권한 문제", message)
+        self.assertIn("Search Console/GA4 OAuth 토큰", message)
+
+    def test_weekly_failure_message_classifies_telegram_failures(self) -> None:
+        message = stage3_weekly_report.build_weekly_failure_message(
+            "easy_pc_fix_guide",
+            RuntimeError("telegram failed"),
+        )
+
+        self.assertIn("텔레그램 전송 문제", message)
+        self.assertIn("TELEGRAM_BOT_TOKEN", message)
 
 
 if __name__ == "__main__":

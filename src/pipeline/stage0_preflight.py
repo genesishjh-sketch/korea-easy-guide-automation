@@ -417,7 +417,10 @@ def check_critical_notifications() -> PreflightCheck:
         "stage3_submit_sitemap.py": "NotificationClient(settings).send_required(build_message(settings.site_name, result))",
         "stage4_publication_check.py": "NotificationClient(settings).send_required(build_message(result))",
         "stage0_reddit_health.py": "NotificationClient(settings).send_required(build_message(result))",
-        "stage3_weekly_report.py": "NotificationClient(settings).send_required(path.read_text(encoding=\"utf-8\"))",
+        "stage3_weekly_report.py": [
+            "NotificationClient(settings).send_required(path.read_text(encoding=\"utf-8\"))",
+            "NotificationClient(settings).send_required(build_weekly_failure_message(site, exc))",
+        ],
         "stage3_cadence_alert.py": "NotificationClient(settings).send_required(message)",
     }
     missing = []
