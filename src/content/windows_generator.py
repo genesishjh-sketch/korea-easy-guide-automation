@@ -32,22 +32,48 @@ TOPIC_SOURCE_RULES = [
     (
         ("wifi", "wi-fi", "internet", "dns", "network"),
         [
-            {"name": "Microsoft Support: Wi-Fi and network help", "url": "https://support.microsoft.com/windows/network-wi-fi"},
-            {"name": "Microsoft Support search: Wi-Fi problems", "url": "https://support.microsoft.com/search/results?query=fix%20wi-fi%20connection%20issues%20in%20Windows"},
+            {
+                "name": "Microsoft Support: Fix Wi-Fi connection issues in Windows",
+                "url": "https://support.microsoft.com/en-us/windows/fix-wi-fi-connection-issues-in-windows-9424a1f7-6a3b-65a6-4d78-7f07eee84d2c",
+            },
+            {
+                "name": "Microsoft Support: Connect to a Wi-Fi network in Windows",
+                "url": "https://support.microsoft.com/en-us/windows/connect-to-a-wi-fi-network-in-windows-1f881677-b569-0cd5-010d-e3cd3579d263",
+            },
         ],
     ),
     (
         ("bluetooth", "pairing"),
         [
-            {"name": "Microsoft Support search: Bluetooth problems", "url": "https://support.microsoft.com/search/results?query=fix%20bluetooth%20problems%20in%20Windows"},
-            {"name": "Microsoft Support: Bluetooth help", "url": "https://support.microsoft.com/windows/bluetooth"},
+            {
+                "name": "Microsoft Support: Fix Bluetooth problems in Windows",
+                "url": "https://support.microsoft.com/en-us/windows/fix-bluetooth-problems-in-windows-723e092f-03fa-858b-5c80-131ec3fba75c",
+            },
+            {
+                "name": "Microsoft Support: Pair a Bluetooth device in Windows",
+                "url": "https://support.microsoft.com/en-us/windows/pair-a-bluetooth-device-in-windows-2be7b51f-6ae9-b757-a3b9-95ee40c3e242",
+            },
+            {
+                "name": "Microsoft Support: Update Bluetooth drivers in Windows",
+                "url": "https://support.microsoft.com/en-us/windows/update-bluetooth-drivers-in-windows-82985c06-6e99-4928-9585-900cd36d1dbc",
+            },
         ],
     ),
     (
         ("printer", "scanner", "print queue"),
         [
-            {"name": "Microsoft Support search: printer problems", "url": "https://support.microsoft.com/search/results?query=fix%20printer%20connection%20and%20printing%20problems%20in%20Windows"},
-            {"name": "Microsoft Support search: printer queue", "url": "https://support.microsoft.com/search/results?query=clear%20print%20queue%20Windows"},
+            {
+                "name": "Microsoft Support: Fix printer connection and printing problems in Windows",
+                "url": "https://support.microsoft.com/en-us/windows/fix-printer-connection-and-printing-problems-in-windows-fb830bff-7702-6349-33cd-9443fe987f73",
+            },
+            {
+                "name": "Microsoft Support: Troubleshooting offline printer problems in Windows",
+                "url": "https://support.microsoft.com/en-us/windows/troubleshooting-offline-printer-problems-in-windows-9f5e98ed-0ac8-50ff-a13b-d79bf7710061",
+            },
+            {
+                "name": "Microsoft Support: Add or install a printer in Windows",
+                "url": "https://support.microsoft.com/en-us/windows/add-or-install-a-printer-in-windows-cc0724cf-793e-3542-d1ff-727e4978638b",
+            },
         ],
     ),
     (
@@ -60,8 +86,18 @@ TOPIC_SOURCE_RULES = [
     (
         ("windows update", "update error", "0x"),
         [
-            {"name": "Microsoft Support search: Windows Update troubleshooter", "url": "https://support.microsoft.com/search/results?query=Windows%20Update%20troubleshooter"},
-            {"name": "Microsoft Support search: Windows Update error codes", "url": "https://support.microsoft.com/search/results?query=Windows%20Update%20error%20code"},
+            {
+                "name": "Microsoft Support: Windows Update troubleshooter",
+                "url": "https://support.microsoft.com/en-us/windows/windows-update-troubleshooter-19bc41ca-ad72-ae67-af3c-89ce169755dd",
+            },
+            {
+                "name": "Microsoft Support: Troubleshoot problems updating Windows",
+                "url": "https://support.microsoft.com/en-us/windows/troubleshoot-problems-updating-windows-188c2b0f-10a7-d72f-65b8-32d177eb136c",
+            },
+            {
+                "name": "Microsoft Support: Install Windows updates",
+                "url": "https://support.microsoft.com/en-us/windows/install-windows-updates-3c5ae7fc-9fb6-9af1-1984-b5e0412c556a",
+            },
             {"name": "Windows release health known issues", "url": "https://learn.microsoft.com/windows/release-health/"},
         ],
     ),

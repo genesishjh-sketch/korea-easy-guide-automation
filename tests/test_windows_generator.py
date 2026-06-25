@@ -17,18 +17,34 @@ from src.content.windows_generator import _symptoms
 ROOT_DIR = Path(__file__).resolve().parents[1]
 
 
+def _direct_microsoft_document_count(urls: list[str]) -> int:
+    return sum(
+        1
+        for url in urls
+        if (
+            url.startswith("https://support.microsoft.com/en-us/windows/")
+            or url.startswith("https://learn.microsoft.com/windows/release-health/")
+        )
+        and "/search/results" not in url
+    )
+
+
 class WindowsGeneratorSourceTests(unittest.TestCase):
     def test_wifi_topics_include_network_specific_microsoft_sources(self) -> None:
         urls = [source["url"] for source in _sources_for_topic("wifi button missing windows 11")]
 
         self.assertTrue(any("wi-fi" in url.lower() or "network" in url.lower() for url in urls))
         self.assertTrue(all("microsoft.com" in url or "learn.microsoft.com" in url for url in urls))
+        self.assertGreaterEqual(_direct_microsoft_document_count(urls), 2)
 
     def test_update_error_topics_include_update_specific_microsoft_sources(self) -> None:
-        names = [source["name"] for source in _sources_for_topic("windows update error 0x800f0922")]
+        sources = _sources_for_topic("windows update error 0x800f0922")
+        names = [source["name"] for source in sources]
+        urls = [source["url"] for source in sources]
 
         self.assertTrue(any("Windows Update" in name for name in names))
         self.assertTrue(any("release health" in name.lower() for name in names))
+        self.assertGreaterEqual(_direct_microsoft_document_count(urls), 3)
 
     def test_onedrive_error_topics_keep_onedrive_title_and_sources(self) -> None:
         title = _error_title("onedrive error 0x8004de40", "0X8004DE40")
@@ -70,6 +86,20 @@ class WindowsGeneratorSourceTests(unittest.TestCase):
         urls = [source["url"] for source in _sources_for_topic("windows update error 0x800f0922")]
 
         self.assertEqual(len(urls), len(set(urls)))
+
+    def test_device_topics_use_direct_microsoft_documents_not_only_search(self) -> None:
+        topics = [
+            "bluetooth not working windows 11",
+            "printer says offline windows 11",
+        ]
+
+        for topic in topics:
+            with self.subTest(topic=topic):
+                urls = [source["url"] for source in _sources_for_topic(topic)]
+
+                self.assertGreaterEqual(_direct_microsoft_document_count(urls), 3)
+                self.assertFalse(any(url.endswith("/windows/bluetooth") for url in urls))
+                self.assertFalse(any(url.endswith("/windows/printers-scanners") for url in urls))
 
     def test_launch_queue_topics_have_enough_microsoft_sources_for_hades(self) -> None:
         seeds = json.loads((ROOT_DIR / "data" / "seeds" / "windows_launch_queue.json").read_text(encoding="utf-8"))
