@@ -594,13 +594,49 @@ class DuplicatePublishGuardTests(unittest.TestCase):
             )
 
         self.assertEqual(plan["active_seed_source"], "launch_queue")
+        self.assertEqual(plan["date_selected_seed"], "wifi button missing")
+        self.assertEqual(plan["date_selected_seed_status"], "already_generated_or_validated")
         self.assertEqual(plan["selected_seed"], "wifi button missing")
+        self.assertEqual(plan["next_publishable_seed"], "")
+        self.assertEqual(plan["next_publishable_seed_status"], "not_available")
         self.assertEqual(plan["candidate_count"], 2)
         self.assertEqual(plan["unused_active_seed_count"], 0)
+        self.assertEqual(
+            plan["candidate_status_counts"],
+            {"already_generated_or_validated": 1, "already_published_or_duplicate": 1},
+        )
         self.assertEqual(plan["candidate_preview"][0]["category"], "Wi-Fi & Internet")
         self.assertEqual(plan["candidate_preview"][0]["quality_precheck"]["status"], "ready")
         self.assertGreaterEqual(plan["candidate_preview"][0]["quality_precheck"]["microsoft_source_count"], 4)
         self.assertGreaterEqual(plan["candidate_preview"][0]["quality_precheck"]["direct_microsoft_source_count"], 2)
+
+    def test_build_seed_plan_shows_next_publishable_seed_after_date_seed(self) -> None:
+        settings = SimpleNamespace(
+            site_key="easy_pc_fix_guide",
+            site_name="Easy PC Fix Guide",
+            site_url="https://easypcfixguide.blogspot.com",
+            app_env="production",
+            automation_start_date="2026-06-24",
+            content_domain="windows_help",
+        )
+        with patch.object(daily_draft, "load_settings", return_value=settings), patch.object(
+            daily_draft, "load_seed_list", return_value=["used topic", "fresh topic", "published topic"]
+        ), patch.object(daily_draft, "load_launch_seed_list", return_value=[]), patch.object(
+            daily_draft, "used_keywords", side_effect=[{"published topic"}, {"used topic", "published topic"}]
+        ), patch.object(daily_draft, "seed_quality_precheck", return_value={"status": "ready", "issues": []}):
+            plan = daily_draft.build_seed_plan(
+                site="easy_pc_fix_guide",
+                now=datetime(2026, 6, 24, 9, 0, tzinfo=ZoneInfo("Asia/Seoul")),
+            )
+
+        self.assertEqual(plan["date_selected_seed"], "used topic")
+        self.assertEqual(plan["date_selected_seed_status"], "already_generated_or_validated")
+        self.assertEqual(plan["next_publishable_seed"], "fresh topic")
+        self.assertEqual(plan["next_publishable_seed_status"], "ready")
+        self.assertEqual(
+            plan["candidate_status_counts"],
+            {"already_generated_or_validated": 1, "already_published_or_duplicate": 1, "ready": 1},
+        )
 
     def test_plan_mode_writes_seed_plan_without_generating_article(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -642,9 +678,14 @@ class DuplicatePublishGuardTests(unittest.TestCase):
                 "today_kst": "2026-06-25",
                 "app_env": "production",
                 "active_seed_source": "long_term",
+                "date_selected_seed": "wifi button missing",
+                "date_selected_seed_status": "ready",
                 "selected_seed": "wifi button missing",
+                "next_publishable_seed": "wifi button missing",
+                "next_publishable_seed_status": "ready",
                 "candidate_count": 1,
                 "unused_active_seed_count": 0,
+                "candidate_status_counts": {"ready": 1},
                 "note": "Seed plan is ready.",
                 "candidate_preview": [
                     {
@@ -664,6 +705,10 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         )
 
         self.assertIn("[Posting Bot] 일일 포스팅 시드 계획", message)
+        self.assertIn("날짜 기준 시드: wifi button missing", message)
+        self.assertIn("날짜 기준 시드 상태: 발행 가능", message)
+        self.assertIn("다음 발행 가능 시드: wifi button missing", message)
+        self.assertIn("후보 상태 집계: 발행 가능 1개", message)
         self.assertIn("wifi button missing / Wi-Fi & Internet", message)
         self.assertIn("공개/중복 이력 있음", message)
         self.assertIn("소스 OK MS 6/직접 3", message)

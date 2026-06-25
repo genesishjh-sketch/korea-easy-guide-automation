@@ -146,16 +146,19 @@ def build_seed_plan(
         selected_index = active_seeds.index(selected_seed)
         candidates = active_seeds[selected_index:] + active_seeds[:selected_index]
 
-    candidate_preview = [
-        {
-            "seed": seed,
-            "category": infer_category(seed, settings.content_domain),
-            "already_published_or_duplicate": seed.lower() in publish_used,
-            "already_generated_or_validated": seed.lower() in generated_used,
-            "quality_precheck": seed_quality_precheck(seed, settings.content_domain),
-        }
-        for seed in candidates[:10]
-    ]
+    candidate_details = [seed_plan_candidate(seed, settings.content_domain, publish_used, generated_used) for seed in candidates]
+    candidate_preview = candidate_details[:10]
+    next_publishable = next(
+        (
+            item
+            for item in candidate_details
+            if not item["already_published_or_duplicate"]
+            and not item["already_generated_or_validated"]
+            and item["quality_precheck"].get("status") == "ready"
+        ),
+        None,
+    )
+    date_selected = next((item for item in candidate_details if item["seed"] == date_selected_seed), None)
     unused_count = sum(1 for seed in active_seeds if seed.lower() not in generated_used)
     plan = {
         "site": settings.site_key,
@@ -172,9 +175,13 @@ def build_seed_plan(
         "main_seed_count": len(load_seed_list(site)),
         "launch_seed_count": len(load_launch_seed_list(site)),
         "date_selected_seed": date_selected_seed,
+        "date_selected_seed_status": seed_plan_candidate_status(date_selected),
         "selected_seed": selected_seed,
+        "next_publishable_seed": (next_publishable or {}).get("seed", ""),
+        "next_publishable_seed_status": seed_plan_candidate_status(next_publishable),
         "candidate_count": len(candidates),
         "candidate_preview": candidate_preview,
+        "candidate_status_counts": seed_plan_candidate_status_counts(candidate_details),
         "used_publish_seed_count": len(publish_used),
         "used_generated_seed_count": len(generated_used),
         "unused_active_seed_count": unused_count,
@@ -187,6 +194,37 @@ def build_seed_plan(
     else:
         plan["note"] = "Seed plan is ready."
     return plan
+
+
+def seed_plan_candidate(seed: str, content_domain: str, publish_used: set[str], generated_used: set[str]) -> dict:
+    normalized = seed.lower()
+    return {
+        "seed": seed,
+        "category": infer_category(seed, content_domain),
+        "already_published_or_duplicate": normalized in publish_used,
+        "already_generated_or_validated": normalized in generated_used,
+        "quality_precheck": seed_quality_precheck(seed, content_domain),
+    }
+
+
+def seed_plan_candidate_status(candidate: dict | None) -> str:
+    if not candidate:
+        return "not_available"
+    if candidate.get("already_published_or_duplicate"):
+        return "already_published_or_duplicate"
+    if (candidate.get("quality_precheck") or {}).get("status") != "ready":
+        return "quality_precheck_warning"
+    if candidate.get("already_generated_or_validated"):
+        return "already_generated_or_validated"
+    return "ready"
+
+
+def seed_plan_candidate_status_counts(candidates: list[dict]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for candidate in candidates:
+        status = seed_plan_candidate_status(candidate)
+        counts[status] = counts.get(status, 0) + 1
+    return dict(sorted(counts.items()))
 
 
 def seed_quality_precheck(seed: str, content_domain: str) -> dict:
@@ -523,15 +561,37 @@ def build_seed_plan_message(seed_plan: dict) -> str:
             f"- 기준일: {seed_plan.get('today_kst')} KST",
             f"- 실행환경: {seed_plan.get('app_env')}",
             f"- 시드 소스: {seed_plan.get('active_seed_source')}",
+            f"- 날짜 기준 시드: {seed_plan.get('date_selected_seed') or seed_plan.get('selected_seed')}",
+            f"- 날짜 기준 시드 상태: {seed_plan_status_label(seed_plan.get('date_selected_seed_status'))}",
             f"- 오늘 선택 시드: {seed_plan.get('selected_seed')}",
+            f"- 다음 발행 가능 시드: {seed_plan.get('next_publishable_seed') or '없음'}",
+            f"- 다음 발행 가능 시드 상태: {seed_plan_status_label(seed_plan.get('next_publishable_seed_status'))}",
             f"- 후보 수: {seed_plan.get('candidate_count')}",
             f"- 미사용 활성 시드 수: {seed_plan.get('unused_active_seed_count')}",
+            f"- 후보 상태 집계: {format_seed_plan_status_counts(seed_plan.get('candidate_status_counts') or {})}",
             f"- 메모: {seed_plan.get('note')}",
             "",
             "후보 미리보기:",
             *preview_lines,
         ]
     )
+
+
+def seed_plan_status_label(status: str | None) -> str:
+    labels = {
+        "ready": "발행 가능",
+        "already_generated_or_validated": "생성/검증 이력 있음",
+        "already_published_or_duplicate": "공개/중복 이력 있음",
+        "quality_precheck_warning": "품질 사전점검 필요",
+        "not_available": "후보 없음",
+    }
+    return labels.get(status or "", status or "확인 필요")
+
+
+def format_seed_plan_status_counts(counts: dict) -> str:
+    if not counts:
+        return "없음"
+    return ", ".join(f"{seed_plan_status_label(str(status))} {count}개" for status, count in counts.items())
 
 
 def build_daily_failure_message(seed: str, exc: Exception, site: str | None = None, mode: str = "draft") -> str:
