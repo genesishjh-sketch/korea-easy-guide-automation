@@ -708,6 +708,10 @@ def build_reddit_diagnostics_summary(research_report: dict) -> list[str]:
     status = diagnostics.get("status")
     if status:
         lines.append(f"- Reddit 수집 진단 상태: {status}")
+    if diagnostics.get("public_json_skipped"):
+        lines.append("- Reddit public JSON 스킵: 예")
+        if diagnostics.get("public_json_skip_reason"):
+            lines.append(f"- Reddit public JSON 스킵 이유: {diagnostics.get('public_json_skip_reason')}")
     public_json_error_count = int(diagnostics.get("public_json_error_count", 0) or 0)
     if public_json_error_count:
         lines.append(f"- Reddit public JSON 실패 수: {public_json_error_count}")

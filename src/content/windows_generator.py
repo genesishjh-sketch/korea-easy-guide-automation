@@ -22,6 +22,69 @@ MICROSOFT_SOURCES = [
 
 TOPIC_SOURCE_RULES = [
     (
+        ("text bigger", "make text bigger", "text size", "display scale", "screen resolution", "magnifier", "high contrast"),
+        [
+            {
+                "name": "Microsoft Support: Change the size of text in Windows",
+                "url": "https://support.microsoft.com/en-us/windows/change-the-size-of-text-in-windows-1d5830c3-eee3-8eaa-836b-abcc37d99b9a",
+            },
+            {
+                "name": "Microsoft Support: Change your screen resolution and layout in Windows",
+                "url": "https://support.microsoft.com/en-us/windows/change-your-screen-resolution-and-layout-in-windows-5effefe3-2eac-e306-0b5d-2073b765876b",
+            },
+            {
+                "name": "Microsoft Support: Turn high contrast mode on or off in Windows",
+                "url": "https://support.microsoft.com/en-us/windows/turn-high-contrast-mode-on-or-off-in-windows-909e9d89-a0f9-a3a9-b993-7a6dcee85025",
+            },
+            {
+                "name": "Microsoft Support: Keyboard shortcuts in Windows",
+                "url": "https://support.microsoft.com/en-us/windows/keyboard-shortcuts-in-windows-dcc61a57-8ff0-cffe-9796-cb9706c75eec",
+            },
+        ],
+    ),
+    (
+        ("screenshot", "screen shot", "snipping tool", "print screen", "prtsc"),
+        [
+            {
+                "name": "Microsoft Support: Use Snipping Tool to capture screenshots",
+                "url": "https://support.microsoft.com/en-us/windows/use-snipping-tool-to-capture-screenshots-00246869-1843-655f-f220-97299b865f6b",
+            },
+            {
+                "name": "Microsoft Support: Keyboard shortcut for print screen",
+                "url": "https://support.microsoft.com/en-us/windows/keyboard-shortcut-for-print-screen-601210c0-b3a9-7b58-bc40-bae4dcf5f108",
+            },
+            {
+                "name": "Microsoft Support: Keyboard shortcuts in Windows",
+                "url": "https://support.microsoft.com/en-us/windows/keyboard-shortcuts-in-windows-dcc61a57-8ff0-cffe-9796-cb9706c75eec",
+            },
+            {
+                "name": "Microsoft Support: Uninstall and reinstall Paint and Snipping Tool",
+                "url": "https://support.microsoft.com/en-us/windows/uninstall-and-reinstall-paint-and-snipping-tool-d21261f8-1c3a-4776-9262-2d34928b1962",
+            },
+        ],
+    ),
+    (
+        ("windows version", "which version", "check windows version", "32-bit", "64-bit", "system type"),
+        [
+            {
+                "name": "Microsoft Support: Find information about your Windows device",
+                "url": "https://support.microsoft.com/en-us/windows/find-information-about-your-windows-device-a66d52c8-3323-44fd-8f34-a9497bb935e1",
+            },
+            {
+                "name": "Microsoft Support: 32-bit and 64-bit Windows FAQ",
+                "url": "https://support.microsoft.com/en-us/windows/32-bit-and-64-bit-windows-frequently-asked-questions-c6ca9541-8dce-4d48-0415-94a3faa2e13d",
+            },
+            {
+                "name": "Microsoft Support: Windows 10 support has ended",
+                "url": "https://support.microsoft.com/en-us/windows/windows-10-support-has-ended-on-october-14-2025-2ca8b313-1946-43d3-b55c-2b95b107f281",
+            },
+            {
+                "name": "Microsoft Support: How to use the PC Health Check app",
+                "url": "https://support.microsoft.com/en-us/windows/how-to-use-the-pc-health-check-app-9c8abd9b-03ba-4e67-81ef-36f37caa7844",
+            },
+        ],
+    ),
+    (
         ("onedrive",),
         [
             {"name": "Microsoft Support: OneDrive help and learning", "url": "https://support.microsoft.com/onedrive"},
@@ -102,7 +165,7 @@ TOPIC_SOURCE_RULES = [
         ],
     ),
     (
-        ("microsoft store", "photos app", "snipping tool", "calculator app", "settings app", "default apps"),
+        ("microsoft store", "photos app", "calculator app", "settings app", "default apps"),
         [
             {"name": "Microsoft Support search: Microsoft Store app problems", "url": "https://support.microsoft.com/search/results?query=Microsoft%20Store%20not%20working%20Windows"},
             {"name": "Microsoft Support search: Windows apps troubleshooting", "url": "https://support.microsoft.com/search/results?query=Windows%20apps%20troubleshooting"},
@@ -316,11 +379,10 @@ def _error_title(text: str, error: str) -> str:
 
 
 def _sources_for_topic(text: str) -> list[dict[str, str]]:
-    sources = [*MICROSOFT_SOURCES]
     for terms, topic_sources in TOPIC_SOURCE_RULES:
         if any(term in text for term in terms):
-            sources.extend(topic_sources)
-            break
+            return _unique_sources([*topic_sources, *MICROSOFT_SOURCES])[:8]
+    sources = [*MICROSOFT_SOURCES]
     return _unique_sources(sources)[:8]
 
 

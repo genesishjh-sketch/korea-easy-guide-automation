@@ -217,6 +217,24 @@ class WindowsGeneratorSourceTests(unittest.TestCase):
                     all("microsoft.com" in source["url"] or "learn.microsoft.com" in source["url"] for source in sources)
                 )
 
+    def test_beginner_pc_tip_seeds_have_enough_microsoft_sources_for_hades(self) -> None:
+        seeds = [
+            "how to make text bigger on windows",
+            "how to take a screenshot on windows",
+            "how to check windows version",
+        ]
+
+        for seed in seeds:
+            with self.subTest(seed=seed):
+                sources = _sources_for_topic(seed)
+                urls = [source["url"] for source in sources]
+
+                self.assertGreaterEqual(len(sources), 6)
+                self.assertGreaterEqual(_direct_microsoft_document_count(urls), 6)
+                self.assertTrue(
+                    all("microsoft.com" in source["url"] or "learn.microsoft.com" in source["url"] for source in sources)
+                )
+
     def test_launch_queue_topics_do_not_fall_back_to_generic_computer_help(self) -> None:
         seeds = json.loads((ROOT_DIR / "data" / "seeds" / "windows_launch_queue.json").read_text(encoding="utf-8"))
 

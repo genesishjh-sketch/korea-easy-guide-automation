@@ -514,6 +514,25 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertIn("https://www.reddit.com/prefs/apps", message)
         self.assertIn("REDDIT_CLIENT_SECRET", message)
 
+    def test_reddit_diagnostics_summary_includes_public_json_skip_reason(self) -> None:
+        lines = daily_draft.build_reddit_diagnostics_summary(
+            {
+                "reddit_collection_diagnostics": {
+                    "status": "fallback_only",
+                    "public_json_skipped": True,
+                    "public_json_skip_reason": "approval pending",
+                    "fallback_reason": "approval pending",
+                    "public_json_error_count": 0,
+                    "public_json_failed_subreddits": [],
+                }
+            }
+        )
+
+        self.assertIn("- Reddit 수집 진단 상태: fallback_only", lines)
+        self.assertIn("- Reddit public JSON 스킵: 예", lines)
+        self.assertIn("- Reddit public JSON 스킵 이유: approval pending", lines)
+        self.assertIn("- fallback 이유: approval pending", lines)
+
     def test_production_uses_launch_queue_before_long_term_seed_list(self) -> None:
         with patch.object(daily_draft, "load_settings") as load_settings:
             load_settings.return_value.app_env = "production"
