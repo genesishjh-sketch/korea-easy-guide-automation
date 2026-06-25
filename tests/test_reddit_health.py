@@ -205,6 +205,33 @@ class RedditHealthTests(unittest.TestCase):
         self.assertIn("GitHub에 넣을 값:", message)
         self.assertIn("검색어 재시도 기록:", message)
 
+    def test_run_persists_reports_before_notification_failure(self) -> None:
+        settings = replace(
+            load_settings("easy_pc_fix_guide"),
+            reddit_client_id="",
+            reddit_client_secret="",
+            notification_provider="telegram",
+            telegram_bot_token="token",
+            telegram_chat_id="chat",
+        )
+        with tempfile.TemporaryDirectory() as tmpdir, patch.object(stage0_reddit_health, "ROOT_DIR", Path(tmpdir)), patch.object(
+            stage0_reddit_health, "load_settings", return_value=settings
+        ), patch.object(stage0_reddit_health, "NotificationClient") as notifier:
+            notifier.return_value.send_required.side_effect = RuntimeError("telegram failed")
+
+            with self.assertRaises(RuntimeError):
+                stage0_reddit_health.run("easy_pc_fix_guide", query="wifi button missing windows 11", notify=True)
+
+            json_path = Path(tmpdir) / "reports" / "easy_pc_fix_guide-reddit-health.json"
+            markdown_path = Path(tmpdir) / "reports" / "easy_pc_fix_guide-reddit-health.md"
+            payload = json.loads(json_path.read_text(encoding="utf-8"))
+            markdown = markdown_path.read_text(encoding="utf-8")
+
+        self.assertEqual(payload["status"], "missing_credentials")
+        self.assertIn("# Reddit OAuth Health: Easy PC Fix Guide", markdown)
+        self.assertIn("GitHub Actions secrets", markdown)
+        self.assertIn("REDDIT_CLIENT_ID", markdown)
+
     def test_console_summary_includes_action_without_secret_values(self) -> None:
         result = {
             "site": "easy_pc_fix_guide",
@@ -243,6 +270,29 @@ class RedditHealthTests(unittest.TestCase):
         self.assertEqual(metadata["collection_status"], "oauth_no_results")
         self.assertEqual(metadata["health_score"], 70)
         self.assertTrue(metadata["blocks_cadence_increase"])
+
+    def test_markdown_report_summarizes_connected_state(self) -> None:
+        markdown = stage0_reddit_health.build_markdown_report(
+            {
+                "site": "easy_pc_fix_guide",
+                "site_name": "Easy PC Fix Guide",
+                "status": "oauth_connected",
+                "status_label": "Reddit OAuth 수집 안정",
+                "query": "wifi button missing windows 11",
+                "oauth_signal_count": 2,
+                "health_score": 100,
+                "blocks_cadence_increase": False,
+                "tested_subreddits": ["WindowsHelp"],
+                "matched_subreddits": ["WindowsHelp"],
+                "action_required": "없음",
+                "sample_titles": ["Wi-Fi button disappeared after update"],
+            }
+        )
+
+        self.assertIn("Status: oauth_connected", markdown)
+        self.assertIn("Health score: 100/100", markdown)
+        self.assertIn("Blocks cadence increase: no", markdown)
+        self.assertIn("Wi-Fi button disappeared after update", markdown)
 
 
 def fake_praw_module(submissions: list) -> object:

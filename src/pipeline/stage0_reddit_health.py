@@ -38,6 +38,8 @@ def run(site: str | None = None, query: str | None = None, limit: int = 3, notif
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / f"{settings.site_key}-reddit-health.json"
     output_path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+    markdown_path = output_dir / f"{settings.site_key}-reddit-health.md"
+    markdown_path.write_text(build_markdown_report(result), encoding="utf-8")
     if notify:
         NotificationClient(settings).send_required(build_message(result))
     return output_path
@@ -394,6 +396,56 @@ def build_console_summary(result: dict) -> str:
     if result.get("error"):
         payload["error"] = result.get("error")
     return json.dumps(payload, ensure_ascii=False, indent=2)
+
+
+def build_markdown_report(result: dict) -> str:
+    status_label = result.get("status_label") or result.get("collection_status") or result.get("status", "unknown")
+    lines = [
+        f"# Reddit OAuth Health: {result.get('site_name', result.get('site', 'Unknown Site'))}",
+        "",
+        f"- Status: {result.get('status', 'unknown')}",
+        f"- Status label: {status_label}",
+        f"- Query: {result.get('query', '')}",
+        f"- OAuth signal count: {result.get('oauth_signal_count', 0)}",
+        f"- Health score: {result.get('health_score', 0)}/100",
+        f"- Blocks cadence increase: {'yes' if result.get('blocks_cadence_increase', True) else 'no'}",
+        f"- Tested subreddits: {', '.join(result.get('tested_subreddits') or []) or 'none'}",
+        f"- Matched subreddits: {', '.join(result.get('matched_subreddits') or []) or 'none'}",
+        "",
+        "## Action Required",
+        "",
+        result.get("action_required") or "None",
+    ]
+    if result.get("remediation_steps"):
+        lines.extend(["", "## Remediation Steps", ""])
+        lines.extend(f"- {step}" for step in result.get("remediation_steps", []))
+    if result.get("query_attempts"):
+        lines.extend(["", "## Query Attempts", ""])
+        for attempt in result.get("query_attempts", []):
+            lines.append(
+                f"- {attempt.get('query')}: {attempt.get('status')} "
+                f"({attempt.get('oauth_signal_count', 0)} OAuth signals)"
+            )
+    setup = result.get("setup_links") or {}
+    if setup:
+        lines.extend(
+            [
+                "",
+                "## Setup Links",
+                "",
+                f"- Reddit apps: {setup.get('reddit_apps_url', '')}",
+                f"- GitHub Actions secrets: {setup.get('github_actions_secrets_url', '')}",
+                f"- Recommended app type: {setup.get('recommended_app_type', '')}",
+                f"- Recommended redirect URI: {setup.get('recommended_redirect_uri', '')}",
+                f"- Recommended user agent: {setup.get('recommended_user_agent', '')}",
+            ]
+        )
+    if result.get("sample_titles"):
+        lines.extend(["", "## Sample Signals", ""])
+        lines.extend(f"- {title}" for title in result.get("sample_titles", [])[:10])
+    if result.get("error"):
+        lines.extend(["", "## Error", "", f"{result.get('error_type')}: {result.get('error')}"])
+    return "\n".join(lines) + "\n"
 
 
 def main() -> None:
