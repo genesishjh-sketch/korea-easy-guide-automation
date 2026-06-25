@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 from datetime import date
+import json
+from pathlib import Path
+import tempfile
 import unittest
 from unittest.mock import patch
 
@@ -98,7 +101,9 @@ class CadenceAlertTests(unittest.TestCase):
         self.assertIn("REDDIT_CLIENT_SECRET = Reddit 앱 상세 화면의 secret", message)
 
     def test_notification_failure_is_not_silenced(self) -> None:
-        with patch("src.pipeline.stage3_cadence_alert.WeeklyReporter") as reporter, patch(
+        with tempfile.TemporaryDirectory() as tmpdir, patch(
+            "src.pipeline.stage3_cadence_alert.ROOT_DIR", Path(tmpdir)
+        ), patch("src.pipeline.stage3_cadence_alert.WeeklyReporter") as reporter, patch(
             "src.pipeline.stage3_cadence_alert.actual_public_post_count", return_value=25
         ), patch("src.pipeline.stage3_cadence_alert.SearchConsoleClient") as search_console, patch(
             "src.pipeline.stage3_cadence_alert.NotificationClient"
@@ -133,6 +138,14 @@ class CadenceAlertTests(unittest.TestCase):
                     site="easy_pc_fix_guide",
                     verbose=False,
                 )
+
+            report_path = Path(tmpdir) / "reports" / "easy_pc_fix_guide-cadence-alert-2026-07-22.json"
+            payload = json.loads(report_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(payload["site_key"], "easy_pc_fix_guide")
+        self.assertEqual(payload["review_date"], "2026-07-22")
+        self.assertEqual(payload["review"]["published_posts"], 25)
+        self.assertIn("발행량 전환 검토일 알림", payload["message"])
 
 
 if __name__ == "__main__":

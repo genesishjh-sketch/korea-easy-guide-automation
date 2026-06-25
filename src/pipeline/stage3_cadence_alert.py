@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import argparse
+import json
 from datetime import date, datetime, timedelta
+from pathlib import Path
 
-from src.config import load_settings
+from src.config import ROOT_DIR, Settings, load_settings
 from src.notifications.telegram import NotificationClient
 from src.publishing.blogger import BloggerCredentialsError, BloggerPublisher
 from src.reporting.cadence import (
+    CadenceReview,
     THREE_POST_REVIEW_DATE,
     TWO_POST_REVIEW_DATE,
     build_cadence_alert_message,
@@ -52,6 +55,7 @@ def run(today: date | None = None, force: bool = False, site: str | None = None,
         review,
         reddit_user_agent=settings.reddit_user_agent,
     )
+    save_alert_report(settings, selected_date, review, message)
     NotificationClient(settings).send_required(message)
     if verbose:
         print(message)
@@ -66,6 +70,23 @@ def actual_public_post_count(settings, articles: list[dict]) -> int:
         return sum(1 for item in articles if item.get("blogger_status") == "LIVE")
     except Exception:
         return sum(1 for item in articles if item.get("blogger_status") == "LIVE")
+
+
+def save_alert_report(settings: Settings, selected_date: date, review: CadenceReview, message: str) -> Path:
+    report_dir = ROOT_DIR / "reports"
+    report_dir.mkdir(parents=True, exist_ok=True)
+    path = report_dir / f"{settings.site_key}-cadence-alert-{selected_date.isoformat()}.json"
+    payload = {
+        "created_at": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+        "site_key": settings.site_key,
+        "site_name": settings.site_name,
+        "site_url": settings.site_url,
+        "review_date": selected_date.isoformat(),
+        "review": review.to_dict(),
+        "message": message,
+    }
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    return path
 
 
 def main() -> None:
