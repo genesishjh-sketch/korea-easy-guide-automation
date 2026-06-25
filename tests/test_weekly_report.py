@@ -293,9 +293,12 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                         "sitemap_url": "https://easypcfixguide.blogspot.com/sitemap.xml",
                         "indexing_guidance": {
                             "status": "submitted_waiting",
+                            "meaning": "Google에 sitemap을 다시 알려준 상태입니다. 이것은 크롤링 요청에 가깝고 색인/검색 노출 확정은 아닙니다.",
                             "summary": "sitemap 제출은 Google에 새 글을 알려주는 단계이며, 즉시 검색 노출을 보장하지는 않습니다.",
                             "expected_wait": "보통 며칠, 새 블로그는 더 오래 걸릴 수 있음",
+                            "first_signal_check": "24~72시간 뒤 URL 검사와 Search Console 페이지 색인 생성 메뉴에서 확인",
                             "check_location": "Search Console > Sitemaps, URL 검사, 페이지 색인 생성",
+                            "url_inspection_target": "https://easypcfixguide.blogspot.com/2026/06/wi-fi-button-missing-on-windows-11.html",
                         },
                     },
                 },
@@ -389,9 +392,12 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("publication-check artifact를 함께 확인하세요.", markdown)
         self.assertIn("최근 글 URL: https://easypcfixguide.blogspot.com/2026/06/wi-fi-button-missing-on-windows-11.html", markdown)
         self.assertIn("Sitemap 제출: 제출됨", markdown)
+        self.assertIn("색인 의미: Google에 sitemap을 다시 알려준 상태입니다", markdown)
         self.assertIn("색인 안내: sitemap 제출은 Google에 새 글을 알려주는 단계", markdown)
         self.assertIn("예상 대기: 보통 며칠", markdown)
+        self.assertIn("첫 신호 확인: 24~72시간 뒤 URL 검사", markdown)
         self.assertIn("확인 위치: Search Console > Sitemaps", markdown)
+        self.assertIn("URL 검사 대상: https://easypcfixguide.blogspot.com/2026/06/wi-fi-button-missing-on-windows-11.html", markdown)
         self.assertIn("## 수집 신호 품질", markdown)
         self.assertIn("Reddit OAuth 신호 수: 0", markdown)
         self.assertIn("Reddit public JSON 신호 수: 0", markdown)
