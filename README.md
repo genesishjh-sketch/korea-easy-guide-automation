@@ -25,6 +25,7 @@ The pipeline can:
 - publish to Blogger
 - avoid duplicate public posts
 - retry the next topic when an automatic publish candidate is already public
+- validate launch queue topic quality before unattended publishing
 - submit the Blogger sitemap to Search Console after publish runs
 - send Korean Telegram Posting Bot reports
 - generate Korean weekly reports with Blogger feed, Search Console, and GA4 data
@@ -61,11 +62,32 @@ It checks:
 
 - site settings
 - topic seed count
+- exact-match seed inventory
+- launch queue inventory
+- launch queue topic quality, including specific Windows categories and Microsoft source readiness
 - daily workflow safety steps
 - validate workflow trigger coverage
 - public Blogger feed reachability
 - local Google OAuth files
 - Telegram notification settings
+
+Launch queue quality can also be checked directly:
+
+```bash
+python -m src.pipeline.stage0_launch_queue_validate --site easy_pc_fix_guide
+```
+
+The command writes:
+
+```text
+reports/easy_pc_fix_guide-launch-queue-validation.json
+```
+
+Use `--generate --limit 2` when you want a stronger sample check that generates the first two launch topics and runs Hades validation without publishing:
+
+```bash
+python -m src.pipeline.stage0_launch_queue_validate --site easy_pc_fix_guide --generate --limit 2
+```
 
 ## Reddit OAuth Health
 
@@ -170,6 +192,15 @@ Public publishing is blocked unless:
 - research report exists
 - official/platform sources exist
 - Windows posts include safety fields such as risk level, data loss risk, estimated time, and last checked
+- Windows posts include direct Microsoft sources, not only Microsoft search-result pages
+- Related Guides include internal blog links for topic clustering
+
+For `easy_pc_fix_guide`, launch queue topics must also:
+
+- exist in `data/seeds/windows_topic_seeds.json`
+- use a specific category instead of generic `Computer Help`
+- have enough Microsoft official sources before unattended publishing
+- remain free of duplicate or blank topic seeds
 
 See:
 

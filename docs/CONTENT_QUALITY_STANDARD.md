@@ -75,3 +75,32 @@ A public post should answer:
 The Hades Engineer quality gate is the hard blocker. If Hades fails, do not publish.
 
 The automation may improve and retry up to three times. If the post still fails, keep the output for inspection and skip that day rather than publishing weak content.
+
+## Easy PC Fix Guide Rules
+
+Windows troubleshooting posts must be safer and more explicit than general travel posts.
+
+Every public Windows post must include:
+
+- `Applies to`, `Risk level`, `Data loss risk`, `Estimated time`, and `Last checked`.
+- A concrete risk level: `Low`, `Medium`, or `High`.
+- A concrete data-loss value: `No`, `Yes`, or `Possible`.
+- A concrete estimated time, such as `5 minutes` or `20 minutes`.
+- A `Last checked` date in `YYYY-MM-DD` format.
+- A backup warning when data loss is possible.
+- Direct Microsoft sources in the article and research report, not only Microsoft search-result pages.
+- Three or more internal Related Guides links.
+
+Keep risky steps in `Advanced Fixes` only:
+
+- Registry or `regedit`
+- BIOS/UEFI
+- partitions, formatting, or reset/recovery operations
+- PowerShell, Command Prompt, `sfc`, `dism`, `chkdsk`, or `diskpart`
+
+Launch queue topics must pass preflight before unattended publishing:
+
+- The topic must exist in `data/seeds/windows_topic_seeds.json`.
+- The topic must map to a specific Windows category, not generic `Computer Help`.
+- The topic must have enough Microsoft source coverage for Hades.
+- The queue must avoid duplicate, blank, or already weak topics.
