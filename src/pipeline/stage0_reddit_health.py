@@ -141,10 +141,11 @@ def check_reddit_oauth(settings: Any, query: str, limit: int = 3) -> dict:
         data_access_submitted_at = getattr(settings, "reddit_data_access_request_submitted_at", "")
         action_required, remediation_steps = missing_credentials_guidance(data_access_submitted_at)
         data_access_status = "approval_pending" if data_access_submitted_at else "not_submitted"
+        status = "approval_pending" if data_access_submitted_at else "missing_credentials"
         return {
             **base,
-            "status": "missing_credentials",
-            **reddit_health_metadata("missing_credentials"),
+            "status": status,
+            **reddit_health_metadata(status),
             "data_access_request_submitted_at": data_access_submitted_at,
             "data_access_request_status": data_access_status,
             "action_required": action_required,
@@ -263,6 +264,12 @@ def reddit_health_metadata(status: str) -> dict:
             "blocks_cadence_increase": True,
             "status_label": "Reddit OAuth 키 없음",
         },
+        "approval_pending": {
+            "collection_status": "approval_pending",
+            "health_score": 0,
+            "blocks_cadence_increase": True,
+            "status_label": "Reddit 승인 대기",
+        },
         "missing_user_agent": {
             "collection_status": "missing_user_agent",
             "health_score": 0,
@@ -354,6 +361,7 @@ def build_message(result: dict) -> str:
         "oauth_connected": "OAuth 연결 확인",
         "oauth_connected_no_results": "OAuth 연결됨, 결과 없음",
         "missing_credentials": "Reddit OAuth 키 없음",
+        "approval_pending": "Reddit 승인 대기",
         "missing_user_agent": "Reddit User-Agent 없음",
         "missing_praw": "PRAW 패키지 없음",
         "oauth_error": "OAuth 오류",
@@ -371,7 +379,11 @@ def build_message(result: dict) -> str:
         f"- 수집 상태: {result.get('status_label') or result.get('collection_status') or '확인 필요'}",
         f"- 상태 점수: {result.get('health_score', 0)}/100",
         f"- 발행량 증량 차단: {'예' if result.get('blocks_cadence_increase', True) else '아니오'}",
-        "- 하루 1개 자동 발행: 계속 운영 가능" if result.get("status") == "missing_credentials" else "- 하루 1개 자동 발행: Reddit 상태 기준 차단 없음",
+        (
+            "- 하루 1개 자동 발행: 계속 운영 가능"
+            if result.get("status") in {"missing_credentials", "approval_pending"}
+            else "- 하루 1개 자동 발행: Reddit 상태 기준 차단 없음"
+        ),
         f"- 조치: {result.get('action_required') or '확인 필요'}",
     ]
     if result.get("data_access_request_submitted_at"):
@@ -394,7 +406,7 @@ def build_message(result: dict) -> str:
                 f"/ OAuth 신호 {attempt.get('oauth_signal_count', 0)}개"
             )
     setup = result.get("setup_links") or {}
-    if setup and result.get("status") in {"missing_credentials", "missing_user_agent", "oauth_error"}:
+    if setup and result.get("status") in {"missing_credentials", "approval_pending", "missing_user_agent", "oauth_error"}:
         lines.extend(
             [
                 "",
@@ -530,7 +542,7 @@ def build_markdown_report(result: dict) -> str:
 def should_exit_nonzero(result: dict) -> bool:
     if result.get("status") in {"oauth_connected", "oauth_connected_no_results"}:
         return False
-    if result.get("status") == "missing_credentials" and result.get("data_access_request_status") == "approval_pending":
+    if result.get("status") == "approval_pending":
         return False
     return True
 

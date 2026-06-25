@@ -19,6 +19,7 @@ class RedditHealthTests(unittest.TestCase):
             reddit_client_id="",
             reddit_client_secret="",
             reddit_user_agent="easy-pc-fix-guide/0.1",
+            reddit_data_access_request_submitted_at="",
         )
 
         result = stage0_reddit_health.check_reddit_oauth(settings, "wifi button missing windows 11")
@@ -42,7 +43,7 @@ class RedditHealthTests(unittest.TestCase):
             any("Easy PC Fix Reddit OAuth Health" in step for step in result["setup_links"]["user_action_checklist"])
         )
 
-    def test_missing_credentials_reports_submitted_data_access_request(self) -> None:
+    def test_approval_pending_reports_submitted_data_access_request(self) -> None:
         settings = replace(
             load_settings("easy_pc_fix_guide"),
             reddit_client_id="",
@@ -53,7 +54,9 @@ class RedditHealthTests(unittest.TestCase):
 
         result = stage0_reddit_health.check_reddit_oauth(settings, "wifi button missing windows 11")
 
-        self.assertEqual(result["status"], "missing_credentials")
+        self.assertEqual(result["status"], "approval_pending")
+        self.assertEqual(result["collection_status"], "approval_pending")
+        self.assertEqual(result["status_label"], "Reddit 승인 대기")
         self.assertEqual(result["data_access_request_submitted_at"], "2026-06-25")
         self.assertEqual(result["data_access_request_status"], "approval_pending")
         self.assertIn("제출 완료했습니다", result["action_required"])
@@ -66,7 +69,7 @@ class RedditHealthTests(unittest.TestCase):
         self.assertFalse(
             stage0_reddit_health.should_exit_nonzero(
                 {
-                    "status": "missing_credentials",
+                    "status": "approval_pending",
                     "data_access_request_status": "approval_pending",
                     "blocks_cadence_increase": True,
                 }
@@ -221,6 +224,7 @@ class RedditHealthTests(unittest.TestCase):
             load_settings("easy_pc_fix_guide"),
             reddit_client_id="",
             reddit_client_secret="",
+            reddit_data_access_request_submitted_at="",
             notification_provider="telegram",
             telegram_bot_token="token",
             telegram_chat_id="chat",
@@ -277,10 +281,13 @@ class RedditHealthTests(unittest.TestCase):
             payload = json.loads(path.read_text(encoding="utf-8"))
 
         self.assertEqual(payload["data_access_request_submitted_at"], "2026-06-25")
+        self.assertEqual(payload["status"], "approval_pending")
         self.assertEqual(payload["data_access_request_status"], "approval_pending")
         self.assertIn("Data Access Request submitted at: 2026-06-25", payload["human_summary_markdown"])
         self.assertIn("Data Access Request status: approval_pending", payload["human_summary_markdown"])
         message = notifier.return_value.send_required.call_args.args[0]
+        self.assertIn("상태: Reddit 승인 대기", message)
+        self.assertIn("하루 1개 자동 발행: 계속 운영 가능", message)
         self.assertIn("Data Access Request 제출일: 2026-06-25", message)
         self.assertIn("Data Access Request 상태: 승인 대기", message)
         self.assertIn("승인 메일을 기다리세요.", message)
@@ -291,6 +298,7 @@ class RedditHealthTests(unittest.TestCase):
             load_settings("easy_pc_fix_guide"),
             reddit_client_id="",
             reddit_client_secret="",
+            reddit_data_access_request_submitted_at="",
             notification_provider="telegram",
             telegram_bot_token="token",
             telegram_chat_id="chat",

@@ -1079,6 +1079,7 @@ def _monitoring_item(label: str, target_date, today, common: dict, action: str) 
         status_label = "예정"
     elif common["quality_issue_count"] or common["reddit_health_status"] in {
         "missing_credentials",
+        "approval_pending",
         "missing_user_agent",
         "reddit_health_missing",
         "stale_reddit_health",
@@ -1142,6 +1143,7 @@ def _status_kr(status: str | None) -> str:
         "oauth_connected": "OAuth 연결 확인",
         "oauth_connected_no_results": "OAuth 연결됨, 결과 없음",
         "missing_credentials": "Reddit OAuth 키 없음",
+        "approval_pending": "Reddit 승인 대기",
         "missing_user_agent": "Reddit User-Agent 없음",
         "missing_praw": "PRAW 패키지 없음",
         "oauth_error": "OAuth 오류",
