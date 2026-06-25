@@ -296,11 +296,39 @@ class PreflightTests(unittest.TestCase):
 
             path = stage0_preflight.run("easy_pc_fix_guide")
             payload = json.loads(path.read_text(encoding="utf-8"))
+            markdown = (path.parent / "easy_pc_fix_guide-preflight.md").read_text(encoding="utf-8")
 
         self.assertIn("readiness", payload)
         self.assertIn("setup_actions", payload)
         self.assertFalse(payload["readiness"]["ready_for_cadence_increase"])
         self.assertEqual(payload["setup_actions"][0]["name"], "reddit_oauth")
+        self.assertIn("# Preflight Report: Easy PC Fix Guide", markdown)
+        self.assertIn("무인 발행 준비: 예", markdown)
+        self.assertIn("발행량 증량 준비: 아니오", markdown)
+        self.assertIn("Reddit OAuth 연결", markdown)
+        self.assertIn("REDDIT_CLIENT_ID", markdown)
+        self.assertIn("## 전체 점검", markdown)
+
+    def test_preflight_markdown_summarizes_no_action_state(self) -> None:
+        result = {
+            "site": "easy_pc_fix_guide",
+            "site_name": "Easy PC Fix Guide",
+            "site_url": "https://easypcfixguide.blogspot.com",
+            "status": "pass",
+            "readiness": {
+                "ready_for_unattended_publish": True,
+                "ready_for_cadence_increase": True,
+                "required_user_action_count": 0,
+            },
+            "setup_actions": [],
+            "checks": [{"name": "site_settings", "status": "pass", "message": "configured"}],
+        }
+
+        markdown = stage0_preflight.build_preflight_markdown(result)
+
+        self.assertIn("전체 상태: 통과", markdown)
+        self.assertIn("추가 조치 없음", markdown)
+        self.assertIn("통과 `site_settings`: configured", markdown)
 
     def test_seed_inventory_passes_when_two_weeks_of_unused_seeds_remain(self) -> None:
         seeds = [f"topic {index}" for index in range(20)]

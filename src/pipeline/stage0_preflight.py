@@ -70,6 +70,8 @@ def run(site: str | None = None) -> Path:
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / f"{settings.site_key}-preflight.json"
     output_path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+    markdown_path = output_dir / f"{settings.site_key}-preflight.md"
+    markdown_path.write_text(build_preflight_markdown(result), encoding="utf-8")
     return output_path
 
 
@@ -673,6 +675,62 @@ def build_readiness_summary(checks: list[PreflightCheck], setup_actions: list[di
         "failed_checks": [check.name for check in checks if check.status == "fail"],
         "warning_checks": [check.name for check in checks if check.status == "warn"],
     }
+
+
+def build_preflight_markdown(result: dict) -> str:
+    readiness = result.get("readiness") or {}
+    setup_actions = result.get("setup_actions") or []
+    checks = result.get("checks") or []
+    lines = [
+        f"# Preflight Report: {result.get('site_name', result.get('site', 'Unknown Site'))}",
+        "",
+        f"- 사이트: {result.get('site_url', '')}",
+        f"- 전체 상태: {_status_label(result.get('status'))}",
+        f"- 무인 발행 준비: {'예' if readiness.get('ready_for_unattended_publish') else '아니오'}",
+        f"- 발행량 증량 준비: {'예' if readiness.get('ready_for_cadence_increase') else '아니오'}",
+        f"- 필요 사용자 조치 수: {readiness.get('required_user_action_count', 0)}",
+        "",
+        "## 필요한 조치",
+        "",
+    ]
+    if setup_actions:
+        for action in setup_actions:
+            lines.extend(
+                [
+                    f"### {action.get('label', action.get('name', '설정 조치'))}",
+                    "",
+                    f"- 상태: {_status_label(action.get('status'))}",
+                    f"- 담당: {action.get('owner', '확인 필요')}",
+                    f"- 시점: {action.get('urgency', 'review')}",
+                    f"- 무인 발행 차단: {'예' if action.get('blocks_unattended_publish') else '아니오'}",
+                    f"- 증량 차단: {'예' if action.get('blocks_cadence_increase') else '아니오'}",
+                    f"- 내용: {action.get('message', '')}",
+                    f"- 다음 단계: {action.get('next_step', '확인 필요')}",
+                ]
+            )
+            links = action.get("links") or {}
+            if links:
+                lines.append("- 링크:")
+                for label, url in links.items():
+                    lines.append(f"  - {label}: {url}")
+            lines.append("")
+    else:
+        lines.append("- 추가 조치 없음")
+        lines.append("")
+
+    lines.extend(["## 전체 점검", ""])
+    for check in checks:
+        lines.append(f"- {_status_label(check.get('status'))} `{check.get('name')}`: {check.get('message')}")
+    lines.append("")
+    return "\n".join(lines)
+
+
+def _status_label(status: str | None) -> str:
+    return {
+        "pass": "통과",
+        "warn": "주의",
+        "fail": "실패",
+    }.get(status or "", status or "확인 필요")
 
 
 def overall_status(checks: list[PreflightCheck]) -> str:
