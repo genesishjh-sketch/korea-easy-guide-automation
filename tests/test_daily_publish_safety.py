@@ -86,6 +86,9 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertEqual(payload["quality_metrics"]["word_count"], 1512)
         self.assertEqual(payload["reddit_signal_quality"]["fallback_reddit_signal_count"], 6)
         self.assertIn("fallback 질문만 사용", payload["reddit_signal_quality"]["warning"])
+        self.assertTrue(payload["operational_status"]["publish_quality_ok"])
+        self.assertEqual(payload["operational_status"]["collection_status"], "fallback_only")
+        self.assertFalse(payload["operational_status"]["ready_for_cadence_increase"])
         self.assertEqual(payload["url"], "https://easypcfixguide.blogspot.com/2026/06/example.html")
         self.assertTrue(stale_failure_removed)
 
@@ -226,8 +229,39 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertIn("- 공식 링크 수: 7", message)
         self.assertIn("- FAQ 수: 9", message)
         self.assertIn("- Reddit fallback 신호 수: 6", message)
+        self.assertIn("- 운영 상태: 발행 품질 OK, 수집 안정성 점검 필요", message)
+        self.assertIn("- 발행 품질 안정성: 안정", message)
+        self.assertIn("- 수집 안정성: 주의: fallback 질문 의존", message)
         self.assertIn("수집 품질 경고", message)
         self.assertIn("fallback 질문만 사용", message)
+
+    def test_operational_status_allows_cadence_increase_only_with_oauth_signals(self) -> None:
+        result = daily_draft.build_operational_status(
+            {"score": 100, "passed": True, "issues": []},
+            {
+                "reddit_oauth_signal_count": 3,
+                "reddit_public_json_signal_count": 0,
+                "fallback_reddit_signal_count": 0,
+            },
+        )
+
+        self.assertTrue(result["publish_quality_ok"])
+        self.assertEqual(result["collection_status"], "stable_oauth")
+        self.assertTrue(result["ready_for_cadence_increase"])
+
+    def test_operational_status_blocks_cadence_increase_when_quality_has_issues(self) -> None:
+        result = daily_draft.build_operational_status(
+            {"score": 88, "passed": False, "issues": [{"code": "thin_content"}]},
+            {
+                "reddit_oauth_signal_count": 3,
+                "reddit_public_json_signal_count": 0,
+                "fallback_reddit_signal_count": 0,
+            },
+        )
+
+        self.assertFalse(result["publish_quality_ok"])
+        self.assertEqual(result["collection_status"], "stable_oauth")
+        self.assertFalse(result["ready_for_cadence_increase"])
 
     def test_daily_success_message_warns_when_reddit_uses_public_json_only(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

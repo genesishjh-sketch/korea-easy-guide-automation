@@ -385,6 +385,7 @@ def save_daily_success_report(result: dict[str, str]) -> Path:
     blogger = publish_result.get("blogger", {})
     existing_post = result.get("existing_post") or {}
     reddit_signal_quality = build_reddit_signal_quality(research_report)
+    operational_status = build_operational_status(quality_report, reddit_signal_quality)
     output_dir = ROOT_DIR / "reports"
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / f"{settings.site_key}-daily-success.json"
@@ -406,6 +407,7 @@ def save_daily_success_report(result: dict[str, str]) -> Path:
         "quality_passed": quality_report.get("passed"),
         "quality_metrics": quality_report.get("metrics", {}),
         "reddit_signal_quality": reddit_signal_quality,
+        "operational_status": operational_status,
         "existing_post": existing_post,
         "daily_limit_skipped": result.get("daily_limit_skipped", False),
         "skipped_duplicate_seeds": result.get("skipped_duplicate_seeds") or [],
@@ -457,6 +459,7 @@ def build_daily_success_message(result: dict[str, str]) -> str:
     quality_metrics = quality_report.get("metrics", {})
     issues = quality_report.get("issues", [])
     reddit_signal_quality = build_reddit_signal_quality(research_report)
+    operational_status = build_operational_status(quality_report, reddit_signal_quality)
     if mode == "validate":
         status = "검증 완료"
     elif result.get("daily_limit_skipped"):
@@ -490,6 +493,9 @@ def build_daily_success_message(result: dict[str, str]) -> str:
         f"- Reddit OAuth 신호 수: {reddit_signal_quality.get('reddit_oauth_signal_count', 0)}",
         f"- Reddit public JSON 신호 수: {reddit_signal_quality.get('reddit_public_json_signal_count', 0)}",
         f"- Reddit fallback 신호 수: {reddit_signal_quality.get('fallback_reddit_signal_count', 0)}",
+        f"- 운영 상태: {operational_status.get('status_label')}",
+        f"- 발행 품질 안정성: {'안정' if operational_status.get('publish_quality_ok') else '점검 필요'}",
+        f"- 수집 안정성: {operational_status.get('collection_status_label')}",
         f"- URL: {blogger_url}",
         f"- 생성 폴더: {result.get('article_dir', '')}",
     ]
@@ -550,6 +556,39 @@ def build_reddit_signal_quality(research_report: dict) -> dict:
         "fallback_reddit_signal_count": fallback_count,
         "reddit_collection_method_counts": method_counts,
         "warning": warning,
+    }
+
+
+def build_operational_status(quality_report: dict, reddit_signal_quality: dict) -> dict:
+    score = int(quality_report.get("score") or 0)
+    passed = bool(quality_report.get("passed"))
+    issues = quality_report.get("issues") or []
+    publish_quality_ok = passed and score >= 90 and not issues
+    if reddit_signal_quality.get("reddit_oauth_signal_count", 0) > 0:
+        collection_status = "stable_oauth"
+        collection_label = "안정: Reddit OAuth 신호 사용"
+    elif reddit_signal_quality.get("reddit_public_json_signal_count", 0) > 0:
+        collection_status = "public_json_only"
+        collection_label = "주의: Reddit public JSON 의존"
+    elif reddit_signal_quality.get("fallback_reddit_signal_count", 0) > 0:
+        collection_status = "fallback_only"
+        collection_label = "주의: fallback 질문 의존"
+    else:
+        collection_status = "no_reddit_signals"
+        collection_label = "주의: Reddit 신호 없음"
+    ready_for_cadence_increase = publish_quality_ok and collection_status == "stable_oauth"
+    if publish_quality_ok and ready_for_cadence_increase:
+        status_label = "품질/수집 안정"
+    elif publish_quality_ok:
+        status_label = "발행 품질 OK, 수집 안정성 점검 필요"
+    else:
+        status_label = "품질 점검 필요"
+    return {
+        "publish_quality_ok": publish_quality_ok,
+        "collection_status": collection_status,
+        "collection_status_label": collection_label,
+        "ready_for_cadence_increase": ready_for_cadence_increase,
+        "status_label": status_label,
     }
 
 
