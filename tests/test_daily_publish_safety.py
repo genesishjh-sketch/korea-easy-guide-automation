@@ -334,9 +334,15 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertIn("수집 품질 경고", message)
         self.assertIn("fallback 질문만 사용", message)
         self.assertIn("- Reddit 수집 진단 상태: fallback_only", message)
+        self.assertEqual(message.count("- Reddit 수집 진단 상태: fallback_only"), 1)
         self.assertIn("- Reddit public JSON 실패 수: 4", message)
+        self.assertEqual(message.count("- Reddit public JSON 실패 수: 4"), 1)
         self.assertIn("- 실패 subreddit: WindowsHelp, Windows11, techsupport, pchelp", message)
         self.assertIn("- fallback 이유: All available Reddit live collection paths returned no usable signals", message)
+        self.assertEqual(
+            message.count("- fallback 이유: All available Reddit live collection paths returned no usable signals"),
+            1,
+        )
         self.assertIn("Google Suggest live 신호 없이 fallback", message)
         self.assertIn("- Google Suggest 수집 진단 상태: fallback_only", message)
         self.assertIn("- Google Suggest fallback 제안 수: 5", message)
