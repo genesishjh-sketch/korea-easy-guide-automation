@@ -39,7 +39,7 @@ def run(site: str | None = None, generate: bool = False, limit: int | None = Non
     settings = load_settings(site)
     launch_seeds = load_launch_seed_list(site)
     main_seeds = set(load_seed_list(site))
-    used = used_keywords(site)
+    used = used_keywords(site, include_validation=False)
 
     selected_seeds = launch_seeds[:limit] if limit is not None else launch_seeds
     items = [

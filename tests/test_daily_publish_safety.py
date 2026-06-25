@@ -507,6 +507,39 @@ class DuplicatePublishGuardTests(unittest.TestCase):
 
         self.assertEqual(seed, "long term one")
 
+    def test_used_keywords_can_ignore_validation_only_artifacts(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir, patch.object(daily_draft, "load_settings") as load_settings:
+            root = Path(tmpdir)
+            validation_dir = root / "2026-06-25" / "validation-only"
+            published_dir = root / "2026-06-25" / "published"
+            duplicate_dir = root / "2026-06-25" / "duplicate"
+            for article_dir, keyword in [
+                (validation_dir, "validation seed"),
+                (published_dir, "published seed"),
+                (duplicate_dir, "duplicate seed"),
+            ]:
+                article_dir.mkdir(parents=True)
+                (article_dir / "metadata.json").write_text(
+                    json.dumps({"candidate": {"keyword": keyword}}),
+                    encoding="utf-8",
+                )
+            (validation_dir / "validation_result.json").write_text(json.dumps({"passed": True}), encoding="utf-8")
+            (published_dir / "blogger_publish_result.json").write_text(
+                json.dumps({"blogger": {"status": "LIVE"}}),
+                encoding="utf-8",
+            )
+            (duplicate_dir / "duplicate_publish_result.json").write_text(
+                json.dumps({"blogger": {"status": "SKIPPED_DUPLICATE"}}),
+                encoding="utf-8",
+            )
+            load_settings.return_value.generated_output_dir = str(root)
+
+            all_keywords = daily_draft.used_keywords("easy_pc_fix_guide")
+            publish_keywords = daily_draft.used_keywords("easy_pc_fix_guide", include_validation=False)
+
+        self.assertEqual(all_keywords, {"validation seed", "published seed", "duplicate seed"})
+        self.assertEqual(publish_keywords, {"published seed", "duplicate seed"})
+
     def test_matches_existing_post_by_title_when_blogger_shortens_slug(self) -> None:
         existing_post = {
             "title": "Wi-Fi Button Missing on Windows 11: Simple Fixes for Beginners",

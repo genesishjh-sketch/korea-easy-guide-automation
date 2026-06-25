@@ -149,7 +149,7 @@ def weak_windows_topic_seeds(seeds: list[str]) -> list[str]:
 def check_seed_inventory(site: str | None = None) -> PreflightCheck:
     try:
         seeds = load_seed_list(site)
-        used = used_keywords(site)
+        used = used_keywords(site, include_validation=False)
     except Exception as exc:
         return PreflightCheck("seed_inventory", "fail", f"Could not inspect seed inventory: {exc}")
     normalized_seeds = {seed.lower() for seed in seeds}
@@ -191,7 +191,7 @@ def check_launch_queue(site: str | None = None) -> PreflightCheck:
     missing = [seed for seed in launch_seeds if seed not in seed_set]
     if missing:
         return PreflightCheck("launch_queue", "fail", f"Launch topics missing from main seed file: {', '.join(missing)}")
-    used = used_keywords(site)
+    used = used_keywords(site, include_validation=False)
     normalized_launch_seeds = {seed.lower() for seed in launch_seeds}
     unused_launch_count = max(0, len(normalized_launch_seeds) - len(normalized_launch_seeds & used))
     message = f"{unused_launch_count}/{len(normalized_launch_seeds)} launch topics remain unused before the long-term queue."

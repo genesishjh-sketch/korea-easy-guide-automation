@@ -26,10 +26,12 @@ KST = ZoneInfo("Asia/Seoul")
 MAX_QUALITY_ATTEMPTS = 3
 
 
-def used_keywords(site: str | None = None) -> set[str]:
+def used_keywords(site: str | None = None, include_validation: bool = True) -> set[str]:
     settings = load_settings(site)
     values = set()
     for path in Path(settings.generated_output_dir).glob("*/*/metadata.json"):
+        if not include_validation and not has_publish_marker(path.parent):
+            continue
         try:
             metadata = json.loads(path.read_text(encoding="utf-8"))
         except Exception:
@@ -39,6 +41,10 @@ def used_keywords(site: str | None = None) -> set[str]:
         if keyword:
             values.add(keyword.lower())
     return values
+
+
+def has_publish_marker(article_dir: Path) -> bool:
+    return (article_dir / "blogger_publish_result.json").exists() or (article_dir / "duplicate_publish_result.json").exists()
 
 
 def choose_seed(explicit_seed: str | None = None, site: str | None = None) -> str:
