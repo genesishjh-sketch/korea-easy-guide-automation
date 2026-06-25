@@ -152,6 +152,104 @@ class Stage2ImageGateTests(unittest.TestCase):
         self.assertIn("weak_image_alt_text", issue_codes)
         self.assertIn("weak_image_caption", issue_codes)
 
+    def test_hades_blocks_windows_image_plans_that_allow_fake_ui(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            article_dir = Path(tmpdir)
+            assets_dir = article_dir / "assets"
+            assets_dir.mkdir()
+            (assets_dir / "ai-hero.jpg").write_bytes(b"hero")
+            (assets_dir / "ai-inline-1.jpg").write_bytes(b"inline")
+            (article_dir / "image_plan.json").write_text(
+                json.dumps(
+                    {
+                        "strict": True,
+                        "images": [
+                            {
+                                "url": "assets/ai-hero.jpg",
+                                "filename": "ai-hero.jpg",
+                                "required": True,
+                                "alt": "Screenshot of Windows settings screen for update repair",
+                                "caption": "A Windows UI screenshot showing the exact repair screen.",
+                                "prompt": "Create a realistic fake Windows UI screenshot with readable error text.",
+                            },
+                            {
+                                "url": "assets/ai-inline-1.jpg",
+                                "filename": "ai-inline-1.jpg",
+                                "required": True,
+                                "alt": "Windows troubleshooting flow with safe abstract repair symbols",
+                                "caption": "Use the safe visual checklist before trying advanced repair steps.",
+                                "prompt": "Create a simple computer help image.",
+                            },
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            html = """
+            <article>
+              <h2>Quick Summary</h2>
+              <img src="assets/ai-hero.jpg" alt="Screenshot of Windows settings screen for update repair">
+              <img src="assets/ai-inline-1.jpg" alt="Windows troubleshooting flow with safe abstract repair symbols">
+            </article>
+            """
+
+            report = HadesQualityGate("windows_help").review_html(html, article_dir, {"article": {}})
+
+        issue_codes = {issue.code for issue in report.issues}
+        self.assertIn("unsafe_windows_image_label", issue_codes)
+        self.assertIn("unsafe_windows_image_prompt", issue_codes)
+
+    def test_hades_accepts_windows_image_prompts_with_strict_fake_ui_guards(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            article_dir = Path(tmpdir)
+            assets_dir = article_dir / "assets"
+            assets_dir.mkdir()
+            (assets_dir / "ai-hero.jpg").write_bytes(b"hero")
+            (assets_dir / "ai-inline-1.jpg").write_bytes(b"inline")
+            guarded_prompt = (
+                "Create a realistic 16:9 beginner Windows help visual. Do not show fake Windows UI, "
+                "readable error codes, readable letters or numbers, command prompts, registry editors, logos, or text overlays."
+            )
+            (article_dir / "image_plan.json").write_text(
+                json.dumps(
+                    {
+                        "strict": True,
+                        "images": [
+                            {
+                                "url": "assets/ai-hero.jpg",
+                                "filename": "ai-hero.jpg",
+                                "required": True,
+                                "alt": "Beginner friendly Windows update repair checklist visual",
+                                "caption": "A calm abstract checklist visual for safe Windows troubleshooting steps.",
+                                "prompt": guarded_prompt,
+                            },
+                            {
+                                "url": "assets/ai-inline-1.jpg",
+                                "filename": "ai-inline-1.jpg",
+                                "required": True,
+                                "alt": "Safe Windows troubleshooting flow with abstract repair symbols",
+                                "caption": "Follow the simple checks first before using advanced repair steps.",
+                                "prompt": guarded_prompt,
+                            },
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            html = """
+            <article>
+              <h2>Quick Summary</h2>
+              <img src="assets/ai-hero.jpg" alt="Beginner friendly Windows update repair checklist visual">
+              <img src="assets/ai-inline-1.jpg" alt="Safe Windows troubleshooting flow with abstract repair symbols">
+            </article>
+            """
+
+            report = HadesQualityGate("windows_help").review_html(html, article_dir, {"article": {}})
+
+        issue_codes = {issue.code for issue in report.issues}
+        self.assertNotIn("unsafe_windows_image_label", issue_codes)
+        self.assertNotIn("unsafe_windows_image_prompt", issue_codes)
+
 
 if __name__ == "__main__":
     unittest.main()

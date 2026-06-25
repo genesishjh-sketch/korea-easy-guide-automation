@@ -245,6 +245,8 @@ class HadesQualityGate:
             if len(required_images) < 2:
                 issues.append(QualityIssue("weak_image_plan", "Image plan must include at least two required images."))
             issues.extend(_review_image_descriptions(required_images))
+            if self.content_domain == "windows_help":
+                issues.extend(_review_windows_image_plan(required_images))
             missing_assets = []
             invalid_urls = []
             for image in required_images:
@@ -616,6 +618,68 @@ def _review_image_descriptions(images: list[dict]) -> list[QualityIssue]:
             QualityIssue(
                 "weak_image_caption",
                 f"Required images need helpful captions for readers: {', '.join(weak_caption)}.",
+            )
+        )
+    return issues
+
+
+def _review_windows_image_plan(images: list[dict]) -> list[QualityIssue]:
+    unsafe_visual_labels = []
+    weak_prompt_guards = []
+    screenshot_terms = (
+        "screenshot",
+        "screen capture",
+        "windows ui",
+        "windows settings screen",
+        "error screen",
+        "real windows screen",
+        "fake windows screen",
+    )
+    for image in images:
+        filename = image.get("filename") or image.get("url") or "unknown image"
+        label_text = f"{image.get('alt', '')} {image.get('caption', '')}".casefold()
+        if any(term in label_text for term in screenshot_terms):
+            unsafe_visual_labels.append(filename)
+
+        prompt = str(image.get("prompt") or "").casefold()
+        has_avoid_language = "do not show" in prompt or "avoid" in prompt or "no " in prompt
+        has_fake_ui_guard = any(
+            term in prompt
+            for term in (
+                "fake windows ui",
+                "fake operating-system screens",
+                "fake official ui",
+                "real or fake operating-system screens",
+            )
+        )
+        has_readable_text_guard = any(
+            term in prompt
+            for term in (
+                "readable ui text",
+                "readable error codes",
+                "readable letters or numbers",
+                "readable interface",
+            )
+        )
+        has_risky_tool_guard = "command prompts" in prompt and "registry editors" in prompt
+        if not (has_avoid_language and has_fake_ui_guard and has_readable_text_guard and has_risky_tool_guard):
+            weak_prompt_guards.append(filename)
+
+    issues = []
+    if unsafe_visual_labels:
+        issues.append(
+            QualityIssue(
+                "unsafe_windows_image_label",
+                "Windows image alt/caption must describe safe abstract help visuals, not screenshots or fake Windows UI: "
+                f"{', '.join(unsafe_visual_labels)}.",
+            )
+        )
+    if weak_prompt_guards:
+        issues.append(
+            QualityIssue(
+                "unsafe_windows_image_prompt",
+                "Windows image prompts must explicitly avoid fake Windows UI, readable UI/error text, command prompts, and registry editors: "
+                f"{', '.join(weak_prompt_guards)}.",
             )
         )
     return issues

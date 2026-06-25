@@ -43,6 +43,17 @@ Every image prompt should specify:
 - Smartphone screens must use generic maps, generic route lines, simple icons, or blurred interfaces.
 - Images should support the article, not pretend to be official documentation.
 
+## Easy PC Fix Guide Image Rules
+
+Windows help images must be safe explanatory visuals, not fake documentation.
+
+- Do not generate fake Windows UI, fake Microsoft support screens, fake error dialogs, or readable error-code screens.
+- Do not show command prompts, PowerShell windows, Registry Editor, BIOS/UEFI screens, partition tools, reset screens, or scary warning overlays.
+- Use abstract repair symbols, checklists, shields, restart arrows, clocks, blank cards, and generic laptop/desk scenes.
+- Prompts must explicitly say to avoid fake Windows UI, readable UI/error text, command prompts, and registry editors.
+- Alt text and captions must describe the image as an abstract help visual or checklist, not as a screenshot or exact UI screen.
+- Hades blocks Windows posts when `image_plan.json` lacks those safety guards.
+
 ## Prompt Template
 
 ```text
