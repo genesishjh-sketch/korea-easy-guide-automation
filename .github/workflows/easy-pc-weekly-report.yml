@@ -40,6 +40,7 @@ jobs:
           printf '%s' '${{ secrets.GOOGLE_OAUTH_TOKEN_SEARCH_CONSOLE_JSON }}' > .credentials/google_token.search-console.json
           printf '%s' '${{ secrets.GOOGLE_OAUTH_TOKEN_ANALYTICS_JSON }}' > .credentials/google_token.analytics.json
       - name: Run Reddit OAuth health check for weekly context
+        continue-on-error: true
         run: python -m src.pipeline.stage0_reddit_health --site easy_pc_fix_guide
       - name: Generate and send weekly report
         run: python -m src.pipeline.stage3_weekly_report --site easy_pc_fix_guide
