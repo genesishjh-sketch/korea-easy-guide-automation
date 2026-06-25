@@ -619,6 +619,11 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertEqual(result["seed"], "strong topic")
         self.assertEqual(result["skipped_quality_seeds"], ["thin topic"])
         self.assertEqual(payload["skipped_quality_seeds"], ["thin topic"])
+        self.assertEqual(payload["seed_attempt_summary"]["attempted_seed_count"], 2)
+        self.assertEqual(payload["seed_attempt_summary"]["selected_seed"], "strong topic")
+        self.assertEqual(payload["seed_attempt_summary"]["quality_retry_count"], 1)
+        self.assertEqual(payload["seed_attempt_summary"]["duplicate_skip_count"], 0)
+        self.assertEqual(payload["seed_attempt_summary"]["attempted_seeds"], ["thin topic", "strong topic"])
         self.assertTrue(result["publish_result"].endswith("blogger_publish_result.json"))
 
     def test_explicit_seed_quality_failure_does_not_switch_topic(self) -> None:
@@ -697,6 +702,34 @@ class DuplicatePublishGuardTests(unittest.TestCase):
 
         self.assertIn("- 품질검수 실패로 재시도한 시드 수: 1", message)
         self.assertIn("- 품질 재시도 시드: thin topic", message)
+        self.assertIn("- 시드 시도 수: 2", message)
+        self.assertIn("- 최종 선택 시드: strong topic", message)
+        self.assertIn("- 품질 재시도 수: 1", message)
+
+    def test_seed_attempt_summary_handles_daily_limit_skip(self) -> None:
+        summary = daily_draft.build_seed_attempt_summary(
+            {
+                "daily_limit_skipped": True,
+                "existing_post": {"title": "Already published"},
+            }
+        )
+
+        self.assertEqual(summary["attempted_seed_count"], 0)
+        self.assertEqual(summary["selected_seed"], "")
+        self.assertEqual(summary["attempted_seeds"], [])
+
+    def test_seed_attempt_summary_deduplicates_final_duplicate_seed(self) -> None:
+        summary = daily_draft.build_seed_attempt_summary(
+            {
+                "seed": "duplicate topic",
+                "skipped_duplicate_seeds": ["duplicate topic"],
+                "skipped_quality_seeds": [],
+            }
+        )
+
+        self.assertEqual(summary["attempted_seed_count"], 1)
+        self.assertEqual(summary["duplicate_skip_count"], 1)
+        self.assertEqual(summary["attempted_seeds"], ["duplicate topic"])
 
     def test_daily_failure_notification_is_required(self) -> None:
         with patch.object(daily_draft, "NotificationClient") as notification:

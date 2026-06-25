@@ -437,6 +437,7 @@ def save_daily_success_report(result: dict[str, str]) -> Path:
     else:
         reddit_signal_quality = build_reddit_signal_quality(research_report)
         operational_status = build_operational_status(quality_report, reddit_signal_quality)
+    seed_attempt_summary = build_seed_attempt_summary(result)
     output_dir = ROOT_DIR / "reports"
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / daily_success_report_name(settings.site_key, mode)
@@ -459,6 +460,7 @@ def save_daily_success_report(result: dict[str, str]) -> Path:
         "quality_metrics": quality_report.get("metrics", {}),
         "reddit_signal_quality": reddit_signal_quality,
         "operational_status": operational_status,
+        "seed_attempt_summary": seed_attempt_summary,
         "existing_post": existing_post,
         "daily_limit_skipped": result.get("daily_limit_skipped", False),
         "skipped_duplicate_seeds": result.get("skipped_duplicate_seeds") or [],
@@ -539,6 +541,7 @@ def build_daily_success_message(result: dict[str, str]) -> str:
     blogger_status = "existing_public_post" if daily_limit_skipped else blogger.get("status") or "unknown"
     blogger_url = blogger.get("url") or existing_post.get("url") or "발행 없음"
     title = article.get("title", "") or existing_post.get("title", "제목 없음")
+    seed_attempt_summary = build_seed_attempt_summary(result)
     if daily_limit_skipped:
         quality_lines = [
             f"- 기존 공개 시각: {existing_post.get('published_kst', '') or '확인 필요'}",
@@ -576,6 +579,10 @@ def build_daily_success_message(result: dict[str, str]) -> str:
         f"- 제목: {title}",
         f"- 카테고리: {article.get('category', '미분류')}",
         f"- 주제 시드: {result.get('seed', '')}",
+        f"- 시드 시도 수: {seed_attempt_summary.get('attempted_seed_count', 0)}",
+        f"- 최종 선택 시드: {seed_attempt_summary.get('selected_seed') or '없음'}",
+        f"- 중복 스킵 수: {seed_attempt_summary.get('duplicate_skip_count', 0)}",
+        f"- 품질 재시도 수: {seed_attempt_summary.get('quality_retry_count', 0)}",
         *quality_lines,
         f"- URL: {blogger_url}",
         f"- 생성 폴더: {result.get('article_dir', '')}",
@@ -631,6 +638,36 @@ def build_daily_success_message(result: dict[str, str]) -> str:
         ]
     )
     return "\n".join(lines)
+
+
+def build_seed_attempt_summary(result: dict) -> dict:
+    if result.get("daily_limit_skipped"):
+        return {
+            "attempted_seed_count": 0,
+            "selected_seed": "",
+            "duplicate_skip_count": 0,
+            "quality_retry_count": 0,
+            "attempted_seeds": [],
+            "skipped_duplicate_seeds": [],
+            "skipped_quality_seeds": [],
+        }
+
+    skipped_duplicate_seeds = list(result.get("skipped_duplicate_seeds") or [])
+    skipped_quality_seeds = list(result.get("skipped_quality_seeds") or [])
+    selected_seed = result.get("seed", "")
+    attempted_seeds = []
+    for seed in [*skipped_quality_seeds, *skipped_duplicate_seeds, selected_seed]:
+        if seed and seed not in attempted_seeds:
+            attempted_seeds.append(seed)
+    return {
+        "attempted_seed_count": len(attempted_seeds),
+        "selected_seed": selected_seed,
+        "duplicate_skip_count": len(skipped_duplicate_seeds),
+        "quality_retry_count": len(skipped_quality_seeds),
+        "attempted_seeds": attempted_seeds,
+        "skipped_duplicate_seeds": skipped_duplicate_seeds,
+        "skipped_quality_seeds": skipped_quality_seeds,
+    }
 
 
 def build_reddit_diagnostics_summary(research_report: dict) -> list[str]:
