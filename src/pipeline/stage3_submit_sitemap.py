@@ -7,6 +7,7 @@ from pathlib import Path
 
 from src.config import ROOT_DIR, load_settings
 from src.notifications.telegram import NotificationClient
+from src.reporting.daily_reports import read_daily_success_report
 from src.reporting.search_console import SearchConsoleClient
 
 
@@ -15,6 +16,7 @@ def run(sitemap_url: str | None = None, site: str | None = None) -> Path:
     selected_sitemap = sitemap_url or f"{settings.site_url.rstrip('/')}/sitemap.xml"
     result = SearchConsoleClient(settings).submit_sitemap(selected_sitemap)
     result["submitted_at"] = datetime.utcnow().isoformat() + "Z"
+    result["daily_publish_context"] = build_daily_publish_context(settings.site_key)
     result["indexing_guidance"] = build_indexing_guidance(result)
 
     output_dir = ROOT_DIR / "reports"
@@ -28,6 +30,7 @@ def run(sitemap_url: str | None = None, site: str | None = None) -> Path:
 def build_message(site_name: str, result: dict) -> str:
     ok = result.get("status") == "submitted"
     guidance = result.get("indexing_guidance") or build_indexing_guidance(result)
+    daily_context = result.get("daily_publish_context") or {}
     lines = [
         "[Posting Bot] Search Console sitemap 제출 결과",
         "",
@@ -36,6 +39,15 @@ def build_message(site_name: str, result: dict) -> str:
         f"- Search Console 속성: {result.get('site_url', 'unknown')}",
         f"- Sitemap: {result.get('sitemap_url', 'unknown')}",
     ]
+    if daily_context:
+        lines.extend(
+            [
+                f"- 연결된 일일 발행 상태: {daily_context.get('status_label', daily_context.get('status', 'unknown'))}",
+                f"- 연결된 글 제목: {daily_context.get('title') or '확인 필요'}",
+                f"- 연결된 글 URL: {daily_context.get('url') or '확인 필요'}",
+                f"- 연결된 글 품질점수: {daily_context.get('quality_score') if daily_context.get('quality_score') is not None else 'n/a'}",
+            ]
+        )
     if result.get("error"):
         lines.extend(
             [
@@ -58,6 +70,35 @@ def build_message(site_name: str, result: dict) -> str:
             ]
         )
     return "\n".join(lines)
+
+
+def build_daily_publish_context(site_key: str) -> dict:
+    report = read_daily_success_report(site_key, ROOT_DIR / "reports")
+    status = report.get("status", "not_uploaded")
+    return {
+        "status": status,
+        "status_label": daily_publish_status_label(status),
+        "mode": report.get("mode", ""),
+        "seed": report.get("seed", ""),
+        "title": report.get("title", ""),
+        "url": report.get("url", ""),
+        "quality_score": report.get("quality_score"),
+        "quality_passed": report.get("quality_passed"),
+        "created_at": report.get("created_at", ""),
+        "daily_limit_skipped": bool(report.get("daily_limit_skipped")),
+    }
+
+
+def daily_publish_status_label(status: str) -> str:
+    labels = {
+        "published": "공개 발행 완료",
+        "draft_uploaded": "초안 업로드",
+        "skipped_duplicate": "중복 감지로 발행 건너뜀",
+        "skipped_daily_limit": "오늘 공개 글 이미 있어 추가 발행 건너뜀",
+        "validated": "검증 완료",
+        "not_uploaded": "일일 발행 리포트 없음",
+    }
+    return labels.get(status, status or "확인 필요")
 
 
 def build_indexing_guidance(result: dict) -> dict:

@@ -9,6 +9,7 @@ from unittest.mock import patch
 from src.pipeline import stage3_submit_sitemap
 from src.pipeline.stage3_submit_sitemap import build_indexing_guidance
 from src.pipeline.stage3_submit_sitemap import build_message
+from src.pipeline.stage3_submit_sitemap import daily_publish_status_label
 
 
 class SearchConsoleSitemapMessageTests(unittest.TestCase):
@@ -19,6 +20,13 @@ class SearchConsoleSitemapMessageTests(unittest.TestCase):
                 "status": "submitted",
                 "site_url": "https://easypcfixguide.blogspot.com/",
                 "sitemap_url": "https://easypcfixguide.blogspot.com/sitemap.xml",
+                "daily_publish_context": {
+                    "status": "published",
+                    "status_label": "공개 발행 완료",
+                    "title": "Wi-Fi Button Missing on Windows 11",
+                    "url": "https://easypcfixguide.blogspot.com/2026/06/wifi-button-missing.html",
+                    "quality_score": 100,
+                },
             },
         )
 
@@ -28,6 +36,10 @@ class SearchConsoleSitemapMessageTests(unittest.TestCase):
         self.assertIn("색인 안내", message)
         self.assertIn("즉시 검색 노출을 보장하지는 않습니다", message)
         self.assertIn("Search Console > Sitemaps", message)
+        self.assertIn("연결된 일일 발행 상태: 공개 발행 완료", message)
+        self.assertIn("Wi-Fi Button Missing on Windows 11", message)
+        self.assertIn("https://easypcfixguide.blogspot.com/2026/06/wifi-button-missing.html", message)
+        self.assertIn("연결된 글 품질점수: 100", message)
 
     def test_error_message_contains_action_items(self) -> None:
         message = build_message(
@@ -87,6 +99,23 @@ class SearchConsoleSitemapMessageTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir, patch.object(stage3_submit_sitemap, "ROOT_DIR", Path(tmpdir)), patch(
             "src.pipeline.stage3_submit_sitemap.SearchConsoleClient"
         ) as client, patch("src.pipeline.stage3_submit_sitemap.NotificationClient"):
+            reports_dir = Path(tmpdir) / "reports"
+            reports_dir.mkdir()
+            (reports_dir / "easy_pc_fix_guide-daily-success.json").write_text(
+                json.dumps(
+                    {
+                        "status": "published",
+                        "mode": "publish",
+                        "seed": "wifi button missing windows 11",
+                        "title": "Wi-Fi Button Missing on Windows 11",
+                        "url": "https://easypcfixguide.blogspot.com/2026/06/wifi-button-missing.html",
+                        "quality_score": 100,
+                        "quality_passed": True,
+                        "created_at": "2026-06-25T00:12:00Z",
+                    }
+                ),
+                encoding="utf-8",
+            )
             client.return_value.submit_sitemap.return_value = {
                 "status": "submitted",
                 "site_url": "https://easypcfixguide.blogspot.com/",
@@ -99,6 +128,16 @@ class SearchConsoleSitemapMessageTests(unittest.TestCase):
         self.assertEqual(payload["status"], "submitted")
         self.assertRegex(payload["submitted_at"], r"\d{4}-\d{2}-\d{2}T")
         self.assertEqual(payload["indexing_guidance"]["status"], "submitted_waiting")
+        self.assertEqual(payload["daily_publish_context"]["status"], "published")
+        self.assertEqual(payload["daily_publish_context"]["status_label"], "공개 발행 완료")
+        self.assertEqual(payload["daily_publish_context"]["title"], "Wi-Fi Button Missing on Windows 11")
+        self.assertEqual(payload["daily_publish_context"]["quality_score"], 100)
+
+    def test_daily_publish_status_label_describes_daily_limit_skip(self) -> None:
+        self.assertEqual(
+            daily_publish_status_label("skipped_daily_limit"),
+            "오늘 공개 글 이미 있어 추가 발행 건너뜀",
+        )
 
 
 if __name__ == "__main__":
