@@ -165,6 +165,31 @@ class PreflightTests(unittest.TestCase):
         self.assertIn("0/7 launch topics remain unused", check.message)
         self.assertIn("long-term seed list", check.message)
 
+    def test_launch_queue_quality_passes_for_current_queue(self) -> None:
+        check = stage0_preflight.check_launch_queue_quality("easy_pc_fix_guide")
+
+        self.assertEqual(check.status, "pass")
+        self.assertIn("launch topics have specific categories", check.message)
+        self.assertIn("Microsoft sources", check.message)
+
+    def test_launch_queue_quality_fails_on_generic_or_weak_sources(self) -> None:
+        with patch.object(stage0_preflight, "load_settings") as load_settings:
+            load_settings.return_value.content_domain = "windows_help"
+            with patch.object(
+                stage0_preflight,
+                "load_seed_list",
+                return_value=["windows problem", *[f"wifi keeps disconnecting windows 11 variant {i}" for i in range(7)]],
+            ), patch.object(
+                stage0_preflight,
+                "load_launch_seed_list",
+                return_value=["windows problem", *[f"wifi keeps disconnecting windows 11 variant {i}" for i in range(6)]],
+            ):
+                check = stage0_preflight.check_launch_queue_quality("easy_pc_fix_guide")
+
+        self.assertEqual(check.status, "fail")
+        self.assertIn("windows problem", check.message)
+        self.assertIn("generic_computer_help_category", check.message)
+
     def test_reddit_collection_warns_without_oauth_credentials(self) -> None:
         with patch.object(stage0_preflight, "load_settings") as load_settings:
             load_settings.return_value.reddit_subreddits = ["WindowsHelp", "Windows11"]

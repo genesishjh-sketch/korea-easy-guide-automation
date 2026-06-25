@@ -17,6 +17,8 @@ from src.google_auth import token_path_for_scopes
 from src.pipeline.daily_draft import load_launch_seed_list
 from src.pipeline.daily_draft import load_seed_list
 from src.pipeline.daily_draft import used_keywords
+from src.pipeline.stage0_launch_queue_validate import global_launch_queue_issues
+from src.pipeline.stage0_launch_queue_validate import validate_seed
 from src.pipeline.stage4_publication_check import fetch_public_feed
 from src.pipeline.stage4_publication_check import parse_posts
 from src.utils.reddit_setup import GITHUB_SECRETS_URL
@@ -39,6 +41,7 @@ def run(site: str | None = None) -> Path:
         check_seed_file(site),
         check_seed_inventory(site),
         check_launch_queue(site),
+        check_launch_queue_quality(site),
         check_reddit_collection_settings(site),
         check_zero_cost_image_policy(),
         check_daily_workflow(),
@@ -195,6 +198,38 @@ def check_launch_queue(site: str | None = None) -> PreflightCheck:
             f"{message} Add launch topics soon if the new blog still needs a guided launch sequence.",
         )
     return PreflightCheck("launch_queue", "pass", message)
+
+
+def check_launch_queue_quality(site: str | None = None) -> PreflightCheck:
+    settings = load_settings(site)
+    if settings.content_domain != "windows_help":
+        return PreflightCheck("launch_queue_quality", "pass", "No launch queue quality check is required for this site.")
+    try:
+        seeds = set(load_seed_list(site))
+        launch_seeds = load_launch_seed_list(site)
+    except Exception as exc:
+        return PreflightCheck("launch_queue_quality", "fail", f"Could not load launch queue quality inputs: {exc}")
+
+    global_issues = global_launch_queue_issues(launch_seeds, seeds)
+    if global_issues:
+        return PreflightCheck(
+            "launch_queue_quality",
+            "fail",
+            f"Launch queue structure issues: {'; '.join(global_issues[:3])}",
+        )
+
+    # Ignore used status here. The regular launch_queue check tracks consumption;
+    # this check proves remaining queue entries are specific, categorized, and source-ready.
+    validations = [validate_seed(seed, seeds, used=set(), site=site, generate=False) for seed in launch_seeds]
+    failures = [item for item in validations if item.status != "pass"]
+    if failures:
+        details = "; ".join(f"{item.seed}: {', '.join(item.issues)}" for item in failures[:5])
+        return PreflightCheck("launch_queue_quality", "fail", f"Launch queue quality failed: {details}")
+    return PreflightCheck(
+        "launch_queue_quality",
+        "pass",
+        f"{len(validations)}/{len(launch_seeds)} launch topics have specific categories and enough Microsoft sources.",
+    )
 
 
 def check_reddit_collection_settings(site: str | None = None) -> PreflightCheck:
