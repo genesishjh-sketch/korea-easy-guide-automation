@@ -84,7 +84,8 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                 "analytics": {"status": "not_configured", "note": "test"},
                 "operations": {
                     "daily_success": {
-                        "status": "published",
+                        "status": "validated",
+                        "mode": "validate",
                         "title": "Wi-Fi Button Missing on Windows 11",
                         "url": "https://easypcfixguide.blogspot.com/2026/06/example.html",
                         "quality_score": 100,
@@ -113,7 +114,9 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("최근 7일 공개 피드 글 수: 1", markdown)
         self.assertIn("Wi-Fi Button Missing on Windows 11", markdown)
         self.assertIn("## 운영 점검", markdown)
-        self.assertIn("최근 일일 성공 리포트: 공개 발행", markdown)
+        self.assertIn("최근 일일 성공 리포트: 검증 완료", markdown)
+        self.assertIn("리포트 구분: 검증 모드 리포트", markdown)
+        self.assertIn("공개 발행 결과가 아닙니다", markdown)
         self.assertIn("품질점수: 100/100", markdown)
         self.assertIn("운영 상태: 발행 품질 OK, 수집 안정성 점검 필요", markdown)
         self.assertIn("발행량 증량 준비: 아니오", markdown)
@@ -309,6 +312,7 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
             operations = reporter._operations_result()
 
         self.assertEqual(operations["daily_success"]["status"], "published")
+        self.assertEqual(operations["daily_success_context"]["status"], "publish_related")
         self.assertEqual(operations["daily_failure"]["status"], "failed")
 
     def test_operations_result_falls_back_to_public_feed_when_artifacts_are_not_persisted(self) -> None:

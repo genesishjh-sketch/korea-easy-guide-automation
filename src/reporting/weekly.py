@@ -6,6 +6,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from src.config import ROOT_DIR, Settings
+from src.pipeline.stage4_publication_check import classify_daily_success_context
 from src.pipeline.stage4_publication_check import fetch_public_feed
 from src.pipeline.stage4_publication_check import parse_posts
 from src.reporting.cadence import review_cadence
@@ -161,8 +162,10 @@ class WeeklyReporter:
                 "status": "not_persisted",
                 "note": "이전 workflow artifact는 주간 workflow 환경에 자동 보존되지 않습니다. Daily publish workflow는 공개 발행 직후 sitemap 제출 단계를 실행합니다.",
             }
+        daily_success = self._read_report(report_dir / f"{self.settings.site_key}-daily-success.json")
         return {
-            "daily_success": self._read_report(report_dir / f"{self.settings.site_key}-daily-success.json"),
+            "daily_success": daily_success,
+            "daily_success_context": classify_daily_success_context(daily_success),
             "daily_failure": self._read_report(report_dir / f"{self.settings.site_key}-daily-failure.json"),
             "preflight": self._read_report(report_dir / f"{self.settings.site_key}-preflight.json"),
             "publication_check": publication_check,
@@ -430,11 +433,16 @@ class WeeklyReporter:
         lines.extend(["", "## 운영 점검", ""])
         operations = report.get("operations", {})
         daily_success = operations.get("daily_success", {})
+        daily_success_context = operations.get("daily_success_context") or classify_daily_success_context(daily_success)
         daily_failure = operations.get("daily_failure", {})
         preflight = operations.get("preflight", {})
         publication_check = operations.get("publication_check", {})
         sitemap_submit = operations.get("sitemap_submit", {})
         lines.append(f"- 최근 일일 성공 리포트: {_status_kr(daily_success.get('status', 'not_uploaded'))}")
+        if daily_success_context.get("status") != "not_uploaded":
+            lines.append(f"  - 리포트 구분: {daily_success_context.get('label')}")
+            if daily_success_context.get("note"):
+                lines.append(f"  - 참고: {daily_success_context.get('note')}")
         if daily_success.get("title"):
             lines.append(f"  - 제목: {daily_success.get('title', '')}")
         if daily_success.get("url"):
