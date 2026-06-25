@@ -31,6 +31,19 @@ class ImagePlanTests(unittest.TestCase):
         self.assertEqual([image.filename for image in plan.images], ["ai-hero.jpg", "ai-inline-1.jpg"])
         self.assertTrue(plan.strict)
 
+    def test_windows_prompts_block_fake_ui_and_readable_error_text(self) -> None:
+        candidate = build_candidate("windows update error 0x80070643", [], "windows_help")
+
+        with patch.dict("os.environ", {"IMAGE_ASSET_MODE": "manual_jpg"}, clear=True):
+            plan = build_article_image_plan(candidate, "Windows Update Error 0x80070643")
+
+        combined_prompts = " ".join(image.prompt for image in plan.images).lower()
+        self.assertIn("fake windows ui", combined_prompts)
+        self.assertIn("readable error codes", combined_prompts)
+        self.assertIn("readable letters or numbers", combined_prompts)
+        self.assertIn("command prompts", combined_prompts)
+        self.assertIn("registry editors", combined_prompts)
+
     def test_korea_production_uses_local_svg_fallback_filenames(self) -> None:
         candidate = build_candidate("incheon airport to seoul", [], "korea_travel")
 

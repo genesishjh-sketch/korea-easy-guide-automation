@@ -118,8 +118,10 @@ def build_windows_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
         caption="A calm beginner-friendly visual for solving this Windows problem safely.",
         prompt=(
             f"Create a realistic 16:9 hero image for an English beginner computer help article titled '{title}'. "
-            "Show a clean home desk with a laptop, simple troubleshooting notes, and a calm non-technical user solving a Windows problem. "
-            "Do not show real Microsoft logos, fake Windows UI, readable error codes, brand marks, private information, or text overlays. "
+            "Show a clean home desk with a laptop displaying only abstract update, checklist, shield, and repair symbols. "
+            "Use blank cards, abstract lines, and icon-like shapes instead of any readable interface. "
+            "Do not show real Microsoft logos, fake Windows UI, readable error codes, readable letters or numbers, brand marks, "
+            "private information, warning screens, command prompts, registry editors, or text overlays. "
             "Style: modern trustworthy tech-help editorial photography, bright natural light, clear composition, practical and safe."
         ),
     )
@@ -130,8 +132,10 @@ def build_windows_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
         caption="Work through the safe checks first before trying advanced repair steps.",
         prompt=(
             f"Create a realistic 16:9 in-article image for a beginner Windows troubleshooting guide about '{candidate.keyword}'. "
-            "Show a simple step-by-step troubleshooting setup: laptop, notebook checklist, router/printer/headphones only if relevant, and a calm workspace. "
-            "Avoid real or fake operating-system screens, no Microsoft logos, no readable UI text, no scary warning overlays, no watermarks."
+            "Show a simple visual troubleshooting flow using abstract icons such as restart arrows, checklist, clock, shield, "
+            "repair gear, and a gentle caution symbol when relevant. Use blank cards and abstract lines only. "
+            "Avoid real or fake operating-system screens, Microsoft logos, readable UI text, readable letters or numbers, "
+            "error codes, scary warning overlays, command prompts, registry editors, and watermarks."
         ),
     )
     return ArticleImagePlan(
