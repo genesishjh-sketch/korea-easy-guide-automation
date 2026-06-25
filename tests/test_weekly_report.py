@@ -658,6 +658,31 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("품질검수 실패 후 다른 시드로 재시도", joined)
         self.assertIn("공식 출처", joined)
 
+    def test_next_actions_include_quality_issue_guidance(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+
+        actions = reporter._next_actions(
+            articles=[{"blogger_status": "LIVE"}],
+            static_pages=[{"title": "About"}, {"title": "Contact"}, {"title": "Privacy Policy"}, {"title": "Disclaimer"}],
+            public_posts={"status": "connected", "posts": [{"title": "Published"}]},
+            operations={"preflight": {"status": "pass"}},
+            signal_quality={"status": "connected"},
+            quality_issues=[
+                {"code": "weak_related_guide_links", "message": "Related guide links missing."},
+                {"code": "missing_required_image_assets", "message": "Missing image assets."},
+                {"code": "shallow_microsoft_sources", "message": "Direct Microsoft sources missing."},
+            ],
+        )
+
+        joined = "\n".join(actions)
+        self.assertIn("Related Guides 내부 링크 문제", joined)
+        self.assertIn("블로그 내부 검색 링크 3개 이상", joined)
+        self.assertIn("이미지 문제가 감지", joined)
+        self.assertIn("hero/inline 이미지 2개", joined)
+        self.assertIn("공식 출처 문제가 감지", joined)
+        self.assertIn("Microsoft Support/Learn 직접 링크", joined)
+
     def test_operations_result_reads_daily_success_and_failure_reports(self) -> None:
         settings = load_settings("easy_pc_fix_guide")
         reporter = WeeklyReporter(settings)

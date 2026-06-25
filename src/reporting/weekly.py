@@ -36,6 +36,7 @@ class WeeklyReporter:
         search_console = search_console_client.summary(week_start.date(), now.date())
         indexed_pages = search_console_client.indexed_page_estimate(week_start.date(), now.date())
         operations = self._operations_result(now, public_posts, search_console)
+        quality_issues = self._quality_issues_result(articles)
         local_published_count = sum(1 for item in articles if item.get("blogger_status") == "LIVE")
         published_count = max(local_published_count, len(public_posts.get("posts", [])))
         cadence_review = review_cadence(
@@ -43,7 +44,7 @@ class WeeklyReporter:
             published_posts=published_count,
             indexed_pages_estimate=indexed_pages.get("page_count_with_search_data", 0),
             recent_impressions=search_console.get("totals_from_top_queries", {}).get("impressions", 0),
-            quality_issue_count=self._quality_issue_count(articles),
+            quality_issue_count=len(quality_issues),
             signal_quality=signal_quality,
             reddit_health=operations.get("reddit_health", {}),
         )
@@ -67,8 +68,8 @@ class WeeklyReporter:
             "analytics": GA4Client(self.settings).summary(week_start.date(), now.date()),
             "operations": operations,
             "cadence_review": cadence_review.to_dict(),
-            "quality_issues": self._quality_issues_result(articles),
-            "next_actions": self._next_actions(articles, static_pages, public_posts, operations, signal_quality),
+            "quality_issues": quality_issues,
+            "next_actions": self._next_actions(articles, static_pages, public_posts, operations, signal_quality, quality_issues),
         }
 
         output_dir = ROOT_DIR / "reports"
@@ -342,6 +343,7 @@ class WeeklyReporter:
         public_posts: dict | None = None,
         operations: dict | None = None,
         signal_quality: dict | None = None,
+        quality_issues: list[dict] | None = None,
     ) -> list[str]:
         actions = []
         public_post_count = len((public_posts or {}).get("posts", []))
@@ -423,6 +425,7 @@ class WeeklyReporter:
             actions.append(
                 "최근 자동 발행에서 품질검수 실패 후 다른 시드로 재시도했습니다. 실패 시드의 공식 출처, 이미지 계획, beginner-safe 섹션 구성을 보강하세요."
             )
+        actions.extend(_quality_issue_actions(quality_issues or []))
         if (signal_quality or {}).get("status") == "fallback_only":
             actions.append(
                 "Reddit 실제 신호 없이 fallback 질문만 사용한 글이 있습니다. Reddit OAuth 설정을 추가해 주제 수집 품질을 안정화하세요. "
@@ -758,3 +761,22 @@ def _status_kr(status: str | None) -> str:
         "oauth_error": "OAuth 오류",
     }
     return mapping.get(status or "not_uploaded", status or "미업로드")
+
+
+def _quality_issue_actions(quality_issues: list[dict]) -> list[str]:
+    codes = {issue.get("code", "") for issue in quality_issues}
+    actions = []
+    if {"weak_related_guides", "weak_related_guide_links"} & codes:
+        actions.append(
+            "품질검수에서 Related Guides 내부 링크 문제가 감지되었습니다. Windows 글 템플릿과 related_guides 생성기가 "
+            "블로그 내부 검색 링크 3개 이상을 출력하는지 확인하세요."
+        )
+    if {"missing_required_image_assets", "missing_images", "weak_image_plan"} & codes:
+        actions.append(
+            "품질검수에서 이미지 문제가 감지되었습니다. hero/inline 이미지 2개와 strict image_plan이 생성됐는지 확인하세요."
+        )
+    if {"weak_sources", "weak_microsoft_sources", "missing_microsoft_source", "shallow_microsoft_sources"} & codes:
+        actions.append(
+            "품질검수에서 공식 출처 문제가 감지되었습니다. Microsoft Support/Learn 직접 링크와 주제별 공식 출처를 보강하세요."
+        )
+    return actions
