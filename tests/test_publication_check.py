@@ -28,6 +28,7 @@ class PublicationCheckTests(unittest.TestCase):
             "read_daily_success_report",
             return_value={
                 "status": "validated",
+                "mode": "validate",
                 "operational_status": {
                     "publish_quality_ok": True,
                     "collection_status_label": "주의: fallback 질문 의존",
@@ -46,6 +47,7 @@ class PublicationCheckTests(unittest.TestCase):
         self.assertEqual(result["today_post_count"], 1)
         self.assertEqual(result["daily_workflow"]["status"], "success")
         self.assertEqual(result["daily_success"]["operational_status"]["ready_for_cadence_increase"], False)
+        self.assertEqual(result["daily_success_context"]["status"], "validation_only")
         notification.return_value.send_required.assert_called_once()
 
     def test_run_accepts_today_post_before_cutoff(self) -> None:
@@ -202,6 +204,7 @@ class PublicationCheckTests(unittest.TestCase):
                 },
                 "daily_success": {
                     "status": "validated",
+                    "mode": "validate",
                     "operational_status": {
                         "publish_quality_ok": True,
                         "collection_status_label": "주의: fallback 질문 의존",
@@ -222,8 +225,22 @@ class PublicationCheckTests(unittest.TestCase):
         self.assertIn("- 확인된 최신 글: Fresh post", message)
         self.assertIn("- 최신 글 URL: https://easypcfixguide.blogspot.com/2026/06/fresh-post.html", message)
         self.assertIn("- Daily workflow 상태: 오늘 실행 성공", message)
+        self.assertIn("- 최근 일일 리포트 구분: 검증 모드 리포트", message)
+        self.assertIn("공개 발행 결과가 아닙니다", message)
         self.assertIn("- 최근 일일 운영 상태: 발행 품질 OK, 수집 안정성 점검 필요", message)
         self.assertIn("발행량 증량 준비: 아니오", message)
+
+    def test_classifies_publish_related_daily_success_report(self) -> None:
+        result = stage4_publication_check.classify_daily_success_context({"status": "published", "mode": "publish"})
+
+        self.assertEqual(result["status"], "publish_related")
+        self.assertTrue(result["publish_related"])
+
+    def test_classifies_validation_only_daily_success_report(self) -> None:
+        result = stage4_publication_check.classify_daily_success_context({"status": "validated", "mode": "validate"})
+
+        self.assertEqual(result["status"], "validation_only")
+        self.assertFalse(result["publish_related"])
 
     def test_publication_message_explains_before_cutoff_post(self) -> None:
         message = stage4_publication_check.build_message(

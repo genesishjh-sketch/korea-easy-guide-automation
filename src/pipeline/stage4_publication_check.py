@@ -38,6 +38,7 @@ def run(site: str | None = None, today: datetime | None = None, after_hour: int 
     status = publication_status(todays_posts, all_todays_posts, cutoff)
     daily_workflow = check_daily_workflow_status(now)
     daily_success = read_daily_success_report(settings.site_key)
+    daily_success_context = classify_daily_success_context(daily_success)
     result = {
         "site": settings.site_key,
         "site_name": settings.site_name,
@@ -49,6 +50,7 @@ def run(site: str | None = None, today: datetime | None = None, after_hour: int 
         "today_total_post_count": len(all_todays_posts),
         "daily_workflow": daily_workflow,
         "daily_success": daily_success,
+        "daily_success_context": daily_success_context,
         "latest_posts": [
             {
                 "title": post["title"],
@@ -185,6 +187,38 @@ def read_daily_success_report(site_key: str) -> dict:
     return data
 
 
+def classify_daily_success_context(report: dict) -> dict:
+    status = report.get("status", "not_uploaded")
+    mode = report.get("mode", "")
+    if status == "not_uploaded":
+        return {
+            "status": "not_uploaded",
+            "publish_related": False,
+            "label": "일일 성공 리포트 없음",
+            "note": "발행 확인은 Blogger 공개 피드와 Daily workflow 상태를 기준으로 판단합니다.",
+        }
+    if mode == "validate" or status == "validated":
+        return {
+            "status": "validation_only",
+            "publish_related": False,
+            "label": "검증 모드 리포트",
+            "note": "최근 일일 성공 리포트는 validate 실행 결과이며 공개 발행 결과가 아닙니다.",
+        }
+    if status in {"published", "skipped_daily_limit", "skipped_duplicate", "draft_uploaded"}:
+        return {
+            "status": "publish_related",
+            "publish_related": True,
+            "label": "발행 workflow 리포트",
+            "note": "",
+        }
+    return {
+        "status": "unknown",
+        "publish_related": False,
+        "label": "판단 필요",
+        "note": f"최근 일일 성공 리포트 상태를 해석하지 못했습니다: {status}",
+    }
+
+
 def publication_status(todays_posts: list[dict], all_todays_posts: list[dict], cutoff: datetime | None) -> str:
     if todays_posts:
         return "published_today"
@@ -228,6 +262,11 @@ def build_message(result: dict) -> str:
         if workflow.get("note"):
             lines.append(f"- workflow 참고: {workflow.get('note')}")
     daily_success = result.get("daily_success") or {}
+    daily_success_context = result.get("daily_success_context") or classify_daily_success_context(daily_success)
+    if daily_success_context.get("status") != "not_uploaded":
+        lines.append(f"- 최근 일일 리포트 구분: {daily_success_context.get('label')}")
+        if daily_success_context.get("note"):
+            lines.append(f"  - 참고: {daily_success_context.get('note')}")
     operational_status = daily_success.get("operational_status") or {}
     if operational_status:
         lines.extend(
