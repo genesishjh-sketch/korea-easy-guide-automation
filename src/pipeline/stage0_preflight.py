@@ -58,6 +58,7 @@ def run(site: str | None = None) -> Path:
         check_reddit_health_report_persistence(),
         check_publication_check_report_persistence(),
         check_daily_failure_report_persistence(),
+        check_weekly_failure_report_persistence(),
         check_critical_notifications(),
         check_public_feed(settings.site_url),
         check_local_google_files(settings.google_oauth_client_secret_file, settings.google_oauth_token_file),
@@ -585,6 +586,35 @@ def check_daily_failure_report_persistence() -> PreflightCheck:
         "daily_failure_report_persistence",
         "pass",
         "Daily publish failures write JSON action items, human summary, and traceback before notification.",
+    )
+
+
+def check_weekly_failure_report_persistence() -> PreflightCheck:
+    path = ROOT_DIR / "src" / "pipeline" / "stage3_weekly_report.py"
+    if not path.exists():
+        return PreflightCheck("weekly_failure_report_persistence", "fail", "Weekly report pipeline file is missing.")
+    text = path.read_text(encoding="utf-8")
+    required = [
+        "save_weekly_failure_report(site, exc)",
+        "weekly_failure_action_items(error)",
+        "build_weekly_failure_message(site, exc)",
+        "\"error_summary\": error",
+        "\"action_items\": action_items",
+        "\"human_summary\": build_weekly_failure_message",
+        "\"traceback\": traceback.format_exception",
+        "weekly-failure.json",
+    ]
+    missing = [item for item in required if item not in text]
+    if missing:
+        return PreflightCheck(
+            "weekly_failure_report_persistence",
+            "fail",
+            f"Missing weekly failure report persistence safeguards: {', '.join(missing)}",
+        )
+    return PreflightCheck(
+        "weekly_failure_report_persistence",
+        "pass",
+        "Weekly report failures write JSON action items, human summary, and traceback before notification.",
     )
 
 
