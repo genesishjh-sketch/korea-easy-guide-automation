@@ -899,6 +899,64 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         )
         self.assertFalse(operations["publication_check"]["publication_evidence"]["needs_attention"])
         self.assertEqual(operations["sitemap_submit"]["status"], "not_persisted")
+        self.assertEqual(operations["sitemap_submit"]["previous_status"], "not_uploaded")
+
+    def test_operations_result_keeps_current_sitemap_report(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+        now = datetime(2026, 6, 25, 9, 40, tzinfo=ZoneInfo("Asia/Seoul"))
+
+        with tempfile.TemporaryDirectory() as tmpdir, patch("src.reporting.weekly.ROOT_DIR", Path(tmpdir)):
+            report_dir = Path(tmpdir) / "reports"
+            report_dir.mkdir()
+            (report_dir / "easy_pc_fix_guide-search-console-sitemap-submit.json").write_text(
+                json.dumps(
+                    {
+                        "status": "submitted",
+                        "submitted_at": "2026-06-25T00:15:00Z",
+                        "sitemap_url": "https://easypcfixguide.blogspot.com/sitemap.xml",
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            operations = reporter._operations_result(
+                now=now,
+                public_posts={"status": "connected", "posts": []},
+                search_console={"status": "connected"},
+            )
+
+        self.assertEqual(operations["sitemap_submit"]["status"], "submitted")
+        self.assertEqual(operations["sitemap_submit"]["submitted_at"], "2026-06-25T00:15:00Z")
+
+    def test_operations_result_marks_stale_sitemap_report_as_not_persisted(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+        now = datetime(2026, 6, 25, 9, 40, tzinfo=ZoneInfo("Asia/Seoul"))
+
+        with tempfile.TemporaryDirectory() as tmpdir, patch("src.reporting.weekly.ROOT_DIR", Path(tmpdir)):
+            report_dir = Path(tmpdir) / "reports"
+            report_dir.mkdir()
+            (report_dir / "easy_pc_fix_guide-search-console-sitemap-submit.json").write_text(
+                json.dumps(
+                    {
+                        "status": "submitted",
+                        "submitted_at": "2026-06-24T00:15:00Z",
+                        "sitemap_url": "https://easypcfixguide.blogspot.com/sitemap.xml",
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            operations = reporter._operations_result(
+                now=now,
+                public_posts={"status": "connected", "posts": []},
+                search_console={"status": "connected"},
+            )
+
+        self.assertEqual(operations["sitemap_submit"]["status"], "not_persisted")
+        self.assertEqual(operations["sitemap_submit"]["previous_status"], "submitted")
+        self.assertEqual(operations["sitemap_submit"]["previous_submitted_at"], "2026-06-24T00:15:00Z")
 
     def test_operations_result_accepts_today_post_before_cutoff(self) -> None:
         settings = load_settings("easy_pc_fix_guide")

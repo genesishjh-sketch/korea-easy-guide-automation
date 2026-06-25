@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from datetime import datetime
 import json
 from pathlib import Path
 
@@ -13,6 +14,7 @@ def run(sitemap_url: str | None = None, site: str | None = None) -> Path:
     settings = load_settings(site)
     selected_sitemap = sitemap_url or f"{settings.site_url.rstrip('/')}/sitemap.xml"
     result = SearchConsoleClient(settings).submit_sitemap(selected_sitemap)
+    result["submitted_at"] = datetime.utcnow().isoformat() + "Z"
     result["indexing_guidance"] = build_indexing_guidance(result)
 
     output_dir = ROOT_DIR / "reports"

@@ -83,6 +83,23 @@ class SearchConsoleSitemapMessageTests(unittest.TestCase):
             ):
                 stage3_submit_sitemap.main()
 
+    def test_run_writes_submitted_at_timestamp(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir, patch.object(stage3_submit_sitemap, "ROOT_DIR", Path(tmpdir)), patch(
+            "src.pipeline.stage3_submit_sitemap.SearchConsoleClient"
+        ) as client, patch("src.pipeline.stage3_submit_sitemap.NotificationClient"):
+            client.return_value.submit_sitemap.return_value = {
+                "status": "submitted",
+                "site_url": "https://easypcfixguide.blogspot.com/",
+                "sitemap_url": "https://easypcfixguide.blogspot.com/sitemap.xml",
+            }
+
+            path = stage3_submit_sitemap.run(site="easy_pc_fix_guide")
+            payload = json.loads(path.read_text(encoding="utf-8"))
+
+        self.assertEqual(payload["status"], "submitted")
+        self.assertRegex(payload["submitted_at"], r"\d{4}-\d{2}-\d{2}T")
+        self.assertEqual(payload["indexing_guidance"]["status"], "submitted_waiting")
+
 
 if __name__ == "__main__":
     unittest.main()

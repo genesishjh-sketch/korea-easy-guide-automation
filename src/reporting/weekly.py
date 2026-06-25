@@ -179,10 +179,12 @@ class WeeklyReporter:
         ):
             publication_check = self._publication_check_from_public_posts(now, public_posts)
         sitemap_submit = self._read_report(report_dir / f"{self.settings.site_key}-search-console-sitemap-submit.json")
-        if sitemap_submit.get("status") == "not_uploaded" and (public_posts or search_console):
+        if self._sitemap_report_is_not_current(sitemap_submit, now) and (public_posts or search_console):
             sitemap_submit = {
                 "status": "not_persisted",
                 "note": "이전 workflow artifact는 주간 workflow 환경에 자동 보존되지 않습니다. Daily publish workflow는 공개 발행 직후 sitemap 제출 단계를 실행합니다.",
+                "previous_status": sitemap_submit.get("status", "not_uploaded"),
+                "previous_submitted_at": sitemap_submit.get("submitted_at", ""),
             }
         return {
             "daily_success": daily_success,
@@ -212,6 +214,16 @@ class WeeklyReporter:
         ):
             return True
         return False
+
+    def _sitemap_report_is_not_current(self, sitemap_submit: dict, now: datetime | None) -> bool:
+        if sitemap_submit.get("status") == "not_uploaded":
+            return True
+        if now is None:
+            return False
+        submitted_at = _parse_datetime(str(sitemap_submit.get("submitted_at", "")))
+        if submitted_at is None:
+            return True
+        return submitted_at.date() != now.date()
 
     def _publication_check_from_public_posts(self, now: datetime, public_posts: dict) -> dict:
         if public_posts.get("status") != "connected":
@@ -834,6 +846,6 @@ def _parse_datetime(value: str) -> datetime | None:
     if not value:
         return None
     try:
-        return datetime.fromisoformat(value)
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
     except ValueError:
         return None
