@@ -22,6 +22,9 @@ jobs:
       NOTIFICATION_PROVIDER: ${{ vars.NOTIFICATION_PROVIDER }}
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+      REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+      EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT: ${{ vars.EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT || 'easy-pc-fix-guide/0.1 by posting-automation-alert-bot' }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -36,6 +39,8 @@ jobs:
           printf '%s' '${{ secrets.GOOGLE_OAUTH_TOKEN_JSON }}' > .credentials/google_token.json
           printf '%s' '${{ secrets.GOOGLE_OAUTH_TOKEN_SEARCH_CONSOLE_JSON }}' > .credentials/google_token.search-console.json
           printf '%s' '${{ secrets.GOOGLE_OAUTH_TOKEN_ANALYTICS_JSON }}' > .credentials/google_token.analytics.json
+      - name: Run Reddit OAuth health check for weekly context
+        run: python -m src.pipeline.stage0_reddit_health --site easy_pc_fix_guide
       - name: Generate and send weekly report
         run: python -m src.pipeline.stage3_weekly_report --site easy_pc_fix_guide
       - name: Upload weekly report
@@ -44,5 +49,7 @@ jobs:
         with:
           name: easy-pc-fix-weekly-report
           path: |
+            reports/easy_pc_fix_guide-reddit-health.json
+            reports/easy_pc_fix_guide-reddit-health.md
             reports/easy_pc_fix_guide-weekly-*
             reports/easy_pc_fix_guide-weekly-failure.json
