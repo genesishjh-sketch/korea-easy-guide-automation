@@ -50,12 +50,16 @@ class RedditCollector:
         client_secret: str = "",
         subreddits: list[str] | None = None,
         timeout: int = 12,
+        skip_public_json: bool = False,
+        skip_public_json_reason: str = "",
     ) -> None:
         self.user_agent = user_agent
         self.client_id = client_id
         self.client_secret = client_secret
         self.subreddits = subreddits or DEFAULT_SUBREDDITS
         self.timeout = timeout
+        self.skip_public_json = skip_public_json
+        self.skip_public_json_reason = skip_public_json_reason
         self.diagnostics: dict = {}
 
     def collect(self, query: str, limit: int = 10) -> list[TopicSignal]:
@@ -67,6 +71,8 @@ class RedditCollector:
             "public_json_attempted_subreddits": [],
             "public_json_failed_subreddits": [],
             "public_json_error_count": 0,
+            "public_json_skipped": bool(self.skip_public_json),
+            "public_json_skip_reason": self.skip_public_json_reason if self.skip_public_json else "",
             "used_fallback": False,
             "fallback_reason": "",
         }
@@ -77,47 +83,48 @@ class RedditCollector:
                 return oauth_signals
 
         signals: list[TopicSignal] = []
-        for subreddit in self.subreddits:
-            self.diagnostics["public_json_attempted_subreddits"].append(subreddit)
-            url = f"https://www.reddit.com/r/{subreddit}/search.json?q={quote_plus(query)}&restrict_sr=1&sort=relevance&limit={limit}"
-            try:
-                response = requests.get(
-                    url,
-                    headers={"User-Agent": self.user_agent},
-                    timeout=self.timeout,
-                )
-                response.raise_for_status()
-                children = response.json().get("data", {}).get("children", [])
-            except Exception as exc:
-                LOGGER.warning("Reddit collection failed for r/%s: %s", subreddit, exc)
-                self.diagnostics["public_json_failed_subreddits"].append(
-                    {
-                        "subreddit": subreddit,
-                        "error": str(exc),
-                    }
-                )
-                continue
-
-            for child in children:
-                data = child.get("data", {})
-                title = clean_space(data.get("title", ""))
-                if not title:
-                    continue
-                signals.append(
-                    TopicSignal(
-                        source="reddit",
-                        keyword=query,
-                        title=title,
-                        url=f"https://www.reddit.com{data.get('permalink', '')}",
-                        score=float(data.get("score", 0)) + float(data.get("num_comments", 0)) * 1.5,
-                        metadata={
-                            "subreddit": subreddit,
-                            "collection_method": "public_json",
-                            "num_comments": data.get("num_comments", 0),
-                            "created_utc": data.get("created_utc"),
-                        },
+        if not self.skip_public_json:
+            for subreddit in self.subreddits:
+                self.diagnostics["public_json_attempted_subreddits"].append(subreddit)
+                url = f"https://www.reddit.com/r/{subreddit}/search.json?q={quote_plus(query)}&restrict_sr=1&sort=relevance&limit={limit}"
+                try:
+                    response = requests.get(
+                        url,
+                        headers={"User-Agent": self.user_agent},
+                        timeout=self.timeout,
                     )
-                )
+                    response.raise_for_status()
+                    children = response.json().get("data", {}).get("children", [])
+                except Exception as exc:
+                    LOGGER.warning("Reddit collection failed for r/%s: %s", subreddit, exc)
+                    self.diagnostics["public_json_failed_subreddits"].append(
+                        {
+                            "subreddit": subreddit,
+                            "error": str(exc),
+                        }
+                    )
+                    continue
+
+                for child in children:
+                    data = child.get("data", {})
+                    title = clean_space(data.get("title", ""))
+                    if not title:
+                        continue
+                    signals.append(
+                        TopicSignal(
+                            source="reddit",
+                            keyword=query,
+                            title=title,
+                            url=f"https://www.reddit.com{data.get('permalink', '')}",
+                            score=float(data.get("score", 0)) + float(data.get("num_comments", 0)) * 1.5,
+                            metadata={
+                                "subreddit": subreddit,
+                                "collection_method": "public_json",
+                                "num_comments": data.get("num_comments", 0),
+                                "created_utc": data.get("created_utc"),
+                            },
+                        )
+                    )
 
         if signals:
             self.diagnostics["status"] = "public_json_connected"
@@ -144,7 +151,9 @@ class RedditCollector:
         self.diagnostics["public_json_error_count"] = len(self.diagnostics["public_json_failed_subreddits"])
         self.diagnostics["used_fallback"] = bool(fallback_signals)
         if fallback_signals:
-            if self.diagnostics["public_json_error_count"]:
+            if self.skip_public_json:
+                self.diagnostics["fallback_reason"] = self.skip_public_json_reason or "Public Reddit JSON collection was skipped."
+            elif self.diagnostics["public_json_error_count"]:
                 self.diagnostics["fallback_reason"] = "All available Reddit live collection paths returned no usable signals; public JSON had errors."
             else:
                 self.diagnostics["fallback_reason"] = "Reddit live collection returned no matching signals."

@@ -36,12 +36,15 @@ def run(seed: str | None = None, site: str | None = None) -> Path:
     settings = load_settings(site)
     keyword = load_seed(seed, settings)
     LOGGER.info("Collecting signals for keyword: %s", keyword)
+    reddit_public_json_skip_reason = reddit_public_json_skip_reason_for_settings(settings)
 
     reddit = RedditCollector(
         settings.reddit_user_agent,
         client_id=settings.reddit_client_id,
         client_secret=settings.reddit_client_secret,
         subreddits=settings.reddit_subreddits,
+        skip_public_json=bool(reddit_public_json_skip_reason),
+        skip_public_json_reason=reddit_public_json_skip_reason,
     )
     google = GoogleSuggestCollector()
     reddit_signals = reddit.collect(keyword, limit=6)
@@ -82,6 +85,19 @@ def run(seed: str | None = None, site: str | None = None) -> Path:
     )
     LOGGER.info("Saved article to %s", output_dir)
     return output_dir
+
+
+def reddit_public_json_skip_reason_for_settings(settings) -> str:
+    if settings.content_domain != "windows_help":
+        return ""
+    if settings.reddit_client_id and settings.reddit_client_secret:
+        return ""
+    if not settings.reddit_data_access_request_submitted_at:
+        return ""
+    return (
+        "Reddit Data Access Request approval is pending, so public JSON collection is skipped "
+        "until OAuth credentials are available."
+    )
 
 
 def build_research_report(

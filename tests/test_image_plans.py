@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 import tempfile
+import types
 import unittest
 from unittest.mock import patch
 
@@ -77,6 +78,35 @@ class ImagePlanTests(unittest.TestCase):
 
         self.assertEqual([image.filename for image in plan.images], ["ai-hero.svg", "ai-inline-1.svg"])
         self.assertTrue(plan.strict)
+
+    def test_easy_pc_approval_pending_skips_unstable_reddit_public_json(self) -> None:
+        settings = types.SimpleNamespace(
+            content_domain="windows_help",
+            reddit_client_id="",
+            reddit_client_secret="",
+            reddit_data_access_request_submitted_at="2026-06-25",
+        )
+
+        reason = stage1_generate.reddit_public_json_skip_reason_for_settings(settings)
+
+        self.assertIn("approval is pending", reason)
+
+    def test_reddit_public_json_skip_does_not_apply_to_korea_or_oauth(self) -> None:
+        korea = types.SimpleNamespace(
+            content_domain="korea_travel",
+            reddit_client_id="",
+            reddit_client_secret="",
+            reddit_data_access_request_submitted_at="2026-06-25",
+        )
+        oauth_ready = types.SimpleNamespace(
+            content_domain="windows_help",
+            reddit_client_id="client",
+            reddit_client_secret="secret",
+            reddit_data_access_request_submitted_at="2026-06-25",
+        )
+
+        self.assertEqual(stage1_generate.reddit_public_json_skip_reason_for_settings(korea), "")
+        self.assertEqual(stage1_generate.reddit_public_json_skip_reason_for_settings(oauth_ready), "")
 
     def test_korea_stage1_creates_two_local_svg_assets_in_production(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

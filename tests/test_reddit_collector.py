@@ -48,6 +48,26 @@ class RedditCollectorTests(unittest.TestCase):
         self.assertIn("blocked", collector.diagnostics["public_json_failed_subreddits"][0]["error"])
         self.assertTrue(collector.diagnostics["used_fallback"])
 
+    def test_skip_public_json_uses_fallback_without_network_request(self) -> None:
+        collector = RedditCollector(
+            "easy-pc-fix-guide/0.1",
+            subreddits=["WindowsHelp"],
+            skip_public_json=True,
+            skip_public_json_reason="approval pending",
+        )
+
+        with patch("src.collectors.reddit.requests.get") as public_get:
+            signals = collector.collect("wifi button missing windows 11")
+
+        public_get.assert_not_called()
+        self.assertTrue(signals)
+        self.assertEqual(collector.diagnostics["status"], "fallback_only")
+        self.assertTrue(collector.diagnostics["public_json_skipped"])
+        self.assertEqual(collector.diagnostics["public_json_skip_reason"], "approval pending")
+        self.assertEqual(collector.diagnostics["public_json_attempted_subreddits"], [])
+        self.assertEqual(collector.diagnostics["public_json_error_count"], 0)
+        self.assertEqual(collector.diagnostics["fallback_reason"], "approval pending")
+
     def test_oauth_failure_is_recorded_before_public_json_fallback(self) -> None:
         collector = RedditCollector(
             "easy-pc-fix-guide/0.1",
