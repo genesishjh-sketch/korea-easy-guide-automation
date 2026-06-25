@@ -98,6 +98,18 @@ WINDOWS_ADVANCED_ONLY_TERMS = {
     "diskpart",
 }
 
+WINDOWS_TOPIC_CONTEXT_CONFLICTS = {
+    "onedrive": {
+        "topic_markers": ("onedrive",),
+        "conflicting_phrases": (
+            "windows update shows",
+            "windows update troubleshooter",
+            "windows update may be blocked",
+            "check windows release health to see whether microsoft has listed a known update issue",
+        ),
+    }
+}
+
 
 @dataclass(frozen=True)
 class QualityIssue:
@@ -260,9 +272,26 @@ class HadesQualityGate:
             issues.append(QualityIssue("missing_advanced_warning", "Advanced fixes require a clear backup warning."))
         if soup is not None:
             issues.extend(self._review_windows_advanced_only_terms(soup))
+        issues.extend(self._review_windows_topic_context(text_lower))
         for phrase in WINDOWS_BLOCKED_PHRASES:
             if phrase in text_lower:
                 issues.append(QualityIssue("blocked_windows_phrase", f"Blocked Windows phrase found: {phrase}."))
+        return issues
+
+    def _review_windows_topic_context(self, text_lower: str) -> list[QualityIssue]:
+        issues: list[QualityIssue] = []
+        for topic, rule in WINDOWS_TOPIC_CONTEXT_CONFLICTS.items():
+            topic_markers = rule["topic_markers"]
+            if not any(marker in text_lower for marker in topic_markers):
+                continue
+            conflicts = sorted(phrase for phrase in rule["conflicting_phrases"] if phrase in text_lower)
+            if conflicts:
+                issues.append(
+                    QualityIssue(
+                        "windows_topic_context_mismatch",
+                        f"{topic.title()} article contains unrelated Windows Update troubleshooting copy: {', '.join(conflicts)}.",
+                    )
+                )
         return issues
 
     def _review_windows_advanced_only_terms(self, soup: BeautifulSoup) -> list[QualityIssue]:

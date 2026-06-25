@@ -626,6 +626,20 @@ class WindowsQualityGateTests(unittest.TestCase):
 
         self.assertIn("advanced_fix_in_beginner_section", {issue.code for issue in issues})
 
+    def test_windows_articles_block_onedrive_update_context_mismatch(self) -> None:
+        gate = HadesQualityGate("windows_help")
+        issues = gate._review_windows_article(
+            None,
+            (
+                "applies to risk level data loss risk estimated time last checked advanced fixes back up important files "
+                "onedrive error 0x8004de40 windows update shows 0x8004de40 "
+                "run the windows update troubleshooter"
+            ),
+            links=[],
+        )
+
+        self.assertIn("windows_topic_context_mismatch", {issue.code for issue in issues})
+
 
 if __name__ == "__main__":
     unittest.main()
