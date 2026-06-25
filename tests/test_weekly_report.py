@@ -920,6 +920,89 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertEqual(operations["publication_check"]["today_post_count"], 0)
         self.assertEqual(operations["publication_check"]["today_total_post_count"], 1)
 
+    def test_operations_result_refreshes_legacy_publication_check_after_validation_report_migration(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+        now = datetime(2026, 6, 25, 12, 0, tzinfo=ZoneInfo("Asia/Seoul"))
+
+        with tempfile.TemporaryDirectory() as tmpdir, patch("src.reporting.weekly.ROOT_DIR", Path(tmpdir)):
+            report_dir = Path(tmpdir) / "reports"
+            report_dir.mkdir()
+            (report_dir / "easy_pc_fix_guide-publication-check.json").write_text(
+                json.dumps(
+                    {
+                        "status": "published_today_before_cutoff",
+                        "checked_at_kst": "2026-06-25T11:32:30+09:00",
+                        "today_post_count": 0,
+                        "today_total_post_count": 1,
+                        "publication_evidence": {
+                            "status": "feed_and_workflow_confirmed_report_not_publish",
+                            "label": "공개 피드와 workflow는 확인, 일일 리포트는 발행 리포트 아님",
+                            "needs_attention": True,
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            operations = reporter._operations_result(
+                now=now,
+                public_posts={
+                    "status": "connected",
+                    "posts": [
+                        {
+                            "title": "Early post",
+                            "url": "https://easypcfixguide.blogspot.com/2026/06/early-post.html",
+                            "published_kst": "2026-06-25T00:12:00+09:00",
+                        }
+                    ],
+                },
+                search_console={"status": "connected"},
+            )
+
+        self.assertEqual(operations["daily_success_context"]["status"], "not_uploaded")
+        self.assertEqual(operations["publication_check"]["source"], "weekly_public_feed_fallback")
+        self.assertEqual(operations["publication_check"]["status"], "published_today_before_cutoff")
+        self.assertNotIn("publication_evidence", operations["publication_check"])
+
+    def test_operations_result_refreshes_stale_publication_check_from_previous_day(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+        now = datetime(2026, 6, 25, 12, 0, tzinfo=ZoneInfo("Asia/Seoul"))
+
+        with tempfile.TemporaryDirectory() as tmpdir, patch("src.reporting.weekly.ROOT_DIR", Path(tmpdir)):
+            report_dir = Path(tmpdir) / "reports"
+            report_dir.mkdir()
+            (report_dir / "easy_pc_fix_guide-publication-check.json").write_text(
+                json.dumps(
+                    {
+                        "status": "published_today",
+                        "checked_at_kst": "2026-06-24T09:45:00+09:00",
+                        "today_post_count": 1,
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            operations = reporter._operations_result(
+                now=now,
+                public_posts={
+                    "status": "connected",
+                    "posts": [
+                        {
+                            "title": "Fresh post",
+                            "url": "https://easypcfixguide.blogspot.com/2026/06/fresh-post.html",
+                            "published_kst": "2026-06-25T09:12:00+09:00",
+                        }
+                    ],
+                },
+                search_console={"status": "connected"},
+            )
+
+        self.assertEqual(operations["publication_check"]["source"], "weekly_public_feed_fallback")
+        self.assertEqual(operations["publication_check"]["status"], "published_today")
+        self.assertEqual(operations["publication_check"]["today_post_count"], 1)
+
 
 if __name__ == "__main__":
     unittest.main()

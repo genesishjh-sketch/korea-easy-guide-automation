@@ -169,8 +169,14 @@ class WeeklyReporter:
         search_console: dict | None = None,
     ) -> dict:
         report_dir = ROOT_DIR / "reports"
+        daily_success = read_daily_success_report(self.settings.site_key, report_dir)
+        daily_success_context = classify_daily_success_context(daily_success)
         publication_check = self._read_report(report_dir / f"{self.settings.site_key}-publication-check.json")
-        if publication_check.get("status") == "not_uploaded" and now is not None and public_posts is not None:
+        if (
+            now is not None
+            and public_posts is not None
+            and self._publication_check_needs_public_feed_refresh(publication_check, now, daily_success_context)
+        ):
             publication_check = self._publication_check_from_public_posts(now, public_posts)
         sitemap_submit = self._read_report(report_dir / f"{self.settings.site_key}-search-console-sitemap-submit.json")
         if sitemap_submit.get("status") == "not_uploaded" and (public_posts or search_console):
@@ -178,16 +184,34 @@ class WeeklyReporter:
                 "status": "not_persisted",
                 "note": "이전 workflow artifact는 주간 workflow 환경에 자동 보존되지 않습니다. Daily publish workflow는 공개 발행 직후 sitemap 제출 단계를 실행합니다.",
             }
-        daily_success = read_daily_success_report(self.settings.site_key, report_dir)
         return {
             "daily_success": daily_success,
-            "daily_success_context": classify_daily_success_context(daily_success),
+            "daily_success_context": daily_success_context,
             "daily_failure": self._read_report(report_dir / f"{self.settings.site_key}-daily-failure.json"),
             "preflight": self._read_report(report_dir / f"{self.settings.site_key}-preflight.json"),
             "reddit_health": self._read_report(report_dir / f"{self.settings.site_key}-reddit-health.json"),
             "publication_check": publication_check,
             "sitemap_submit": sitemap_submit,
         }
+
+    def _publication_check_needs_public_feed_refresh(
+        self,
+        publication_check: dict,
+        now: datetime,
+        daily_success_context: dict,
+    ) -> bool:
+        if publication_check.get("status") == "not_uploaded":
+            return True
+        checked_at = _parse_datetime(publication_check.get("checked_at_kst", ""))
+        if checked_at and checked_at.date() != now.date():
+            return True
+        evidence = publication_check.get("publication_evidence") or {}
+        if (
+            evidence.get("status") == "feed_and_workflow_confirmed_report_not_publish"
+            and daily_success_context.get("status") == "not_uploaded"
+        ):
+            return True
+        return False
 
     def _publication_check_from_public_posts(self, now: datetime, public_posts: dict) -> dict:
         if public_posts.get("status") != "connected":
@@ -793,3 +817,12 @@ def _article_validation_status(validation: dict) -> str:
     if validation.get("mode") == "validate" and validation.get("passed") is False:
         return "failed"
     return "not_uploaded"
+
+
+def _parse_datetime(value: str) -> datetime | None:
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(value)
+    except ValueError:
+        return None
