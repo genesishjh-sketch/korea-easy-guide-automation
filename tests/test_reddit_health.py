@@ -24,6 +24,9 @@ class RedditHealthTests(unittest.TestCase):
         result = stage0_reddit_health.check_reddit_oauth(settings, "wifi button missing windows 11")
 
         self.assertEqual(result["status"], "missing_credentials")
+        self.assertEqual(result["collection_status"], "missing_credentials")
+        self.assertEqual(result["health_score"], 0)
+        self.assertTrue(result["blocks_cadence_increase"])
         self.assertIn("REDDIT_CLIENT_ID", result["action_required"])
         self.assertIn("GitHub Secrets에 REDDIT_CLIENT_ID를 추가하세요.", result["remediation_steps"])
         self.assertEqual(result["setup_links"]["reddit_apps_url"], "https://www.reddit.com/prefs/apps")
@@ -48,6 +51,9 @@ class RedditHealthTests(unittest.TestCase):
             result = stage0_reddit_health.check_reddit_oauth(settings, "wifi button missing windows 11")
 
         self.assertEqual(result["status"], "oauth_connected")
+        self.assertEqual(result["collection_status"], "stable_oauth")
+        self.assertEqual(result["health_score"], 100)
+        self.assertFalse(result["blocks_cadence_increase"])
         self.assertEqual(result["oauth_signal_count"], 1)
         self.assertEqual(result["sample_titles"], ["Wi-Fi button disappeared after a Windows update"])
         self.assertEqual(result["samples"][0]["subreddit"], "WindowsHelp")
@@ -72,6 +78,8 @@ class RedditHealthTests(unittest.TestCase):
         notifier.return_value.send_required.assert_called_once()
         message = notifier.return_value.send_required.call_args.args[0]
         self.assertIn("Reddit OAuth 상태 점검", message)
+        self.assertIn("상태 점수: 0/100", message)
+        self.assertIn("발행량 증량 차단: 예", message)
         self.assertIn("다음 조치:", message)
         self.assertIn("GitHub Secrets에 REDDIT_CLIENT_ID를 추가하세요.", message)
         self.assertIn("설정 링크:", message)
@@ -98,9 +106,19 @@ class RedditHealthTests(unittest.TestCase):
         payload = json.loads(summary)
 
         self.assertEqual(payload["status"], "missing_credentials")
+        self.assertEqual(payload["collection_status"], "missing_credentials")
+        self.assertEqual(payload["health_score"], 0)
+        self.assertTrue(payload["blocks_cadence_increase"])
         self.assertIn("REDDIT_CLIENT_ID", payload["action_required"])
         self.assertEqual(payload["setup_links"]["reddit_apps_url"], "https://www.reddit.com/prefs/apps")
         self.assertNotIn("super-secret-token", summary)
+
+    def test_metadata_marks_oauth_no_results_as_connected_but_not_ready(self) -> None:
+        metadata = stage0_reddit_health.reddit_health_metadata("oauth_connected_no_results")
+
+        self.assertEqual(metadata["collection_status"], "oauth_no_results")
+        self.assertEqual(metadata["health_score"], 70)
+        self.assertTrue(metadata["blocks_cadence_increase"])
 
 
 def fake_praw_module(submissions: list) -> object:

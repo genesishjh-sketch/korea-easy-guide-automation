@@ -54,6 +54,7 @@ def check_reddit_oauth(settings: Any, query: str, limit: int = 3) -> dict:
         return {
             **base,
             "status": "missing_user_agent",
+            **reddit_health_metadata("missing_user_agent"),
             "action_required": "REDDIT_USER_AGENT를 설정하세요.",
             "remediation_steps": [
                 "GitHub Variables에 REDDIT_USER_AGENT 또는 EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT를 설정하세요.",
@@ -64,6 +65,7 @@ def check_reddit_oauth(settings: Any, query: str, limit: int = 3) -> dict:
         return {
             **base,
             "status": "missing_credentials",
+            **reddit_health_metadata("missing_credentials"),
             "action_required": f"{reddit_oauth_secret_label()}을 GitHub Secrets 또는 .env에 설정하세요.",
             "remediation_steps": [
                 "Reddit 앱을 script 타입으로 만들고 client id와 secret을 확인하세요.",
@@ -78,6 +80,7 @@ def check_reddit_oauth(settings: Any, query: str, limit: int = 3) -> dict:
         return {
             **base,
             "status": "missing_praw",
+            **reddit_health_metadata("missing_praw"),
             "error_type": type(exc).__name__,
             "error": str(exc),
             "action_required": "requirements.txt 설치 상태를 확인하세요. praw 패키지가 필요합니다.",
@@ -114,6 +117,7 @@ def check_reddit_oauth(settings: Any, query: str, limit: int = 3) -> dict:
         return {
             **base,
             "status": "oauth_error",
+            **reddit_health_metadata("oauth_error"),
             "error_type": type(exc).__name__,
             "error": str(exc),
             "action_required": "Reddit 앱 유형, client id/secret, user agent, Reddit API 권한을 확인하세요.",
@@ -129,6 +133,7 @@ def check_reddit_oauth(settings: Any, query: str, limit: int = 3) -> dict:
         return {
             **base,
             "status": "oauth_connected_no_results",
+            **reddit_health_metadata("oauth_connected_no_results"),
             "action_required": "OAuth 연결은 됐지만 검색 결과가 없습니다. query와 subreddit 목록을 점검하세요.",
             "remediation_steps": [
                 "더 일반적인 Windows 오류 검색어로 재실행하세요.",
@@ -139,6 +144,7 @@ def check_reddit_oauth(settings: Any, query: str, limit: int = 3) -> dict:
     return {
         **base,
         "status": "oauth_connected",
+        **reddit_health_metadata("oauth_connected"),
         "oauth_signal_count": len(samples),
         "sample_titles": [sample["title"] for sample in samples],
         "sample_urls": [sample["url"] for sample in samples],
@@ -146,6 +152,56 @@ def check_reddit_oauth(settings: Any, query: str, limit: int = 3) -> dict:
         "action_required": "없음",
         "remediation_steps": [],
     }
+
+
+def reddit_health_metadata(status: str) -> dict:
+    mapping = {
+        "oauth_connected": {
+            "collection_status": "stable_oauth",
+            "health_score": 100,
+            "blocks_cadence_increase": False,
+            "status_label": "Reddit OAuth 수집 안정",
+        },
+        "oauth_connected_no_results": {
+            "collection_status": "oauth_no_results",
+            "health_score": 70,
+            "blocks_cadence_increase": True,
+            "status_label": "OAuth 연결됨, 검색어/서브레딧 조정 필요",
+        },
+        "missing_credentials": {
+            "collection_status": "missing_credentials",
+            "health_score": 0,
+            "blocks_cadence_increase": True,
+            "status_label": "Reddit OAuth 키 없음",
+        },
+        "missing_user_agent": {
+            "collection_status": "missing_user_agent",
+            "health_score": 0,
+            "blocks_cadence_increase": True,
+            "status_label": "Reddit User-Agent 없음",
+        },
+        "missing_praw": {
+            "collection_status": "missing_dependency",
+            "health_score": 0,
+            "blocks_cadence_increase": True,
+            "status_label": "Reddit 수집 패키지 없음",
+        },
+        "oauth_error": {
+            "collection_status": "oauth_error",
+            "health_score": 20,
+            "blocks_cadence_increase": True,
+            "status_label": "Reddit OAuth 오류",
+        },
+    }
+    return mapping.get(
+        status,
+        {
+            "collection_status": "unknown",
+            "health_score": 0,
+            "blocks_cadence_increase": True,
+            "status_label": "Reddit 상태 확인 필요",
+        },
+    )
 
 
 def default_query(site: str | None = None) -> str:
@@ -183,6 +239,9 @@ def build_message(result: dict) -> str:
         f"- 검색어: {result.get('query')}",
         f"- subreddit: {', '.join(result.get('subreddits') or [])}",
         f"- OAuth 신호 수: {result.get('oauth_signal_count', 0)}",
+        f"- 수집 상태: {result.get('status_label') or result.get('collection_status') or '확인 필요'}",
+        f"- 상태 점수: {result.get('health_score', 0)}/100",
+        f"- 발행량 증량 차단: {'예' if result.get('blocks_cadence_increase', True) else '아니오'}",
         f"- 조치: {result.get('action_required') or '확인 필요'}",
     ]
     if result.get("remediation_steps"):
@@ -211,12 +270,16 @@ def build_message(result: dict) -> str:
 
 
 def build_console_summary(result: dict) -> str:
+    metadata = reddit_health_metadata(result.get("status", "unknown"))
     payload = {
         "site": result.get("site"),
         "site_name": result.get("site_name"),
         "status": result.get("status"),
         "query": result.get("query"),
         "oauth_signal_count": result.get("oauth_signal_count", 0),
+        "collection_status": result.get("collection_status") or metadata["collection_status"],
+        "health_score": result.get("health_score", metadata["health_score"]),
+        "blocks_cadence_increase": result.get("blocks_cadence_increase", metadata["blocks_cadence_increase"]),
         "action_required": result.get("action_required"),
         "remediation_steps": result.get("remediation_steps", []),
         "setup_links": result.get("setup_links", {}),
