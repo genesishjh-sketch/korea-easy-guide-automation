@@ -256,6 +256,8 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         joined = "\n".join(actions)
         self.assertIn("Reddit OAuth 설정", joined)
         self.assertIn("fallback 질문만 사용", joined)
+        self.assertIn("https://www.reddit.com/prefs/apps", joined)
+        self.assertIn("REDDIT_CLIENT_ID", joined)
 
     def test_next_actions_include_public_json_only_warning(self) -> None:
         settings = load_settings("easy_pc_fix_guide")
@@ -276,6 +278,8 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         joined = "\n".join(actions)
         self.assertIn("public JSON", joined)
         self.assertIn("Reddit OAuth 수집", joined)
+        self.assertIn("https://www.reddit.com/prefs/apps", joined)
+        self.assertIn("REDDIT_CLIENT_SECRET", joined)
 
     def test_next_actions_include_operational_status_cadence_warning(self) -> None:
         settings = load_settings("easy_pc_fix_guide")

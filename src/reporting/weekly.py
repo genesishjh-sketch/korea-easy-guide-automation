@@ -9,6 +9,8 @@ from src.config import ROOT_DIR, Settings
 from src.pipeline.stage4_publication_check import classify_daily_success_context
 from src.pipeline.stage4_publication_check import fetch_public_feed
 from src.pipeline.stage4_publication_check import parse_posts
+from src.reporting.cadence import GITHUB_SECRETS_URL
+from src.reporting.cadence import REDDIT_APPS_URL
 from src.reporting.cadence import review_cadence
 from src.reporting.analytics import GA4Client
 from src.reporting.search_console import SearchConsoleClient
@@ -322,11 +324,19 @@ class WeeklyReporter:
         if not has_public_article:
             actions.append("공개 글이 생긴 뒤 Search Console 연결을 확인하세요.")
         if (signal_quality or {}).get("status") == "fallback_only":
-            actions.append("Reddit 실제 신호 없이 fallback 질문만 사용한 글이 있습니다. Reddit OAuth 설정을 추가해 주제 수집 품질을 안정화하세요.")
+            actions.append(
+                "Reddit 실제 신호 없이 fallback 질문만 사용한 글이 있습니다. Reddit OAuth 설정을 추가해 주제 수집 품질을 안정화하세요. "
+                f"Reddit 앱: {REDDIT_APPS_URL} / GitHub Secrets: {GITHUB_SECRETS_URL} "
+                "(REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET)"
+            )
         elif (signal_quality or {}).get("reddit_public_json_signal_count", 0) and not (signal_quality or {}).get(
             "reddit_oauth_signal_count", 0
         ):
-            actions.append("Reddit 실제 신호가 public JSON 경로에만 의존하고 있습니다. 403 차단 가능성을 줄이려면 Reddit OAuth 수집을 점검하세요.")
+            actions.append(
+                "Reddit 실제 신호가 public JSON 경로에만 의존하고 있습니다. 403 차단 가능성을 줄이려면 Reddit OAuth 수집을 점검하세요. "
+                f"Reddit 앱: {REDDIT_APPS_URL} / GitHub Secrets: {GITHUB_SECRETS_URL} "
+                "(REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET)"
+            )
         if operational_status and not operational_status.get("ready_for_cadence_increase", False):
             actions.append(
                 "일일 운영 상태 기준으로 아직 발행량 증량 준비가 아닙니다. 품질 통과와 Reddit OAuth 수집 안정성을 모두 확인한 뒤 증량하세요."
