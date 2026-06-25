@@ -865,6 +865,76 @@ class WindowsQualityGateTests(unittest.TestCase):
 
         self.assertIn("shallow_microsoft_sources", {issue.code for issue in issues})
 
+    def test_windows_sources_section_requires_direct_microsoft_links(self) -> None:
+        gate = HadesQualityGate("windows_help")
+        soup = BeautifulSoup(
+            """
+            <article>
+              <h2>Related Guides</h2>
+              <ul>
+                <li><a href="https://easypcfixguide.blogspot.com/search?q=Windows+Update">Windows Update</a></li>
+                <li><a href="https://easypcfixguide.blogspot.com/search?q=Check+Windows+version">Check Windows version</a></li>
+                <li><a href="https://easypcfixguide.blogspot.com/search?q=Free+disk+space">Free disk space</a></li>
+              </ul>
+              <h2>Sources</h2>
+              <ul>
+                <li><a href="https://support.microsoft.com/search/results?query=Windows%20troubleshooting">Search 1</a></li>
+                <li><a href="https://support.microsoft.com/search/results?query=Windows%20Update">Search 2</a></li>
+                <li><a href="https://support.microsoft.com/search/results?query=Bluetooth%20Windows">Search 3</a></li>
+                <li><a href="https://support.microsoft.com/search/results?query=Printer%20Windows">Search 4</a></li>
+              </ul>
+            </article>
+            """,
+            "html.parser",
+        )
+        issues = gate._review_windows_article(
+            soup,
+            "applies to risk level data loss risk estimated time last checked advanced fixes back up important files",
+            links=soup.find_all("a"),
+        )
+
+        self.assertIn("shallow_sources_section_microsoft_links", {issue.code for issue in issues})
+
+    def test_windows_safety_table_requires_concrete_values(self) -> None:
+        gate = HadesQualityGate("windows_help")
+        soup = BeautifulSoup(
+            """
+            <article>
+              <h2>Applies to / Risk level / Data loss risk / Estimated time / Last checked</h2>
+              <table>
+                <tr><td>Applies to</td><td>Windows 11</td></tr>
+                <tr><td>Risk level</td><td>Very risky</td></tr>
+                <tr><td>Data loss risk</td><td>Maybe</td></tr>
+                <tr><td>Estimated time</td><td>Soon</td></tr>
+                <tr><td>Last checked</td><td>Today</td></tr>
+              </table>
+              <h2>Related Guides</h2>
+              <ul>
+                <li><a href="https://easypcfixguide.blogspot.com/search?q=Windows+Update">Windows Update</a></li>
+                <li><a href="https://easypcfixguide.blogspot.com/search?q=Check+Windows+version">Check Windows version</a></li>
+                <li><a href="https://easypcfixguide.blogspot.com/search?q=Free+disk+space">Free disk space</a></li>
+              </ul>
+              <h2>Sources</h2>
+              <a href="https://support.microsoft.com/windows">Microsoft Support</a>
+              <a href="https://learn.microsoft.com/windows/">Microsoft Learn</a>
+              <a href="https://learn.microsoft.com/windows/release-health/">Windows release health</a>
+              <a href="https://support.microsoft.com/windows/windows-update">Windows Update</a>
+            </article>
+            """,
+            "html.parser",
+        )
+        issues = gate._review_windows_article(
+            soup,
+            "applies to risk level data loss risk estimated time last checked advanced fixes back up important files",
+            links=soup.find_all("a"),
+        )
+
+        issue_codes = {issue.code for issue in issues}
+        self.assertIn("invalid_windows_risk_level", issue_codes)
+        self.assertIn("invalid_windows_data_loss_risk", issue_codes)
+        self.assertIn("invalid_windows_estimated_time", issue_codes)
+        self.assertIn("invalid_windows_last_checked", issue_codes)
+
     def test_windows_research_rejects_search_only_microsoft_sources(self) -> None:
         gate = HadesQualityGate("windows_help")
         with tempfile.TemporaryDirectory() as tmpdir:

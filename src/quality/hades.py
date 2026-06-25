@@ -308,8 +308,10 @@ class HadesQualityGate:
         if "advanced fixes" in text_lower and "back up important files" not in text_lower:
             issues.append(QualityIssue("missing_advanced_warning", "Advanced fixes require a clear backup warning."))
         if soup is not None:
+            issues.extend(self._review_windows_safety_values(soup, text_lower))
             issues.extend(self._review_windows_advanced_only_terms(soup))
             issues.extend(self._review_windows_related_guides(soup))
+            issues.extend(self._review_windows_sources_section(soup))
         issues.extend(self._review_windows_command_safety(text_lower))
         issues.extend(self._review_windows_topic_context(text_lower))
         for phrase in WINDOWS_BLOCKED_PHRASES:
@@ -363,6 +365,52 @@ class HadesQualityGate:
                 )
             ]
         return []
+
+    def _review_windows_sources_section(self, soup: BeautifulSoup) -> list[QualityIssue]:
+        source_links = _section_links_by_h2(soup).get("sources", [])
+        microsoft_links = [url for url in source_links if _is_microsoft_url(url)]
+        direct_microsoft_links = [url for url in microsoft_links if _is_direct_microsoft_url(url)]
+        issues: list[QualityIssue] = []
+        if len(microsoft_links) < MIN_WINDOWS_MICROSOFT_LINKS:
+            issues.append(
+                QualityIssue(
+                    "weak_sources_section_microsoft_links",
+                    f"Sources section must include at least {MIN_WINDOWS_MICROSOFT_LINKS} Microsoft links.",
+                )
+            )
+        if len(direct_microsoft_links) < MIN_WINDOWS_DIRECT_MICROSOFT_LINKS:
+            issues.append(
+                QualityIssue(
+                    "shallow_sources_section_microsoft_links",
+                    "Sources section must include direct Microsoft pages, not only Microsoft search result URLs.",
+                )
+            )
+        return issues
+
+    def _review_windows_safety_values(self, soup: BeautifulSoup, text_lower: str) -> list[QualityIssue]:
+        values = _windows_safety_values(soup)
+        if not values:
+            return [QualityIssue("missing_windows_safety_table", "Windows articles require a filled safety details table.")]
+
+        issues: list[QualityIssue] = []
+        risk = values.get("risk level", "").casefold()
+        data_loss = values.get("data loss risk", "").casefold()
+        estimated_time = values.get("estimated time", "").casefold()
+        last_checked = values.get("last checked", "").strip()
+
+        if risk not in {"low", "medium", "high"}:
+            issues.append(QualityIssue("invalid_windows_risk_level", "Risk level must be Low, Medium, or High."))
+        if data_loss not in {"no", "yes", "possible"}:
+            issues.append(QualityIssue("invalid_windows_data_loss_risk", "Data loss risk must be No, Yes, or Possible."))
+        if not re.search(r"\b\d+\s*(minute|minutes|min|mins|hour|hours)\b", estimated_time):
+            issues.append(QualityIssue("invalid_windows_estimated_time", "Estimated time must include a concrete duration."))
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", last_checked):
+            issues.append(QualityIssue("invalid_windows_last_checked", "Last checked must use YYYY-MM-DD format."))
+        if risk == "high" and data_loss not in {"yes", "possible"}:
+            issues.append(QualityIssue("high_risk_without_data_loss_warning", "High-risk Windows articles must mark data loss risk as Yes or Possible."))
+        if data_loss in {"yes", "possible"} and "back up important files" not in text_lower:
+            issues.append(QualityIssue("missing_data_loss_backup_warning", "Data-loss-risk articles require a clear backup warning."))
+        return issues
 
     def _review_windows_topic_context(self, text_lower: str) -> list[QualityIssue]:
         issues: list[QualityIssue] = []
@@ -528,6 +576,19 @@ def _section_links_by_h2(soup: BeautifulSoup) -> dict[str, list[str]]:
                 links.extend(_href(link) for link in find_all("a"))
         sections[title] = [link for link in links if link]
     return sections
+
+
+def _windows_safety_values(soup: BeautifulSoup) -> dict[str, str]:
+    values: dict[str, str] = {}
+    for row in soup.find_all("tr"):
+        cells = row.find_all(["th", "td"])
+        if len(cells) < 2:
+            continue
+        key = cells[0].get_text(" ", strip=True).casefold()
+        value = cells[1].get_text(" ", strip=True)
+        if key in {"applies to", "risk level", "data loss risk", "estimated time", "last checked"}:
+            values[key] = value
+    return values
 
 
 def _review_image_descriptions(images: list[dict]) -> list[QualityIssue]:
