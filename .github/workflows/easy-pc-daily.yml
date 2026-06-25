@@ -16,6 +16,10 @@ on:
     # 09:25 KST backup. The daily limit guard prevents duplicate publishing.
     - cron: "25 0 * * *"
 
+concurrency:
+  group: easy-pc-fix-daily-publish
+  cancel-in-progress: false
+
 jobs:
   daily-publish:
     runs-on: ubuntu-latest
