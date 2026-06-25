@@ -66,6 +66,9 @@ class WeeklyPipelineTests(unittest.TestCase):
         self.assertEqual(payload["status"], "failed")
         self.assertEqual(payload["error_type"], "RuntimeError")
         self.assertIn("weekly failed", payload["error"])
+        self.assertIn("RuntimeError: weekly failed", payload["error_summary"])
+        self.assertIn("reports 폴더의 weekly-failure.json traceback을 확인하세요.", payload["action_items"])
+        self.assertIn("[Posting Bot] 주간 리포트 실패", payload["human_summary"])
         notifier.return_value.send_required.assert_called_once()
         message = notifier.return_value.send_required.call_args.args[0]
         self.assertIn("[Posting Bot] 주간 리포트 실패", message)
@@ -87,6 +90,7 @@ class WeeklyPipelineTests(unittest.TestCase):
 
         self.assertEqual(payload["status"], "failed")
         self.assertIn("weekly failed", payload["error"])
+        self.assertIn("우선 조치:", payload["human_summary"])
         notifier.assert_not_called()
 
     def test_weekly_notification_failure_is_reported_before_reraising(self) -> None:
@@ -109,6 +113,8 @@ class WeeklyPipelineTests(unittest.TestCase):
 
         self.assertEqual(payload["status"], "failed")
         self.assertIn("telegram failed", payload["error"])
+        self.assertIn("텔레그램 전송 문제", "\n".join(payload["action_items"]))
+        self.assertIn("TELEGRAM_BOT_TOKEN", payload["human_summary"])
 
     def test_weekly_failure_message_classifies_reporting_auth_failures(self) -> None:
         message = stage3_weekly_report.build_weekly_failure_message(

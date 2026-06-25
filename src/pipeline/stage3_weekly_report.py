@@ -79,6 +79,8 @@ def save_weekly_failure_report(site: str | None, exc: Exception) -> Path:
     output_dir = ROOT_DIR / "reports"
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / f"{settings.site_key}-weekly-failure.json"
+    error = "".join(traceback.format_exception_only(type(exc), exc)).strip()
+    action_items = weekly_failure_action_items(error)
     payload = {
         "site": settings.site_key,
         "site_name": settings.site_name,
@@ -86,6 +88,9 @@ def save_weekly_failure_report(site: str | None, exc: Exception) -> Path:
         "status": "failed",
         "error_type": type(exc).__name__,
         "error": str(exc),
+        "error_summary": error,
+        "action_items": action_items,
+        "human_summary": build_weekly_failure_message(site, exc),
         "traceback": traceback.format_exception(type(exc), exc, exc.__traceback__),
         "created_at": datetime.utcnow().isoformat() + "Z",
     }
