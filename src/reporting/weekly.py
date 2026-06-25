@@ -995,6 +995,10 @@ class WeeklyReporter:
                 lines.append(f"  - 판정 참고: {evidence.get('note')}")
             if evidence.get("needs_attention") is not None:
                 lines.append(f"  - 추가 확인 필요: {'예' if evidence.get('needs_attention') else '아니오'}")
+        if publication_check.get("action_items"):
+            lines.append("  - 발행 확인 조치:")
+            for item in publication_check.get("action_items", [])[:5]:
+                lines.append(f"    - {item}")
         if publication_check.get("latest_posts"):
             latest = publication_check["latest_posts"][0]
             lines.append(f"  - 최근 글: {latest.get('title', '')}")

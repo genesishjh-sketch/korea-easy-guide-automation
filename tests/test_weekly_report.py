@@ -283,6 +283,10 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                             "note": "최근 일일 성공 리포트는 validate 실행 결과이며 공개 발행 결과가 아닙니다.",
                             "needs_attention": True,
                         },
+                        "action_items": [
+                            "공개 글은 확인됐지만 workflow 또는 daily-success 리포트와 증거가 완전히 일치하지 않습니다.",
+                            "GitHub Actions Easy PC Fix Daily Publish 실행 결과와 publication-check artifact를 함께 확인하세요.",
+                        ],
                     },
                     "sitemap_submit": {
                         "status": "submitted",
@@ -380,6 +384,9 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("발행 확인 요약: 상태: 기준 이후 공개 글 확인", markdown)
         self.assertIn("발행 증거 판정: 공개 피드와 workflow는 확인, 일일 리포트는 발행 리포트 아님", markdown)
         self.assertIn("추가 확인 필요: 예", markdown)
+        self.assertIn("발행 확인 조치", markdown)
+        self.assertIn("공개 글은 확인됐지만 workflow 또는 daily-success 리포트와 증거가 완전히 일치하지 않습니다.", markdown)
+        self.assertIn("publication-check artifact를 함께 확인하세요.", markdown)
         self.assertIn("최근 글 URL: https://easypcfixguide.blogspot.com/2026/06/wi-fi-button-missing-on-windows-11.html", markdown)
         self.assertIn("Sitemap 제출: 제출됨", markdown)
         self.assertIn("색인 안내: sitemap 제출은 Google에 새 글을 알려주는 단계", markdown)
