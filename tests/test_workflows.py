@@ -99,6 +99,8 @@ class WorkflowSafetyTests(unittest.TestCase):
         self.assertIn('cron: "10 0 * * *"', workflow)
         self.assertIn('cron: "25 0 * * *"', workflow)
         self.assertIn("daily limit guard prevents duplicate publishing", workflow)
+        self.assertIn("group: easy-pc-fix-daily-publish", workflow)
+        self.assertIn("cancel-in-progress: false", workflow)
 
     def test_easy_pc_daily_uploads_debug_outputs_even_after_failure(self) -> None:
         workflow = (ROOT_DIR / ".github" / "workflows" / "easy-pc-daily.yml").read_text(encoding="utf-8")

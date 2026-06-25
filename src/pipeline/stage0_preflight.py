@@ -382,6 +382,8 @@ def check_daily_workflow() -> PreflightCheck:
         "Run safety regression tests",
         'cron: "10 0 * * *"',
         'cron: "25 0 * * *"',
+        "group: easy-pc-fix-daily-publish",
+        "cancel-in-progress: false",
         "python -m unittest discover -v",
         "python -m src.pipeline.stage0_preflight --site easy_pc_fix_guide",
         "python -m src.pipeline.daily_draft --site easy_pc_fix_guide",
@@ -391,7 +393,11 @@ def check_daily_workflow() -> PreflightCheck:
     missing = [item for item in required if item not in text]
     if missing:
         return PreflightCheck("daily_workflow", "fail", f"Missing workflow safeguards: {', '.join(missing)}")
-    return PreflightCheck("daily_workflow", "pass", "Daily workflow runs tests before publishing and submits sitemap only after publish runs.")
+    return PreflightCheck(
+        "daily_workflow",
+        "pass",
+        "Daily workflow runs tests before publishing, prevents overlapping publish runs, and submits sitemap only after publish runs.",
+    )
 
 
 def check_validate_workflow() -> PreflightCheck:
