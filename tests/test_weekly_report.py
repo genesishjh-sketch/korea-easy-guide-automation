@@ -11,6 +11,7 @@ from zoneinfo import ZoneInfo
 
 from src.config import load_settings
 from src.reporting.weekly import WeeklyReporter
+from src.reporting.weekly import article_status_summary
 from src.reporting.weekly import monitoring_review_items
 
 
@@ -103,6 +104,7 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                 "draft_count": 0,
                 "published_count": 1,
                 "local_published_count": 0,
+                "article_status_counts": {"LIVE": 1, "validated": 3, "failed": 1},
                 "articles": [],
                 "public_posts": {
                     "status": "connected",
@@ -294,6 +296,7 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
 
         self.assertIn("## Blogger 공개 피드 확인", markdown)
         self.assertIn("최근 7일 공개 피드 글 수: 1", markdown)
+        self.assertIn("상태별 산출물: 공개 1개, 검증 완료 3개, 실패 1개", markdown)
         self.assertIn("Wi-Fi Button Missing on Windows 11", markdown)
         self.assertIn("## 운영 점검", markdown)
         self.assertIn("최근 일일 성공 리포트: 검증 완료", markdown)
@@ -383,6 +386,23 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertEqual(items[0]["status_label"], "점검 필요")
         self.assertEqual(items[0]["target_date"], "2026-07-08")
         self.assertEqual(items[0]["reddit_health_status"], "missing_credentials")
+
+    def test_article_status_summary_orders_operational_statuses(self) -> None:
+        result = article_status_summary(
+            [
+                {"article_status": "validated"},
+                {"article_status": "failed"},
+                {"blogger_status": "LIVE"},
+                {"article_status": "validated"},
+                {"article_status": "not_uploaded"},
+                {},
+            ]
+        )
+
+        self.assertEqual(
+            result,
+            {"LIVE": 1, "validated": 2, "failed": 1, "not_uploaded": 1, "unknown": 1},
+        )
 
     def test_markdown_article_list_includes_seed_and_domain(self) -> None:
         settings = load_settings("easy_pc_fix_guide")

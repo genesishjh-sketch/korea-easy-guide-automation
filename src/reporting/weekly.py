@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import Counter
 from datetime import datetime, timedelta
 import json
 from pathlib import Path
@@ -46,6 +47,7 @@ class WeeklyReporter:
         quality_issues = self._quality_issues_result(articles)
         local_published_count = sum(1 for item in articles if item.get("blogger_status") == "LIVE")
         published_count = max(local_published_count, len(public_posts.get("posts", [])))
+        article_status_counts = article_status_summary(articles)
         cadence_review = review_cadence(
             today=now.date(),
             published_posts=published_count,
@@ -66,6 +68,7 @@ class WeeklyReporter:
             "draft_count": sum(1 for item in articles if item.get("blogger_status") == "DRAFT"),
             "published_count": published_count,
             "local_published_count": local_published_count,
+            "article_status_counts": article_status_counts,
             "articles": articles,
             "public_posts": public_posts,
             "static_pages": static_pages,
@@ -669,6 +672,7 @@ class WeeklyReporter:
             f"- 초안 글 수: {report['draft_count']}",
             f"- 공개 발행 글 수: {report['published_count']}",
             f"- 로컬 결과 기준 공개 글 수: {report.get('local_published_count', 0)}",
+            f"- 상태별 산출물: {_format_article_status_counts(report.get('article_status_counts', {}))}",
             "",
             "## 글 목록",
             "",
@@ -1049,6 +1053,25 @@ def monitoring_review_items(report: dict) -> list[dict]:
             ),
         ),
     ]
+
+
+def article_status_summary(articles: list[dict]) -> dict[str, int]:
+    counts = Counter()
+    for article in articles:
+        status = article.get("article_status") or article.get("blogger_status") or "unknown"
+        counts[str(status)] += 1
+    preferred_order = ["LIVE", "DRAFT", "validated", "failed", "not_uploaded", "unknown"]
+    ordered = {status: counts[status] for status in preferred_order if counts.get(status)}
+    for status, count in sorted(counts.items()):
+        if status not in ordered:
+            ordered[status] = count
+    return ordered
+
+
+def _format_article_status_counts(counts: dict) -> str:
+    if not counts:
+        return "없음"
+    return ", ".join(f"{_status_kr(str(status))} {count}개" for status, count in counts.items())
 
 
 def _monitoring_item(label: str, target_date, today, common: dict, action: str) -> dict:
