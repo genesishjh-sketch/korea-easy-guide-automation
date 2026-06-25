@@ -46,6 +46,9 @@ def check_reddit_oauth(settings: Any, query: str, limit: int = 3) -> dict:
         "oauth_signal_count": 0,
         "sample_titles": [],
         "sample_urls": [],
+        "tested_subreddits": [],
+        "matched_subreddits": [],
+        "first_successful_subreddit": "",
         "error_type": "",
         "error": "",
         "action_required": "",
@@ -99,12 +102,17 @@ def check_reddit_oauth(settings: Any, query: str, limit: int = 3) -> dict:
             user_agent=settings.reddit_user_agent,
         )
         samples = []
+        tested_subreddits = []
+        matched_subreddits = []
+        per_subreddit_counts = {}
         for subreddit in settings.reddit_subreddits:
+            tested_subreddits.append(subreddit)
+            subreddit_samples = []
             for submission in reddit.subreddit(subreddit).search(query, sort="relevance", limit=limit):
                 title = clean_space(submission.title)
                 if not title:
                     continue
-                samples.append(
+                subreddit_samples.append(
                     {
                         "title": title,
                         "url": f"https://www.reddit.com{submission.permalink}",
@@ -113,7 +121,10 @@ def check_reddit_oauth(settings: Any, query: str, limit: int = 3) -> dict:
                         "num_comments": int(getattr(submission, "num_comments", 0) or 0),
                     }
                 )
-            if samples:
+            per_subreddit_counts[subreddit] = len(subreddit_samples)
+            if subreddit_samples:
+                matched_subreddits.append(subreddit)
+                samples.extend(subreddit_samples)
                 break
     except Exception as exc:
         return {
@@ -136,6 +147,8 @@ def check_reddit_oauth(settings: Any, query: str, limit: int = 3) -> dict:
             **base,
             "status": "oauth_connected_no_results",
             **reddit_health_metadata("oauth_connected_no_results"),
+            "tested_subreddits": tested_subreddits,
+            "per_subreddit_counts": per_subreddit_counts,
             "action_required": "OAuth 연결은 됐지만 검색 결과가 없습니다. query와 subreddit 목록을 점검하세요.",
             "remediation_steps": [
                 "더 일반적인 Windows 오류 검색어로 재실행하세요.",
@@ -150,6 +163,10 @@ def check_reddit_oauth(settings: Any, query: str, limit: int = 3) -> dict:
         "oauth_signal_count": len(samples),
         "sample_titles": [sample["title"] for sample in samples],
         "sample_urls": [sample["url"] for sample in samples],
+        "tested_subreddits": tested_subreddits,
+        "matched_subreddits": matched_subreddits,
+        "first_successful_subreddit": matched_subreddits[0] if matched_subreddits else "",
+        "per_subreddit_counts": per_subreddit_counts,
         "samples": samples,
         "action_required": "없음",
         "remediation_steps": [],
@@ -246,6 +263,8 @@ def build_message(result: dict) -> str:
         f"- 검색어: {result.get('query')}",
         f"- subreddit: {', '.join(result.get('subreddits') or [])}",
         f"- OAuth 신호 수: {result.get('oauth_signal_count', 0)}",
+        f"- 테스트한 subreddit: {', '.join(result.get('tested_subreddits') or []) or '없음'}",
+        f"- 신호 발견 subreddit: {', '.join(result.get('matched_subreddits') or []) or '없음'}",
         f"- 수집 상태: {result.get('status_label') or result.get('collection_status') or '확인 필요'}",
         f"- 상태 점수: {result.get('health_score', 0)}/100",
         f"- 발행량 증량 차단: {'예' if result.get('blocks_cadence_increase', True) else '아니오'}",
@@ -299,6 +318,9 @@ def build_console_summary(result: dict) -> str:
         "action_required": result.get("action_required"),
         "remediation_steps": result.get("remediation_steps", []),
         "setup_links": result.get("setup_links", {}),
+        "tested_subreddits": result.get("tested_subreddits", []),
+        "matched_subreddits": result.get("matched_subreddits", []),
+        "first_successful_subreddit": result.get("first_successful_subreddit", ""),
         "sample_titles": result.get("sample_titles", [])[:3],
     }
     if result.get("error_type"):

@@ -63,6 +63,27 @@ class RedditHealthTests(unittest.TestCase):
         self.assertEqual(result["oauth_signal_count"], 1)
         self.assertEqual(result["sample_titles"], ["Wi-Fi button disappeared after a Windows update"])
         self.assertEqual(result["samples"][0]["subreddit"], "WindowsHelp")
+        self.assertEqual(result["tested_subreddits"], ["WindowsHelp"])
+        self.assertEqual(result["matched_subreddits"], ["WindowsHelp"])
+        self.assertEqual(result["first_successful_subreddit"], "WindowsHelp")
+        self.assertEqual(result["per_subreddit_counts"], {"WindowsHelp": 1})
+
+    def test_oauth_connected_no_results_reports_tested_subreddits(self) -> None:
+        settings = replace(
+            load_settings("easy_pc_fix_guide"),
+            reddit_client_id="client",
+            reddit_client_secret="secret",
+            reddit_user_agent="easy-pc-fix-guide/0.1",
+            reddit_subreddits=["WindowsHelp", "Windows11"],
+        )
+
+        with patch.dict("sys.modules", {"praw": fake_praw_module([])}):
+            result = stage0_reddit_health.check_reddit_oauth(settings, "rare windows error")
+
+        self.assertEqual(result["status"], "oauth_connected_no_results")
+        self.assertEqual(result["tested_subreddits"], ["WindowsHelp", "Windows11"])
+        self.assertEqual(result["per_subreddit_counts"], {"WindowsHelp": 0, "Windows11": 0})
+        self.assertEqual(result["matched_subreddits"], [])
 
     def test_run_writes_report_and_can_notify(self) -> None:
         settings = replace(
@@ -86,6 +107,8 @@ class RedditHealthTests(unittest.TestCase):
         self.assertIn("Reddit OAuth 상태 점검", message)
         self.assertIn("상태 점수: 0/100", message)
         self.assertIn("발행량 증량 차단: 예", message)
+        self.assertIn("테스트한 subreddit: 없음", message)
+        self.assertIn("신호 발견 subreddit: 없음", message)
         self.assertIn("다음 조치:", message)
         self.assertIn("GitHub Secrets에 REDDIT_CLIENT_ID를 추가하세요.", message)
         self.assertIn("설정 링크:", message)
@@ -109,6 +132,8 @@ class RedditHealthTests(unittest.TestCase):
                 "reddit_apps_url": "https://www.reddit.com/prefs/apps",
                 "github_actions_secrets_url": "https://github.com/example/repo/settings/secrets/actions",
             },
+            "tested_subreddits": ["WindowsHelp"],
+            "matched_subreddits": [],
             "sample_titles": [],
         }
 
@@ -121,6 +146,8 @@ class RedditHealthTests(unittest.TestCase):
         self.assertTrue(payload["blocks_cadence_increase"])
         self.assertIn("REDDIT_CLIENT_ID", payload["action_required"])
         self.assertEqual(payload["setup_links"]["reddit_apps_url"], "https://www.reddit.com/prefs/apps")
+        self.assertEqual(payload["tested_subreddits"], ["WindowsHelp"])
+        self.assertEqual(payload["matched_subreddits"], [])
         self.assertNotIn("super-secret-token", summary)
 
     def test_metadata_marks_oauth_no_results_as_connected_but_not_ready(self) -> None:
