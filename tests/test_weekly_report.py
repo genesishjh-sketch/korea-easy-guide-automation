@@ -229,6 +229,11 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                                 "message": "83/103 exact-match topic seeds remain unused.",
                             },
                             {
+                                "name": "all_seed_quality",
+                                "status": "pass",
+                                "message": "103/103 long-term topics have specific categories and enough Microsoft sources.",
+                            },
+                            {
                                 "name": "launch_queue_quality",
                                 "status": "pass",
                                 "message": "14/14 launch topics have specific categories and enough Microsoft sources.",
@@ -298,6 +303,8 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("최종 선택 시드: wifi button missing windows 11", markdown)
         self.assertIn("중복 스킵 수: 1", markdown)
         self.assertIn("품질 재시도 수: 1", markdown)
+        self.assertEqual(markdown.count("- 초안 글 수:"), 1)
+        self.assertEqual(markdown.count("최종 선택 시드: wifi button missing windows 11"), 1)
         self.assertIn("중복으로 건너뛴 시드 수: 1", markdown)
         self.assertIn("중복 시드: wifi button missing windows 11", markdown)
         self.assertIn("품질검수 실패로 재시도한 시드 수: 1", markdown)
@@ -311,6 +318,7 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("Reddit OAuth 연결: 주의 / before_cadence_increase", markdown)
         self.assertIn("Easy PC Fix Reddit OAuth Health workflow를 수동 실행하세요.", markdown)
         self.assertIn("시드 재고: 통과 - 83/103 exact-match topic seeds remain unused.", markdown)
+        self.assertIn("장기 시드 품질: 통과 - 103/103 long-term topics have specific categories", markdown)
         self.assertIn("Launch queue 품질: 통과 - 14/14 launch topics have specific categories", markdown)
         self.assertIn("Reddit OAuth Health: Reddit OAuth 키 없음", markdown)
         self.assertIn("상태 점수: 0/100", markdown)
@@ -732,6 +740,34 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("Windows topic seed 재고가 소진되었습니다", joined)
         self.assertIn("다음 무인 발행 전", joined)
         self.assertIn("0/103 exact-match topic seeds remain unused", joined)
+
+    def test_next_actions_include_all_seed_quality_failure(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+
+        actions = reporter._next_actions(
+            articles=[{"blogger_status": "LIVE"}],
+            static_pages=[{"title": "About"}, {"title": "Contact"}, {"title": "Privacy Policy"}, {"title": "Disclaimer"}],
+            public_posts={"status": "connected", "posts": [{"title": "Published"}]},
+            operations={
+                "preflight": {
+                    "status": "fail",
+                    "checks": [
+                        {
+                            "name": "all_seed_quality",
+                            "status": "fail",
+                            "message": "Long-term seed quality failed for 2/103 topic(s): windows problem: generic_computer_help_category",
+                        }
+                    ],
+                },
+            },
+            signal_quality={"status": "connected"},
+        )
+
+        joined = "\n".join(actions)
+        self.assertIn("장기 Windows topic seed 품질검수에 실패", joined)
+        self.assertIn("장기 큐로 넘어가기 전", joined)
+        self.assertIn("generic_computer_help_category", joined)
 
     def test_next_actions_include_seed_file_duplicate_guidance(self) -> None:
         settings = load_settings("easy_pc_fix_guide")

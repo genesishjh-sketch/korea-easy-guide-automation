@@ -510,6 +510,7 @@ class WeeklyReporter:
         preflight_checks = operations.get("preflight", {}).get("checks", []) or []
         seed_file_check = next((check for check in preflight_checks if check.get("name") == "seed_file"), {})
         seed_inventory_check = next((check for check in preflight_checks if check.get("name") == "seed_inventory"), {})
+        all_seed_quality_check = next((check for check in preflight_checks if check.get("name") == "all_seed_quality"), {})
         launch_queue_check = next((check for check in preflight_checks if check.get("name") == "launch_queue"), {})
         launch_queue_quality_check = next((check for check in preflight_checks if check.get("name") == "launch_queue_quality"), {})
         if preflight_status == "fail":
@@ -554,6 +555,11 @@ class WeeklyReporter:
                 actions.append(
                     f"Windows topic seed 재고가 낮습니다. 최소 2주치 이상 새 주제를 보충하세요. {seed_message}"
                 )
+        if all_seed_quality_check.get("status") in {"warn", "fail"}:
+            actions.append(
+                "장기 Windows topic seed 품질검수에 실패했습니다. 장기 큐로 넘어가기 전에 일반적인 주제, 약한 Microsoft 출처, "
+                f"카테고리 누락 항목을 수정하세요. {all_seed_quality_check.get('message', '')}"
+            )
         if daily_failure_status == "failed":
             actions.append("최근 일일 자동화 실패 리포트를 확인하세요. daily failure JSON의 오류 타입, 메시지, traceback을 우선 점검해야 합니다.")
         if publication_status == "missing_today":
@@ -815,6 +821,11 @@ class WeeklyReporter:
                 lines.append(
                     f"  - 시드 재고: {_status_kr(seed_inventory.get('status'))} - {seed_inventory.get('message')}"
                 )
+            all_seed_quality = next((check for check in preflight.get("checks", []) if check.get("name") == "all_seed_quality"), None)
+            if all_seed_quality:
+                lines.append(
+                    f"  - 장기 시드 품질: {_status_kr(all_seed_quality.get('status'))} - {all_seed_quality.get('message')}"
+                )
             launch_queue_quality = next((check for check in preflight.get("checks", []) if check.get("name") == "launch_queue_quality"), None)
             if launch_queue_quality:
                 lines.append(
@@ -823,7 +834,7 @@ class WeeklyReporter:
             failed_or_warned = [check for check in preflight.get("checks", []) if check.get("status") != "pass"]
             if failed_or_warned:
                 for check in failed_or_warned:
-                    if check.get("name") in {"seed_inventory", "launch_queue_quality"}:
+                    if check.get("name") in {"seed_inventory", "all_seed_quality", "launch_queue_quality"}:
                         continue
                     lines.append(f"  - {check.get('name')}: {_status_kr(check.get('status'))} - {check.get('message')}")
             else:
