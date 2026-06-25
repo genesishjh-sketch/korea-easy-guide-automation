@@ -114,6 +114,8 @@ class ImagePlanTests(unittest.TestCase):
         self.assertEqual(research_report["signal_source_counts"]["reddit"], 1)
         self.assertEqual(research_report["signal_source_counts"]["reddit_fallback"], 1)
         self.assertEqual(research_report["signal_source_counts"]["google_suggest"], 1)
+        self.assertEqual(research_report["seed_keyword"], "incheon airport to seoul")
+        self.assertEqual(research_report["content_domain"], "korea_travel")
         self.assertEqual(research_report["live_reddit_signal_count"], 1)
         self.assertEqual(research_report["reddit_oauth_signal_count"], 1)
         self.assertEqual(research_report["reddit_public_json_signal_count"], 0)

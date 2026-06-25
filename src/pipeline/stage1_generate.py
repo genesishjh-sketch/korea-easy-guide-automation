@@ -107,6 +107,8 @@ def build_research_report(settings, keyword: str, article, signals: list, reddit
     ]
     return {
         "site": settings.site_key,
+        "content_domain": settings.content_domain,
+        "seed_keyword": keyword,
         "topic": article.title,
         "queries": list(dict.fromkeys(queries))[:10],
         "sources": sources,
