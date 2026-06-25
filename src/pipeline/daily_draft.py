@@ -505,6 +505,9 @@ def build_daily_success_message(result: dict[str, str]) -> str:
     reddit_warning = reddit_signal_quality.get("warning")
     if reddit_warning:
         lines.extend(["", "수집 품질 경고:", f"- {reddit_warning}"])
+        reddit_diagnostics = build_reddit_diagnostics_summary(research_report)
+        if reddit_diagnostics:
+            lines.extend(reddit_diagnostics)
         lines.extend(
             [
                 f"- Reddit 앱 생성: {REDDIT_APPS_URL}",
@@ -546,6 +549,31 @@ def build_daily_success_message(result: dict[str, str]) -> str:
         ]
     )
     return "\n".join(lines)
+
+
+def build_reddit_diagnostics_summary(research_report: dict) -> list[str]:
+    diagnostics = research_report.get("reddit_collection_diagnostics") or {}
+    if not diagnostics:
+        return []
+    lines = []
+    status = diagnostics.get("status")
+    if status:
+        lines.append(f"- Reddit 수집 진단 상태: {status}")
+    public_json_error_count = int(diagnostics.get("public_json_error_count", 0) or 0)
+    if public_json_error_count:
+        lines.append(f"- Reddit public JSON 실패 수: {public_json_error_count}")
+    failed_subreddits = [
+        item.get("subreddit", "")
+        for item in diagnostics.get("public_json_failed_subreddits", [])
+        if item.get("subreddit")
+    ]
+    if failed_subreddits:
+        lines.append(f"- 실패 subreddit: {', '.join(failed_subreddits[:6])}")
+    if diagnostics.get("fallback_reason"):
+        lines.append(f"- fallback 이유: {diagnostics.get('fallback_reason')}")
+    if diagnostics.get("oauth_error"):
+        lines.append(f"- Reddit OAuth 오류: {diagnostics.get('oauth_error')}")
+    return lines
 
 
 def build_reddit_signal_quality(research_report: dict) -> dict:

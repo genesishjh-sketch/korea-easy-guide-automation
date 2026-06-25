@@ -44,6 +44,17 @@ class DuplicatePublishGuardTests(unittest.TestCase):
                         "reddit_public_json_signal_count": 0,
                         "fallback_reddit_signal_count": 6,
                         "reddit_collection_method_counts": {"fallback": 6},
+                        "reddit_collection_diagnostics": {
+                            "status": "fallback_only",
+                            "public_json_error_count": 4,
+                            "public_json_failed_subreddits": [
+                                {"subreddit": "WindowsHelp", "error": "403 blocked"},
+                                {"subreddit": "Windows11", "error": "403 blocked"},
+                                {"subreddit": "techsupport", "error": "403 blocked"},
+                                {"subreddit": "pchelp", "error": "403 blocked"},
+                            ],
+                            "fallback_reason": "All available Reddit live collection paths returned no usable signals; public JSON had errors.",
+                        },
                     }
                 ),
                 encoding="utf-8",
@@ -197,6 +208,17 @@ class DuplicatePublishGuardTests(unittest.TestCase):
                         "reddit_public_json_signal_count": 0,
                         "fallback_reddit_signal_count": 6,
                         "reddit_collection_method_counts": {"fallback": 6},
+                        "reddit_collection_diagnostics": {
+                            "status": "fallback_only",
+                            "public_json_error_count": 4,
+                            "public_json_failed_subreddits": [
+                                {"subreddit": "WindowsHelp", "error": "403 blocked"},
+                                {"subreddit": "Windows11", "error": "403 blocked"},
+                                {"subreddit": "techsupport", "error": "403 blocked"},
+                                {"subreddit": "pchelp", "error": "403 blocked"},
+                            ],
+                            "fallback_reason": "All available Reddit live collection paths returned no usable signals; public JSON had errors.",
+                        },
                     }
                 ),
                 encoding="utf-8",
@@ -234,6 +256,10 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertIn("- 수집 안정성: 주의: fallback 질문 의존", message)
         self.assertIn("수집 품질 경고", message)
         self.assertIn("fallback 질문만 사용", message)
+        self.assertIn("- Reddit 수집 진단 상태: fallback_only", message)
+        self.assertIn("- Reddit public JSON 실패 수: 4", message)
+        self.assertIn("- 실패 subreddit: WindowsHelp, Windows11, techsupport, pchelp", message)
+        self.assertIn("- fallback 이유: All available Reddit live collection paths returned no usable signals", message)
         self.assertIn("https://www.reddit.com/prefs/apps", message)
         self.assertIn("REDDIT_CLIENT_ID", message)
         self.assertIn("Easy PC Fix Reddit OAuth Health", message)
@@ -286,6 +312,13 @@ class DuplicatePublishGuardTests(unittest.TestCase):
                         "reddit_public_json_signal_count": 4,
                         "fallback_reddit_signal_count": 0,
                         "reddit_collection_method_counts": {"public_json": 4},
+                        "reddit_collection_diagnostics": {
+                            "status": "public_json_connected",
+                            "public_json_error_count": 1,
+                            "public_json_failed_subreddits": [
+                                {"subreddit": "WindowsHelp", "error": "403 blocked"},
+                            ],
+                        },
                     }
                 ),
                 encoding="utf-8",
@@ -307,6 +340,9 @@ class DuplicatePublishGuardTests(unittest.TestCase):
 
         self.assertIn("- Reddit public JSON 신호 수: 4", message)
         self.assertIn("public JSON 경로에만 의존", message)
+        self.assertIn("- Reddit 수집 진단 상태: public_json_connected", message)
+        self.assertIn("- Reddit public JSON 실패 수: 1", message)
+        self.assertIn("- 실패 subreddit: WindowsHelp", message)
         self.assertIn("https://www.reddit.com/prefs/apps", message)
         self.assertIn("REDDIT_CLIENT_SECRET", message)
 
