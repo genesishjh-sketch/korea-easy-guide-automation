@@ -65,9 +65,12 @@ def build_message(site_name: str, result: dict) -> str:
             [
                 "",
                 "색인 안내:",
+                f"- 의미: {guidance.get('meaning')}",
                 f"- {guidance.get('summary')}",
                 f"- 예상 대기: {guidance.get('expected_wait')}",
+                f"- 첫 신호 확인: {guidance.get('first_signal_check')}",
                 f"- 확인 위치: {guidance.get('check_location')}",
+                f"- URL 검사 대상: {guidance.get('url_inspection_target')}",
                 f"- 다음 확인: {guidance.get('next_check')}",
             ]
         )
@@ -75,11 +78,13 @@ def build_message(site_name: str, result: dict) -> str:
 
 
 def sitemap_action_items(result: dict) -> list[str]:
+    guidance = result.get("indexing_guidance") or build_indexing_guidance(result)
     if result.get("status") == "submitted":
         return [
             "Search Console > Sitemaps에서 제출 상태를 확인하세요.",
-            "URL 검사에서 최신 글 URL이 발견되는지 다음 주간 보고서와 함께 확인하세요.",
+            f"URL 검사에서 최신 글 URL({guidance.get('url_inspection_target', 'daily publish URL')})이 발견되는지 확인하세요.",
             "색인은 즉시 보장되지 않으므로 노출/색인 데이터는 며칠 단위로 확인하세요.",
+            "Search Console에 색인/노출 페이지가 충분히 쌓이기 전까지 하루 1개 발행 리듬을 유지하세요.",
         ]
     return [
         "Google OAuth 토큰 또는 Search Console 권한을 확인하세요.",
@@ -118,19 +123,27 @@ def daily_publish_status_label(status: str) -> str:
 
 
 def build_indexing_guidance(result: dict) -> dict:
+    daily_context = result.get("daily_publish_context") or {}
+    latest_url = daily_context.get("url") or result.get("latest_post_url") or "오늘 공개 글 URL"
     if result.get("status") != "submitted":
         return {
             "status": "needs_fix",
+            "meaning": "Google에 sitemap 제출 요청이 완료되지 않았습니다.",
             "summary": "sitemap 제출이 실패했으므로 색인 대기 전에 오류를 먼저 복구해야 합니다.",
             "expected_wait": "오류 복구 후 다시 제출",
+            "first_signal_check": "재제출 성공 후 확인",
             "check_location": "Search Console > Sitemaps",
+            "url_inspection_target": latest_url,
             "next_check": "OAuth 권한과 sitemap URL을 수정한 뒤 재실행",
         }
     return {
         "status": "submitted_waiting",
+        "meaning": "Google에 sitemap을 다시 알려준 상태입니다. 이것은 크롤링 요청에 가깝고 색인/검색 노출 확정은 아닙니다.",
         "summary": "sitemap 제출은 Google에 새 글을 알려주는 단계이며, 즉시 검색 노출을 보장하지는 않습니다.",
         "expected_wait": "보통 며칠, 새 블로그는 더 오래 걸릴 수 있음",
+        "first_signal_check": "24~72시간 뒤 URL 검사와 Search Console 페이지 색인 생성 메뉴에서 확인",
         "check_location": "Search Console > Sitemaps, URL 검사, 페이지 색인 생성",
+        "url_inspection_target": latest_url,
         "next_check": "다음 주간 보고서에서 색인/노출 페이지 수와 오류를 확인",
     }
 

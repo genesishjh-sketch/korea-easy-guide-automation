@@ -34,8 +34,11 @@ class SearchConsoleSitemapMessageTests(unittest.TestCase):
         self.assertIn("제출 완료", message)
         self.assertIn("https://easypcfixguide.blogspot.com/sitemap.xml", message)
         self.assertIn("색인 안내", message)
+        self.assertIn("크롤링 요청에 가깝고 색인/검색 노출 확정은 아닙니다", message)
         self.assertIn("즉시 검색 노출을 보장하지는 않습니다", message)
+        self.assertIn("24~72시간", message)
         self.assertIn("Search Console > Sitemaps", message)
+        self.assertIn("URL 검사 대상: https://easypcfixguide.blogspot.com/2026/06/wifi-button-missing.html", message)
         self.assertIn("연결된 일일 발행 상태: 공개 발행 완료", message)
         self.assertIn("Wi-Fi Button Missing on Windows 11", message)
         self.assertIn("https://easypcfixguide.blogspot.com/2026/06/wifi-button-missing.html", message)
@@ -61,14 +64,18 @@ class SearchConsoleSitemapMessageTests(unittest.TestCase):
         guidance = build_indexing_guidance({"status": "submitted"})
 
         self.assertEqual(guidance["status"], "submitted_waiting")
+        self.assertIn("크롤링 요청", guidance["meaning"])
         self.assertIn("즉시 검색 노출", guidance["summary"])
         self.assertIn("며칠", guidance["expected_wait"])
+        self.assertIn("24~72시간", guidance["first_signal_check"])
+        self.assertEqual(guidance["url_inspection_target"], "오늘 공개 글 URL")
 
     def test_indexing_guidance_blocks_wait_message_on_error(self) -> None:
         guidance = build_indexing_guidance({"status": "error"})
 
         self.assertEqual(guidance["status"], "needs_fix")
         self.assertIn("오류", guidance["summary"])
+        self.assertIn("완료되지 않았습니다", guidance["meaning"])
 
     def test_main_exits_nonzero_when_sitemap_submit_fails(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -129,7 +136,17 @@ class SearchConsoleSitemapMessageTests(unittest.TestCase):
         self.assertEqual(payload["status"], "submitted")
         self.assertRegex(payload["submitted_at"], r"\d{4}-\d{2}-\d{2}T")
         self.assertEqual(payload["indexing_guidance"]["status"], "submitted_waiting")
+        self.assertEqual(
+            payload["indexing_guidance"]["url_inspection_target"],
+            "https://easypcfixguide.blogspot.com/2026/06/wifi-button-missing.html",
+        )
+        self.assertIn("24~72시간", payload["indexing_guidance"]["first_signal_check"])
         self.assertIn("Search Console > Sitemaps", "\n".join(payload["action_items"]))
+        self.assertIn(
+            "https://easypcfixguide.blogspot.com/2026/06/wifi-button-missing.html",
+            "\n".join(payload["action_items"]),
+        )
+        self.assertIn("하루 1개 발행 리듬", "\n".join(payload["action_items"]))
         self.assertIn("Search Console sitemap 제출 결과", payload["human_summary"])
         self.assertEqual(payload["daily_publish_context"]["status"], "published")
         self.assertEqual(payload["daily_publish_context"]["status_label"], "공개 발행 완료")
