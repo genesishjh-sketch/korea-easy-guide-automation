@@ -468,9 +468,16 @@ class WeeklyReporter:
             lines.append(f"  - 실패 시드: {daily_failure.get('seed')}")
         lines.append(f"- Preflight: {_status_kr(preflight.get('status', 'not_uploaded'))}")
         if preflight.get("checks"):
+            seed_inventory = next((check for check in preflight.get("checks", []) if check.get("name") == "seed_inventory"), None)
+            if seed_inventory:
+                lines.append(
+                    f"  - 시드 재고: {_status_kr(seed_inventory.get('status'))} - {seed_inventory.get('message')}"
+                )
             failed_or_warned = [check for check in preflight.get("checks", []) if check.get("status") != "pass"]
             if failed_or_warned:
                 for check in failed_or_warned:
+                    if check.get("name") == "seed_inventory":
+                        continue
                     lines.append(f"  - {check.get('name')}: {_status_kr(check.get('status'))} - {check.get('message')}")
             else:
                 lines.append("  - 전체 점검 통과")

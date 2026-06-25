@@ -98,7 +98,16 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                         },
                     },
                     "daily_failure": {"status": "not_uploaded"},
-                    "preflight": {"status": "pass", "checks": []},
+                    "preflight": {
+                        "status": "pass",
+                        "checks": [
+                            {
+                                "name": "seed_inventory",
+                                "status": "pass",
+                                "message": "83/103 exact-match topic seeds remain unused.",
+                            }
+                        ],
+                    },
                     "publication_check": {"status": "published_today", "today_post_count": 1},
                     "sitemap_submit": {
                         "status": "submitted",
@@ -122,6 +131,7 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("발행량 증량 준비: 아니오", markdown)
         self.assertIn("최근 일일 실패 리포트: 미업로드", markdown)
         self.assertIn("Preflight: 통과", markdown)
+        self.assertIn("시드 재고: 통과 - 83/103 exact-match topic seeds remain unused.", markdown)
         self.assertIn("발행 확인: 오늘 공개 글 확인", markdown)
         self.assertIn("Sitemap 제출: 제출됨", markdown)
         self.assertIn("## 수집 신호 품질", markdown)
