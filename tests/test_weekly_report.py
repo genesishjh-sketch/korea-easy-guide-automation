@@ -467,6 +467,31 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("상태 점수: 0/100", joined)
         self.assertIn("REDDIT_CLIENT_ID", joined)
 
+    def test_next_actions_include_daily_retry_seed_guidance(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+
+        actions = reporter._next_actions(
+            articles=[{"blogger_status": "LIVE"}],
+            static_pages=[{"title": "About"}, {"title": "Contact"}, {"title": "Privacy Policy"}, {"title": "Disclaimer"}],
+            public_posts={"status": "connected", "posts": [{"title": "Published"}]},
+            operations={
+                "preflight": {"status": "pass"},
+                "daily_success": {
+                    "status": "published",
+                    "skipped_duplicate_seeds": ["wifi button missing windows 11"],
+                    "skipped_quality_seeds": ["thin windows update topic"],
+                },
+            },
+            signal_quality={"status": "connected"},
+        )
+
+        joined = "\n".join(actions)
+        self.assertIn("중복 주제가 감지", joined)
+        self.assertIn("Windows topic seed 목록에 새 주제를 보충", joined)
+        self.assertIn("품질검수 실패 후 다른 시드로 재시도", joined)
+        self.assertIn("공식 출처", joined)
+
     def test_operations_result_reads_daily_success_and_failure_reports(self) -> None:
         settings = load_settings("easy_pc_fix_guide")
         reporter = WeeklyReporter(settings)

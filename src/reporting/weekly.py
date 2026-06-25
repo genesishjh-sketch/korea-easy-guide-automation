@@ -333,7 +333,8 @@ class WeeklyReporter:
         daily_failure_status = operations.get("daily_failure", {}).get("status")
         publication_status = operations.get("publication_check", {}).get("status")
         sitemap_status = operations.get("sitemap_submit", {}).get("status")
-        operational_status = operations.get("daily_success", {}).get("operational_status", {})
+        daily_success = operations.get("daily_success", {})
+        operational_status = daily_success.get("operational_status", {})
         reddit_health = operations.get("reddit_health", {})
         if preflight_status == "fail":
             actions.append("Preflight 실패 항목을 먼저 복구하세요. 설정, workflow 안전장치, 알림 설정을 확인해야 합니다.")
@@ -359,6 +360,14 @@ class WeeklyReporter:
             actions.append("공개 발행 전 Blogger 초안 상태의 글을 확인하세요.")
         if not has_public_article:
             actions.append("공개 글이 생긴 뒤 Search Console 연결을 확인하세요.")
+        if daily_success.get("skipped_duplicate_seeds"):
+            actions.append(
+                "최근 자동 발행에서 중복 주제가 감지되었습니다. 사용된 시드를 정리하고 launch queue 또는 Windows topic seed 목록에 새 주제를 보충하세요."
+            )
+        if daily_success.get("skipped_quality_seeds"):
+            actions.append(
+                "최근 자동 발행에서 품질검수 실패 후 다른 시드로 재시도했습니다. 실패 시드의 공식 출처, 이미지 계획, beginner-safe 섹션 구성을 보강하세요."
+            )
         if (signal_quality or {}).get("status") == "fallback_only":
             actions.append(
                 "Reddit 실제 신호 없이 fallback 질문만 사용한 글이 있습니다. Reddit OAuth 설정을 추가해 주제 수집 품질을 안정화하세요. "
