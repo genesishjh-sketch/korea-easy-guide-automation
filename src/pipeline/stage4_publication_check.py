@@ -5,6 +5,7 @@ from datetime import datetime
 from datetime import timezone
 import json
 from pathlib import Path
+import traceback
 from urllib.parse import quote
 from zoneinfo import ZoneInfo
 
@@ -23,49 +24,91 @@ DEFAULT_GITHUB_REPOSITORY = "genesishjh-sketch/korea-easy-guide-automation"
 def run(site: str | None = None, today: datetime | None = None, after_hour: int | None = None, notify: bool = True) -> dict:
     settings = load_settings(site)
     now = today or datetime.now(tz=KST)
-    feed = fetch_public_feed(settings.site_url)
-    posts = parse_posts(feed)
     cutoff = now.replace(hour=after_hour, minute=0, second=0, microsecond=0) if after_hour is not None else None
-    all_todays_posts = [
-        post
-        for post in posts
-        if post["published_kst"].date() == now.date()
-    ]
-    todays_posts = [
-        post
-        for post in all_todays_posts
-        if cutoff is None or post["published_kst"] >= cutoff
-    ]
-    status = publication_status(todays_posts, all_todays_posts, cutoff)
-    daily_workflow = check_daily_workflow_status(now)
-    daily_success = read_daily_success_report(settings.site_key)
-    daily_success_context = classify_daily_success_context(daily_success)
-    result = {
+    try:
+        feed = fetch_public_feed(settings.site_url)
+        posts = parse_posts(feed)
+        all_todays_posts = [
+            post
+            for post in posts
+            if post["published_kst"].date() == now.date()
+        ]
+        todays_posts = [
+            post
+            for post in all_todays_posts
+            if cutoff is None or post["published_kst"] >= cutoff
+        ]
+        status = publication_status(todays_posts, all_todays_posts, cutoff)
+        daily_workflow = check_daily_workflow_status(now)
+        daily_success = read_daily_success_report(settings.site_key)
+        daily_success_context = classify_daily_success_context(daily_success)
+        result = {
+            "site": settings.site_key,
+            "site_name": settings.site_name,
+            "site_url": settings.site_url,
+            "checked_at_kst": now.isoformat(),
+            "cutoff_kst": cutoff.isoformat() if cutoff else "",
+            "status": status,
+            "today_post_count": len(todays_posts),
+            "today_total_post_count": len(all_todays_posts),
+            "daily_workflow": daily_workflow,
+            "daily_success": daily_success,
+            "daily_success_context": daily_success_context,
+            "latest_posts": [
+                {
+                    "title": post["title"],
+                    "url": post["url"],
+                    "published_kst": post["published_kst"].isoformat(),
+                }
+                for post in posts[:5]
+            ],
+        }
+        result["publication_evidence"] = assess_publication_evidence(result)
+        save_result(result)
+    except Exception as exc:
+        result = publication_check_failure_result(settings, now, cutoff, exc)
+        save_result(result)
+        if notify:
+            try:
+                NotificationClient(settings).send_required(build_message(result))
+            except Exception as notification_exc:
+                result["notification_error"] = {
+                    "error_type": type(notification_exc).__name__,
+                    "error": str(notification_exc),
+                }
+                save_result(result)
+        raise
+    if notify:
+        NotificationClient(settings).send_required(build_message(result))
+    return result
+
+
+def publication_check_failure_result(settings, now: datetime, cutoff: datetime | None, exc: Exception) -> dict:
+    error = "".join(traceback.format_exception_only(type(exc), exc)).strip()
+    return {
         "site": settings.site_key,
         "site_name": settings.site_name,
         "site_url": settings.site_url,
         "checked_at_kst": now.isoformat(),
         "cutoff_kst": cutoff.isoformat() if cutoff else "",
-        "status": status,
-        "today_post_count": len(todays_posts),
-        "today_total_post_count": len(all_todays_posts),
-        "daily_workflow": daily_workflow,
-        "daily_success": daily_success,
-        "daily_success_context": daily_success_context,
-        "latest_posts": [
-            {
-                "title": post["title"],
-                "url": post["url"],
-                "published_kst": post["published_kst"].isoformat(),
-            }
-            for post in posts[:5]
-        ],
+        "status": "error",
+        "today_post_count": 0,
+        "today_total_post_count": 0,
+        "daily_workflow": {"status": "unknown", "note": "발행 확인 실행 전 오류로 Daily workflow 상태를 확인하지 못했습니다."},
+        "daily_success": read_daily_success_report(settings.site_key),
+        "daily_success_context": classify_daily_success_context(read_daily_success_report(settings.site_key)),
+        "latest_posts": [],
+        "error_type": type(exc).__name__,
+        "error": str(exc),
+        "error_summary": error,
+        "traceback": traceback.format_exception(type(exc), exc, exc.__traceback__),
+        "publication_evidence": {
+            "status": "publication_check_error",
+            "label": "공개 발행 확인 실행 오류",
+            "note": "Blogger 공개 피드 또는 발행 확인 단계에서 오류가 발생했습니다.",
+            "needs_attention": True,
+        },
     }
-    result["publication_evidence"] = assess_publication_evidence(result)
-    save_result(result)
-    if notify:
-        NotificationClient(settings).send_required(build_message(result))
-    return result
 
 
 def save_result(result: dict) -> Path:
@@ -521,6 +564,8 @@ def publication_status_label(status: str | None) -> str:
         return "기준 이후 공개 글 확인"
     if status == "published_today_before_cutoff":
         return "오늘 공개 글 확인, 기준시각 전 발행"
+    if status == "error":
+        return "발행 확인 오류"
     return "기준 이후 공개 글 없음"
 
 

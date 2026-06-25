@@ -159,6 +159,57 @@ class PublicationCheckTests(unittest.TestCase):
         self.assertIn("[Posting Bot] 공개 발행 확인", saved["human_summary"])
         self.assertIn("Fresh post", markdown)
 
+    def test_run_writes_error_report_when_public_feed_fails(self) -> None:
+        with patch.object(
+            stage4_publication_check,
+            "fetch_public_feed",
+            side_effect=RuntimeError("feed unavailable"),
+        ), patch("src.pipeline.stage4_publication_check.NotificationClient") as notification:
+            with self.assertRaises(RuntimeError):
+                stage4_publication_check.run(
+                    "easy_pc_fix_guide",
+                    today=datetime(2026, 6, 25, 9, 45, tzinfo=ZoneInfo("Asia/Seoul")),
+                    after_hour=9,
+                )
+
+            report_path = Path(self._tmpdir.name) / "reports" / "easy_pc_fix_guide-publication-check.json"
+            markdown_path = Path(self._tmpdir.name) / "reports" / "easy_pc_fix_guide-publication-check.md"
+            saved = json.loads(report_path.read_text(encoding="utf-8"))
+            markdown = markdown_path.read_text(encoding="utf-8")
+
+        self.assertEqual(saved["status"], "error")
+        self.assertEqual(saved["error_type"], "RuntimeError")
+        self.assertIn("feed unavailable", saved["error"])
+        self.assertIn("publication_check_error", saved["publication_evidence"]["status"])
+        self.assertIn("action_items", saved)
+        self.assertIn("publication check를 다시 실행", "\n".join(saved["action_items"]))
+        self.assertIn("발행 확인 오류", saved["human_summary"])
+        self.assertIn("공개 발행 확인 실행 오류", markdown)
+        notification.return_value.send_required.assert_called_once()
+
+    def test_run_preserves_feed_error_when_failure_notification_fails(self) -> None:
+        with patch.object(
+            stage4_publication_check,
+            "fetch_public_feed",
+            side_effect=RuntimeError("feed unavailable"),
+        ), patch("src.pipeline.stage4_publication_check.NotificationClient") as notification:
+            notification.return_value.send_required.side_effect = RuntimeError("telegram failed")
+
+            with self.assertRaises(RuntimeError) as raised:
+                stage4_publication_check.run(
+                    "easy_pc_fix_guide",
+                    today=datetime(2026, 6, 25, 9, 45, tzinfo=ZoneInfo("Asia/Seoul")),
+                    after_hour=9,
+                )
+
+            report_path = Path(self._tmpdir.name) / "reports" / "easy_pc_fix_guide-publication-check.json"
+            saved = json.loads(report_path.read_text(encoding="utf-8"))
+
+        self.assertIn("feed unavailable", str(raised.exception))
+        self.assertEqual(saved["status"], "error")
+        self.assertEqual(saved["error"], "feed unavailable")
+        self.assertEqual(saved["notification_error"]["error"], "telegram failed")
+
     def test_run_can_skip_notification_for_local_smoke_check(self) -> None:
         post = {
             "title": "Fresh post",
