@@ -71,6 +71,8 @@ WINDOWS_REQUIRED_HEADINGS = {
     "What Not to Do First",
     "Try This First",
     "Step-by-Step Fixes",
+    "After Each Step",
+    "What to Record Before Asking for Help",
     "Advanced Fixes",
     "When to Stop and Get Help",
     "FAQ",
