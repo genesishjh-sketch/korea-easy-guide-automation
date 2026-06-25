@@ -893,6 +893,11 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertEqual(operations["publication_check"]["status"], "published_today")
         self.assertEqual(operations["publication_check"]["today_post_count"], 1)
         self.assertEqual(operations["publication_check"]["source"], "weekly_public_feed_fallback")
+        self.assertEqual(
+            operations["publication_check"]["publication_evidence"]["status"],
+            "weekly_public_feed_confirmed",
+        )
+        self.assertFalse(operations["publication_check"]["publication_evidence"]["needs_attention"])
         self.assertEqual(operations["sitemap_submit"]["status"], "not_persisted")
 
     def test_operations_result_accepts_today_post_before_cutoff(self) -> None:
@@ -919,6 +924,10 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertEqual(operations["publication_check"]["status"], "published_today_before_cutoff")
         self.assertEqual(operations["publication_check"]["today_post_count"], 0)
         self.assertEqual(operations["publication_check"]["today_total_post_count"], 1)
+        self.assertEqual(
+            operations["publication_check"]["publication_evidence"]["status"],
+            "weekly_public_feed_confirmed",
+        )
 
     def test_operations_result_refreshes_legacy_publication_check_after_validation_report_migration(self) -> None:
         settings = load_settings("easy_pc_fix_guide")
@@ -963,7 +972,11 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertEqual(operations["daily_success_context"]["status"], "not_uploaded")
         self.assertEqual(operations["publication_check"]["source"], "weekly_public_feed_fallback")
         self.assertEqual(operations["publication_check"]["status"], "published_today_before_cutoff")
-        self.assertNotIn("publication_evidence", operations["publication_check"])
+        self.assertEqual(
+            operations["publication_check"]["publication_evidence"]["status"],
+            "weekly_public_feed_confirmed",
+        )
+        self.assertFalse(operations["publication_check"]["publication_evidence"]["needs_attention"])
 
     def test_operations_result_refreshes_stale_publication_check_from_previous_day(self) -> None:
         settings = load_settings("easy_pc_fix_guide")
@@ -1002,6 +1015,29 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertEqual(operations["publication_check"]["source"], "weekly_public_feed_fallback")
         self.assertEqual(operations["publication_check"]["status"], "published_today")
         self.assertEqual(operations["publication_check"]["today_post_count"], 1)
+        self.assertEqual(
+            operations["publication_check"]["publication_evidence"]["status"],
+            "weekly_public_feed_confirmed",
+        )
+
+    def test_operations_result_marks_weekly_public_feed_missing_as_attention_needed(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+        now = datetime(2026, 6, 25, 12, 0, tzinfo=ZoneInfo("Asia/Seoul"))
+
+        with tempfile.TemporaryDirectory() as tmpdir, patch("src.reporting.weekly.ROOT_DIR", Path(tmpdir)):
+            operations = reporter._operations_result(
+                now=now,
+                public_posts={"status": "connected", "posts": []},
+                search_console={"status": "connected"},
+            )
+
+        self.assertEqual(operations["publication_check"]["status"], "missing_today")
+        self.assertEqual(
+            operations["publication_check"]["publication_evidence"]["status"],
+            "weekly_public_feed_missing_today",
+        )
+        self.assertTrue(operations["publication_check"]["publication_evidence"]["needs_attention"])
 
 
 if __name__ == "__main__":

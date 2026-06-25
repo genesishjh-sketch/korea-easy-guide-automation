@@ -234,6 +234,7 @@ class WeeklyReporter:
                 if published_at >= cutoff:
                     todays_posts.append(post)
         status = "published_today" if todays_posts else "published_today_before_cutoff" if all_todays_posts else "missing_today"
+        public_feed_ok = status in {"published_today", "published_today_before_cutoff"}
         return {
             "site": self.settings.site_key,
             "site_name": self.settings.site_name,
@@ -245,6 +246,16 @@ class WeeklyReporter:
             "today_post_count": len(todays_posts),
             "today_total_post_count": len(all_todays_posts),
             "latest_posts": public_posts.get("posts", [])[:5],
+            "publication_evidence": {
+                "status": "weekly_public_feed_confirmed" if public_feed_ok else "weekly_public_feed_missing_today",
+                "label": "주간 보고 공개 피드 기준 확인" if public_feed_ok else "주간 보고 공개 피드 기준 오늘 글 없음",
+                "note": (
+                    "발행 확인 workflow artifact가 없거나 오래되어 공개 Blogger feed로 재계산했습니다."
+                    if public_feed_ok
+                    else "공개 Blogger feed에서 오늘 공개 글을 찾지 못했습니다."
+                ),
+                "needs_attention": not public_feed_ok,
+            },
         }
 
     def _read_report(self, path: Path) -> dict:
