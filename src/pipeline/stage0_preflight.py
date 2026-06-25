@@ -432,6 +432,7 @@ def check_publication_check_workflow() -> PreflightCheck:
         "python -m src.pipeline.stage4_publication_check --site easy_pc_fix_guide --after-hour 9",
         "if: always()",
         "reports/easy_pc_fix_guide-publication-check.json",
+        "reports/easy_pc_fix_guide-publication-check.md",
     ]
     missing = [item for item in required if item not in text]
     if missing:

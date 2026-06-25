@@ -142,6 +142,7 @@ class WorkflowSafetyTests(unittest.TestCase):
         self.assertIn("python -m src.pipeline.stage4_publication_check --site easy_pc_fix_guide --after-hour 9", workflow)
         self.assertIn("actions/upload-artifact", workflow)
         self.assertIn("reports/easy_pc_fix_guide-publication-check.json", workflow)
+        self.assertIn("reports/easy_pc_fix_guide-publication-check.md", workflow)
 
     def test_easy_pc_weekly_report_has_search_console_analytics_and_artifact(self) -> None:
         workflow = (ROOT_DIR / ".github" / "workflows" / "easy-pc-weekly-report.yml").read_text(encoding="utf-8")

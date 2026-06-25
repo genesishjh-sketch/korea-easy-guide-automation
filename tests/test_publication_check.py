@@ -147,10 +147,14 @@ class PublicationCheckTests(unittest.TestCase):
                     after_hour=9,
                 )
             report_path = Path(tmpdir) / "reports" / "easy_pc_fix_guide-publication-check.json"
+            markdown_path = Path(tmpdir) / "reports" / "easy_pc_fix_guide-publication-check.md"
             saved = json.loads(report_path.read_text(encoding="utf-8"))
+            markdown = markdown_path.read_text(encoding="utf-8")
 
         self.assertEqual(saved["status"], "published_today")
         self.assertEqual(saved["publication_evidence"]["status"], "feed_and_workflow_confirmed_report_unavailable")
+        self.assertIn("[Posting Bot] 공개 발행 확인", saved["human_summary"])
+        self.assertIn("Fresh post", markdown)
 
     def test_run_can_skip_notification_for_local_smoke_check(self) -> None:
         post = {
@@ -224,11 +228,15 @@ class PublicationCheckTests(unittest.TestCase):
         }
         with tempfile.TemporaryDirectory() as tmpdir, patch.object(stage4_publication_check, "ROOT_DIR", Path(tmpdir)):
             path = stage4_publication_check.save_result(result)
+            markdown_path = Path(tmpdir) / "reports" / "easy_pc_fix_guide-publication-check.md"
             saved_exists = path.exists()
             saved = json.loads(path.read_text(encoding="utf-8"))
+            markdown = markdown_path.read_text(encoding="utf-8")
 
         self.assertTrue(saved_exists)
         self.assertEqual(saved["status"], "published_today")
+        self.assertIn("human_summary", saved)
+        self.assertIn("[Posting Bot] 공개 발행 확인", markdown)
 
     def test_daily_workflow_status_summarizes_today_success_run(self) -> None:
         runs = [

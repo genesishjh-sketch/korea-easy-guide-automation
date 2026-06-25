@@ -71,9 +71,40 @@ def run(site: str | None = None, today: datetime | None = None, after_hour: int 
 def save_result(result: dict) -> Path:
     output_dir = ROOT_DIR / "reports"
     output_dir.mkdir(parents=True, exist_ok=True)
+    result = publication_result_with_defaults(result)
+    summary = result.get("human_summary") or build_message(result)
+    result = {
+        **result,
+        "human_summary": summary,
+    }
     output_path = output_dir / f"{result['site']}-publication-check.json"
     output_path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+    markdown_path = output_dir / f"{result['site']}-publication-check.md"
+    markdown_path.write_text(summary + "\n", encoding="utf-8")
     return output_path
+
+
+def publication_result_with_defaults(result: dict) -> dict:
+    site = result.get("site") or "easy_pc_fix_guide"
+    try:
+        settings = load_settings(site)
+        site_name = settings.site_name
+        site_url = settings.site_url
+    except Exception:
+        site_name = site
+        site_url = ""
+    return {
+        "site": site,
+        "site_name": result.get("site_name") or site_name,
+        "site_url": result.get("site_url") or site_url,
+        "checked_at_kst": result.get("checked_at_kst", ""),
+        "cutoff_kst": result.get("cutoff_kst", ""),
+        "status": result.get("status", "not_uploaded"),
+        "today_post_count": result.get("today_post_count", 0),
+        "today_total_post_count": result.get("today_total_post_count", result.get("today_post_count", 0)),
+        "latest_posts": result.get("latest_posts", []),
+        **result,
+    }
 
 
 def fetch_public_feed(site_url: str) -> dict:
