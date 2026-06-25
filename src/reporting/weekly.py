@@ -370,6 +370,7 @@ class WeeklyReporter:
         seed_file_check = next((check for check in preflight_checks if check.get("name") == "seed_file"), {})
         seed_inventory_check = next((check for check in preflight_checks if check.get("name") == "seed_inventory"), {})
         launch_queue_check = next((check for check in preflight_checks if check.get("name") == "launch_queue"), {})
+        launch_queue_quality_check = next((check for check in preflight_checks if check.get("name") == "launch_queue_quality"), {})
         if preflight_status == "fail":
             actions.append("Preflight 실패 항목을 먼저 복구하세요. 설정, workflow 안전장치, 알림 설정을 확인해야 합니다.")
         elif preflight_status == "warn":
@@ -382,6 +383,12 @@ class WeeklyReporter:
                 )
             else:
                 actions.append(f"Launch queue 상태를 확인하세요. {launch_message}")
+        if launch_queue_quality_check.get("status") in {"warn", "fail"}:
+            quality_message = launch_queue_quality_check.get("message", "")
+            actions.append(
+                "Launch queue 품질검수에 실패했습니다. 너무 일반적인 Windows 주제, main seed 누락, Microsoft 출처 부족 항목을 고친 뒤 다시 실행하세요. "
+                f"{quality_message}"
+            )
         if seed_file_check.get("status") in {"warn", "fail"}:
             seed_file_message = seed_file_check.get("message", "")
             if "Duplicate topic seeds" in seed_file_message:

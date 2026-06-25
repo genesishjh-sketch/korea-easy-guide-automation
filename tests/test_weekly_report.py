@@ -552,6 +552,34 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("Launch queue가 소진", joined)
         self.assertIn("장기 Windows topic seed 목록", joined)
 
+    def test_next_actions_explain_launch_queue_quality_failure(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+
+        actions = reporter._next_actions(
+            articles=[{"blogger_status": "LIVE"}],
+            static_pages=[{"title": "About"}, {"title": "Contact"}, {"title": "Privacy Policy"}, {"title": "Disclaimer"}],
+            public_posts={"status": "connected", "posts": [{"title": "Published"}]},
+            operations={
+                "preflight": {
+                    "status": "fail",
+                    "checks": [
+                        {
+                            "name": "launch_queue_quality",
+                            "status": "fail",
+                            "message": "Launch queue quality failed: windows problem: generic_computer_help_category, weak_microsoft_sources",
+                        }
+                    ],
+                },
+            },
+            signal_quality={"status": "connected"},
+        )
+
+        joined = "\n".join(actions)
+        self.assertIn("Launch queue 품질검수에 실패", joined)
+        self.assertIn("Microsoft 출처 부족", joined)
+        self.assertIn("generic_computer_help_category", joined)
+
     def test_next_actions_include_seed_inventory_warning(self) -> None:
         settings = load_settings("easy_pc_fix_guide")
         reporter = WeeklyReporter(settings)
