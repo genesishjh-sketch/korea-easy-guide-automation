@@ -50,6 +50,7 @@ def run(site: str | None = None) -> Path:
         check_weekly_report_workflow(),
         check_cadence_alert_workflow(),
         check_reddit_health_workflow(),
+        check_reddit_health_report_persistence(),
         check_critical_notifications(),
         check_public_feed(settings.site_url),
         check_local_google_files(settings.google_oauth_client_secret_file, settings.google_oauth_token_file),
@@ -446,6 +447,32 @@ def check_reddit_health_workflow() -> PreflightCheck:
     if missing:
         return PreflightCheck("reddit_health_workflow", "fail", f"Missing Reddit health workflow safeguards: {', '.join(missing)}")
     return PreflightCheck("reddit_health_workflow", "pass", "Reddit health workflow checks OAuth with secrets and uploads its report.")
+
+
+def check_reddit_health_report_persistence() -> PreflightCheck:
+    path = ROOT_DIR / "src" / "pipeline" / "stage0_reddit_health.py"
+    if not path.exists():
+        return PreflightCheck("reddit_health_report_persistence", "fail", "Reddit health pipeline file is missing.")
+    text = path.read_text(encoding="utf-8")
+    required = [
+        "human_summary_markdown",
+        "build_markdown_report(result)",
+        "reddit-health.md",
+        "output_path.write_text(json.dumps(result",
+        "markdown_path.write_text(markdown_report",
+    ]
+    missing = [item for item in required if item not in text]
+    if missing:
+        return PreflightCheck(
+            "reddit_health_report_persistence",
+            "fail",
+            f"Missing Reddit health report persistence safeguards: {', '.join(missing)}",
+        )
+    return PreflightCheck(
+        "reddit_health_report_persistence",
+        "pass",
+        "Reddit health writes JSON, Markdown, and embedded human-readable summary before notification.",
+    )
 
 
 def check_critical_notifications() -> PreflightCheck:
