@@ -9,11 +9,12 @@ from src.config import ROOT_DIR, Settings
 from src.pipeline.stage4_publication_check import classify_daily_success_context
 from src.pipeline.stage4_publication_check import fetch_public_feed
 from src.pipeline.stage4_publication_check import parse_posts
-from src.reporting.cadence import GITHUB_SECRETS_URL
-from src.reporting.cadence import REDDIT_APPS_URL
 from src.reporting.cadence import review_cadence
 from src.reporting.analytics import GA4Client
 from src.reporting.search_console import SearchConsoleClient
+from src.utils.reddit_setup import GITHUB_SECRETS_URL
+from src.utils.reddit_setup import REDDIT_APPS_URL
+from src.utils.reddit_setup import reddit_oauth_secret_label
 
 
 KST = ZoneInfo("Asia/Seoul")
@@ -327,7 +328,7 @@ class WeeklyReporter:
             actions.append(
                 "Reddit 실제 신호 없이 fallback 질문만 사용한 글이 있습니다. Reddit OAuth 설정을 추가해 주제 수집 품질을 안정화하세요. "
                 f"Reddit 앱: {REDDIT_APPS_URL} / GitHub Secrets: {GITHUB_SECRETS_URL} "
-                "(REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET)"
+                f"({reddit_oauth_secret_label()})"
             )
         elif (signal_quality or {}).get("reddit_public_json_signal_count", 0) and not (signal_quality or {}).get(
             "reddit_oauth_signal_count", 0
@@ -335,7 +336,7 @@ class WeeklyReporter:
             actions.append(
                 "Reddit 실제 신호가 public JSON 경로에만 의존하고 있습니다. 403 차단 가능성을 줄이려면 Reddit OAuth 수집을 점검하세요. "
                 f"Reddit 앱: {REDDIT_APPS_URL} / GitHub Secrets: {GITHUB_SECRETS_URL} "
-                "(REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET)"
+                f"({reddit_oauth_secret_label()})"
             )
         if operational_status and not operational_status.get("ready_for_cadence_increase", False):
             actions.append(

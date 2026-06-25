@@ -10,12 +10,15 @@ from src.config import ROOT_DIR
 from src.config import load_settings
 from src.notifications.telegram import NotificationClient
 from src.pipeline.daily_draft import load_seed_list
+from src.utils.reddit_setup import GITHUB_SECRETS_URL
+from src.utils.reddit_setup import REDDIT_APPS_URL
+from src.utils.reddit_setup import REDDIT_CLIENT_ID_SECRET
+from src.utils.reddit_setup import REDDIT_CLIENT_SECRET_SECRET
+from src.utils.reddit_setup import reddit_oauth_secret_label
 from src.utils.text import clean_space
 
 
 DEFAULT_WINDOWS_QUERY = "wifi button missing windows 11"
-REDDIT_APPS_URL = "https://www.reddit.com/prefs/apps"
-GITHUB_SECRETS_URL = "https://github.com/genesishjh-sketch/korea-easy-guide-automation/settings/secrets/actions"
 
 
 def run(site: str | None = None, query: str | None = None, limit: int = 3, notify: bool = False) -> Path:
@@ -61,11 +64,11 @@ def check_reddit_oauth(settings: Any, query: str, limit: int = 3) -> dict:
         return {
             **base,
             "status": "missing_credentials",
-            "action_required": "REDDIT_CLIENT_ID와 REDDIT_CLIENT_SECRET을 GitHub Secrets 또는 .env에 설정하세요.",
+            "action_required": f"{reddit_oauth_secret_label()}을 GitHub Secrets 또는 .env에 설정하세요.",
             "remediation_steps": [
                 "Reddit 앱을 script 타입으로 만들고 client id와 secret을 확인하세요.",
-                "GitHub Secrets에 REDDIT_CLIENT_ID를 추가하세요.",
-                "GitHub Secrets에 REDDIT_CLIENT_SECRET을 추가하세요.",
+                f"GitHub Secrets에 {REDDIT_CLIENT_ID_SECRET}를 추가하세요.",
+                f"GitHub Secrets에 {REDDIT_CLIENT_SECRET_SECRET}을 추가하세요.",
                 "Actions > Easy PC Fix Reddit OAuth Health에서 수동 재실행하세요.",
             ],
         }
@@ -116,7 +119,7 @@ def check_reddit_oauth(settings: Any, query: str, limit: int = 3) -> dict:
             "action_required": "Reddit 앱 유형, client id/secret, user agent, Reddit API 권한을 확인하세요.",
             "remediation_steps": [
                 "Reddit 앱 타입이 script인지 확인하세요.",
-                "GitHub Secrets의 REDDIT_CLIENT_ID와 REDDIT_CLIENT_SECRET 오타를 확인하세요.",
+                f"GitHub Secrets의 {reddit_oauth_secret_label()} 오타를 확인하세요.",
                 "REDDIT_USER_AGENT가 비어 있거나 너무 일반적인 값인지 확인하세요.",
                 "Reddit API 또는 계정 제한 메시지가 있는지 오류 내용을 확인하세요.",
             ],

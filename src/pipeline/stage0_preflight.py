@@ -19,6 +19,9 @@ from src.pipeline.daily_draft import load_seed_list
 from src.pipeline.daily_draft import used_keywords
 from src.pipeline.stage4_publication_check import fetch_public_feed
 from src.pipeline.stage4_publication_check import parse_posts
+from src.utils.reddit_setup import GITHUB_SECRETS_URL
+from src.utils.reddit_setup import REDDIT_APPS_URL
+from src.utils.reddit_setup import reddit_oauth_secret_label
 
 
 @dataclass(frozen=True)
@@ -152,8 +155,7 @@ def check_reddit_collection_settings(site: str | None = None) -> PreflightCheck:
         "reddit_collection",
         "warn",
         "Reddit OAuth credentials are missing. Public Reddit JSON may return 403, so the pipeline may rely on fallback reader questions. "
-        "Create a script app at https://www.reddit.com/prefs/apps, then add REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET at "
-        "https://github.com/genesishjh-sketch/korea-easy-guide-automation/settings/secrets/actions.",
+        f"Create a script app at {REDDIT_APPS_URL}, then add {reddit_oauth_secret_label()} at {GITHUB_SECRETS_URL}.",
     )
 
 

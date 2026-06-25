@@ -3,12 +3,14 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 from datetime import date
 
+from src.utils.reddit_setup import GITHUB_SECRETS_URL
+from src.utils.reddit_setup import REDDIT_APPS_URL
+from src.utils.reddit_setup import reddit_oauth_secret_label
+
 
 START_DATE = date(2026, 6, 24)
 TWO_POST_REVIEW_DATE = date(2026, 7, 22)
 THREE_POST_REVIEW_DATE = date(2026, 8, 19)
-REDDIT_APPS_URL = "https://www.reddit.com/prefs/apps"
-GITHUB_SECRETS_URL = "https://github.com/genesishjh-sketch/korea-easy-guide-automation/settings/secrets/actions"
 
 
 @dataclass(frozen=True)
@@ -128,7 +130,7 @@ def build_cadence_alert_message(site_name: str, site_url: str, review: CadenceRe
                 "필요 조치:",
                 "- Reddit 앱에서 script app을 만들고 client id/client secret을 확인하세요.",
                 f"- Reddit 앱 생성: {REDDIT_APPS_URL}",
-                "- GitHub Actions Secrets에 REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET을 저장하세요.",
+                f"- GitHub Actions Secrets에 {reddit_oauth_secret_label()}을 저장하세요.",
                 f"- GitHub Secrets: {GITHUB_SECRETS_URL}",
                 "- 저장 후 Actions > Easy PC Fix Reddit OAuth Health를 수동 실행해 연결을 확인하세요.",
             ]

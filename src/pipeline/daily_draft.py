@@ -16,8 +16,9 @@ from src.pipeline.stage4_publication_check import parse_posts
 from src.pipeline.stage1_generate import run as run_stage1
 from src.pipeline.stage2_publish import run as run_stage2
 from src.quality.hades import HadesQualityGate
-from src.reporting.cadence import GITHUB_SECRETS_URL
-from src.reporting.cadence import REDDIT_APPS_URL
+from src.utils.reddit_setup import GITHUB_SECRETS_URL
+from src.utils.reddit_setup import REDDIT_APPS_URL
+from src.utils.reddit_setup import reddit_oauth_secret_label
 
 
 KST = ZoneInfo("Asia/Seoul")
@@ -507,7 +508,7 @@ def build_daily_success_message(result: dict[str, str]) -> str:
         lines.extend(
             [
                 f"- Reddit 앱 생성: {REDDIT_APPS_URL}",
-                f"- GitHub Secrets에 REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET 저장: {GITHUB_SECRETS_URL}",
+                f"- GitHub Secrets에 {reddit_oauth_secret_label()} 저장: {GITHUB_SECRETS_URL}",
                 "- 저장 후 Actions > Easy PC Fix Reddit OAuth Health를 수동 실행하세요.",
             ]
         )
