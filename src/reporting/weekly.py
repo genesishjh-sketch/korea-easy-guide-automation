@@ -9,6 +9,7 @@ from src.config import ROOT_DIR, Settings
 from src.pipeline.stage4_publication_check import classify_daily_success_context
 from src.pipeline.stage4_publication_check import fetch_public_feed
 from src.pipeline.stage4_publication_check import parse_posts
+from src.reporting.daily_reports import read_daily_success_report
 from src.reporting.cadence import review_cadence
 from src.reporting.analytics import GA4Client
 from src.reporting.search_console import SearchConsoleClient
@@ -177,7 +178,7 @@ class WeeklyReporter:
                 "status": "not_persisted",
                 "note": "이전 workflow artifact는 주간 workflow 환경에 자동 보존되지 않습니다. Daily publish workflow는 공개 발행 직후 sitemap 제출 단계를 실행합니다.",
             }
-        daily_success = self._read_report(report_dir / f"{self.settings.site_key}-daily-success.json")
+        daily_success = read_daily_success_report(self.settings.site_key, report_dir)
         return {
             "daily_success": daily_success,
             "daily_success_context": classify_daily_success_context(daily_success),

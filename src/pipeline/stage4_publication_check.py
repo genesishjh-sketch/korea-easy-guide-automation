@@ -13,6 +13,7 @@ import requests
 from src.config import ROOT_DIR
 from src.config import load_settings
 from src.notifications.telegram import NotificationClient
+from src.reporting.daily_reports import read_daily_success_report
 
 
 KST = ZoneInfo("Asia/Seoul")
@@ -174,18 +175,6 @@ def parse_posts(feed: dict) -> list[dict]:
             }
         )
     return sorted(posts, key=lambda post: post["published_kst"], reverse=True)
-
-
-def read_daily_success_report(site_key: str) -> dict:
-    path = ROOT_DIR / "reports" / f"{site_key}-daily-success.json"
-    if not path.exists():
-        return {"status": "not_uploaded", "path": str(path)}
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as exc:
-        return {"status": "error", "path": str(path), "error": str(exc)}
-    data.setdefault("path", str(path))
-    return data
 
 
 def classify_daily_success_context(report: dict) -> dict:
