@@ -171,6 +171,7 @@ class WeeklyReporter:
             "daily_success_context": classify_daily_success_context(daily_success),
             "daily_failure": self._read_report(report_dir / f"{self.settings.site_key}-daily-failure.json"),
             "preflight": self._read_report(report_dir / f"{self.settings.site_key}-preflight.json"),
+            "reddit_health": self._read_report(report_dir / f"{self.settings.site_key}-reddit-health.json"),
             "publication_check": publication_check,
             "sitemap_submit": sitemap_submit,
         }
@@ -447,6 +448,7 @@ class WeeklyReporter:
         daily_success_context = operations.get("daily_success_context") or classify_daily_success_context(daily_success)
         daily_failure = operations.get("daily_failure", {})
         preflight = operations.get("preflight", {})
+        reddit_health = operations.get("reddit_health", {})
         publication_check = operations.get("publication_check", {})
         sitemap_submit = operations.get("sitemap_submit", {})
         lines.append(f"- 최근 일일 성공 리포트: {_status_kr(daily_success.get('status', 'not_uploaded'))}")
@@ -492,6 +494,18 @@ class WeeklyReporter:
                     lines.append(f"  - {check.get('name')}: {_status_kr(check.get('status'))} - {check.get('message')}")
             else:
                 lines.append("  - 전체 점검 통과")
+        lines.append(f"- Reddit OAuth Health: {_status_kr(reddit_health.get('status', 'not_uploaded'))}")
+        if reddit_health.get("status_label"):
+            lines.append(f"  - 상태: {reddit_health.get('status_label')}")
+        if reddit_health.get("health_score") is not None:
+            lines.append(f"  - 상태 점수: {reddit_health.get('health_score')}/100")
+        if reddit_health.get("blocks_cadence_increase") is not None:
+            lines.append(
+                "  - 발행량 증량 차단: "
+                f"{'예' if reddit_health.get('blocks_cadence_increase') else '아니오'}"
+            )
+        if reddit_health.get("action_required"):
+            lines.append(f"  - 조치: {reddit_health.get('action_required')}")
         lines.append(f"- 발행 확인: {_status_kr(publication_check.get('status', 'not_uploaded'))}")
         if publication_check.get("source"):
             lines.append(f"  - 확인 기준: {publication_check.get('source')}")
@@ -559,5 +573,11 @@ def _status_kr(status: str | None) -> str:
         "skipped_daily_limit": "하루 1개 제한으로 건너뜀",
         "fallback_only": "fallback 사용",
         "failed": "실패",
+        "oauth_connected": "OAuth 연결 확인",
+        "oauth_connected_no_results": "OAuth 연결됨, 결과 없음",
+        "missing_credentials": "Reddit OAuth 키 없음",
+        "missing_user_agent": "Reddit User-Agent 없음",
+        "missing_praw": "PRAW 패키지 없음",
+        "oauth_error": "OAuth 오류",
     }
     return mapping.get(status or "not_uploaded", status or "미업로드")

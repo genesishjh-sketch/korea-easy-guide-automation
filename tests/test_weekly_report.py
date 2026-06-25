@@ -98,6 +98,13 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                         },
                     },
                     "daily_failure": {"status": "not_uploaded"},
+                    "reddit_health": {
+                        "status": "missing_credentials",
+                        "status_label": "Reddit OAuth 키 없음",
+                        "health_score": 0,
+                        "blocks_cadence_increase": True,
+                        "action_required": "REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET을 GitHub Secrets 또는 .env에 설정하세요.",
+                    },
                     "preflight": {
                         "status": "pass",
                         "checks": [
@@ -132,6 +139,9 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("최근 일일 실패 리포트: 미업로드", markdown)
         self.assertIn("Preflight: 통과", markdown)
         self.assertIn("시드 재고: 통과 - 83/103 exact-match topic seeds remain unused.", markdown)
+        self.assertIn("Reddit OAuth Health: Reddit OAuth 키 없음", markdown)
+        self.assertIn("상태 점수: 0/100", markdown)
+        self.assertIn("발행량 증량 차단: 예", markdown)
         self.assertIn("발행 확인: 오늘 공개 글 확인", markdown)
         self.assertIn("Sitemap 제출: 제출됨", markdown)
         self.assertIn("## 수집 신호 품질", markdown)
@@ -322,12 +332,18 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                 '{"status":"failed","error":"boom"}',
                 encoding="utf-8",
             )
+            (report_dir / "easy_pc_fix_guide-reddit-health.json").write_text(
+                '{"status":"oauth_connected","collection_status":"stable_oauth","health_score":100,"blocks_cadence_increase":false}',
+                encoding="utf-8",
+            )
 
             operations = reporter._operations_result()
 
         self.assertEqual(operations["daily_success"]["status"], "published")
         self.assertEqual(operations["daily_success_context"]["status"], "publish_related")
         self.assertEqual(operations["daily_failure"]["status"], "failed")
+        self.assertEqual(operations["reddit_health"]["status"], "oauth_connected")
+        self.assertEqual(operations["reddit_health"]["health_score"], 100)
 
     def test_operations_result_falls_back_to_public_feed_when_artifacts_are_not_persisted(self) -> None:
         settings = load_settings("easy_pc_fix_guide")
