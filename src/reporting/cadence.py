@@ -63,6 +63,18 @@ def review_cadence(
 
     if today < TWO_POST_REVIEW_DATE:
         reasons.append("아직 초기 신뢰도 구축 기간입니다. 하루 1개를 유지하세요.")
+        if reddit_health_blocks_cadence_increase:
+            label = reddit_health.get("status_label") or reddit_health_status
+            reasons.append(f"Reddit OAuth Health도 발행량 증량을 차단 중입니다: {label}.")
+            reasons.append(f"Reddit Health 상태 점수는 {reddit_health_score}/100입니다.")
+            if reddit_health.get("action_required"):
+                reasons.append(f"필요 조치: {reddit_health.get('action_required')}")
+        elif has_unstable_reddit_collection:
+            if signal_quality_status == "fallback_only":
+                reasons.append("최근 글 수집이 Reddit 실제 신호 없이 fallback 질문에 의존했습니다.")
+            else:
+                reasons.append("Reddit 실제 신호가 OAuth 없이 public JSON 경로에 의존했습니다.")
+            reasons.append("발행량 확대 전 Reddit OAuth 수집 안정성을 먼저 확인하세요.")
         action = "하루 1개 유지"
         recommendation = "not_ready"
     elif reddit_health_blocks_cadence_increase:

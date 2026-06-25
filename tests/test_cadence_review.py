@@ -61,6 +61,35 @@ class CadenceReviewTests(unittest.TestCase):
         self.assertIn("Reddit OAuth Health", " ".join(review.reasons))
         self.assertIn("0/100", " ".join(review.reasons))
 
+    def test_initial_period_still_mentions_reddit_health_blocker(self) -> None:
+        review = review_cadence(
+            today=date(2026, 6, 25),
+            published_posts=1,
+            indexed_pages_estimate=0,
+            recent_impressions=0,
+            quality_issue_count=0,
+            signal_quality={
+                "status": "fallback_only",
+                "reddit_oauth_signal_count": 0,
+                "reddit_public_json_signal_count": 0,
+                "fallback_reddit_signal_count": 15,
+            },
+            reddit_health={
+                "status": "missing_credentials",
+                "status_label": "Reddit OAuth 키 없음",
+                "health_score": 0,
+                "blocks_cadence_increase": True,
+                "action_required": "REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET을 GitHub Secrets 또는 .env에 설정하세요.",
+            },
+        )
+
+        joined_reasons = " ".join(review.reasons)
+        self.assertEqual(review.current_recommendation, "not_ready")
+        self.assertEqual(review.action, "하루 1개 유지")
+        self.assertIn("초기 신뢰도 구축 기간", joined_reasons)
+        self.assertIn("Reddit OAuth Health도 발행량 증량을 차단", joined_reasons)
+        self.assertIn("0/100", joined_reasons)
+
     def test_fallback_only_blocks_cadence_increase_even_when_counts_are_ready(self) -> None:
         review = review_cadence(
             today=date(2026, 7, 22),
