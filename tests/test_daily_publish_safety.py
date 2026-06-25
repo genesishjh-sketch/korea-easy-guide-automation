@@ -832,6 +832,48 @@ class WindowsQualityGateTests(unittest.TestCase):
         self.assertNotIn("missing_command_understanding_warning", issue_codes)
         self.assertNotIn("missing_official_command_source_warning", issue_codes)
 
+    def test_windows_articles_require_three_related_guides(self) -> None:
+        gate = HadesQualityGate("windows_help")
+        soup = BeautifulSoup(
+            """
+            <article>
+              <h2>Related Guides</h2>
+              <ul><li>How to check your Windows version</li></ul>
+            </article>
+            """,
+            "html.parser",
+        )
+        issues = gate._review_windows_article(
+            soup,
+            "applies to risk level data loss risk estimated time last checked advanced fixes back up important files",
+            links=[],
+        )
+
+        self.assertIn("weak_related_guides", {issue.code for issue in issues})
+
+    def test_windows_articles_accept_three_related_guides(self) -> None:
+        gate = HadesQualityGate("windows_help")
+        soup = BeautifulSoup(
+            """
+            <article>
+              <h2>Related Guides</h2>
+              <ul>
+                <li>How to check your Windows version</li>
+                <li>How to free up disk space on Windows</li>
+                <li>Windows Update stuck at 100%</li>
+              </ul>
+            </article>
+            """,
+            "html.parser",
+        )
+        issues = gate._review_windows_article(
+            soup,
+            "applies to risk level data loss risk estimated time last checked advanced fixes back up important files",
+            links=[],
+        )
+
+        self.assertNotIn("weak_related_guides", {issue.code for issue in issues})
+
     def test_windows_articles_block_onedrive_update_context_mismatch(self) -> None:
         gate = HadesQualityGate("windows_help")
         issues = gate._review_windows_article(

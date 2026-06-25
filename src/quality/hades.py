@@ -284,6 +284,7 @@ class HadesQualityGate:
             issues.append(QualityIssue("missing_advanced_warning", "Advanced fixes require a clear backup warning."))
         if soup is not None:
             issues.extend(self._review_windows_advanced_only_terms(soup))
+            issues.extend(self._review_windows_related_guides(soup))
         issues.extend(self._review_windows_command_safety(text_lower))
         issues.extend(self._review_windows_topic_context(text_lower))
         for phrase in WINDOWS_BLOCKED_PHRASES:
@@ -317,6 +318,17 @@ class HadesQualityGate:
                 )
             )
         return issues
+
+    def _review_windows_related_guides(self, soup: BeautifulSoup) -> list[QualityIssue]:
+        related_items = _section_list_items_by_h2(soup).get("related guides", [])
+        if len(related_items) < 3:
+            return [
+                QualityIssue(
+                    "weak_related_guides",
+                    "Windows help articles require at least three Related Guides items for topic clustering.",
+                )
+            ]
+        return []
 
     def _review_windows_topic_context(self, text_lower: str) -> list[QualityIssue]:
         issues: list[QualityIssue] = []
@@ -451,6 +463,21 @@ def _section_text_by_h2(soup: BeautifulSoup) -> dict[str, str]:
             if get_text:
                 parts.append(get_text(" ", strip=True))
         sections[title] = " ".join(part for part in parts if part)
+    return sections
+
+
+def _section_list_items_by_h2(soup: BeautifulSoup) -> dict[str, list[str]]:
+    sections: dict[str, list[str]] = {}
+    for heading in soup.find_all("h2"):
+        title = heading.get_text(" ", strip=True).casefold()
+        items = []
+        for sibling in heading.next_siblings:
+            if getattr(sibling, "name", None) == "h2":
+                break
+            find_all = getattr(sibling, "find_all", None)
+            if find_all:
+                items.extend(item.get_text(" ", strip=True) for item in find_all("li"))
+        sections[title] = [item for item in items if item]
     return sections
 
 
