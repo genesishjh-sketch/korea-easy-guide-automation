@@ -37,6 +37,7 @@ def run(site: str | None = None, today: datetime | None = None, after_hour: int 
     ]
     status = publication_status(todays_posts, all_todays_posts, cutoff)
     daily_workflow = check_daily_workflow_status(now)
+    daily_success = read_daily_success_report(settings.site_key)
     result = {
         "site": settings.site_key,
         "site_name": settings.site_name,
@@ -47,6 +48,7 @@ def run(site: str | None = None, today: datetime | None = None, after_hour: int 
         "today_post_count": len(todays_posts),
         "today_total_post_count": len(all_todays_posts),
         "daily_workflow": daily_workflow,
+        "daily_success": daily_success,
         "latest_posts": [
             {
                 "title": post["title"],
@@ -171,6 +173,18 @@ def parse_posts(feed: dict) -> list[dict]:
     return sorted(posts, key=lambda post: post["published_kst"], reverse=True)
 
 
+def read_daily_success_report(site_key: str) -> dict:
+    path = ROOT_DIR / "reports" / f"{site_key}-daily-success.json"
+    if not path.exists():
+        return {"status": "not_uploaded", "path": str(path)}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        return {"status": "error", "path": str(path), "error": str(exc)}
+    data.setdefault("path", str(path))
+    return data
+
+
 def publication_status(todays_posts: list[dict], all_todays_posts: list[dict], cutoff: datetime | None) -> str:
     if todays_posts:
         return "published_today"
@@ -213,6 +227,19 @@ def build_message(result: dict) -> str:
                 lines.append(f"  {latest_run.get('url')}")
         if workflow.get("note"):
             lines.append(f"- workflow 참고: {workflow.get('note')}")
+    daily_success = result.get("daily_success") or {}
+    operational_status = daily_success.get("operational_status") or {}
+    if operational_status:
+        lines.extend(
+            [
+                f"- 최근 일일 운영 상태: {operational_status.get('status_label', '확인 필요')}",
+                "  - 발행 품질 안정성: "
+                f"{'안정' if operational_status.get('publish_quality_ok') else '점검 필요'}",
+                f"  - 수집 안정성: {operational_status.get('collection_status_label', '확인 필요')}",
+                "  - 발행량 증량 준비: "
+                f"{'예' if operational_status.get('ready_for_cadence_increase') else '아니오'}",
+            ]
+        )
     todays_latest = [
         post
         for post in result.get("latest_posts", [])

@@ -23,6 +23,18 @@ class PublicationCheckTests(unittest.TestCase):
             stage4_publication_check, "parse_posts", return_value=[post]
         ), patch.object(
             stage4_publication_check, "check_daily_workflow_status", return_value={"status": "success", "today_run_count": 1}
+        ), patch.object(
+            stage4_publication_check,
+            "read_daily_success_report",
+            return_value={
+                "status": "validated",
+                "operational_status": {
+                    "publish_quality_ok": True,
+                    "collection_status_label": "주의: fallback 질문 의존",
+                    "ready_for_cadence_increase": False,
+                    "status_label": "발행 품질 OK, 수집 안정성 점검 필요",
+                },
+            },
         ), patch("src.pipeline.stage4_publication_check.NotificationClient") as notification:
             result = stage4_publication_check.run(
                 "easy_pc_fix_guide",
@@ -33,6 +45,7 @@ class PublicationCheckTests(unittest.TestCase):
         self.assertEqual(result["status"], "published_today")
         self.assertEqual(result["today_post_count"], 1)
         self.assertEqual(result["daily_workflow"]["status"], "success")
+        self.assertEqual(result["daily_success"]["operational_status"]["ready_for_cadence_increase"], False)
         notification.return_value.send_required.assert_called_once()
 
     def test_run_accepts_today_post_before_cutoff(self) -> None:
@@ -48,6 +61,8 @@ class PublicationCheckTests(unittest.TestCase):
             stage4_publication_check,
             "check_daily_workflow_status",
             return_value={"status": "no_run_today", "today_run_count": 0},
+        ), patch.object(
+            stage4_publication_check, "read_daily_success_report", return_value={"status": "not_uploaded"}
         ), patch("src.pipeline.stage4_publication_check.NotificationClient") as notification:
             result = stage4_publication_check.run(
                 "easy_pc_fix_guide",
@@ -72,6 +87,8 @@ class PublicationCheckTests(unittest.TestCase):
             stage4_publication_check, "parse_posts", return_value=[post]
         ), patch.object(
             stage4_publication_check, "check_daily_workflow_status", return_value={"status": "success", "today_run_count": 1}
+        ), patch.object(
+            stage4_publication_check, "read_daily_success_report", return_value={"status": "not_uploaded"}
         ), patch("src.pipeline.stage4_publication_check.NotificationClient") as notification:
             notification.return_value.send_required.side_effect = RuntimeError("telegram failed")
 
@@ -183,6 +200,15 @@ class PublicationCheckTests(unittest.TestCase):
                         "url": "https://github.com/run/123",
                     },
                 },
+                "daily_success": {
+                    "status": "validated",
+                    "operational_status": {
+                        "publish_quality_ok": True,
+                        "collection_status_label": "주의: fallback 질문 의존",
+                        "ready_for_cadence_increase": False,
+                        "status_label": "발행 품질 OK, 수집 안정성 점검 필요",
+                    },
+                },
                 "latest_posts": [
                     {
                         "title": "Fresh post",
@@ -196,6 +222,8 @@ class PublicationCheckTests(unittest.TestCase):
         self.assertIn("- 확인된 최신 글: Fresh post", message)
         self.assertIn("- 최신 글 URL: https://easypcfixguide.blogspot.com/2026/06/fresh-post.html", message)
         self.assertIn("- Daily workflow 상태: 오늘 실행 성공", message)
+        self.assertIn("- 최근 일일 운영 상태: 발행 품질 OK, 수집 안정성 점검 필요", message)
+        self.assertIn("발행량 증량 준비: 아니오", message)
 
     def test_publication_message_explains_before_cutoff_post(self) -> None:
         message = stage4_publication_check.build_message(
