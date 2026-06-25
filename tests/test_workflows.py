@@ -65,6 +65,18 @@ class WorkflowSafetyTests(unittest.TestCase):
         self.assertIn('cron: "30 0 22 7 *"', easy_pc_workflow)
         self.assertIn('cron: "30 0 19 8 *"', easy_pc_workflow)
 
+    def test_easy_pc_cadence_alert_uploads_report_even_after_failure(self) -> None:
+        workflow = (ROOT_DIR / ".github" / "workflows" / "easy-pc-cadence-alert.yml").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("python -m src.pipeline.stage3_cadence_alert --site easy_pc_fix_guide", workflow)
+        upload_index = workflow.index("- name: Upload cadence alert report")
+        upload_block = workflow[upload_index : upload_index + 260]
+        self.assertIn("if: ${{ always() }}", upload_block)
+        self.assertIn("actions/upload-artifact@v6", upload_block)
+        self.assertIn("reports/easy_pc_fix_guide-cadence-alert-*.json", upload_block)
+
     def test_easy_pc_daily_runs_safety_tests_before_publish(self) -> None:
         workflow = (ROOT_DIR / ".github" / "workflows" / "easy-pc-daily.yml").read_text(encoding="utf-8")
 

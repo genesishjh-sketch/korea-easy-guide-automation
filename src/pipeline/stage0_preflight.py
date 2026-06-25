@@ -479,6 +479,9 @@ def check_cadence_alert_workflow() -> PreflightCheck:
         "30 0 19 8 *",
         "GOOGLE_OAUTH_TOKEN_SEARCH_CONSOLE_JSON",
         "python -m src.pipeline.stage3_cadence_alert --site easy_pc_fix_guide",
+        "Upload cadence alert report",
+        "if: ${{ always() }}",
+        "reports/easy_pc_fix_guide-cadence-alert-*.json",
     ]
     missing = [item for item in required if item not in text]
     if missing:
