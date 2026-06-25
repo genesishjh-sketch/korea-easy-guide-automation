@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from contextlib import ExitStack
 import json
 from pathlib import Path
 import tempfile
@@ -215,6 +216,91 @@ class PreflightTests(unittest.TestCase):
 
         self.assertEqual(check.status, "pass")
         self.assertIn("Reddit OAuth credentials", check.message)
+
+    def test_setup_actions_classify_reddit_oauth_as_cadence_blocker(self) -> None:
+        checks = [
+            stage0_preflight.PreflightCheck("reddit_collection", "warn", "Reddit OAuth credentials are missing."),
+            stage0_preflight.PreflightCheck("telegram", "pass", "Telegram notifications are configured."),
+        ]
+
+        actions = stage0_preflight.build_setup_actions(checks)
+        readiness = stage0_preflight.build_readiness_summary(checks, actions)
+
+        self.assertEqual(actions[0]["name"], "reddit_oauth")
+        self.assertEqual(actions[0]["owner"], "user")
+        self.assertFalse(actions[0]["blocks_unattended_publish"])
+        self.assertTrue(actions[0]["blocks_cadence_increase"])
+        self.assertIn("REDDIT_CLIENT_ID", actions[0]["next_step"])
+        self.assertTrue(readiness["ready_for_unattended_publish"])
+        self.assertFalse(readiness["ready_for_cadence_increase"])
+        self.assertEqual(readiness["required_user_action_count"], 1)
+
+    def test_setup_actions_classify_telegram_failure_as_unattended_blocker(self) -> None:
+        checks = [
+            stage0_preflight.PreflightCheck("telegram", "fail", "Telegram provider is enabled but bot token is missing."),
+        ]
+
+        actions = stage0_preflight.build_setup_actions(checks)
+        readiness = stage0_preflight.build_readiness_summary(checks, actions)
+
+        self.assertEqual(actions[0]["name"], "posting_bot")
+        self.assertTrue(actions[0]["blocks_unattended_publish"])
+        self.assertFalse(actions[0]["blocks_cadence_increase"])
+        self.assertFalse(readiness["ready_for_unattended_publish"])
+        self.assertTrue(readiness["ready_for_cadence_increase"])
+        self.assertEqual(readiness["failed_checks"], ["telegram"])
+
+    def test_run_writes_readiness_and_setup_actions(self) -> None:
+        checks = [
+            stage0_preflight.PreflightCheck("reddit_collection", "warn", "Reddit OAuth credentials are missing."),
+            stage0_preflight.PreflightCheck("telegram", "pass", "Telegram notifications are configured."),
+        ]
+
+        pass_check_names = [
+            "check_site_settings",
+            "check_seed_file",
+            "check_seed_inventory",
+            "check_launch_queue",
+            "check_launch_queue_quality",
+            "check_zero_cost_image_policy",
+            "check_daily_workflow",
+            "check_validate_workflow",
+            "check_publication_check_workflow",
+            "check_weekly_report_workflow",
+            "check_cadence_alert_workflow",
+            "check_reddit_health_workflow",
+            "check_critical_notifications",
+            "check_public_feed",
+            "check_local_google_files",
+            "check_reporting_google_files",
+            "check_telegram_settings",
+        ]
+
+        with tempfile.TemporaryDirectory() as tmpdir, ExitStack() as stack:
+            stack.enter_context(patch.object(stage0_preflight, "ROOT_DIR", Path(tmpdir)))
+            load_settings = stack.enter_context(patch.object(stage0_preflight, "load_settings"))
+            stack.enter_context(patch.object(stage0_preflight, "check_python_runtime", return_value=checks[1]))
+            stack.enter_context(patch.object(stage0_preflight, "check_reddit_collection_settings", return_value=checks[0]))
+            for name in pass_check_names:
+                stack.enter_context(patch.object(stage0_preflight, name, return_value=checks[1]))
+
+            settings = load_settings.return_value
+            settings.site_key = "easy_pc_fix_guide"
+            settings.site_name = "Easy PC Fix Guide"
+            settings.site_url = "https://easypcfixguide.blogspot.com"
+            settings.google_oauth_client_secret_file = ""
+            settings.google_oauth_token_file = ""
+            settings.notification_provider = "telegram"
+            settings.telegram_bot_token = "token"
+            settings.telegram_chat_id = "chat"
+
+            path = stage0_preflight.run("easy_pc_fix_guide")
+            payload = json.loads(path.read_text(encoding="utf-8"))
+
+        self.assertIn("readiness", payload)
+        self.assertIn("setup_actions", payload)
+        self.assertFalse(payload["readiness"]["ready_for_cadence_increase"])
+        self.assertEqual(payload["setup_actions"][0]["name"], "reddit_oauth")
 
     def test_seed_inventory_passes_when_two_weeks_of_unused_seeds_remain(self) -> None:
         seeds = [f"topic {index}" for index in range(20)]

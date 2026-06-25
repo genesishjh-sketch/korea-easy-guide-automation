@@ -726,6 +726,24 @@ class WeeklyReporter:
         if daily_failure.get("seed"):
             lines.append(f"  - 실패 시드: {daily_failure.get('seed')}")
         lines.append(f"- Preflight: {_status_kr(preflight.get('status', 'not_uploaded'))}")
+        readiness = preflight.get("readiness") or {}
+        if readiness:
+            lines.append(
+                "  - 무인 발행 준비: "
+                f"{'예' if readiness.get('ready_for_unattended_publish') else '아니오'}"
+            )
+            lines.append(
+                "  - 발행량 증량 준비: "
+                f"{'예' if readiness.get('ready_for_cadence_increase') else '아니오'}"
+            )
+            lines.append(f"  - 필요 사용자 조치 수: {readiness.get('required_user_action_count', 0)}")
+        if preflight.get("setup_actions"):
+            lines.append("  - 설정 조치:")
+            for action in preflight.get("setup_actions", [])[:5]:
+                lines.append(
+                    f"    - {action.get('label', action.get('name', '설정'))}: {_status_kr(action.get('status'))} "
+                    f"/ {action.get('urgency', 'review')} - {action.get('next_step', action.get('message', '확인 필요'))}"
+                )
         if preflight.get("checks"):
             seed_inventory = next((check for check in preflight.get("checks", []) if check.get("name") == "seed_inventory"), None)
             if seed_inventory:

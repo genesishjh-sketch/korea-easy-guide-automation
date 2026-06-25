@@ -56,11 +56,14 @@ def run(site: str | None = None) -> Path:
         check_reporting_google_files(settings.google_oauth_client_secret_file, settings.google_oauth_token_file),
         check_telegram_settings(settings.notification_provider, settings.telegram_bot_token, settings.telegram_chat_id),
     ]
+    setup_actions = build_setup_actions(checks)
     result = {
         "site": settings.site_key,
         "site_name": settings.site_name,
         "site_url": settings.site_url,
         "status": overall_status(checks),
+        "readiness": build_readiness_summary(checks, setup_actions),
+        "setup_actions": setup_actions,
         "checks": [asdict(check) for check in checks],
     }
     output_dir = ROOT_DIR / "reports"
@@ -550,6 +553,126 @@ def check_telegram_settings(provider: str, bot_token: str, chat_id: str) -> Pref
     if not bot_token or not chat_id:
         return PreflightCheck("telegram", "fail", "Telegram provider is enabled but bot token or chat ID is missing.")
     return PreflightCheck("telegram", "pass", "Telegram notifications are configured.")
+
+
+def build_setup_actions(checks: list[PreflightCheck]) -> list[dict]:
+    actions = []
+    for check in checks:
+        if check.status == "pass":
+            continue
+        if check.name == "reddit_collection":
+            actions.append(
+                {
+                    "name": "reddit_oauth",
+                    "label": "Reddit OAuth 연결",
+                    "status": check.status,
+                    "owner": "user",
+                    "urgency": "before_cadence_increase",
+                    "blocks_unattended_publish": check.status == "fail",
+                    "blocks_cadence_increase": True,
+                    "message": check.message,
+                    "next_step": (
+                        "Reddit script app을 만들고 REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET을 GitHub Secrets에 저장한 뒤 "
+                        "Easy PC Fix Reddit OAuth Health workflow를 수동 실행하세요."
+                    ),
+                    "links": {
+                        "reddit_apps": REDDIT_APPS_URL,
+                        "github_secrets": GITHUB_SECRETS_URL,
+                    },
+                }
+            )
+        elif check.name == "reporting_google_files":
+            actions.append(
+                {
+                    "name": "reporting_oauth",
+                    "label": "Search Console/GA4 보고 토큰",
+                    "status": check.status,
+                    "owner": "user_or_github_secrets",
+                    "urgency": "before_weekly_reporting",
+                    "blocks_unattended_publish": False,
+                    "blocks_cadence_increase": False,
+                    "message": check.message,
+                    "next_step": (
+                        "GitHub Secrets에 GOOGLE_OAUTH_TOKEN_SEARCH_CONSOLE_JSON과 "
+                        "GOOGLE_OAUTH_TOKEN_ANALYTICS_JSON이 있는지 확인하세요."
+                    ),
+                }
+            )
+        elif check.name == "telegram":
+            actions.append(
+                {
+                    "name": "posting_bot",
+                    "label": "Posting Bot 알림",
+                    "status": check.status,
+                    "owner": "user_or_github_secrets",
+                    "urgency": "before_unattended_operations",
+                    "blocks_unattended_publish": check.status == "fail",
+                    "blocks_cadence_increase": False,
+                    "message": check.message,
+                    "next_step": "NOTIFICATION_PROVIDER=telegram, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID를 설정하세요.",
+                }
+            )
+        elif check.name == "python_runtime":
+            actions.append(
+                {
+                    "name": "python_runtime",
+                    "label": "로컬 Python 런타임",
+                    "status": check.status,
+                    "owner": "local_environment",
+                    "urgency": "maintenance",
+                    "blocks_unattended_publish": False,
+                    "blocks_cadence_increase": False,
+                    "message": check.message,
+                    "next_step": "로컬 개발 환경을 Python 3.11로 맞추면 GitHub Actions와 더 비슷하게 검증할 수 있습니다.",
+                }
+            )
+        elif check.name in {
+            "site_settings",
+            "seed_file",
+            "launch_queue",
+            "launch_queue_quality",
+            "daily_workflow",
+            "critical_notifications",
+        }:
+            actions.append(
+                {
+                    "name": check.name,
+                    "label": check.name,
+                    "status": check.status,
+                    "owner": "automation",
+                    "urgency": "before_unattended_publish",
+                    "blocks_unattended_publish": True,
+                    "blocks_cadence_increase": True,
+                    "message": check.message,
+                    "next_step": "자동 발행 전에 이 preflight 항목을 pass로 복구하세요.",
+                }
+            )
+        else:
+            actions.append(
+                {
+                    "name": check.name,
+                    "label": check.name,
+                    "status": check.status,
+                    "owner": "automation_or_user",
+                    "urgency": "review",
+                    "blocks_unattended_publish": check.status == "fail",
+                    "blocks_cadence_increase": check.status == "fail",
+                    "message": check.message,
+                    "next_step": "preflight 메시지를 확인하고 필요한 설정이나 워크플로를 복구하세요.",
+                }
+            )
+    return actions
+
+
+def build_readiness_summary(checks: list[PreflightCheck], setup_actions: list[dict]) -> dict:
+    return {
+        "ready_for_unattended_publish": not any(action.get("blocks_unattended_publish") for action in setup_actions),
+        "ready_for_cadence_increase": not any(action.get("blocks_cadence_increase") for action in setup_actions),
+        "required_user_action_count": sum(1 for action in setup_actions if str(action.get("owner", "")).startswith("user")),
+        "action_count": len(setup_actions),
+        "failed_checks": [check.name for check in checks if check.status == "fail"],
+        "warning_checks": [check.name for check in checks if check.status == "warn"],
+    }
 
 
 def overall_status(checks: list[PreflightCheck]) -> str:

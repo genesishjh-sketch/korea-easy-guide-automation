@@ -187,6 +187,20 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                     },
                     "preflight": {
                         "status": "pass",
+                        "readiness": {
+                            "ready_for_unattended_publish": True,
+                            "ready_for_cadence_increase": False,
+                            "required_user_action_count": 1,
+                        },
+                        "setup_actions": [
+                            {
+                                "name": "reddit_oauth",
+                                "label": "Reddit OAuth 연결",
+                                "status": "warn",
+                                "urgency": "before_cadence_increase",
+                                "next_step": "Reddit script app을 만들고 REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET을 GitHub Secrets에 저장한 뒤 Easy PC Fix Reddit OAuth Health workflow를 수동 실행하세요.",
+                            }
+                        ],
                         "checks": [
                             {
                                 "name": "seed_inventory",
@@ -267,6 +281,10 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("발행량 증량 준비: 아니오", markdown)
         self.assertIn("최근 일일 실패 리포트: 미업로드", markdown)
         self.assertIn("Preflight: 통과", markdown)
+        self.assertIn("무인 발행 준비: 예", markdown)
+        self.assertIn("필요 사용자 조치 수: 1", markdown)
+        self.assertIn("Reddit OAuth 연결: 주의 / before_cadence_increase", markdown)
+        self.assertIn("Easy PC Fix Reddit OAuth Health workflow를 수동 실행하세요.", markdown)
         self.assertIn("시드 재고: 통과 - 83/103 exact-match topic seeds remain unused.", markdown)
         self.assertIn("Launch queue 품질: 통과 - 14/14 launch topics have specific categories", markdown)
         self.assertIn("Reddit OAuth Health: Reddit OAuth 키 없음", markdown)
