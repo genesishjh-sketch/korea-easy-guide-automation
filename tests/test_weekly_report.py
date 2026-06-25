@@ -1015,6 +1015,40 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("상태 점수: 0/100", joined)
         self.assertIn("REDDIT_CLIENT_ID", joined)
 
+    def test_next_actions_merge_reddit_fallback_and_cadence_warnings_when_health_blocks(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+
+        actions = reporter._next_actions(
+            articles=[{"blogger_status": "LIVE"}],
+            static_pages=[{"title": "About"}, {"title": "Contact"}, {"title": "Privacy Policy"}, {"title": "Disclaimer"}],
+            public_posts={"status": "connected", "posts": [{"title": "Published"}]},
+            operations={
+                "preflight": {"status": "pass"},
+                "daily_success": {
+                    "status": "published",
+                    "operational_status": {
+                        "publish_quality_ok": True,
+                        "collection_status": "fallback_only",
+                        "ready_for_cadence_increase": False,
+                    },
+                },
+                "reddit_health": {
+                    "status": "missing_credentials",
+                    "health_score": 0,
+                    "blocks_cadence_increase": True,
+                    "action_required": "Reddit 승인 메일을 기다리세요.",
+                },
+            },
+            signal_quality={"status": "fallback_only"},
+        )
+
+        joined = "\n".join(actions)
+        self.assertIn("Reddit OAuth Health가 발행량 증량을 차단 중", joined)
+        self.assertEqual(joined.count("Reddit"), 2)
+        self.assertNotIn("Reddit 실제 신호 없이 fallback 질문만 사용한 글", joined)
+        self.assertNotIn("일일 운영 상태 기준으로 아직 발행량 증량 준비가 아닙니다", joined)
+
     def test_next_actions_include_daily_retry_seed_guidance(self) -> None:
         settings = load_settings("easy_pc_fix_guide")
         reporter = WeeklyReporter(settings)

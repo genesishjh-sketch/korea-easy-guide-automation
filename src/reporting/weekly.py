@@ -626,14 +626,15 @@ class WeeklyReporter:
                 "최근 자동 발행에서 품질검수 실패 후 다른 시드로 재시도했습니다. 실패 시드의 공식 출처, 이미지 계획, beginner-safe 섹션 구성을 보강하세요."
             )
         actions.extend(quality_issue_actions(quality_issues or []))
-        if (signal_quality or {}).get("status") == "fallback_only":
+        reddit_health_blocks_cadence = bool(reddit_health.get("blocks_cadence_increase"))
+        if not reddit_health_blocks_cadence and (signal_quality or {}).get("status") == "fallback_only":
             actions.append(
                 "Reddit 실제 신호 없이 fallback 질문만 사용한 글이 있습니다. 하루 1개 자동 발행은 계속 가능하지만, "
                 "승인 메일 전까지 하루 2~3개 증량은 보류하세요. 승인 후 Reddit OAuth 설정을 추가해 주제 수집 품질을 안정화합니다. "
                 f"Reddit 앱: {REDDIT_APPS_URL} / GitHub Secrets: {GITHUB_SECRETS_URL} "
                 f"({reddit_oauth_secret_label()})"
             )
-        elif (signal_quality or {}).get("reddit_public_json_signal_count", 0) and not (signal_quality or {}).get(
+        elif not reddit_health_blocks_cadence and (signal_quality or {}).get("reddit_public_json_signal_count", 0) and not (signal_quality or {}).get(
             "reddit_oauth_signal_count", 0
         ):
             actions.append(
@@ -642,11 +643,11 @@ class WeeklyReporter:
                 f"Reddit 앱: {REDDIT_APPS_URL} / GitHub Secrets: {GITHUB_SECRETS_URL} "
                 f"({reddit_oauth_secret_label()})"
             )
-        if operational_status and not operational_status.get("ready_for_cadence_increase", False):
+        if operational_status and not operational_status.get("ready_for_cadence_increase", False) and not reddit_health_blocks_cadence:
             actions.append(
                 "일일 운영 상태 기준으로 아직 발행량 증량 준비가 아닙니다. 하루 1개를 유지하고, 품질 통과와 Reddit OAuth 수집 안정성을 모두 확인한 뒤 증량하세요."
             )
-        if reddit_health.get("blocks_cadence_increase"):
+        if reddit_health_blocks_cadence:
             action_required = reddit_health.get("action_required") or "Reddit OAuth 상태를 점검하세요."
             actions.append(
                 f"Reddit OAuth Health가 발행량 증량을 차단 중입니다. 하루 1개 자동 발행은 계속 가능하며, 승인 전에는 대기하세요. {action_required} "
