@@ -234,6 +234,9 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertIn("- 수집 안정성: 주의: fallback 질문 의존", message)
         self.assertIn("수집 품질 경고", message)
         self.assertIn("fallback 질문만 사용", message)
+        self.assertIn("https://www.reddit.com/prefs/apps", message)
+        self.assertIn("REDDIT_CLIENT_ID", message)
+        self.assertIn("Easy PC Fix Reddit OAuth Health", message)
 
     def test_operational_status_allows_cadence_increase_only_with_oauth_signals(self) -> None:
         result = daily_draft.build_operational_status(
@@ -304,6 +307,8 @@ class DuplicatePublishGuardTests(unittest.TestCase):
 
         self.assertIn("- Reddit public JSON 신호 수: 4", message)
         self.assertIn("public JSON 경로에만 의존", message)
+        self.assertIn("https://www.reddit.com/prefs/apps", message)
+        self.assertIn("REDDIT_CLIENT_SECRET", message)
 
     def test_production_uses_launch_queue_before_long_term_seed_list(self) -> None:
         with patch.object(daily_draft, "load_settings") as load_settings:

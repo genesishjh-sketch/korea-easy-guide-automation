@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import date
 import unittest
 
+from src.reporting.cadence import build_cadence_alert_message
 from src.reporting.cadence import review_cadence
 
 
@@ -64,6 +65,56 @@ class CadenceReviewTests(unittest.TestCase):
         self.assertEqual(review.action, "하루 1개 유지")
         self.assertIn("public JSON", " ".join(review.reasons))
         self.assertEqual(review.reddit_public_json_signal_count, 8)
+
+    def test_cadence_alert_includes_reddit_setup_links_when_oauth_is_missing(self) -> None:
+        review = review_cadence(
+            today=date(2026, 7, 22),
+            published_posts=25,
+            indexed_pages_estimate=25,
+            recent_impressions=100,
+            quality_issue_count=0,
+            signal_quality={
+                "status": "fallback_only",
+                "reddit_oauth_signal_count": 0,
+                "reddit_public_json_signal_count": 0,
+                "fallback_reddit_signal_count": 6,
+            },
+        )
+
+        message = build_cadence_alert_message(
+            "Easy PC Fix Guide",
+            "https://easypcfixguide.blogspot.com",
+            review,
+        )
+
+        self.assertIn("필요 조치", message)
+        self.assertIn("https://www.reddit.com/prefs/apps", message)
+        self.assertIn("REDDIT_CLIENT_ID", message)
+        self.assertIn("Easy PC Fix Reddit OAuth Health", message)
+
+    def test_cadence_alert_omits_reddit_setup_links_when_oauth_is_stable(self) -> None:
+        review = review_cadence(
+            today=date(2026, 7, 22),
+            published_posts=25,
+            indexed_pages_estimate=25,
+            recent_impressions=100,
+            quality_issue_count=0,
+            signal_quality={
+                "status": "connected",
+                "reddit_oauth_signal_count": 5,
+                "reddit_public_json_signal_count": 0,
+                "fallback_reddit_signal_count": 0,
+            },
+        )
+
+        message = build_cadence_alert_message(
+            "Easy PC Fix Guide",
+            "https://easypcfixguide.blogspot.com",
+            review,
+        )
+
+        self.assertNotIn("필요 조치", message)
+        self.assertNotIn("https://www.reddit.com/prefs/apps", message)
 
 
 if __name__ == "__main__":

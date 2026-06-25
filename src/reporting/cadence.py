@@ -7,6 +7,8 @@ from datetime import date
 START_DATE = date(2026, 6, 24)
 TWO_POST_REVIEW_DATE = date(2026, 7, 22)
 THREE_POST_REVIEW_DATE = date(2026, 8, 19)
+REDDIT_APPS_URL = "https://www.reddit.com/prefs/apps"
+GITHUB_SECRETS_URL = "https://github.com/genesishjh-sketch/korea-easy-guide-automation/settings/secrets/actions"
 
 
 @dataclass(frozen=True)
@@ -100,28 +102,53 @@ def review_cadence(
 
 
 def build_cadence_alert_message(site_name: str, site_url: str, review: CadenceReview) -> str:
-    return "\n".join(
+    lines = [
+        "[Posting Bot] 발행량 전환 검토일 알림",
+        "",
+        f"- 블로그: {site_name}",
+        f"- 사이트: {site_url}",
+        f"- 권장 조치: {review.action}",
+        f"- 운영 일수: {review.days_since_start}일",
+        f"- 공개 글 수: {review.published_posts}개",
+        f"- Search Console 색인/노출 페이지 추정: {review.indexed_pages_estimate}개",
+        f"- 최근 노출 수: {review.recent_impressions}",
+        f"- 품질 이슈 수: {review.quality_issue_count}",
+        f"- 수집 신호 상태: {review.signal_quality_status}",
+        f"- Reddit OAuth 신호 수: {review.reddit_oauth_signal_count}",
+        f"- Reddit public JSON 신호 수: {review.reddit_public_json_signal_count}",
+        f"- Reddit fallback 신호 수: {review.fallback_reddit_signal_count}",
+        "",
+        "판단 근거:",
+        *[f"- {reason}" for reason in review.reasons],
+    ]
+    if needs_reddit_oauth_action(review):
+        lines.extend(
+            [
+                "",
+                "필요 조치:",
+                "- Reddit 앱에서 script app을 만들고 client id/client secret을 확인하세요.",
+                f"- Reddit 앱 생성: {REDDIT_APPS_URL}",
+                "- GitHub Actions Secrets에 REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET을 저장하세요.",
+                f"- GitHub Secrets: {GITHUB_SECRETS_URL}",
+                "- 저장 후 Actions > Easy PC Fix Reddit OAuth Health를 수동 실행해 연결을 확인하세요.",
+            ]
+        )
+    lines.extend(
         [
-            "[Posting Bot] 발행량 전환 검토일 알림",
-            "",
-            f"- 블로그: {site_name}",
-            f"- 사이트: {site_url}",
-            f"- 권장 조치: {review.action}",
-            f"- 운영 일수: {review.days_since_start}일",
-            f"- 공개 글 수: {review.published_posts}개",
-            f"- Search Console 색인/노출 페이지 추정: {review.indexed_pages_estimate}개",
-            f"- 최근 노출 수: {review.recent_impressions}",
-            f"- 품질 이슈 수: {review.quality_issue_count}",
-            f"- 수집 신호 상태: {review.signal_quality_status}",
-            f"- Reddit OAuth 신호 수: {review.reddit_oauth_signal_count}",
-            f"- Reddit public JSON 신호 수: {review.reddit_public_json_signal_count}",
-            f"- Reddit fallback 신호 수: {review.fallback_reddit_signal_count}",
-            "",
-            "판단 근거:",
-            *[f"- {reason}" for reason in review.reasons],
             "",
             "운영 원칙:",
             "- 자동으로 발행량을 늘리지는 않습니다.",
             "- 전환 가능 알림이 오면 승인 후 스케줄을 변경합니다.",
         ]
+    )
+    return "\n".join(lines)
+
+
+def needs_reddit_oauth_action(review: CadenceReview) -> bool:
+    if review.reddit_oauth_signal_count > 0:
+        return False
+    return (
+        review.signal_quality_status == "fallback_only"
+        or review.reddit_public_json_signal_count > 0
+        or review.fallback_reddit_signal_count > 0
     )
