@@ -546,6 +546,15 @@ class WeeklyReporter:
             )
         if reddit_health.get("action_required"):
             lines.append(f"  - 조치: {reddit_health.get('action_required')}")
+        setup_links = reddit_health.get("setup_links") or {}
+        if setup_links and reddit_health.get("blocks_cadence_increase"):
+            lines.append(f"  - Reddit 앱 타입: {setup_links.get('recommended_app_type', 'script')}")
+            if setup_links.get("recommended_redirect_uri"):
+                lines.append(f"  - Redirect URI: {setup_links.get('recommended_redirect_uri')}")
+            if setup_links.get("github_secret_mapping"):
+                lines.append("  - GitHub 입력값:")
+                for item in setup_links.get("github_secret_mapping", [])[:3]:
+                    lines.append(f"    - {item}")
         lines.append(f"- 발행 확인: {_status_kr(publication_check.get('status', 'not_uploaded'))}")
         if publication_check.get("source"):
             lines.append(f"  - 확인 기준: {publication_check.get('source')}")

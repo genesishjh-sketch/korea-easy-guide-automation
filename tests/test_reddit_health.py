@@ -31,6 +31,12 @@ class RedditHealthTests(unittest.TestCase):
         self.assertIn("GitHub Secrets에 REDDIT_CLIENT_ID를 추가하세요.", result["remediation_steps"])
         self.assertEqual(result["setup_links"]["reddit_apps_url"], "https://www.reddit.com/prefs/apps")
         self.assertIn("/settings/secrets/actions", result["setup_links"]["github_actions_secrets_url"])
+        self.assertEqual(result["setup_links"]["recommended_redirect_uri"], "http://localhost:8080")
+        self.assertIn("앱 타입: script", result["setup_links"]["reddit_app_field_guide"])
+        self.assertIn(
+            "REDDIT_CLIENT_SECRET = Reddit 앱 상세 화면의 secret",
+            result["setup_links"]["github_secret_mapping"],
+        )
 
     def test_reports_oauth_connected_with_sample_titles(self) -> None:
         settings = replace(
@@ -85,6 +91,10 @@ class RedditHealthTests(unittest.TestCase):
         self.assertIn("설정 링크:", message)
         self.assertIn("https://www.reddit.com/prefs/apps", message)
         self.assertIn("https://github.com/genesishjh-sketch/korea-easy-guide-automation/settings/secrets/actions", message)
+        self.assertIn("Redirect URI: http://localhost:8080", message)
+        self.assertIn("Reddit 앱 입력값:", message)
+        self.assertIn("client secret: Reddit 앱 상세 화면의 secret 값을 REDDIT_CLIENT_SECRET에 저장하세요.", message)
+        self.assertIn("GitHub에 넣을 값:", message)
 
     def test_console_summary_includes_action_without_secret_values(self) -> None:
         result = {

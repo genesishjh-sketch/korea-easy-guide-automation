@@ -91,6 +91,23 @@ Setup links:
 
 Create the Reddit app as `script`, then copy the app client id and secret into the two GitHub Secrets above. The health check never prints secret values; it only reports whether OAuth can collect live Reddit signals.
 
+Suggested Reddit app fields:
+
+```text
+name: Easy PC Fix Guide Automation
+type: script
+description/about url: blank is OK
+redirect uri: http://localhost:8080
+```
+
+Secret mapping:
+
+```text
+REDDIT_CLIENT_ID = short client id shown under the Reddit app name
+REDDIT_CLIENT_SECRET = secret shown in the Reddit app details
+EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT = easy-pc-fix-guide/0.1 by your-reddit-username
+```
+
 Manual health check:
 
 ```bash

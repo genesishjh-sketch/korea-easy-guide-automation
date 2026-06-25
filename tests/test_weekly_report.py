@@ -104,6 +104,15 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                         "health_score": 0,
                         "blocks_cadence_increase": True,
                         "action_required": "REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET을 GitHub Secrets 또는 .env에 설정하세요.",
+                        "setup_links": {
+                            "recommended_app_type": "script",
+                            "recommended_redirect_uri": "http://localhost:8080",
+                            "github_secret_mapping": [
+                                "REDDIT_CLIENT_ID = Reddit 앱 이름 아래에 표시되는 client id",
+                                "REDDIT_CLIENT_SECRET = Reddit 앱 상세 화면의 secret",
+                                "EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT = 권장 User-Agent 문자열",
+                            ],
+                        },
                     },
                     "preflight": {
                         "status": "pass",
@@ -167,6 +176,9 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("Reddit OAuth Health: Reddit OAuth 키 없음", markdown)
         self.assertIn("상태 점수: 0/100", markdown)
         self.assertIn("발행량 증량 차단: 예", markdown)
+        self.assertIn("Reddit 앱 타입: script", markdown)
+        self.assertIn("Redirect URI: http://localhost:8080", markdown)
+        self.assertIn("REDDIT_CLIENT_SECRET = Reddit 앱 상세 화면의 secret", markdown)
         self.assertIn("발행 확인: 오늘 공개 글 확인", markdown)
         self.assertIn("Sitemap 제출: 제출됨", markdown)
         self.assertIn("## 수집 신호 품질", markdown)
