@@ -279,6 +279,7 @@ class WeeklyReporter:
         source_counts: dict[str, int] = {}
         reddit_method_counts: dict[str, int] = {}
         fallback_articles: list[str] = []
+        reddit_diagnostics: list[dict] = []
         for article in articles:
             research_path = Path(article.get("article_dir", "")) / "research_report.json"
             if not research_path.exists():
@@ -304,6 +305,23 @@ class WeeklyReporter:
                 report.get("live_reddit_signal_count", 0) or 0
             ):
                 fallback_articles.append(article.get("title") or article.get("slug") or article.get("article_dir", ""))
+            diagnostics = report.get("reddit_collection_diagnostics") or {}
+            if diagnostics:
+                reddit_diagnostics.append(
+                    {
+                        "title": article.get("title") or article.get("slug") or article.get("article_dir", ""),
+                        "status": diagnostics.get("status", "unknown"),
+                        "oauth_configured": bool(diagnostics.get("oauth_configured")),
+                        "public_json_error_count": int(diagnostics.get("public_json_error_count", 0) or 0),
+                        "failed_subreddits": [
+                            item.get("subreddit", "")
+                            for item in diagnostics.get("public_json_failed_subreddits", [])
+                            if item.get("subreddit")
+                        ],
+                        "fallback_reason": diagnostics.get("fallback_reason", ""),
+                        "oauth_error": diagnostics.get("oauth_error", ""),
+                    }
+                )
 
         status = "not_uploaded"
         if totals["article_count_with_research"]:
@@ -314,6 +332,7 @@ class WeeklyReporter:
             "signal_source_counts": dict(sorted(source_counts.items())),
             "reddit_collection_method_counts": dict(sorted(reddit_method_counts.items())),
             "fallback_only_articles": fallback_articles,
+            "reddit_collection_diagnostics": reddit_diagnostics,
         }
 
     def _next_actions(
@@ -492,6 +511,19 @@ class WeeklyReporter:
             lines.append("- fallback만 사용한 글:")
             for title in signal_quality.get("fallback_only_articles", [])[:5]:
                 lines.append(f"  - {title}")
+        if signal_quality.get("reddit_collection_diagnostics"):
+            lines.append("- 최근 Reddit 수집 진단:")
+            for item in signal_quality.get("reddit_collection_diagnostics", [])[:5]:
+                lines.append(
+                    f"  - {item.get('title', '')}: {_status_kr(item.get('status'))}, "
+                    f"public JSON 실패 {item.get('public_json_error_count', 0)}개"
+                )
+                if item.get("failed_subreddits"):
+                    lines.append(f"    - 실패 subreddit: {', '.join(item.get('failed_subreddits', [])[:5])}")
+                if item.get("fallback_reason"):
+                    lines.append(f"    - fallback 이유: {item.get('fallback_reason')}")
+                if item.get("oauth_error"):
+                    lines.append(f"    - OAuth 오류: {item.get('oauth_error')}")
 
         lines.extend(["", "## Search Console", ""])
         search_console = report.get("search_console", {})
@@ -715,6 +747,8 @@ def _status_kr(status: str | None) -> str:
         "skipped_duplicate": "중복 건너뜀",
         "skipped_daily_limit": "하루 1개 제한으로 건너뜀",
         "fallback_only": "fallback 사용",
+        "public_json_connected": "public JSON 연결",
+        "no_reddit_signals": "Reddit 신호 없음",
         "failed": "실패",
         "oauth_connected": "OAuth 연결 확인",
         "oauth_connected_no_results": "OAuth 연결됨, 결과 없음",

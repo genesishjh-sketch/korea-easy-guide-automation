@@ -79,6 +79,17 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                     "fallback_reddit_signal_count": 2,
                     "google_suggest_signal_count": 3,
                     "fallback_only_articles": ["Wi-Fi Button Missing on Windows 11"],
+                    "reddit_collection_diagnostics": [
+                        {
+                            "title": "Wi-Fi Button Missing on Windows 11",
+                            "status": "fallback_only",
+                            "oauth_configured": False,
+                            "public_json_error_count": 4,
+                            "failed_subreddits": ["WindowsHelp", "Windows11"],
+                            "fallback_reason": "All available Reddit live collection paths returned no usable signals; public JSON had errors.",
+                            "oauth_error": "",
+                        }
+                    ],
                 },
                 "search_console": {"status": "not_configured", "note": "test"},
                 "analytics": {"status": "not_configured", "note": "test"},
@@ -230,6 +241,10 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("Reddit public JSON 신호 수: 0", markdown)
         self.assertIn("Reddit fallback 신호 수: 2", markdown)
         self.assertIn("fallback만 사용한 글", markdown)
+        self.assertIn("최근 Reddit 수집 진단", markdown)
+        self.assertIn("public JSON 실패 4개", markdown)
+        self.assertIn("실패 subreddit: WindowsHelp, Windows11", markdown)
+        self.assertIn("fallback 이유: All available Reddit live collection paths returned no usable signals", markdown)
         self.assertIn("## 발행량 전환 검토", markdown)
         self.assertIn("Reddit Health 상태: Reddit OAuth 키 없음", markdown)
         self.assertIn("Reddit Health 점수: 0/100", markdown)
@@ -294,6 +309,16 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                         "google_suggest_signal_count": 4,
                         "signal_source_counts": {"reddit_fallback": 2, "google_suggest": 4},
                         "reddit_collection_method_counts": {"fallback": 2},
+                        "reddit_collection_diagnostics": {
+                            "status": "fallback_only",
+                            "oauth_configured": False,
+                            "public_json_error_count": 4,
+                            "public_json_failed_subreddits": [
+                                {"subreddit": "WindowsHelp", "error": "403 blocked"},
+                                {"subreddit": "Windows11", "error": "403 blocked"},
+                            ],
+                            "fallback_reason": "All available Reddit live collection paths returned no usable signals; public JSON had errors.",
+                        },
                     }
                 ),
                 encoding="utf-8",
@@ -331,6 +356,9 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertEqual(result["reddit_collection_method_counts"]["oauth"], 2)
         self.assertEqual(result["reddit_collection_method_counts"]["public_json"], 1)
         self.assertEqual(result["fallback_only_articles"], ["Fallback only article"])
+        self.assertEqual(result["reddit_collection_diagnostics"][0]["title"], "Fallback only article")
+        self.assertEqual(result["reddit_collection_diagnostics"][0]["public_json_error_count"], 4)
+        self.assertEqual(result["reddit_collection_diagnostics"][0]["failed_subreddits"], ["WindowsHelp", "Windows11"])
 
     def test_next_actions_do_not_ask_for_first_article_when_public_feed_has_posts(self) -> None:
         settings = load_settings("easy_pc_fix_guide")

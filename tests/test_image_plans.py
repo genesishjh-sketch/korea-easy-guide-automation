@@ -107,6 +107,7 @@ class ImagePlanTests(unittest.TestCase):
         self.assertEqual(research_report["reddit_oauth_signal_count"], 1)
         self.assertEqual(research_report["reddit_public_json_signal_count"], 0)
         self.assertEqual(research_report["fallback_reddit_signal_count"], 1)
+        self.assertIn("reddit_collection_diagnostics", research_report)
         self.assertTrue(hero_exists)
         self.assertTrue(inline_exists)
 

@@ -41,6 +41,33 @@ class RedditCollectorTests(unittest.TestCase):
         self.assertTrue(signals)
         self.assertTrue(all(signal.source == "reddit_fallback" for signal in signals))
         self.assertTrue(all(signal.metadata["collection_method"] == "fallback" for signal in signals))
+        self.assertEqual(collector.diagnostics["status"], "fallback_only")
+        self.assertEqual(collector.diagnostics["public_json_attempted_subreddits"], ["WindowsHelp"])
+        self.assertEqual(collector.diagnostics["public_json_error_count"], 1)
+        self.assertEqual(collector.diagnostics["public_json_failed_subreddits"][0]["subreddit"], "WindowsHelp")
+        self.assertIn("blocked", collector.diagnostics["public_json_failed_subreddits"][0]["error"])
+        self.assertTrue(collector.diagnostics["used_fallback"])
+
+    def test_oauth_failure_is_recorded_before_public_json_fallback(self) -> None:
+        collector = RedditCollector(
+            "easy-pc-fix-guide/0.1",
+            client_id="client",
+            client_secret="secret",
+            subreddits=["WindowsHelp"],
+        )
+
+        def fail_oauth(_query: str, _limit: int) -> list:
+            collector.diagnostics["oauth_error"] = "invalid_grant"
+            return []
+
+        with patch.object(collector, "_collect_with_praw", side_effect=fail_oauth):
+            with patch("src.collectors.reddit.requests.get", side_effect=RuntimeError("blocked")):
+                signals = collector.collect("wifi button missing windows 11")
+
+        self.assertTrue(signals)
+        self.assertTrue(collector.diagnostics["oauth_configured"])
+        self.assertEqual(collector.diagnostics["status"], "fallback_only")
+        self.assertEqual(collector.diagnostics["oauth_error"], "invalid_grant")
 
 
 if __name__ == "__main__":

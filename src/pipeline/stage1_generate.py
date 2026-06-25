@@ -44,7 +44,9 @@ def run(seed: str | None = None, site: str | None = None) -> Path:
         subreddits=settings.reddit_subreddits,
     )
     google = GoogleSuggestCollector()
-    signals = reddit.collect(keyword, limit=6) + google.collect(keyword, limit=8)
+    reddit_signals = reddit.collect(keyword, limit=6)
+    google_signals = google.collect(keyword, limit=8)
+    signals = reddit_signals + google_signals
 
     candidate = build_candidate(keyword, signals, settings.content_domain)
     LOGGER.info("Selected topic category=%s score=%s", candidate.category, candidate.score)
@@ -71,14 +73,14 @@ def run(seed: str | None = None, site: str | None = None) -> Path:
         else:
             create_korea_svg_assets(output_dir, article.title, keyword)
     (output_dir / "research_report.json").write_text(
-        json.dumps(build_research_report(settings, keyword, article, signals), ensure_ascii=False, indent=2),
+        json.dumps(build_research_report(settings, keyword, article, signals, reddit.diagnostics), ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
     LOGGER.info("Saved article to %s", output_dir)
     return output_dir
 
 
-def build_research_report(settings, keyword: str, article, signals: list) -> dict:
+def build_research_report(settings, keyword: str, article, signals: list, reddit_diagnostics: dict | None = None) -> dict:
     signal_queries = [signal.title for signal in signals[:4] if signal.title]
     signal_source_counts = Counter(signal.source for signal in signals)
     reddit_method_counts = Counter(
@@ -122,6 +124,7 @@ def build_research_report(settings, keyword: str, article, signals: list) -> dic
         "reddit_public_json_signal_count": reddit_method_counts.get("public_json", 0),
         "fallback_reddit_signal_count": signal_source_counts.get("reddit_fallback", 0),
         "google_suggest_signal_count": signal_source_counts.get("google_suggest", 0),
+        "reddit_collection_diagnostics": reddit_diagnostics or {},
         "notes": [
             "Reddit and Google Suggest are used for topic discovery.",
             "Official/platform sources are used for publishing validation.",

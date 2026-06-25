@@ -56,15 +56,29 @@ class RedditCollector:
         self.client_secret = client_secret
         self.subreddits = subreddits or DEFAULT_SUBREDDITS
         self.timeout = timeout
+        self.diagnostics: dict = {}
 
     def collect(self, query: str, limit: int = 10) -> list[TopicSignal]:
+        self.diagnostics = {
+            "query": query,
+            "subreddits": list(self.subreddits),
+            "oauth_configured": bool(self.client_id and self.client_secret),
+            "oauth_error": "",
+            "public_json_attempted_subreddits": [],
+            "public_json_failed_subreddits": [],
+            "public_json_error_count": 0,
+            "used_fallback": False,
+            "fallback_reason": "",
+        }
         if self.client_id and self.client_secret:
             oauth_signals = self._collect_with_praw(query, limit)
             if oauth_signals:
+                self.diagnostics["status"] = "oauth_connected"
                 return oauth_signals
 
         signals: list[TopicSignal] = []
         for subreddit in self.subreddits:
+            self.diagnostics["public_json_attempted_subreddits"].append(subreddit)
             url = f"https://www.reddit.com/r/{subreddit}/search.json?q={quote_plus(query)}&restrict_sr=1&sort=relevance&limit={limit}"
             try:
                 response = requests.get(
@@ -76,6 +90,12 @@ class RedditCollector:
                 children = response.json().get("data", {}).get("children", [])
             except Exception as exc:
                 LOGGER.warning("Reddit collection failed for r/%s: %s", subreddit, exc)
+                self.diagnostics["public_json_failed_subreddits"].append(
+                    {
+                        "subreddit": subreddit,
+                        "error": str(exc),
+                    }
+                )
                 continue
 
             for child in children:
@@ -100,6 +120,8 @@ class RedditCollector:
                 )
 
         if signals:
+            self.diagnostics["status"] = "public_json_connected"
+            self.diagnostics["public_json_error_count"] = len(self.diagnostics["public_json_failed_subreddits"])
             return sorted(signals, key=lambda item: item.score, reverse=True)
 
         query_terms = {part for part in query.lower().split() if len(part) > 2}
@@ -118,6 +140,14 @@ class RedditCollector:
                     metadata={"collection_method": "fallback"},
                 )
             )
+        self.diagnostics["status"] = "fallback_only" if fallback_signals else "no_reddit_signals"
+        self.diagnostics["public_json_error_count"] = len(self.diagnostics["public_json_failed_subreddits"])
+        self.diagnostics["used_fallback"] = bool(fallback_signals)
+        if fallback_signals:
+            if self.diagnostics["public_json_error_count"]:
+                self.diagnostics["fallback_reason"] = "All available Reddit live collection paths returned no usable signals; public JSON had errors."
+            else:
+                self.diagnostics["fallback_reason"] = "Reddit live collection returned no matching signals."
         return sorted(fallback_signals, key=lambda item: item.score, reverse=True)[:limit]
 
     def _fallback_questions(self) -> list[str]:
@@ -159,4 +189,5 @@ class RedditCollector:
             return sorted(signals, key=lambda item: item.score, reverse=True)
         except Exception as exc:
             LOGGER.warning("Reddit OAuth collection failed, falling back to public JSON: %s", exc)
+            self.diagnostics["oauth_error"] = str(exc)
             return []
