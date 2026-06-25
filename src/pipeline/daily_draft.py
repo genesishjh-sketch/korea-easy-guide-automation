@@ -765,6 +765,7 @@ def save_daily_success_report(result: dict[str, str]) -> Path:
         google_signal_quality = build_google_signal_quality(research_report)
         operational_status = build_operational_status(quality_report, reddit_signal_quality)
     seed_attempt_summary = build_seed_attempt_summary(result)
+    seed_plan_summary = build_seed_plan_summary_for_site(settings.site_key)
     output_dir = ROOT_DIR / "reports"
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / daily_success_report_name(settings.site_key, mode)
@@ -789,6 +790,7 @@ def save_daily_success_report(result: dict[str, str]) -> Path:
         "google_signal_quality": google_signal_quality,
         "operational_status": operational_status,
         "seed_attempt_summary": seed_attempt_summary,
+        "seed_plan_summary": seed_plan_summary,
         "existing_post": existing_post,
         "daily_limit_skipped": result.get("daily_limit_skipped", False),
         "skipped_duplicate_seeds": result.get("skipped_duplicate_seeds") or [],
@@ -872,6 +874,7 @@ def build_daily_success_message(result: dict[str, str]) -> str:
     blogger_url = blogger.get("url") or existing_post.get("url") or "발행 없음"
     title = article.get("title", "") or existing_post.get("title", "제목 없음")
     seed_attempt_summary = build_seed_attempt_summary(result)
+    seed_plan_summary = build_seed_plan_summary_for_site(settings.site_key)
     if daily_limit_skipped:
         quality_lines = [
             f"- 기존 공개 시각: {existing_post.get('published_kst', '') or '확인 필요'}",
@@ -950,6 +953,10 @@ def build_daily_success_message(result: dict[str, str]) -> str:
         lines.append(f"- 품질검수 실패로 재시도한 시드 수: {len(skipped_quality_seeds)}")
         lines.append(f"- 품질 재시도 시드: {', '.join(skipped_quality_seeds[:5])}")
 
+    seed_plan_lines = build_seed_plan_summary_lines(seed_plan_summary)
+    if seed_plan_lines:
+        lines.extend(["", "오늘 시드 계획:", *seed_plan_lines])
+
     if issues:
         lines.extend(["", "품질 이슈:"])
         for issue in issues[:5]:
@@ -979,6 +986,50 @@ def build_daily_success_message(result: dict[str, str]) -> str:
         ]
     )
     return "\n".join(lines)
+
+
+def build_seed_plan_summary_for_site(site_key: str) -> dict:
+    seed_plan = read_json(ROOT_DIR / "reports" / f"{site_key}-daily-seed-plan.json")
+    if not seed_plan:
+        return {"status": "not_uploaded"}
+    today_kst = datetime.now(tz=KST).date().isoformat()
+    status = "current" if seed_plan.get("today_kst") == today_kst else "stale"
+    return {
+        "status": status,
+        "today_kst": seed_plan.get("today_kst", ""),
+        "active_seed_source": seed_plan.get("active_seed_source", ""),
+        "date_selected_seed": seed_plan.get("date_selected_seed", ""),
+        "date_selected_seed_status": seed_plan.get("date_selected_seed_status", ""),
+        "selected_seed": seed_plan.get("selected_seed", ""),
+        "next_publishable_seed": seed_plan.get("next_publishable_seed", ""),
+        "next_publishable_seed_status": seed_plan.get("next_publishable_seed_status", ""),
+        "candidate_status_counts": seed_plan.get("candidate_status_counts", {}),
+        "unused_active_seed_count": seed_plan.get("unused_active_seed_count"),
+        "note": seed_plan.get("note", ""),
+    }
+
+
+def build_seed_plan_summary_lines(seed_plan_summary: dict) -> list[str]:
+    status = seed_plan_summary.get("status")
+    if status == "not_uploaded":
+        return ["- 일일 시드 계획 파일 없음"]
+    if not status:
+        return []
+    stale_note = " (이전 계획)" if status == "stale" else ""
+    lines = [
+        f"- 계획 기준일: {seed_plan_summary.get('today_kst', '확인 필요')} KST{stale_note}",
+        f"- 시드 소스: {seed_plan_summary.get('active_seed_source') or '확인 필요'}",
+        f"- 날짜 기준 시드: {seed_plan_summary.get('date_selected_seed') or '없음'}",
+        f"- 날짜 기준 시드 상태: {seed_plan_status_label(seed_plan_summary.get('date_selected_seed_status'))}",
+        f"- 다음 발행 가능 시드: {seed_plan_summary.get('next_publishable_seed') or '없음'}",
+        f"- 다음 발행 가능 시드 상태: {seed_plan_status_label(seed_plan_summary.get('next_publishable_seed_status'))}",
+        f"- 후보 상태 집계: {format_seed_plan_status_counts(seed_plan_summary.get('candidate_status_counts') or {})}",
+    ]
+    if seed_plan_summary.get("unused_active_seed_count") is not None:
+        lines.append(f"- 미사용 활성 시드 수: {seed_plan_summary.get('unused_active_seed_count')}")
+    if seed_plan_summary.get("note"):
+        lines.append(f"- 계획 메모: {seed_plan_summary.get('note')}")
+    return lines
 
 
 def build_seed_attempt_summary(result: dict) -> dict:

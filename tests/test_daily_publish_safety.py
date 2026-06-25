@@ -90,6 +90,26 @@ class DuplicatePublishGuardTests(unittest.TestCase):
             )
             reports_dir = root / "reports"
             reports_dir.mkdir()
+            (reports_dir / "easy_pc_fix_guide-daily-seed-plan.json").write_text(
+                json.dumps(
+                    {
+                        "today_kst": datetime.now(tz=ZoneInfo("Asia/Seoul")).date().isoformat(),
+                        "active_seed_source": "long_term",
+                        "date_selected_seed": "wifi button missing windows 11",
+                        "date_selected_seed_status": "already_published_or_duplicate",
+                        "selected_seed": "how to check windows version",
+                        "next_publishable_seed": "how to check windows version",
+                        "next_publishable_seed_status": "ready",
+                        "candidate_status_counts": {
+                            "already_published_or_duplicate": 1,
+                            "ready": 53,
+                        },
+                        "unused_active_seed_count": 53,
+                        "note": "Seed plan is ready.",
+                    }
+                ),
+                encoding="utf-8",
+            )
             stale_failure_path = reports_dir / "easy_pc_fix_guide-daily-failure.json"
             stale_failure_path.write_text(json.dumps({"status": "failed"}), encoding="utf-8")
 
@@ -119,6 +139,9 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertTrue(payload["operational_status"]["publish_quality_ok"])
         self.assertEqual(payload["operational_status"]["collection_status"], "fallback_only")
         self.assertFalse(payload["operational_status"]["ready_for_cadence_increase"])
+        self.assertEqual(payload["seed_plan_summary"]["status"], "current")
+        self.assertEqual(payload["seed_plan_summary"]["date_selected_seed"], "wifi button missing windows 11")
+        self.assertEqual(payload["seed_plan_summary"]["next_publishable_seed"], "how to check windows version")
         self.assertEqual(payload["url"], "https://easypcfixguide.blogspot.com/2026/06/example.html")
         self.assertTrue(stale_failure_removed)
 
@@ -967,6 +990,65 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertIn("- 시드 시도 수: 2", message)
         self.assertIn("- 최종 선택 시드: strong topic", message)
         self.assertIn("- 품질 재시도 수: 1", message)
+
+    def test_daily_success_message_includes_seed_plan_summary(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            reports_dir = root / "reports"
+            reports_dir.mkdir()
+            (reports_dir / "easy_pc_fix_guide-daily-seed-plan.json").write_text(
+                json.dumps(
+                    {
+                        "today_kst": datetime.now(tz=ZoneInfo("Asia/Seoul")).date().isoformat(),
+                        "active_seed_source": "long_term",
+                        "date_selected_seed": "wifi button missing windows 11",
+                        "date_selected_seed_status": "already_published_or_duplicate",
+                        "selected_seed": "how to check windows version",
+                        "next_publishable_seed": "how to check windows version",
+                        "next_publishable_seed_status": "ready",
+                        "candidate_status_counts": {
+                            "already_published_or_duplicate": 1,
+                            "ready": 53,
+                        },
+                        "unused_active_seed_count": 53,
+                        "note": "Seed plan is ready.",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            article_dir = root / "article"
+            article_dir.mkdir()
+            publish_result_path = article_dir / "blogger_publish_result.json"
+            (article_dir / "metadata.json").write_text(
+                json.dumps({"article": {"title": "Strong Topic", "category": "Windows"}}),
+                encoding="utf-8",
+            )
+            (article_dir / "quality_report.json").write_text(
+                json.dumps({"score": 100, "passed": True, "issues": [], "metrics": {}}),
+                encoding="utf-8",
+            )
+            (article_dir / "research_report.json").write_text(json.dumps({}), encoding="utf-8")
+            publish_result_path.write_text(
+                json.dumps({"draft": False, "blogger": {"status": "LIVE", "url": "https://example.com/new.html"}}),
+                encoding="utf-8",
+            )
+
+            with patch.object(daily_draft, "ROOT_DIR", root):
+                message = daily_draft.build_daily_success_message(
+                    {
+                        "site": "easy_pc_fix_guide",
+                        "mode": "publish",
+                        "seed": "how to check windows version",
+                        "article_dir": str(article_dir),
+                        "publish_result": str(publish_result_path),
+                    }
+                )
+
+        self.assertIn("오늘 시드 계획:", message)
+        self.assertIn("- 날짜 기준 시드: wifi button missing windows 11", message)
+        self.assertIn("- 날짜 기준 시드 상태: 공개/중복 이력 있음", message)
+        self.assertIn("- 다음 발행 가능 시드: how to check windows version", message)
+        self.assertIn("- 후보 상태 집계: 공개/중복 이력 있음 1개, 발행 가능 53개", message)
 
     def test_seed_attempt_summary_handles_daily_limit_skip(self) -> None:
         summary = daily_draft.build_seed_attempt_summary(
