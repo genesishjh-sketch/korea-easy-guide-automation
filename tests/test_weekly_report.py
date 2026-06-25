@@ -1089,6 +1089,25 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertEqual(operations["sitemap_submit"]["previous_status"], "submitted")
         self.assertEqual(operations["sitemap_submit"]["previous_submitted_at"], "2026-06-24T00:15:00Z")
 
+    def test_next_actions_include_not_persisted_sitemap_guidance(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+
+        actions = reporter._next_actions(
+            articles=[{"blogger_status": "LIVE"}],
+            static_pages=[{"title": "About"}, {"title": "Contact"}, {"title": "Privacy Policy"}, {"title": "Disclaimer"}],
+            public_posts={"status": "connected", "posts": [{"title": "Published"}]},
+            operations={
+                "preflight": {"status": "pass"},
+                "sitemap_submit": {"status": "not_persisted"},
+            },
+            signal_quality={"status": "connected"},
+        )
+
+        joined = "\n".join(actions)
+        self.assertIn("sitemap 제출 리포트가 주간 workflow 환경에 보존되지 않았습니다", joined)
+        self.assertIn("Daily Publish artifact", joined)
+
     def test_operations_result_marks_stale_daily_failure_as_previous_failure(self) -> None:
         settings = load_settings("easy_pc_fix_guide")
         reporter = WeeklyReporter(settings)

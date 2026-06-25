@@ -570,6 +570,11 @@ class WeeklyReporter:
             actions.append("Search Console sitemap 제출 실패를 확인하세요. OAuth 토큰과 Search Console 권한을 점검해야 합니다.")
         elif sitemap_status == "not_uploaded":
             actions.append("Search Console sitemap 제출 결과 파일이 없습니다. publish 실행 후 sitemap 제출 단계가 실행됐는지 확인하세요.")
+        elif sitemap_status == "not_persisted":
+            actions.append(
+                "Search Console sitemap 제출 리포트가 주간 workflow 환경에 보존되지 않았습니다. "
+                "Daily Publish artifact에서 search-console-sitemap-submit.json을 확인하거나 sitemap 제출 workflow를 수동 재실행하세요."
+            )
         if len(static_pages) < 4:
             actions.append("필수 고정 페이지 4개(About, Contact, Privacy Policy, Disclaimer)를 모두 발행하세요.")
         if not articles and not has_public_article:

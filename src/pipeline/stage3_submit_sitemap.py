@@ -18,12 +18,14 @@ def run(sitemap_url: str | None = None, site: str | None = None) -> Path:
     result["submitted_at"] = datetime.utcnow().isoformat() + "Z"
     result["daily_publish_context"] = build_daily_publish_context(settings.site_key)
     result["indexing_guidance"] = build_indexing_guidance(result)
+    result["action_items"] = sitemap_action_items(result)
+    result["human_summary"] = build_message(settings.site_name, result)
 
     output_dir = ROOT_DIR / "reports"
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / f"{settings.site_key}-search-console-sitemap-submit.json"
     output_path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
-    NotificationClient(settings).send_required(build_message(settings.site_name, result))
+    NotificationClient(settings).send_required(result["human_summary"])
     return output_path
 
 
@@ -49,13 +51,13 @@ def build_message(site_name: str, result: dict) -> str:
             ]
         )
     if result.get("error"):
+        action_items = result.get("action_items") or sitemap_action_items(result)
         lines.extend(
             [
                 f"- 오류: {result.get('error')}",
                 "",
                 "조치 필요:",
-                "- Google OAuth 토큰 또는 Search Console 권한을 확인하세요.",
-                "- sitemap URL이 공개 접속 가능한지 확인하세요.",
+                *[f"- {item}" for item in action_items],
             ]
         )
     else:
@@ -70,6 +72,20 @@ def build_message(site_name: str, result: dict) -> str:
             ]
         )
     return "\n".join(lines)
+
+
+def sitemap_action_items(result: dict) -> list[str]:
+    if result.get("status") == "submitted":
+        return [
+            "Search Console > Sitemaps에서 제출 상태를 확인하세요.",
+            "URL 검사에서 최신 글 URL이 발견되는지 다음 주간 보고서와 함께 확인하세요.",
+            "색인은 즉시 보장되지 않으므로 노출/색인 데이터는 며칠 단위로 확인하세요.",
+        ]
+    return [
+        "Google OAuth 토큰 또는 Search Console 권한을 확인하세요.",
+        "sitemap URL이 공개 접속 가능한지 확인하세요.",
+        "권한 또는 URL을 수정한 뒤 Easy PC Fix Daily Publish 또는 sitemap 제출 단계를 다시 실행하세요.",
+    ]
 
 
 def build_daily_publish_context(site_key: str) -> dict:

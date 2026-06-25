@@ -55,6 +55,7 @@ class SearchConsoleSitemapMessageTests(unittest.TestCase):
         self.assertIn("제출 실패", message)
         self.assertIn("permission denied", message)
         self.assertIn("조치 필요", message)
+        self.assertIn("Easy PC Fix Daily Publish", message)
 
     def test_indexing_guidance_explains_wait_after_success(self) -> None:
         guidance = build_indexing_guidance({"status": "submitted"})
@@ -128,6 +129,8 @@ class SearchConsoleSitemapMessageTests(unittest.TestCase):
         self.assertEqual(payload["status"], "submitted")
         self.assertRegex(payload["submitted_at"], r"\d{4}-\d{2}-\d{2}T")
         self.assertEqual(payload["indexing_guidance"]["status"], "submitted_waiting")
+        self.assertIn("Search Console > Sitemaps", "\n".join(payload["action_items"]))
+        self.assertIn("Search Console sitemap 제출 결과", payload["human_summary"])
         self.assertEqual(payload["daily_publish_context"]["status"], "published")
         self.assertEqual(payload["daily_publish_context"]["status_label"], "공개 발행 완료")
         self.assertEqual(payload["daily_publish_context"]["title"], "Wi-Fi Button Missing on Windows 11")

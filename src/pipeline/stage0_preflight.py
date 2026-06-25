@@ -531,7 +531,7 @@ def check_critical_notifications() -> PreflightCheck:
             "NotificationClient(settings).send_required(build_daily_success_message(result))",
             "NotificationClient(settings).send_required(build_daily_failure_message(seed, exc, site, mode))",
         ],
-        "stage3_submit_sitemap.py": "NotificationClient(settings).send_required(build_message(settings.site_name, result))",
+        "stage3_submit_sitemap.py": "NotificationClient(settings).send_required(result[\"human_summary\"])",
         "stage4_publication_check.py": "NotificationClient(settings).send_required(build_message(result))",
         "stage0_reddit_health.py": "NotificationClient(settings).send_required(build_message(result))",
         "stage3_weekly_report.py": [
