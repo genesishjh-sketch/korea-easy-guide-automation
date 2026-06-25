@@ -11,6 +11,10 @@ from unittest.mock import patch
 
 from bs4 import BeautifulSoup
 
+from src.config import load_settings
+from src.content.windows_generator import WindowsArticleGenerator
+from src.models import ImageAsset
+from src.models import TopicCandidate
 from src.pipeline import daily_draft
 from src.quality.hades import HadesQualityGate
 
@@ -1567,6 +1571,62 @@ class WindowsQualityGateTests(unittest.TestCase):
 
         self.assertNotIn("weak_related_guides", {issue.code for issue in issues})
         self.assertNotIn("weak_related_guide_links", {issue.code for issue in issues})
+
+    def test_windows_articles_require_deep_beginner_troubleshooting_sections(self) -> None:
+        gate = HadesQualityGate("windows_help")
+        soup = BeautifulSoup(
+            """
+            <article>
+              <h2>Quick Summary</h2><ul><li>One quick point</li></ul>
+              <h2>Symptoms</h2><ul><li>One symptom</li><li>Second symptom</li></ul>
+              <h2>Try This First</h2><ol><li>Restart once</li><li>Check Settings</li></ol>
+              <h2>Step-by-Step Fixes</h2><ol><li>One fix</li><li>Second fix</li></ol>
+              <h2>After Each Step</h2><ul><li>Test once</li></ul>
+              <h2>When to Stop and Get Help</h2><ul><li>Ask for help eventually</li></ul>
+            </article>
+            """,
+            "html.parser",
+        )
+
+        issues = gate._review_windows_section_depth(soup)
+
+        issue_codes = {issue.code for issue in issues}
+        self.assertIn("weak_quick_summary", issue_codes)
+        self.assertIn("weak_symptoms", issue_codes)
+        self.assertIn("weak_try_first_steps", issue_codes)
+        self.assertIn("weak_fix_steps", issue_codes)
+        self.assertIn("weak_after_each_step_checks", issue_codes)
+        self.assertIn("weak_stop_help_items", issue_codes)
+
+    def test_windows_generator_outputs_deep_beginner_troubleshooting_sections(self) -> None:
+        generator = WindowsArticleGenerator(load_settings("easy_pc_fix_guide"))
+        candidate = TopicCandidate(
+            keyword="wifi button missing windows 11",
+            category="Wi-Fi & Internet",
+            intent="troubleshooting",
+            score=10,
+        )
+        hero = ImageAsset(
+            path="assets/ai-hero.jpg",
+            url="assets/ai-hero.jpg",
+            alt="Beginner Windows Wi-Fi troubleshooting checklist visual",
+            source="codex",
+            caption="A calm visual checklist for safe Wi-Fi troubleshooting steps.",
+        )
+        inline = ImageAsset(
+            path="assets/ai-inline-1.jpg",
+            url="assets/ai-inline-1.jpg",
+            alt="Safe Windows network settings troubleshooting flow visual",
+            source="codex",
+            caption="Check simple network settings before trying advanced repair options.",
+        )
+
+        article = generator.generate(candidate, hero, [inline])
+        issues = HadesQualityGate("windows_help")._review_windows_section_depth(
+            BeautifulSoup(article.html, "html.parser")
+        )
+
+        self.assertEqual(issues, [])
 
     def test_windows_articles_require_internal_related_guide_links(self) -> None:
         gate = HadesQualityGate("windows_help")

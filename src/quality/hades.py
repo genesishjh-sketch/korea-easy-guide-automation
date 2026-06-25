@@ -27,6 +27,12 @@ MIN_RESEARCH_SOURCES = 6
 MIN_RESEARCH_READER_QUESTIONS = 5
 MIN_WINDOWS_MICROSOFT_LINKS = 4
 MIN_WINDOWS_DIRECT_MICROSOFT_LINKS = 2
+MIN_WINDOWS_QUICK_SUMMARY_ITEMS = 4
+MIN_WINDOWS_SYMPTOM_ITEMS = 4
+MIN_WINDOWS_TRY_FIRST_ITEMS = 5
+MIN_WINDOWS_FIX_ITEMS = 5
+MIN_WINDOWS_AFTER_STEP_ITEMS = 4
+MIN_WINDOWS_STOP_HELP_ITEMS = 4
 
 KNOWN_BAD_MICROSOFT_SHORTCUT_URLS = {
     "https://support.microsoft.com/windows/network-wi-fi",
@@ -343,6 +349,7 @@ class HadesQualityGate:
             issues.append(QualityIssue("missing_advanced_warning", "Advanced fixes require a clear backup warning."))
         if soup is not None:
             issues.extend(self._review_windows_safety_values(soup, text_lower))
+            issues.extend(self._review_windows_section_depth(soup))
             issues.extend(self._review_windows_advanced_only_terms(soup))
             issues.extend(self._review_windows_related_guides(soup))
             issues.extend(self._review_windows_sources_section(soup))
@@ -351,6 +358,28 @@ class HadesQualityGate:
         for phrase in WINDOWS_BLOCKED_PHRASES:
             if phrase in text_lower:
                 issues.append(QualityIssue("blocked_windows_phrase", f"Blocked Windows phrase found: {phrase}."))
+        return issues
+
+    def _review_windows_section_depth(self, soup: BeautifulSoup) -> list[QualityIssue]:
+        sections = _section_list_items_by_h2(soup)
+        requirements = {
+            "quick summary": ("weak_quick_summary", MIN_WINDOWS_QUICK_SUMMARY_ITEMS, "Quick Summary"),
+            "symptoms": ("weak_symptoms", MIN_WINDOWS_SYMPTOM_ITEMS, "Symptoms"),
+            "try this first": ("weak_try_first_steps", MIN_WINDOWS_TRY_FIRST_ITEMS, "Try This First"),
+            "step-by-step fixes": ("weak_fix_steps", MIN_WINDOWS_FIX_ITEMS, "Step-by-Step Fixes"),
+            "after each step": ("weak_after_each_step_checks", MIN_WINDOWS_AFTER_STEP_ITEMS, "After Each Step"),
+            "when to stop and get help": ("weak_stop_help_items", MIN_WINDOWS_STOP_HELP_ITEMS, "When to Stop and Get Help"),
+        }
+        issues: list[QualityIssue] = []
+        for section_key, (issue_code, minimum, label) in requirements.items():
+            count = len(sections.get(section_key, []))
+            if count < minimum:
+                issues.append(
+                    QualityIssue(
+                        issue_code,
+                        f"{label} must include at least {minimum} concrete bullet or numbered items; found {count}.",
+                    )
+                )
         return issues
 
     def _review_windows_command_safety(self, text_lower: str) -> list[QualityIssue]:
