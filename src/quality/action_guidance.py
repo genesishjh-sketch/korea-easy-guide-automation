@@ -24,4 +24,9 @@ def quality_issue_actions(quality_issues: list[dict]) -> list[str]:
         actions.append(
             "품질검수에서 공식 출처 문제가 감지되었습니다. Microsoft Support/Learn 직접 링크와 주제별 공식 출처를 보강하세요."
         )
+    if "topic_alignment_mismatch" in codes:
+        actions.append(
+            "품질검수에서 주제 일치 문제가 감지되었습니다. 선택된 topic seed의 핵심 단어, 오류코드, 앱/기능명이 제목과 본문에 "
+            "유지되는지 확인하세요."
+        )
     return actions

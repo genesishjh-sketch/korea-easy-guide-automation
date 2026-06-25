@@ -672,6 +672,7 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                 {"code": "weak_related_guide_links", "message": "Related guide links missing."},
                 {"code": "missing_required_image_assets", "message": "Missing image assets."},
                 {"code": "shallow_microsoft_sources", "message": "Direct Microsoft sources missing."},
+                {"code": "topic_alignment_mismatch", "message": "Topic seed mismatch."},
             ],
         )
 
@@ -683,6 +684,8 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("alt/caption", joined)
         self.assertIn("공식 출처 문제가 감지", joined)
         self.assertIn("Microsoft Support/Learn 직접 링크", joined)
+        self.assertIn("주제 일치 문제가 감지", joined)
+        self.assertIn("topic seed의 핵심 단어", joined)
 
     def test_operations_result_reads_daily_success_and_failure_reports(self) -> None:
         settings = load_settings("easy_pc_fix_guide")

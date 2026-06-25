@@ -112,6 +112,26 @@ WINDOWS_COMMAND_REPAIR_TERMS = {
     "diskpart",
 }
 
+WINDOWS_GENERIC_TOPIC_TOKENS = {
+    "windows",
+    "win10",
+    "win11",
+    "error",
+    "issue",
+    "issues",
+    "problem",
+    "problems",
+    "working",
+    "opening",
+    "missing",
+    "after",
+    "before",
+    "with",
+    "from",
+    "says",
+    "code",
+}
+
 WINDOWS_TOPIC_CONTEXT_CONFLICTS = {
     "onedrive": {
         "topic_markers": ("onedrive",),
@@ -244,6 +264,8 @@ class HadesQualityGate:
             issues.append(QualityIssue("missing_meta_description", "Meta description is required."))
         if not article.get("tags"):
             issues.append(QualityIssue("missing_tags", "Tags are required."))
+        if self.content_domain == "windows_help":
+            issues.extend(_review_topic_alignment(metadata, text_lower))
 
         research_metrics, research_issues = self._review_research_report(article_dir)
         issues.extend(research_issues)
@@ -536,6 +558,59 @@ def _review_image_descriptions(images: list[dict]) -> list[QualityIssue]:
             )
         )
     return issues
+
+
+def _review_topic_alignment(metadata: dict, text_lower: str) -> list[QualityIssue]:
+    candidate = metadata.get("candidate", {}) or {}
+    article = metadata.get("article", {}) or {}
+    keyword = str(candidate.get("keyword") or "").strip()
+    if not keyword:
+        return []
+
+    title = str(article.get("title") or "")
+    haystack = _normalize_topic_text(f"{title} {text_lower}")
+    error_codes = re.findall(r"0x[a-f0-9]{8}", keyword.casefold())
+    missing_error_codes = [code.upper() for code in error_codes if code not in haystack]
+    if missing_error_codes:
+        return [
+            QualityIssue(
+                "topic_alignment_mismatch",
+                f"Article does not preserve topic error code(s): {', '.join(missing_error_codes)}.",
+            )
+        ]
+
+    tokens = _distinctive_topic_tokens(keyword)
+    if len(tokens) < 2:
+        return []
+    matched = [token for token in tokens if token in haystack]
+    required_matches = 2 if len(tokens) >= 2 else len(tokens)
+    if len(matched) < required_matches:
+        return [
+            QualityIssue(
+                "topic_alignment_mismatch",
+                "Article title/body does not preserve enough distinctive topic words from the seed: "
+                f"{', '.join(tokens[:6])}.",
+            )
+        ]
+    return []
+
+
+def _distinctive_topic_tokens(keyword: str) -> list[str]:
+    normalized = _normalize_topic_text(keyword)
+    tokens = []
+    for token in re.findall(r"[a-z0-9]+", normalized):
+        if token in WINDOWS_GENERIC_TOPIC_TOKENS:
+            continue
+        if len(token) < 4 and not token.startswith("0x"):
+            continue
+        tokens.append(token)
+    return list(dict.fromkeys(tokens))
+
+
+def _normalize_topic_text(value: str) -> str:
+    normalized = value.casefold()
+    normalized = normalized.replace("wi-fi", "wifi").replace("wi fi", "wifi")
+    return normalized
 
 
 def _href(link: object) -> str:

@@ -288,6 +288,7 @@ class DuplicatePublishGuardTests(unittest.TestCase):
                             {"code": "weak_related_guide_links", "message": "Missing internal related guide links."},
                             {"code": "missing_required_image_assets", "message": "Missing image assets."},
                             {"code": "shallow_microsoft_sources", "message": "Direct Microsoft source links missing."},
+                            {"code": "topic_alignment_mismatch", "message": "Topic seed mismatch."},
                         ],
                         "metrics": {
                             "word_count": 1501,
@@ -320,6 +321,7 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertIn("이미지 문제가 감지", message)
         self.assertIn("alt/caption", message)
         self.assertIn("공식 출처 문제가 감지", message)
+        self.assertIn("주제 일치 문제가 감지", message)
 
     def test_operational_status_allows_cadence_increase_only_with_oauth_signals(self) -> None:
         result = daily_draft.build_operational_status(
@@ -1028,6 +1030,162 @@ class WindowsQualityGateTests(unittest.TestCase):
         )
 
         self.assertIn("windows_topic_context_mismatch", {issue.code for issue in issues})
+
+    def test_windows_articles_block_seed_title_topic_mismatch(self) -> None:
+        gate = HadesQualityGate("windows_help")
+        with tempfile.TemporaryDirectory() as tmpdir:
+            article_dir = Path(tmpdir)
+            assets_dir = article_dir / "assets"
+            assets_dir.mkdir()
+            (assets_dir / "hero.jpg").write_bytes(b"hero")
+            (assets_dir / "inline.jpg").write_bytes(b"inline")
+            (article_dir / "image_plan.json").write_text(
+                json.dumps(
+                    {
+                        "strict": True,
+                        "images": [
+                            {
+                                "filename": "hero.jpg",
+                                "url": "assets/hero.jpg",
+                                "required": True,
+                                "alt": "Windows Update troubleshooting visual for beginner computer users",
+                                "caption": "Use official update guidance before changing advanced settings.",
+                            },
+                            {
+                                "filename": "inline.jpg",
+                                "url": "assets/inline.jpg",
+                                "required": True,
+                                "alt": "Safe Windows Update checklist for beginner troubleshooting steps",
+                                "caption": "Check each simple update step before trying advanced repair options.",
+                            },
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            filler = " ".join(["safe beginner windows update troubleshooting guidance"] * 300)
+            html = f"""
+            <article>
+              <h1>Windows Update Error 0X800F0922: What It Means and How to Fix It</h1>
+              <h2>Quick Summary</h2>
+              <h2>Applies to / Risk level / Data loss risk / Estimated time / Last checked</h2>
+              <p>Applies to Windows 11. Risk level low. Data loss risk low. Estimated time 10 minutes. Last checked today.</p>
+              <h2>Symptoms</h2><h2>What This Usually Means</h2><h2>What Not to Do First</h2>
+              <h2>Try This First</h2><h2>Step-by-Step Fixes</h2><h2>After Each Step</h2>
+              <h2>What to Record Before Asking for Help</h2><h2>Advanced Fixes</h2>
+              <p>Back up important files before advanced fixes.</p>
+              <h2>When to Stop and Get Help</h2>
+              <h2>FAQ</h2>
+              <h3>Question 1?</h3><h3>Question 2?</h3><h3>Question 3?</h3><h3>Question 4?</h3><h3>Question 5?</h3>
+              <h2>Related Guides</h2>
+              <ul>
+                <li><a href="https://easypcfixguide.blogspot.com/search?q=Windows+Update">Windows Update</a></li>
+                <li><a href="https://easypcfixguide.blogspot.com/search?q=Check+Windows+version">Check Windows version</a></li>
+                <li><a href="https://easypcfixguide.blogspot.com/search?q=Free+disk+space">Free disk space</a></li>
+              </ul>
+              <h2>Sources</h2>
+              <img src="assets/hero.jpg" alt="Windows Update troubleshooting visual for beginner computer users">
+              <img src="assets/inline.jpg" alt="Safe Windows Update checklist for beginner troubleshooting steps">
+              <a href="https://support.microsoft.com/windows">Microsoft Support</a>
+              <a href="https://learn.microsoft.com/windows/">Microsoft Learn</a>
+              <a href="https://learn.microsoft.com/windows/release-health/">Windows release health</a>
+              <a href="https://support.microsoft.com/windows/windows-update">Windows Update</a>
+              <p>{filler}</p>
+            </article>
+            """
+
+            report = gate.review_html(
+                html,
+                article_dir,
+                {
+                    "article": {
+                        "title": "Windows Update Error 0X800F0922: What It Means and How to Fix It",
+                        "meta_description": "Safe Windows help.",
+                        "tags": ["Windows"],
+                    },
+                    "candidate": {"keyword": "onedrive error 0x8004de40"},
+                },
+            )
+
+        self.assertIn("topic_alignment_mismatch", {issue.code for issue in report.issues})
+
+    def test_windows_articles_accept_seed_title_topic_alignment(self) -> None:
+        gate = HadesQualityGate("windows_help")
+        with tempfile.TemporaryDirectory() as tmpdir:
+            article_dir = Path(tmpdir)
+            assets_dir = article_dir / "assets"
+            assets_dir.mkdir()
+            (assets_dir / "hero.jpg").write_bytes(b"hero")
+            (assets_dir / "inline.jpg").write_bytes(b"inline")
+            (article_dir / "image_plan.json").write_text(
+                json.dumps(
+                    {
+                        "strict": True,
+                        "images": [
+                            {
+                                "filename": "hero.jpg",
+                                "url": "assets/hero.jpg",
+                                "required": True,
+                                "alt": "OneDrive error troubleshooting visual for beginner Windows users",
+                                "caption": "Confirm the OneDrive account and connection before advanced fixes.",
+                            },
+                            {
+                                "filename": "inline.jpg",
+                                "url": "assets/inline.jpg",
+                                "required": True,
+                                "alt": "Safe OneDrive checklist for beginner troubleshooting steps",
+                                "caption": "Record the OneDrive error code and what changed before retrying.",
+                            },
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            filler = " ".join(["safe beginner onedrive windows troubleshooting guidance"] * 300)
+            html = f"""
+            <article>
+              <h1>OneDrive Error 0X8004DE40: What It Means and How to Fix It</h1>
+              <h2>Quick Summary</h2>
+              <h2>Applies to / Risk level / Data loss risk / Estimated time / Last checked</h2>
+              <p>Applies to Windows 11. Risk level low. Data loss risk low. Estimated time 10 minutes. Last checked today.</p>
+              <h2>Symptoms</h2><h2>What This Usually Means</h2><h2>What Not to Do First</h2>
+              <h2>Try This First</h2><h2>Step-by-Step Fixes</h2><h2>After Each Step</h2>
+              <h2>What to Record Before Asking for Help</h2><h2>Advanced Fixes</h2>
+              <p>Back up important files before advanced fixes.</p>
+              <h2>When to Stop and Get Help</h2>
+              <h2>FAQ</h2>
+              <h3>Question 1?</h3><h3>Question 2?</h3><h3>Question 3?</h3><h3>Question 4?</h3><h3>Question 5?</h3>
+              <h2>Related Guides</h2>
+              <ul>
+                <li><a href="https://easypcfixguide.blogspot.com/search?q=OneDrive+sync">OneDrive sync</a></li>
+                <li><a href="https://easypcfixguide.blogspot.com/search?q=Microsoft+account">Microsoft account</a></li>
+                <li><a href="https://easypcfixguide.blogspot.com/search?q=Windows+settings">Windows settings</a></li>
+              </ul>
+              <h2>Sources</h2>
+              <img src="assets/hero.jpg" alt="OneDrive error troubleshooting visual for beginner Windows users">
+              <img src="assets/inline.jpg" alt="Safe OneDrive checklist for beginner troubleshooting steps">
+              <a href="https://support.microsoft.com/windows">Microsoft Support</a>
+              <a href="https://learn.microsoft.com/windows/">Microsoft Learn</a>
+              <a href="https://learn.microsoft.com/windows/release-health/">Windows release health</a>
+              <a href="https://support.microsoft.com/onedrive">OneDrive Support</a>
+              <p>{filler}</p>
+            </article>
+            """
+
+            report = gate.review_html(
+                html,
+                article_dir,
+                {
+                    "article": {
+                        "title": "OneDrive Error 0X8004DE40: What It Means and How to Fix It",
+                        "meta_description": "Safe Windows help.",
+                        "tags": ["Windows", "OneDrive"],
+                    },
+                    "candidate": {"keyword": "onedrive error 0x8004de40"},
+                },
+            )
+
+        self.assertNotIn("topic_alignment_mismatch", {issue.code for issue in report.issues})
 
 
 if __name__ == "__main__":
