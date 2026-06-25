@@ -524,6 +524,14 @@ def build_markdown_report(result: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
+def should_exit_nonzero(result: dict) -> bool:
+    if result.get("status") in {"oauth_connected", "oauth_connected_no_results"}:
+        return False
+    if result.get("status") == "missing_credentials" and result.get("data_access_request_status") == "approval_pending":
+        return False
+    return True
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Check whether Reddit OAuth can collect live Reddit signals.")
     parser.add_argument("--site", help="Site profile key, for example: easy_pc_fix_guide")
@@ -535,7 +543,7 @@ def main() -> None:
     print(path)
     result = json.loads(path.read_text(encoding="utf-8"))
     print(build_console_summary(result))
-    if result.get("status") not in {"oauth_connected", "oauth_connected_no_results"}:
+    if should_exit_nonzero(result):
         raise SystemExit(1)
 
 

@@ -62,6 +62,28 @@ class RedditHealthTests(unittest.TestCase):
         self.assertIn("승인 메일 전에는 Reddit 앱 생성 버튼을 다시 눌러도 같은 정책 안내에서 막힐 수 있습니다.", result["remediation_steps"])
         self.assertEqual(result["setup_links"]["data_access_request_submitted_at"], "2026-06-25")
 
+    def test_approval_pending_is_warning_but_not_cli_failure(self) -> None:
+        self.assertFalse(
+            stage0_reddit_health.should_exit_nonzero(
+                {
+                    "status": "missing_credentials",
+                    "data_access_request_status": "approval_pending",
+                    "blocks_cadence_increase": True,
+                }
+            )
+        )
+        self.assertTrue(
+            stage0_reddit_health.should_exit_nonzero(
+                {
+                    "status": "missing_credentials",
+                    "data_access_request_status": "not_submitted",
+                    "blocks_cadence_increase": True,
+                }
+            )
+        )
+        self.assertTrue(stage0_reddit_health.should_exit_nonzero({"status": "oauth_error"}))
+        self.assertFalse(stage0_reddit_health.should_exit_nonzero({"status": "oauth_connected"}))
+
     def test_reports_oauth_connected_with_sample_titles(self) -> None:
         settings = replace(
             load_settings("easy_pc_fix_guide"),
