@@ -156,6 +156,11 @@ class CadenceReviewTests(unittest.TestCase):
         self.assertIn("REDDIT_CLIENT_ID", message)
         self.assertIn("Reddit Health 점수: 0/100", message)
         self.assertIn("Easy PC Fix Reddit OAuth Health", message)
+        self.assertIn("Reddit 앱 입력값:", message)
+        self.assertIn("앱 타입: script", message)
+        self.assertIn("redirect uri: http://localhost:8080", message)
+        self.assertIn("GitHub에 넣을 값:", message)
+        self.assertIn("REDDIT_CLIENT_SECRET = Reddit 앱 상세 화면의 secret", message)
 
     def test_cadence_alert_omits_reddit_setup_links_when_oauth_is_stable(self) -> None:
         review = review_cadence(

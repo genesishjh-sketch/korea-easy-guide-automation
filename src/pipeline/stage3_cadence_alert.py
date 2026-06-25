@@ -46,7 +46,12 @@ def run(today: date | None = None, force: bool = False, site: str | None = None,
         reddit_health=operations.get("reddit_health", {}),
     )
 
-    message = build_cadence_alert_message(settings.site_name, settings.site_url, review)
+    message = build_cadence_alert_message(
+        settings.site_name,
+        settings.site_url,
+        review,
+        reddit_user_agent=settings.reddit_user_agent,
+    )
     NotificationClient(settings).send_required(message)
     if verbose:
         print(message)

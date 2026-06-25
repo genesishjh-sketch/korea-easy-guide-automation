@@ -53,6 +53,50 @@ class CadenceAlertTests(unittest.TestCase):
         self.assertTrue(sent)
         notification.return_value.send_required.assert_called_once()
 
+    def test_missing_reddit_oauth_alert_includes_setup_fields(self) -> None:
+        with patch("src.pipeline.stage3_cadence_alert.WeeklyReporter") as reporter, patch(
+            "src.pipeline.stage3_cadence_alert.actual_public_post_count", return_value=25
+        ), patch("src.pipeline.stage3_cadence_alert.SearchConsoleClient") as search_console, patch(
+            "src.pipeline.stage3_cadence_alert.NotificationClient"
+        ) as notification:
+            reporter.return_value._collect_articles.return_value = []
+            reporter.return_value._quality_issue_count.return_value = 0
+            reporter.return_value._signal_quality_result.return_value = {
+                "status": "fallback_only",
+                "reddit_oauth_signal_count": 0,
+                "reddit_public_json_signal_count": 0,
+                "fallback_reddit_signal_count": 6,
+            }
+            reporter.return_value._operations_result.return_value = {
+                "reddit_health": {
+                    "status": "missing_credentials",
+                    "status_label": "Reddit OAuth 키 없음",
+                    "health_score": 0,
+                    "blocks_cadence_increase": True,
+                    "action_required": "REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET을 GitHub Secrets 또는 .env에 설정하세요.",
+                }
+            }
+            search_console.return_value.summary.return_value = {
+                "totals_from_top_queries": {"impressions": 100},
+            }
+            search_console.return_value.indexed_page_estimate.return_value = {
+                "page_count_with_search_data": 25,
+            }
+
+            sent = stage3_cadence_alert.run(
+                today=date(2026, 7, 22),
+                force=True,
+                site="easy_pc_fix_guide",
+                verbose=False,
+            )
+
+        self.assertTrue(sent)
+        message = notification.return_value.send_required.call_args.args[0]
+        self.assertIn("Reddit 앱 입력값:", message)
+        self.assertIn("앱 타입: script", message)
+        self.assertIn("redirect uri: http://localhost:8080", message)
+        self.assertIn("REDDIT_CLIENT_SECRET = Reddit 앱 상세 화면의 secret", message)
+
     def test_notification_failure_is_not_silenced(self) -> None:
         with patch("src.pipeline.stage3_cadence_alert.WeeklyReporter") as reporter, patch(
             "src.pipeline.stage3_cadence_alert.actual_public_post_count", return_value=25

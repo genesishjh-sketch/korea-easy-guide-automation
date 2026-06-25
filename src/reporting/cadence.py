@@ -5,6 +5,8 @@ from datetime import date
 
 from src.utils.reddit_setup import GITHUB_SECRETS_URL
 from src.utils.reddit_setup import REDDIT_APPS_URL
+from src.utils.reddit_setup import github_secret_mapping
+from src.utils.reddit_setup import reddit_app_field_guide
 from src.utils.reddit_setup import reddit_oauth_secret_label
 
 
@@ -134,7 +136,12 @@ def review_cadence(
     )
 
 
-def build_cadence_alert_message(site_name: str, site_url: str, review: CadenceReview) -> str:
+def build_cadence_alert_message(
+    site_name: str,
+    site_url: str,
+    review: CadenceReview,
+    reddit_user_agent: str = "easy-pc-fix-guide/0.1 by your-reddit-username",
+) -> str:
     lines = [
         "[Posting Bot] 발행량 전환 검토일 알림",
         "",
@@ -167,6 +174,16 @@ def build_cadence_alert_message(site_name: str, site_url: str, review: CadenceRe
                 f"- GitHub Actions Secrets에 {reddit_oauth_secret_label()}을 저장하세요.",
                 f"- GitHub Secrets: {GITHUB_SECRETS_URL}",
                 "- 저장 후 Actions > Easy PC Fix Reddit OAuth Health를 수동 실행해 연결을 확인하세요.",
+            ]
+        )
+        lines.extend(
+            [
+                "",
+                "Reddit 앱 입력값:",
+                *[f"- {item}" for item in reddit_app_field_guide(f"{site_name} Automation", reddit_user_agent)],
+                "",
+                "GitHub에 넣을 값:",
+                *[f"- {item}" for item in github_secret_mapping()],
             ]
         )
     lines.extend(
