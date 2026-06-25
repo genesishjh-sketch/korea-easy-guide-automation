@@ -45,6 +45,45 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertEqual(result["posts"], [])
         self.assertIn("feed unavailable", result["error"])
 
+    def test_collect_articles_includes_seed_and_content_domain(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            article_dir = Path(tmpdir) / "2026-06-25" / "bluetooth-not-working"
+            article_dir.mkdir(parents=True)
+            (article_dir / "metadata.json").write_text(
+                json.dumps(
+                    {
+                        "article": {
+                            "title": "Bluetooth Not Working on Windows",
+                            "slug": "bluetooth-not-working",
+                            "category": "Bluetooth & Devices",
+                            "tags": ["Bluetooth"],
+                        },
+                        "candidate": {
+                            "keyword": "bluetooth not working windows 11",
+                            "category": "Bluetooth & Devices",
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (article_dir / "research_report.json").write_text(
+                json.dumps(
+                    {
+                        "seed_keyword": "bluetooth not working windows 11",
+                        "content_domain": "windows_help",
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            reporter = WeeklyReporter(replace(settings, generated_output_dir=str(Path(tmpdir))))
+            result = reporter._collect_articles(datetime.utcnow() - timedelta(days=7))
+
+        self.assertEqual(result[0]["seed_keyword"], "bluetooth not working windows 11")
+        self.assertEqual(result[0]["content_domain"], "windows_help")
+
     def test_markdown_includes_public_feed_section(self) -> None:
         settings = load_settings("easy_pc_fix_guide")
         reporter = WeeklyReporter(settings)
@@ -252,6 +291,44 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("품질 이슈 상세", markdown)
         self.assertIn("Windows Update Error 0x80070643", markdown)
         self.assertIn("missing_required_image_assets", markdown)
+
+    def test_markdown_article_list_includes_seed_and_domain(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+        markdown = reporter._to_markdown(
+            {
+                "site_name": settings.site_name,
+                "site_url": settings.site_url,
+                "week_start": "2026-06-18",
+                "week_end": "2026-06-25",
+                "article_count": 1,
+                "draft_count": 0,
+                "published_count": 1,
+                "local_published_count": 1,
+                "articles": [
+                    {
+                        "title": "Bluetooth Not Working on Windows",
+                        "seed_keyword": "bluetooth not working windows 11",
+                        "content_domain": "windows_help",
+                        "category": "Bluetooth & Devices",
+                        "blogger_status": "LIVE",
+                    }
+                ],
+                "public_posts": {"status": "connected", "posts": []},
+                "static_pages": [],
+                "signal_quality": {},
+                "search_console": {"status": "not_configured"},
+                "analytics": {"status": "not_configured"},
+                "operations": {},
+                "cadence_review": {},
+                "quality_issues": [],
+                "next_actions": [],
+            }
+        )
+
+        self.assertIn("| 제목 | 시드 | 도메인 | 카테고리 | Blogger 상태 |", markdown)
+        self.assertIn("bluetooth not working windows 11", markdown)
+        self.assertIn("windows_help", markdown)
 
     def test_quality_issues_result_summarizes_article_quality_reports(self) -> None:
         settings = load_settings("easy_pc_fix_guide")

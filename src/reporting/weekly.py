@@ -89,6 +89,8 @@ class WeeklyReporter:
             article_dir = metadata_path.parent
             metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
             article = metadata.get("article", {})
+            candidate = metadata.get("candidate", {})
+            research_report = self._read_report(article_dir / "research_report.json")
             publish_result_path = article_dir / "blogger_publish_result.json"
             update_result_path = article_dir / "blogger_update_result.json"
             blogger = self._best_blogger_result([publish_result_path, update_result_path])
@@ -97,6 +99,8 @@ class WeeklyReporter:
                     "title": article.get("title"),
                     "slug": article.get("slug"),
                     "category": article.get("category"),
+                    "seed_keyword": research_report.get("seed_keyword") or candidate.get("keyword", ""),
+                    "content_domain": research_report.get("content_domain") or self.settings.content_domain,
                     "tags": article.get("tags", []),
                     "article_dir": str(article_dir),
                     "blogger_id": blogger.get("id"),
@@ -469,11 +473,13 @@ class WeeklyReporter:
             "",
         ]
         if report["articles"]:
-            lines.append("| 제목 | 카테고리 | Blogger 상태 |")
-            lines.append("|---|---|---|")
+            lines.append("| 제목 | 시드 | 도메인 | 카테고리 | Blogger 상태 |")
+            lines.append("|---|---|---|---|---|")
             for article in report["articles"]:
                 lines.append(
-                    f"| {article.get('title') or ''} | {article.get('category') or ''} | {_status_kr(article.get('blogger_status'))} |"
+                    f"| {article.get('title') or ''} | {article.get('seed_keyword') or ''} | "
+                    f"{article.get('content_domain') or ''} | {article.get('category') or ''} | "
+                    f"{_status_kr(article.get('blogger_status'))} |"
                 )
         else:
             lines.append("이번 기간에 생성된 글이 없습니다.")
