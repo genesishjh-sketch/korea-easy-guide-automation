@@ -163,7 +163,7 @@ def run(seed: str | None = None, site: str | None = None, publish_mode: str = "d
         return result
     except Exception as exc:
         save_daily_failure_report(selected_seed, exc, site, publish_mode)
-        notify_daily_failure(selected_seed, exc, site)
+        notify_daily_failure(selected_seed, exc, site, publish_mode)
         raise
 
 
@@ -334,16 +334,16 @@ def notify_daily_completion(result: dict[str, str]) -> None:
     NotificationClient(settings).send_required(build_daily_success_message(result))
 
 
-def notify_daily_failure(seed: str, exc: Exception, site: str | None = None) -> None:
+def notify_daily_failure(seed: str, exc: Exception, site: str | None = None, mode: str = "draft") -> None:
     settings = load_settings(site)
-    NotificationClient(settings).send_required(build_daily_failure_message(seed, exc, site))
+    NotificationClient(settings).send_required(build_daily_failure_message(seed, exc, site, mode))
 
 
-def build_daily_failure_message(seed: str, exc: Exception, site: str | None = None) -> str:
+def build_daily_failure_message(seed: str, exc: Exception, site: str | None = None, mode: str = "draft") -> str:
     settings = load_settings(site)
     error = "".join(traceback.format_exception_only(type(exc), exc)).strip()
-    action_items = daily_failure_action_items(error)
-    report_path = ROOT_DIR / "reports" / f"{settings.site_key}-daily-failure.json"
+    action_items = daily_failure_action_items(error, mode, settings.site_key)
+    report_path = ROOT_DIR / "reports" / daily_failure_report_name(settings.site_key, mode)
     return "\n".join(
         [
             "[Posting Bot] 일일 포스팅 실패",
@@ -365,7 +365,7 @@ def build_daily_failure_message(seed: str, exc: Exception, site: str | None = No
     )
 
 
-def daily_failure_action_items(error: str) -> list[str]:
+def daily_failure_action_items(error: str, mode: str = "draft", site_key: str = "easy_pc_fix_guide") -> list[str]:
     error_lower = error.casefold()
     if "hades quality gate failed" in error_lower or "quality" in error_lower:
         return [
@@ -393,7 +393,7 @@ def daily_failure_action_items(error: str) -> list[str]:
             "REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET 설정 여부를 확인하세요.",
         ]
     return [
-        "reports 폴더의 daily-failure.json traceback을 확인하세요.",
+        f"reports 폴더의 {daily_failure_report_name(site_key, mode)} traceback을 확인하세요.",
         "같은 seed로 validate mode를 먼저 재실행해 발행 전 단계에서 원인을 좁히세요.",
     ]
 
@@ -402,7 +402,7 @@ def save_daily_failure_report(seed: str, exc: Exception, site: str | None = None
     settings = load_settings(site)
     output_dir = ROOT_DIR / "reports"
     output_dir.mkdir(parents=True, exist_ok=True)
-    output_path = output_dir / f"{settings.site_key}-daily-failure.json"
+    output_path = output_dir / daily_failure_report_name(settings.site_key, mode)
     payload = {
         "site": settings.site_key,
         "site_name": settings.site_name,
@@ -421,6 +421,7 @@ def save_daily_failure_report(seed: str, exc: Exception, site: str | None = None
 
 def save_daily_success_report(result: dict[str, str]) -> Path:
     settings = load_settings(result.get("site"))
+    mode = result.get("mode", "draft")
     article_dir_raw = result.get("article_dir", "")
     publish_result_raw = result.get("publish_result", "")
     metadata = read_json(Path(article_dir_raw) / "metadata.json") if article_dir_raw else {}
@@ -434,13 +435,13 @@ def save_daily_success_report(result: dict[str, str]) -> Path:
     operational_status = build_operational_status(quality_report, reddit_signal_quality)
     output_dir = ROOT_DIR / "reports"
     output_dir.mkdir(parents=True, exist_ok=True)
-    output_path = output_dir / f"{settings.site_key}-daily-success.json"
-    failure_path = output_dir / f"{settings.site_key}-daily-failure.json"
+    output_path = output_dir / daily_success_report_name(settings.site_key, mode)
+    failure_path = output_dir / daily_failure_report_name(settings.site_key, mode)
     payload = {
         "site": settings.site_key,
         "site_name": settings.site_name,
         "site_url": settings.site_url,
-        "mode": result.get("mode", "draft"),
+        "mode": mode,
         "status": daily_result_status(result, publish_result),
         "seed": result.get("seed", ""),
         "article_dir": result.get("article_dir", ""),
@@ -463,6 +464,18 @@ def save_daily_success_report(result: dict[str, str]) -> Path:
     output_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     remove_stale_report(failure_path)
     return output_path
+
+
+def daily_success_report_name(site_key: str, mode: str) -> str:
+    if mode == "validate":
+        return f"{site_key}-daily-validation-success.json"
+    return f"{site_key}-daily-success.json"
+
+
+def daily_failure_report_name(site_key: str, mode: str) -> str:
+    if mode == "validate":
+        return f"{site_key}-daily-validation-failure.json"
+    return f"{site_key}-daily-failure.json"
 
 
 def remove_stale_report(path: Path) -> None:

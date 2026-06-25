@@ -152,11 +152,19 @@ Validate only, no Blogger publishing:
 python -m src.pipeline.daily_draft --site easy_pc_fix_guide --mode validate
 ```
 
+Validate mode writes `reports/easy_pc_fix_guide-daily-validation-success.json` or
+`reports/easy_pc_fix_guide-daily-validation-failure.json` so smoke tests do not
+overwrite the latest real publishing report.
+
 Public publish mode:
 
 ```bash
 python -m src.pipeline.daily_draft --site easy_pc_fix_guide --mode publish
 ```
+
+Publish, draft, duplicate-skip, and daily-limit results write
+`reports/easy_pc_fix_guide-daily-success.json` or
+`reports/easy_pc_fix_guide-daily-failure.json`.
 
 Scheduled GitHub Actions publish at 09:10 KST daily:
 

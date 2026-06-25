@@ -103,6 +103,51 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertEqual(payload["url"], "https://easypcfixguide.blogspot.com/2026/06/example.html")
         self.assertTrue(stale_failure_removed)
 
+    def test_validate_success_report_does_not_overwrite_publish_success_report(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            article_dir = root / "article"
+            article_dir.mkdir()
+            (article_dir / "metadata.json").write_text(
+                json.dumps({"article": {"title": "Validation Topic", "category": "Windows"}}),
+                encoding="utf-8",
+            )
+            (article_dir / "quality_report.json").write_text(
+                json.dumps({"score": 100, "passed": True, "issues": [], "metrics": {}}),
+                encoding="utf-8",
+            )
+            (article_dir / "research_report.json").write_text(json.dumps({}), encoding="utf-8")
+            validation_result_path = article_dir / "validation_result.json"
+            validation_result_path.write_text(json.dumps({"mode": "validate", "passed": True}), encoding="utf-8")
+            reports_dir = root / "reports"
+            reports_dir.mkdir()
+            publish_success_path = reports_dir / "easy_pc_fix_guide-daily-success.json"
+            publish_success_path.write_text(
+                json.dumps({"status": "published", "title": "Keep this publish report"}),
+                encoding="utf-8",
+            )
+            stale_validation_failure = reports_dir / "easy_pc_fix_guide-daily-validation-failure.json"
+            stale_validation_failure.write_text(json.dumps({"status": "failed"}), encoding="utf-8")
+
+            with patch.object(daily_draft, "ROOT_DIR", root):
+                validation_report_path = daily_draft.save_daily_success_report(
+                    {
+                        "site": "easy_pc_fix_guide",
+                        "mode": "validate",
+                        "seed": "validation seed",
+                        "article_dir": str(article_dir),
+                        "publish_result": str(validation_result_path),
+                    }
+                )
+
+            publish_payload = json.loads(publish_success_path.read_text(encoding="utf-8"))
+            validation_payload = json.loads(validation_report_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(validation_report_path.name, "easy_pc_fix_guide-daily-validation-success.json")
+        self.assertEqual(validation_payload["status"], "validated")
+        self.assertEqual(publish_payload["title"], "Keep this publish report")
+        self.assertFalse(stale_validation_failure.exists())
+
     def test_scheduled_publish_skips_when_public_post_already_exists_today(self) -> None:
         existing_post = {
             "title": "Wi-Fi Button Missing on Windows 11",
@@ -657,6 +702,17 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertIn("인증 문제 가능성", message)
         self.assertIn("Google OAuth 토큰", message)
 
+    def test_validate_failure_message_points_to_validation_failure_report(self) -> None:
+        message = daily_draft.build_daily_failure_message(
+            "validation topic",
+            RuntimeError("unexpected validation error"),
+            "easy_pc_fix_guide",
+            mode="validate",
+        )
+
+        self.assertIn("easy_pc_fix_guide-daily-validation-failure.json", message)
+        self.assertIn("daily-validation-failure.json traceback", message)
+
     def test_daily_failure_report_is_written_before_reraising(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             report_dir = Path(tmpdir) / "reports"
@@ -668,7 +724,7 @@ class DuplicatePublishGuardTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     daily_draft.run(site="easy_pc_fix_guide", publish_mode="validate")
 
-            report_path = report_dir / "easy_pc_fix_guide-daily-failure.json"
+            report_path = report_dir / "easy_pc_fix_guide-daily-validation-failure.json"
             self.assertTrue(report_path.exists())
             payload = json.loads(report_path.read_text(encoding="utf-8"))
 
