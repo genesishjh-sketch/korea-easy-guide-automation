@@ -21,12 +21,19 @@ from src.utils.text import clean_space
 
 
 DEFAULT_WINDOWS_QUERY = "wifi button missing windows 11"
+DEFAULT_HEALTH_QUERIES = [
+    DEFAULT_WINDOWS_QUERY,
+    "windows update error",
+    "windows 11 settings not opening",
+    "bluetooth disappeared windows 11",
+    "onedrive sync error",
+]
 
 
 def run(site: str | None = None, query: str | None = None, limit: int = 3, notify: bool = False) -> Path:
     settings = load_settings(site)
     selected_query = query or default_query(site)
-    result = check_reddit_oauth(settings, selected_query, limit)
+    result = check_reddit_oauth_with_fallback_queries(settings, selected_query, limit)
     output_dir = ROOT_DIR / "reports"
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / f"{settings.site_key}-reddit-health.json"
@@ -34,6 +41,57 @@ def run(site: str | None = None, query: str | None = None, limit: int = 3, notif
     if notify:
         NotificationClient(settings).send_required(build_message(result))
     return output_path
+
+
+def check_reddit_oauth_with_fallback_queries(settings: Any, query: str, limit: int = 3) -> dict:
+    queries = ordered_health_queries(query)
+    attempts = []
+    for selected_query in queries:
+        result = check_reddit_oauth(settings, selected_query, limit)
+        attempts.append(
+            {
+                "query": selected_query,
+                "status": result.get("status"),
+                "oauth_signal_count": result.get("oauth_signal_count", 0),
+                "tested_subreddits": result.get("tested_subreddits", []),
+                "matched_subreddits": result.get("matched_subreddits", []),
+                "per_subreddit_counts": result.get("per_subreddit_counts", {}),
+                "error_type": result.get("error_type", ""),
+            }
+        )
+        if result.get("status") != "oauth_connected_no_results":
+            result["query_attempts"] = attempts
+            result["query_attempt_count"] = len(attempts)
+            return result
+        if result.get("oauth_signal_count", 0):
+            result["query_attempts"] = attempts
+            result["query_attempt_count"] = len(attempts)
+            return result
+
+    result["query_attempts"] = attempts
+    result["query_attempt_count"] = len(attempts)
+    if result.get("status") == "oauth_connected_no_results":
+        result["action_required"] = (
+            "OAuth 연결은 됐지만 대표 Windows 검색어에서도 결과가 없습니다. subreddit 목록 또는 Reddit 검색 제한을 점검하세요."
+        )
+        result["remediation_steps"] = [
+            "EASY_PC_FIX_GUIDE_REDDIT_SUBREDDITS에 WindowsHelp, Windows11, techsupport, pchelp가 포함되어 있는지 확인하세요.",
+            "Actions > Easy PC Fix Reddit OAuth Health에서 더 일반적인 query로 수동 재실행하세요.",
+            "Reddit 계정/API 제한 또는 subreddit 검색 제한이 있는지 확인하세요.",
+        ]
+    return result
+
+
+def ordered_health_queries(primary_query: str) -> list[str]:
+    seen = set()
+    queries = []
+    for query in [primary_query, *DEFAULT_HEALTH_QUERIES]:
+        normalized = clean_space(query)
+        key = normalized.lower()
+        if normalized and key not in seen:
+            seen.add(key)
+            queries.append(normalized)
+    return queries
 
 
 def check_reddit_oauth(settings: Any, query: str, limit: int = 3) -> dict:
@@ -274,6 +332,13 @@ def build_message(result: dict) -> str:
         lines.extend(["", "다음 조치:"])
         for step in result.get("remediation_steps", [])[:6]:
             lines.append(f"- {step}")
+    if result.get("query_attempts"):
+        lines.extend(["", "검색어 재시도 기록:"])
+        for attempt in result.get("query_attempts", [])[:6]:
+            lines.append(
+                f"- {attempt.get('query')}: {attempt.get('status')} "
+                f"/ OAuth 신호 {attempt.get('oauth_signal_count', 0)}개"
+            )
     setup = result.get("setup_links") or {}
     if setup and result.get("status") in {"missing_credentials", "missing_user_agent", "oauth_error"}:
         lines.extend(
@@ -322,6 +387,8 @@ def build_console_summary(result: dict) -> str:
         "matched_subreddits": result.get("matched_subreddits", []),
         "first_successful_subreddit": result.get("first_successful_subreddit", ""),
         "sample_titles": result.get("sample_titles", [])[:3],
+        "query_attempt_count": result.get("query_attempt_count", 0),
+        "query_attempts": result.get("query_attempts", [])[:5],
     }
     if result.get("error_type"):
         payload["error_type"] = result.get("error_type")

@@ -85,6 +85,53 @@ class RedditHealthTests(unittest.TestCase):
         self.assertEqual(result["per_subreddit_counts"], {"WindowsHelp": 0, "Windows11": 0})
         self.assertEqual(result["matched_subreddits"], [])
 
+    def test_fallback_queries_find_signal_when_primary_query_has_no_results(self) -> None:
+        settings = replace(
+            load_settings("easy_pc_fix_guide"),
+            reddit_client_id="client",
+            reddit_client_secret="secret",
+            reddit_user_agent="easy-pc-fix-guide/0.1",
+            reddit_subreddits=["WindowsHelp"],
+        )
+        fake_submission = types.SimpleNamespace(
+            title="Windows Update error after restart",
+            permalink="/r/WindowsHelp/comments/update/test/",
+            score=8,
+            num_comments=4,
+        )
+
+        with patch.dict("sys.modules", {"praw": fake_praw_module_by_query({"windows update error": [fake_submission]})}):
+            result = stage0_reddit_health.check_reddit_oauth_with_fallback_queries(
+                settings,
+                "rare made up windows error",
+            )
+
+        self.assertEqual(result["status"], "oauth_connected")
+        self.assertEqual(result["query"], "windows update error")
+        self.assertEqual(result["query_attempt_count"], 3)
+        self.assertEqual(
+            [attempt["query"] for attempt in result["query_attempts"]],
+            ["rare made up windows error", "wifi button missing windows 11", "windows update error"],
+        )
+        self.assertEqual(result["oauth_signal_count"], 1)
+
+    def test_fallback_queries_report_all_attempts_when_no_results(self) -> None:
+        settings = replace(
+            load_settings("easy_pc_fix_guide"),
+            reddit_client_id="client",
+            reddit_client_secret="secret",
+            reddit_user_agent="easy-pc-fix-guide/0.1",
+            reddit_subreddits=["WindowsHelp"],
+        )
+
+        with patch.dict("sys.modules", {"praw": fake_praw_module_by_query({})}):
+            result = stage0_reddit_health.check_reddit_oauth_with_fallback_queries(settings, "rare windows error")
+
+        self.assertEqual(result["status"], "oauth_connected_no_results")
+        self.assertGreater(result["query_attempt_count"], 1)
+        self.assertEqual(result["query_attempts"][0]["query"], "rare windows error")
+        self.assertIn("대표 Windows 검색어", result["action_required"])
+
     def test_run_writes_report_and_can_notify(self) -> None:
         settings = replace(
             load_settings("easy_pc_fix_guide"),
@@ -118,6 +165,7 @@ class RedditHealthTests(unittest.TestCase):
         self.assertIn("Reddit 앱 입력값:", message)
         self.assertIn("client secret: Reddit 앱 상세 화면의 secret 값을 REDDIT_CLIENT_SECRET에 저장하세요.", message)
         self.assertIn("GitHub에 넣을 값:", message)
+        self.assertIn("검색어 재시도 기록:", message)
 
     def test_console_summary_includes_action_without_secret_values(self) -> None:
         result = {
@@ -148,6 +196,7 @@ class RedditHealthTests(unittest.TestCase):
         self.assertEqual(payload["setup_links"]["reddit_apps_url"], "https://www.reddit.com/prefs/apps")
         self.assertEqual(payload["tested_subreddits"], ["WindowsHelp"])
         self.assertEqual(payload["matched_subreddits"], [])
+        self.assertIn("query_attempts", payload)
         self.assertNotIn("super-secret-token", summary)
 
     def test_metadata_marks_oauth_no_results_as_connected_but_not_ready(self) -> None:
@@ -162,6 +211,23 @@ def fake_praw_module(submissions: list) -> object:
     class FakeSubreddit:
         def search(self, query: str, sort: str, limit: int):
             return submissions[:limit]
+
+    class FakeReddit:
+        def __init__(self, client_id: str, client_secret: str, user_agent: str) -> None:
+            self.client_id = client_id
+            self.client_secret = client_secret
+            self.user_agent = user_agent
+
+        def subreddit(self, name: str) -> FakeSubreddit:
+            return FakeSubreddit()
+
+    return types.SimpleNamespace(Reddit=FakeReddit)
+
+
+def fake_praw_module_by_query(submissions_by_query: dict[str, list]) -> object:
+    class FakeSubreddit:
+        def search(self, query: str, sort: str, limit: int):
+            return submissions_by_query.get(query, [])[:limit]
 
     class FakeReddit:
         def __init__(self, client_id: str, client_secret: str, user_agent: str) -> None:
