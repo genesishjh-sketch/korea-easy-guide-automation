@@ -107,6 +107,15 @@ WINDOWS_BLOCKED_PHRASES = {
     "disable antivirus permanently",
 }
 
+WINDOWS_DANGEROUS_RECOMMENDATION_PATTERNS = (
+    r"\b(?:install|download|use|try|run)\s+(?:driver\s+booster|iobit|driverpack|snappy\s+driver\s+installer)\b",
+    r"\b(?:install|download|use|try|run)\s+(?:a\s+|an\s+|any\s+)?(?:third[-\s]?party\s+|random\s+|unknown\s+)?driver\s+updater\b",
+    r"\b(?:install|download|use|try|run)\s+(?:a\s+|an\s+|any\s+)?(?:third[-\s]?party\s+|random\s+|unknown\s+)?repair\s+tool\b",
+    r"\b(?:use|try|run|download)\s+(?:an?\s+)?(?:activation\s+bypass|windows\s+activation\s+bypass|pirated\s+windows)\b",
+    r"\b(?:disable|turn\s+off)\s+(?:microsoft\s+defender|windows\s+defender|antivirus)\s+permanently\b",
+    r"\b(?:disable|turn\s+off)\s+windows\s+update\s+permanently\b",
+)
+
 WINDOWS_ADVANCED_ONLY_TERMS = {
     "registry",
     "regedit",
@@ -358,6 +367,7 @@ class HadesQualityGate:
         for phrase in WINDOWS_BLOCKED_PHRASES:
             if phrase in text_lower:
                 issues.append(QualityIssue("blocked_windows_phrase", f"Blocked Windows phrase found: {phrase}."))
+        issues.extend(_review_windows_dangerous_recommendations(text_lower))
         return issues
 
     def _review_windows_section_depth(self, soup: BeautifulSoup) -> list[QualityIssue]:
@@ -697,6 +707,26 @@ def _review_image_descriptions(images: list[dict]) -> list[QualityIssue]:
             )
         )
     return issues
+
+
+def _review_windows_dangerous_recommendations(text_lower: str) -> list[QualityIssue]:
+    matches = []
+    for pattern in WINDOWS_DANGEROUS_RECOMMENDATION_PATTERNS:
+        for match in re.finditer(pattern, text_lower):
+            guard_context = text_lower[max(0, match.start() - 24) : match.start()]
+            if any(guard in guard_context for guard in ("avoid ", "do not ", "don't ", "never ")):
+                continue
+            matches.append(match.group(0))
+    if not matches:
+        return []
+    unique_matches = sorted(set(matches))
+    return [
+        QualityIssue(
+            "dangerous_windows_recommendation",
+            "Windows articles must not recommend third-party driver updaters, unknown repair tools, activation bypasses, or permanent security/update disabling: "
+            f"{', '.join(unique_matches)}.",
+        )
+    ]
 
 
 def _review_windows_image_plan(images: list[dict]) -> list[QualityIssue]:
