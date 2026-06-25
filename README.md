@@ -19,6 +19,7 @@ The pipeline can:
 
 - collect topic signals from Reddit and Google suggestions
 - select a topic seed
+- write a daily seed plan before generation/publishing
 - generate English article HTML/Markdown
 - create an image plan and local fallback assets
 - run the Hades Engineer quality gate
@@ -149,9 +150,10 @@ User action checklist:
 4. Select app type: script.
 5. Enter redirect uri: http://localhost:8080.
 6. If Reddit blocks creation with the Responsible Builder Policy/Data API message, submit the Data Access Request.
-7. Copy the short client id under the app name into GitHub Secret REDDIT_CLIENT_ID.
-8. Copy the app secret into GitHub Secret REDDIT_CLIENT_SECRET.
-9. Run Actions > Easy PC Fix Reddit OAuth Health.
+7. Before pressing create app, complete the reCAPTCHA "I'm not a robot" check. If Reddit shows `Incorrect response. Try again.`, complete reCAPTCHA again and press create app again.
+8. Copy the short client id under the app name into GitHub Secret REDDIT_CLIENT_ID.
+9. Copy the app secret into GitHub Secret REDDIT_CLIENT_SECRET.
+10. Run Actions > Easy PC Fix Reddit OAuth Health.
 ```
 
 Data Access Request draft:
@@ -189,6 +191,20 @@ Validate only, no Blogger publishing:
 python -m src.pipeline.daily_draft --site easy_pc_fix_guide --mode validate
 ```
 
+Preview the next topic seed without generating or publishing:
+
+```bash
+python -m src.pipeline.daily_draft --site easy_pc_fix_guide --mode plan --no-notify
+```
+
+Plan mode writes:
+
+```text
+reports/easy_pc_fix_guide-daily-seed-plan.json
+```
+
+It records the selected seed, candidate rotation, category, used/generated flags, and active seed source. The scheduled daily workflow writes this plan before Blogger/OAuth steps and uploads it with the generated output artifact.
+
 Validate mode writes `reports/easy_pc_fix_guide-daily-validation-success.json` or
 `reports/easy_pc_fix_guide-daily-validation-failure.json` so smoke tests do not
 overwrite the latest real publishing report.
@@ -209,7 +225,7 @@ Scheduled GitHub Actions publish at 09:10 KST daily:
 .github/workflows/easy-pc-daily.yml
 ```
 
-The daily workflow runs regression tests before Blogger/OAuth steps. Sitemap submission runs only when `BLOGGER_PUBLISH_MODE` is `publish`.
+The daily workflow runs regression tests and writes the daily seed plan before Blogger/OAuth steps. Sitemap submission runs only when `BLOGGER_PUBLISH_MODE` is `publish`.
 
 ## Weekly Report
 
