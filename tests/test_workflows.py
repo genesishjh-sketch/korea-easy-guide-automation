@@ -79,6 +79,8 @@ class WorkflowSafetyTests(unittest.TestCase):
         self.assertLess(preflight_index, oauth_index)
         self.assertLess(oauth_index, publish_index)
         self.assertIn("python -m src.pipeline.stage0_preflight --site easy_pc_fix_guide", workflow)
+        self.assertIn("EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT", workflow)
+        self.assertIn("easy-pc-fix-guide/0.1 by posting-automation-alert-bot", workflow)
 
     def test_easy_pc_daily_submits_sitemap_only_for_publish_mode(self) -> None:
         workflow = (ROOT_DIR / ".github" / "workflows" / "easy-pc-daily.yml").read_text(encoding="utf-8")
@@ -112,6 +114,8 @@ class WorkflowSafetyTests(unittest.TestCase):
         self.assertIn("reports/easy_pc_fix_guide-preflight.json", workflow)
         self.assertIn("REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}", workflow)
         self.assertIn("REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}", workflow)
+        self.assertIn("EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT", workflow)
+        self.assertIn("easy-pc-fix-guide/0.1 by posting-automation-alert-bot", workflow)
 
     def test_easy_pc_validate_runs_when_any_easy_pc_workflow_changes(self) -> None:
         workflow = (ROOT_DIR / ".github" / "workflows" / "easy-pc-validate-smoke.yml").read_text(encoding="utf-8")
@@ -151,6 +155,7 @@ class WorkflowSafetyTests(unittest.TestCase):
         self.assertIn("20 0 * * *", workflow)
         self.assertIn("REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}", workflow)
         self.assertIn("REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}", workflow)
+        self.assertIn("EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT", workflow)
         self.assertIn("python -m src.pipeline.stage0_reddit_health --site easy_pc_fix_guide", workflow)
         self.assertIn("--notify", workflow)
         self.assertIn("actions/upload-artifact@v6", workflow)
