@@ -45,6 +45,7 @@ def user_action_checklist(recommended_app_name: str, recommended_user_agent: str
         "앱 타입은 반드시 script를 선택하세요. web app이나 installed app이 아닙니다.",
         f"redirect uri에는 {DEFAULT_REDDIT_REDIRECT_URI}를 그대로 입력하세요.",
         "Reddit이 Responsible Builder Policy/Data API 등록 안내를 표시하면 Data Access Request를 제출하고 승인을 기다리세요.",
+        "create app 제출 전 reCAPTCHA의 '로봇이 아닙니다' 체크가 완료됐는지 확인하세요. Incorrect response가 뜨면 CAPTCHA를 다시 체크한 뒤 create app을 다시 누르세요.",
         "생성 후 앱 이름 아래의 짧은 client id를 GitHub Secret REDDIT_CLIENT_ID에 저장하세요.",
         "앱 상세의 secret 값을 GitHub Secret REDDIT_CLIENT_SECRET에 저장하세요.",
         f"GitHub Variable EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT가 비어 있으면 '{recommended_user_agent}'로 저장하세요.",

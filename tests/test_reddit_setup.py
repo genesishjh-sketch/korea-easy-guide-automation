@@ -49,6 +49,8 @@ class RedditSetupTests(unittest.TestCase):
         self.assertIn("REDDIT_CLIENT_ID", joined)
         self.assertIn("REDDIT_CLIENT_SECRET", joined)
         self.assertIn("Data Access Request", joined)
+        self.assertIn("reCAPTCHA", joined)
+        self.assertIn("Incorrect response", joined)
         self.assertIn("Easy PC Fix Reddit OAuth Health", joined)
 
     def test_reddit_data_access_request_guide_matches_project(self) -> None:
