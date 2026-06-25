@@ -151,6 +151,17 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                             "ready_for_cadence_increase": False,
                             "status_label": "발행 품질 OK, 수집 안정성 점검 필요",
                         },
+                        "seed_attempt_summary": {
+                            "attempted_seed_count": 3,
+                            "selected_seed": "wifi button missing windows 11",
+                            "duplicate_skip_count": 1,
+                            "quality_retry_count": 1,
+                            "attempted_seeds": [
+                                "thin windows update topic",
+                                "wifi button missing windows 11",
+                                "fresh windows search topic",
+                            ],
+                        },
                         "skipped_duplicate_seeds": ["wifi button missing windows 11"],
                         "skipped_quality_seeds": ["thin windows update topic"],
                     },
@@ -273,6 +284,10 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("리포트 구분: 검증 모드 리포트", markdown)
         self.assertIn("공개 발행 결과가 아닙니다", markdown)
         self.assertIn("품질점수: 100/100", markdown)
+        self.assertIn("시드 시도 수: 3", markdown)
+        self.assertIn("최종 선택 시드: wifi button missing windows 11", markdown)
+        self.assertIn("중복 스킵 수: 1", markdown)
+        self.assertIn("품질 재시도 수: 1", markdown)
         self.assertIn("중복으로 건너뛴 시드 수: 1", markdown)
         self.assertIn("중복 시드: wifi button missing windows 11", markdown)
         self.assertIn("품질검수 실패로 재시도한 시드 수: 1", markdown)

@@ -696,6 +696,13 @@ class WeeklyReporter:
             lines.append(f"  - URL: {daily_success.get('url', '')}")
         if daily_success.get("quality_score") is not None:
             lines.append(f"  - 품질점수: {daily_success.get('quality_score')}/100")
+        seed_attempt_summary = daily_success.get("seed_attempt_summary") or {}
+        if seed_attempt_summary:
+            lines.append(f"  - 시드 시도 수: {seed_attempt_summary.get('attempted_seed_count', 0)}")
+            if seed_attempt_summary.get("selected_seed"):
+                lines.append(f"  - 최종 선택 시드: {seed_attempt_summary.get('selected_seed')}")
+            lines.append(f"  - 중복 스킵 수: {seed_attempt_summary.get('duplicate_skip_count', 0)}")
+            lines.append(f"  - 품질 재시도 수: {seed_attempt_summary.get('quality_retry_count', 0)}")
         skipped_duplicate_seeds = daily_success.get("skipped_duplicate_seeds") or []
         if skipped_duplicate_seeds:
             lines.append(f"  - 중복으로 건너뛴 시드 수: {len(skipped_duplicate_seeds)}")
