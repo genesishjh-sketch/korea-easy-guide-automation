@@ -33,6 +33,22 @@ class WeeklyPipelineTests(unittest.TestCase):
         self.assertEqual(result_path, weekly_markdown_path)
         self.assertTrue(stale_failure_removed)
 
+    def test_weekly_no_notify_skips_success_notification(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            weekly_markdown_path = root / "weekly.md"
+            weekly_markdown_path.write_text("# Weekly report", encoding="utf-8")
+
+            with patch.object(stage3_weekly_report, "ROOT_DIR", root), patch(
+                "src.pipeline.stage3_weekly_report.WeeklyReporter"
+            ) as reporter, patch("src.pipeline.stage3_weekly_report.NotificationClient") as notifier:
+                reporter.return_value.generate.return_value = weekly_markdown_path
+
+                result_path = stage3_weekly_report.run("easy_pc_fix_guide", notify=False)
+
+        self.assertEqual(result_path, weekly_markdown_path)
+        notifier.assert_not_called()
+
     def test_weekly_failure_report_is_written_before_reraising(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             with patch.object(stage3_weekly_report, "ROOT_DIR", Path(tmpdir)), patch(
@@ -55,6 +71,23 @@ class WeeklyPipelineTests(unittest.TestCase):
         self.assertIn("[Posting Bot] 주간 리포트 실패", message)
         self.assertIn("weekly failed", message)
         self.assertIn("Easy PC Fix Weekly Report", message)
+
+    def test_weekly_no_notify_still_writes_failure_report(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch.object(stage3_weekly_report, "ROOT_DIR", Path(tmpdir)), patch(
+                "src.pipeline.stage3_weekly_report.WeeklyReporter"
+            ) as reporter, patch("src.pipeline.stage3_weekly_report.NotificationClient") as notifier:
+                reporter.return_value.generate.side_effect = RuntimeError("weekly failed")
+
+                with self.assertRaises(RuntimeError):
+                    stage3_weekly_report.run("easy_pc_fix_guide", notify=False)
+
+            report_path = Path(tmpdir) / "reports" / "easy_pc_fix_guide-weekly-failure.json"
+            payload = json.loads(report_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(payload["status"], "failed")
+        self.assertIn("weekly failed", payload["error"])
+        notifier.assert_not_called()
 
     def test_weekly_notification_failure_is_reported_before_reraising(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

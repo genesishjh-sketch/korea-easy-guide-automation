@@ -12,16 +12,18 @@ from src.notifications.telegram import NotificationClient
 from src.reporting.weekly import WeeklyReporter
 
 
-def run(site: str | None = None) -> Path:
+def run(site: str | None = None, notify: bool = True) -> Path:
     settings = load_settings(site)
     try:
         path = WeeklyReporter(settings).generate()
-        NotificationClient(settings).send_required(path.read_text(encoding="utf-8"))
+        if notify:
+            NotificationClient(settings).send_required(path.read_text(encoding="utf-8"))
         remove_stale_weekly_failure_report(settings.site_key)
         return path
     except Exception as exc:
         save_weekly_failure_report(site, exc)
-        NotificationClient(settings).send_required(build_weekly_failure_message(site, exc))
+        if notify:
+            NotificationClient(settings).send_required(build_weekly_failure_message(site, exc))
         raise
 
 
@@ -102,8 +104,9 @@ def remove_stale_weekly_failure_report(site_key: str) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate a weekly automation report.")
     parser.add_argument("--site", help="Site profile key, for example: easy_pc_fix_guide")
+    parser.add_argument("--no-notify", action="store_true", help="Skip Posting Bot notifications for local smoke checks.")
     args = parser.parse_args()
-    path = run(args.site)
+    path = run(args.site, notify=not args.no_notify)
     print(path)
 
 
