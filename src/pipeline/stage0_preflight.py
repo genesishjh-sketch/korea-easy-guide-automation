@@ -136,7 +136,23 @@ def check_launch_queue(site: str | None = None) -> PreflightCheck:
     missing = [seed for seed in launch_seeds if seed not in seed_set]
     if missing:
         return PreflightCheck("launch_queue", "fail", f"Launch topics missing from main seed file: {', '.join(missing)}")
-    return PreflightCheck("launch_queue", "pass", f"{len(launch_seeds)} launch topics are ready before the long-term queue.")
+    used = used_keywords(site)
+    normalized_launch_seeds = {seed.lower() for seed in launch_seeds}
+    unused_launch_count = max(0, len(normalized_launch_seeds) - len(normalized_launch_seeds & used))
+    message = f"{unused_launch_count}/{len(normalized_launch_seeds)} launch topics remain unused before the long-term queue."
+    if unused_launch_count == 0:
+        return PreflightCheck(
+            "launch_queue",
+            "warn",
+            f"{message} Production will use the long-term seed list. Add fresh launch topics only if the new blog still needs a guided launch sequence.",
+        )
+    if unused_launch_count < 3:
+        return PreflightCheck(
+            "launch_queue",
+            "warn",
+            f"{message} Add launch topics soon if the new blog still needs a guided launch sequence.",
+        )
+    return PreflightCheck("launch_queue", "pass", message)
 
 
 def check_reddit_collection_settings(site: str | None = None) -> PreflightCheck:

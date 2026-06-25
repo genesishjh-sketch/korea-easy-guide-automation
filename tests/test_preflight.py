@@ -77,11 +77,11 @@ class PreflightTests(unittest.TestCase):
             load_settings.return_value.content_domain = "windows_help"
             with patch.object(stage0_preflight, "load_seed_list", return_value=[f"topic {i}" for i in range(8)]), patch.object(
                 stage0_preflight, "load_launch_seed_list", return_value=[f"topic {i}" for i in range(7)]
-            ):
+            ), patch.object(stage0_preflight, "used_keywords", return_value=set()):
                 check = stage0_preflight.check_launch_queue("easy_pc_fix_guide")
 
         self.assertEqual(check.status, "pass")
-        self.assertIn("7 launch topics", check.message)
+        self.assertIn("7/7 launch topics remain unused", check.message)
 
     def test_launch_queue_fails_when_topic_is_not_in_main_seed_file(self) -> None:
         with patch.object(stage0_preflight, "load_settings") as load_settings:
@@ -95,6 +95,30 @@ class PreflightTests(unittest.TestCase):
 
         self.assertEqual(check.status, "fail")
         self.assertIn("missing topic", check.message)
+
+    def test_launch_queue_warns_when_unused_launch_topics_are_low(self) -> None:
+        with patch.object(stage0_preflight, "load_settings") as load_settings:
+            load_settings.return_value.content_domain = "windows_help"
+            with patch.object(stage0_preflight, "load_seed_list", return_value=[f"topic {i}" for i in range(8)]), patch.object(
+                stage0_preflight, "load_launch_seed_list", return_value=[f"topic {i}" for i in range(7)]
+            ), patch.object(stage0_preflight, "used_keywords", return_value={f"topic {i}" for i in range(5)}):
+                check = stage0_preflight.check_launch_queue("easy_pc_fix_guide")
+
+        self.assertEqual(check.status, "warn")
+        self.assertIn("2/7 launch topics remain unused", check.message)
+        self.assertIn("guided launch sequence", check.message)
+
+    def test_launch_queue_warns_when_unused_launch_topics_are_empty(self) -> None:
+        with patch.object(stage0_preflight, "load_settings") as load_settings:
+            load_settings.return_value.content_domain = "windows_help"
+            with patch.object(stage0_preflight, "load_seed_list", return_value=[f"topic {i}" for i in range(8)]), patch.object(
+                stage0_preflight, "load_launch_seed_list", return_value=[f"topic {i}" for i in range(7)]
+            ), patch.object(stage0_preflight, "used_keywords", return_value={f"topic {i}" for i in range(7)}):
+                check = stage0_preflight.check_launch_queue("easy_pc_fix_guide")
+
+        self.assertEqual(check.status, "warn")
+        self.assertIn("0/7 launch topics remain unused", check.message)
+        self.assertIn("long-term seed list", check.message)
 
     def test_reddit_collection_warns_without_oauth_credentials(self) -> None:
         with patch.object(stage0_preflight, "load_settings") as load_settings:
