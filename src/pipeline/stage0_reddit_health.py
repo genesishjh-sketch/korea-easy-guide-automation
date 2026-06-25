@@ -14,6 +14,8 @@ from src.utils.text import clean_space
 
 
 DEFAULT_WINDOWS_QUERY = "wifi button missing windows 11"
+REDDIT_APPS_URL = "https://www.reddit.com/prefs/apps"
+GITHUB_SECRETS_URL = "https://github.com/genesishjh-sketch/korea-easy-guide-automation/settings/secrets/actions"
 
 
 def run(site: str | None = None, query: str | None = None, limit: int = 3, notify: bool = False) -> Path:
@@ -43,6 +45,7 @@ def check_reddit_oauth(settings: Any, query: str, limit: int = 3) -> dict:
         "error": "",
         "action_required": "",
         "remediation_steps": [],
+        "setup_links": setup_links(settings),
     }
     if not settings.reddit_user_agent:
         return {
@@ -150,6 +153,16 @@ def default_query(site: str | None = None) -> str:
     return seeds[0] if seeds else DEFAULT_WINDOWS_QUERY
 
 
+def setup_links(settings: Any) -> dict:
+    return {
+        "reddit_apps_url": REDDIT_APPS_URL,
+        "github_actions_secrets_url": GITHUB_SECRETS_URL,
+        "recommended_app_type": "script",
+        "recommended_app_name": f"{settings.site_name} Automation",
+        "recommended_user_agent": settings.reddit_user_agent or "easy-pc-fix-guide/0.1 by your-reddit-username",
+    }
+
+
 def build_message(result: dict) -> str:
     status_kr = {
         "oauth_connected": "OAuth 연결 확인",
@@ -173,6 +186,18 @@ def build_message(result: dict) -> str:
         lines.extend(["", "다음 조치:"])
         for step in result.get("remediation_steps", [])[:6]:
             lines.append(f"- {step}")
+    setup = result.get("setup_links") or {}
+    if setup and result.get("status") in {"missing_credentials", "missing_user_agent", "oauth_error"}:
+        lines.extend(
+            [
+                "",
+                "설정 링크:",
+                f"- Reddit 앱 생성/확인: {setup.get('reddit_apps_url')}",
+                f"- GitHub Secrets 입력: {setup.get('github_actions_secrets_url')}",
+                f"- Reddit 앱 타입: {setup.get('recommended_app_type')}",
+                f"- 권장 User-Agent: {setup.get('recommended_user_agent')}",
+            ]
+        )
     if result.get("error"):
         lines.append(f"- 오류: {result.get('error_type')}: {result.get('error')}")
     if result.get("sample_titles"):
@@ -191,6 +216,7 @@ def build_console_summary(result: dict) -> str:
         "oauth_signal_count": result.get("oauth_signal_count", 0),
         "action_required": result.get("action_required"),
         "remediation_steps": result.get("remediation_steps", []),
+        "setup_links": result.get("setup_links", {}),
         "sample_titles": result.get("sample_titles", [])[:3],
     }
     if result.get("error_type"):

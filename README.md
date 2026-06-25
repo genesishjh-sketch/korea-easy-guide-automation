@@ -84,6 +84,13 @@ Recommended GitHub Variable:
 EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT
 ```
 
+Setup links:
+
+- Reddit apps: https://www.reddit.com/prefs/apps
+- GitHub Actions Secrets: https://github.com/genesishjh-sketch/korea-easy-guide-automation/settings/secrets/actions
+
+Create the Reddit app as `script`, then copy the app client id and secret into the two GitHub Secrets above. The health check never prints secret values; it only reports whether OAuth can collect live Reddit signals.
+
 Manual health check:
 
 ```bash

@@ -26,6 +26,8 @@ class RedditHealthTests(unittest.TestCase):
         self.assertEqual(result["status"], "missing_credentials")
         self.assertIn("REDDIT_CLIENT_ID", result["action_required"])
         self.assertIn("GitHub Secrets에 REDDIT_CLIENT_ID를 추가하세요.", result["remediation_steps"])
+        self.assertEqual(result["setup_links"]["reddit_apps_url"], "https://www.reddit.com/prefs/apps")
+        self.assertIn("/settings/secrets/actions", result["setup_links"]["github_actions_secrets_url"])
 
     def test_reports_oauth_connected_with_sample_titles(self) -> None:
         settings = replace(
@@ -72,6 +74,9 @@ class RedditHealthTests(unittest.TestCase):
         self.assertIn("Reddit OAuth 상태 점검", message)
         self.assertIn("다음 조치:", message)
         self.assertIn("GitHub Secrets에 REDDIT_CLIENT_ID를 추가하세요.", message)
+        self.assertIn("설정 링크:", message)
+        self.assertIn("https://www.reddit.com/prefs/apps", message)
+        self.assertIn("https://github.com/genesishjh-sketch/korea-easy-guide-automation/settings/secrets/actions", message)
 
     def test_console_summary_includes_action_without_secret_values(self) -> None:
         result = {
@@ -82,6 +87,10 @@ class RedditHealthTests(unittest.TestCase):
             "oauth_signal_count": 0,
             "action_required": "REDDIT_CLIENT_ID와 REDDIT_CLIENT_SECRET을 GitHub Secrets 또는 .env에 설정하세요.",
             "remediation_steps": ["GitHub Secrets에 REDDIT_CLIENT_ID를 추가하세요."],
+            "setup_links": {
+                "reddit_apps_url": "https://www.reddit.com/prefs/apps",
+                "github_actions_secrets_url": "https://github.com/example/repo/settings/secrets/actions",
+            },
             "sample_titles": [],
         }
 
@@ -90,6 +99,7 @@ class RedditHealthTests(unittest.TestCase):
 
         self.assertEqual(payload["status"], "missing_credentials")
         self.assertIn("REDDIT_CLIENT_ID", payload["action_required"])
+        self.assertEqual(payload["setup_links"]["reddit_apps_url"], "https://www.reddit.com/prefs/apps")
         self.assertNotIn("super-secret-token", summary)
 
 
