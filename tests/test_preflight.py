@@ -79,6 +79,12 @@ class PreflightTests(unittest.TestCase):
         self.assertEqual(check.status, "pass")
         self.assertIn("public feed verification fails", check.message)
 
+    def test_sitemap_submit_report_persistence_passes(self) -> None:
+        check = stage0_preflight.check_sitemap_submit_report_persistence()
+
+        self.assertEqual(check.status, "pass")
+        self.assertIn("Sitemap submission writes JSON action items", check.message)
+
     def test_daily_failure_report_persistence_passes(self) -> None:
         check = stage0_preflight.check_daily_failure_report_persistence()
 
@@ -353,6 +359,7 @@ class PreflightTests(unittest.TestCase):
             "check_reddit_health_workflow",
             "check_reddit_health_report_persistence",
             "check_publication_check_report_persistence",
+            "check_sitemap_submit_report_persistence",
             "check_daily_failure_report_persistence",
             "check_weekly_failure_report_persistence",
             "check_critical_notifications",

@@ -57,6 +57,7 @@ def run(site: str | None = None) -> Path:
         check_reddit_health_workflow(),
         check_reddit_health_report_persistence(),
         check_publication_check_report_persistence(),
+        check_sitemap_submit_report_persistence(),
         check_daily_failure_report_persistence(),
         check_weekly_failure_report_persistence(),
         check_critical_notifications(),
@@ -557,6 +558,36 @@ def check_publication_check_report_persistence() -> PreflightCheck:
         "publication_check_report_persistence",
         "pass",
         "Publication check writes JSON/Markdown and action items even when public feed verification fails.",
+    )
+
+
+def check_sitemap_submit_report_persistence() -> PreflightCheck:
+    path = ROOT_DIR / "src" / "pipeline" / "stage3_submit_sitemap.py"
+    if not path.exists():
+        return PreflightCheck("sitemap_submit_report_persistence", "fail", "Search Console sitemap pipeline file is missing.")
+    text = path.read_text(encoding="utf-8")
+    required = [
+        "SearchConsoleClient(settings).submit_sitemap",
+        'result["submitted_at"]',
+        "build_daily_publish_context(settings.site_key)",
+        "build_indexing_guidance(result)",
+        "sitemap_action_items(result)",
+        'result["human_summary"] = build_message',
+        "search-console-sitemap-submit.json",
+        "output_path.write_text(json.dumps(result",
+        'NotificationClient(settings).send_required(result["human_summary"])',
+    ]
+    missing = [item for item in required if item not in text]
+    if missing:
+        return PreflightCheck(
+            "sitemap_submit_report_persistence",
+            "fail",
+            f"Missing sitemap submission report persistence safeguards: {', '.join(missing)}",
+        )
+    return PreflightCheck(
+        "sitemap_submit_report_persistence",
+        "pass",
+        "Sitemap submission writes JSON action items, indexing guidance, daily context, and human summary before notification.",
     )
 
 
