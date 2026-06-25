@@ -187,6 +187,7 @@ class RedditHealthTests(unittest.TestCase):
             payload = json.loads(path.read_text(encoding="utf-8"))
 
         self.assertEqual(payload["status"], "missing_credentials")
+        self.assertIn("# Reddit OAuth Health: Easy PC Fix Guide", payload["human_summary_markdown"])
         notifier.return_value.send_required.assert_called_once()
         message = notifier.return_value.send_required.call_args.args[0]
         self.assertIn("Reddit OAuth 상태 점검", message)
@@ -228,6 +229,7 @@ class RedditHealthTests(unittest.TestCase):
             markdown = markdown_path.read_text(encoding="utf-8")
 
         self.assertEqual(payload["status"], "missing_credentials")
+        self.assertIn("# Reddit OAuth Health: Easy PC Fix Guide", payload["human_summary_markdown"])
         self.assertIn("# Reddit OAuth Health: Easy PC Fix Guide", markdown)
         self.assertIn("GitHub Actions secrets", markdown)
         self.assertIn("REDDIT_CLIENT_ID", markdown)

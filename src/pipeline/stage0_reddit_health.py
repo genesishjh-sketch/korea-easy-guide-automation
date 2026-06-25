@@ -36,10 +36,15 @@ def run(site: str | None = None, query: str | None = None, limit: int = 3, notif
     result = check_reddit_oauth_with_fallback_queries(settings, selected_query, limit)
     output_dir = ROOT_DIR / "reports"
     output_dir.mkdir(parents=True, exist_ok=True)
+    markdown_report = build_markdown_report(result)
+    result = {
+        **result,
+        "human_summary_markdown": markdown_report,
+    }
     output_path = output_dir / f"{settings.site_key}-reddit-health.json"
     output_path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
     markdown_path = output_dir / f"{settings.site_key}-reddit-health.md"
-    markdown_path.write_text(build_markdown_report(result), encoding="utf-8")
+    markdown_path.write_text(markdown_report, encoding="utf-8")
     if notify:
         NotificationClient(settings).send_required(build_message(result))
     return output_path
