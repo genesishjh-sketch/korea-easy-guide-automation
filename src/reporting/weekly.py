@@ -591,7 +591,8 @@ class WeeklyReporter:
         actions.extend(quality_issue_actions(quality_issues or []))
         if (signal_quality or {}).get("status") == "fallback_only":
             actions.append(
-                "Reddit 실제 신호 없이 fallback 질문만 사용한 글이 있습니다. Reddit OAuth 설정을 추가해 주제 수집 품질을 안정화하세요. "
+                "Reddit 실제 신호 없이 fallback 질문만 사용한 글이 있습니다. 하루 1개 자동 발행은 계속 가능하지만, "
+                "승인 메일 전까지 하루 2~3개 증량은 보류하세요. 승인 후 Reddit OAuth 설정을 추가해 주제 수집 품질을 안정화합니다. "
                 f"Reddit 앱: {REDDIT_APPS_URL} / GitHub Secrets: {GITHUB_SECRETS_URL} "
                 f"({reddit_oauth_secret_label()})"
             )
@@ -599,18 +600,19 @@ class WeeklyReporter:
             "reddit_oauth_signal_count", 0
         ):
             actions.append(
-                "Reddit 실제 신호가 public JSON 경로에만 의존하고 있습니다. 403 차단 가능성을 줄이려면 Reddit OAuth 수집을 점검하세요. "
+                "Reddit 실제 신호가 public JSON 경로에만 의존하고 있습니다. 하루 1개 자동 발행은 계속 가능하지만, "
+                "403 차단 가능성을 줄이고 발행량을 늘리려면 승인 후 Reddit OAuth 수집을 연결하세요. "
                 f"Reddit 앱: {REDDIT_APPS_URL} / GitHub Secrets: {GITHUB_SECRETS_URL} "
                 f"({reddit_oauth_secret_label()})"
             )
         if operational_status and not operational_status.get("ready_for_cadence_increase", False):
             actions.append(
-                "일일 운영 상태 기준으로 아직 발행량 증량 준비가 아닙니다. 품질 통과와 Reddit OAuth 수집 안정성을 모두 확인한 뒤 증량하세요."
+                "일일 운영 상태 기준으로 아직 발행량 증량 준비가 아닙니다. 하루 1개를 유지하고, 품질 통과와 Reddit OAuth 수집 안정성을 모두 확인한 뒤 증량하세요."
             )
         if reddit_health.get("blocks_cadence_increase"):
             action_required = reddit_health.get("action_required") or "Reddit OAuth 상태를 점검하세요."
             actions.append(
-                f"Reddit OAuth Health가 발행량 증량을 차단 중입니다. {action_required} "
+                f"Reddit OAuth Health가 발행량 증량을 차단 중입니다. 하루 1개 자동 발행은 계속 가능하며, 승인 전에는 대기하세요. {action_required} "
                 f"상태 점수: {reddit_health.get('health_score', 0)}/100."
             )
         actions.append("트래픽과 수익 신호가 보일 때까지 추가 유료 API 비용은 0원 정책을 유지하세요.")

@@ -169,7 +169,8 @@ def build_cadence_alert_message(
             [
                 "",
                 "필요 조치:",
-                "- Reddit 앱에서 script app을 만들고 client id/client secret을 확인하세요.",
+                "- Reddit 승인 메일 전에는 하루 1개 자동 발행을 유지하고, 앱 생성 재시도와 발행량 증량은 보류하세요.",
+                "- 승인 후 Reddit 앱에서 script app을 만들고 client id/client secret을 확인하세요.",
                 f"- Reddit 앱 생성: {REDDIT_APPS_URL}",
                 f"- GitHub Actions Secrets에 {reddit_oauth_secret_label()}을 저장하세요.",
                 f"- GitHub Secrets: {GITHUB_SECRETS_URL}",

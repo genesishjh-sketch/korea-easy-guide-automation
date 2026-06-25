@@ -298,10 +298,12 @@ def missing_credentials_guidance(data_access_submitted_at: str = "") -> tuple[st
         return (
             f"Reddit Data Access Request는 {data_access_submitted_at}에 제출 완료했습니다. "
             "승인 전에는 Reddit 앱 생성이 Responsible Builder Policy/Data API 안내에서 막힐 수 있습니다. "
+            "하루 1개 자동 발행은 fallback 질문, Google Suggest, Microsoft 공식 출처로 계속 운영합니다. "
             f"승인 메일을 받은 뒤 {reddit_oauth_secret_label()}을 GitHub Secrets 또는 .env에 설정하세요.",
             [
                 "Reddit 승인 메일을 기다리세요.",
                 "승인 메일 전에는 Reddit 앱 생성 버튼을 다시 눌러도 같은 정책 안내에서 막힐 수 있습니다.",
+                "승인 전까지는 하루 1개 자동 발행을 유지하고, 하루 2~3개 증량은 보류하세요.",
                 "승인 후 Reddit 앱을 script 타입으로 만들고 client id와 secret을 확인하세요.",
                 f"GitHub Secrets에 {REDDIT_CLIENT_ID_SECRET}를 추가하세요.",
                 f"GitHub Secrets에 {REDDIT_CLIENT_SECRET_SECRET}을 추가하세요.",
@@ -369,6 +371,7 @@ def build_message(result: dict) -> str:
         f"- 수집 상태: {result.get('status_label') or result.get('collection_status') or '확인 필요'}",
         f"- 상태 점수: {result.get('health_score', 0)}/100",
         f"- 발행량 증량 차단: {'예' if result.get('blocks_cadence_increase', True) else '아니오'}",
+        "- 하루 1개 자동 발행: 계속 운영 가능" if result.get("status") == "missing_credentials" else "- 하루 1개 자동 발행: Reddit 상태 기준 차단 없음",
         f"- 조치: {result.get('action_required') or '확인 필요'}",
     ]
     if result.get("data_access_request_submitted_at"):

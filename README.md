@@ -92,7 +92,7 @@ python -m src.pipeline.stage0_launch_queue_validate --site easy_pc_fix_guide --g
 
 ## Reddit OAuth Health
 
-Easy PC Fix Guide can publish with fallback reader questions, but Reddit OAuth is required before topic discovery is considered stable enough for future cadence increases.
+Easy PC Fix Guide currently runs in Reddit-deferred mode. It can keep publishing one post per day with fallback reader questions, Google Suggest data, and official Microsoft sources. Reddit OAuth is only required before topic discovery is considered stable enough for future cadence increases.
 
 Required GitHub Secrets:
 
@@ -115,12 +115,13 @@ Setup links:
 - Responsible Builder Policy: https://support.reddithelp.com/hc/articles/42728983564564
 - GitHub Actions Secrets: https://github.com/genesishjh-sketch/korea-easy-guide-automation/settings/secrets/actions
 
-Create the Reddit app as `script`, then copy the app client id and secret into the two GitHub Secrets above. If Reddit shows the Responsible Builder Policy/Data API registration message instead of creating the app, submit the Data Access Request first and wait for approval. The health check never prints secret values; it only reports whether OAuth can collect live Reddit signals.
+Create the Reddit app as `script`, then copy the app client id and secret into the two GitHub Secrets above. If Reddit shows the Responsible Builder Policy/Data API registration message instead of creating the app, submit the Data Access Request first and wait for approval. Before approval arrives, do not keep retrying app creation; keep the blog on one-post-per-day publishing. The health check never prints secret values; it only reports whether OAuth can collect live Reddit signals.
 
 Current Reddit Data Access Request status:
 
 ```text
 Submitted: 2026-06-25
+Current mode: deferred; one-post-per-day publishing continues without Reddit OAuth.
 Next step: wait for Reddit approval, then create the script app and store REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET.
 ```
 
@@ -144,16 +145,17 @@ EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT = easy-pc-fix-guide/0.1 by posting-automatio
 User action checklist:
 
 ```text
-1. Open https://www.reddit.com/prefs/apps.
-2. Click create app or create another app.
-3. Enter name: Easy PC Fix Guide Automation.
-4. Select app type: script.
-5. Enter redirect uri: http://localhost:8080.
-6. If Reddit blocks creation with the Responsible Builder Policy/Data API message, submit the Data Access Request.
-7. Before pressing create app, complete the reCAPTCHA "I'm not a robot" check. If Reddit shows `Incorrect response. Try again.`, complete reCAPTCHA again and press create app again.
-8. Copy the short client id under the app name into GitHub Secret REDDIT_CLIENT_ID.
-9. Copy the app secret into GitHub Secret REDDIT_CLIENT_SECRET.
-10. Run Actions > Easy PC Fix Reddit OAuth Health.
+1. Wait for the Reddit Data Access Request approval email if app creation is still blocked.
+2. Open https://www.reddit.com/prefs/apps.
+3. Click create app or create another app.
+4. Enter name: Easy PC Fix Guide Automation.
+5. Select app type: script.
+6. Enter redirect uri: http://localhost:8080.
+7. If Reddit still blocks creation with the Responsible Builder Policy/Data API message, stop and keep waiting for approval.
+8. Before pressing create app, complete the reCAPTCHA "I'm not a robot" check. If Reddit shows `Incorrect response. Try again.`, complete reCAPTCHA again and press create app again.
+9. Copy the short client id under the app name into GitHub Secret REDDIT_CLIENT_ID.
+10. Copy the app secret into GitHub Secret REDDIT_CLIENT_SECRET.
+11. Run Actions > Easy PC Fix Reddit OAuth Health.
 ```
 
 Data Access Request draft:

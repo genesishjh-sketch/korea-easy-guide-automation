@@ -880,9 +880,9 @@ def build_reddit_signal_quality(research_report: dict) -> dict:
     method_counts = research_report.get("reddit_collection_method_counts", {}) or {}
     warning = ""
     if fallback_count and not live_count:
-        warning = "Reddit 실제 신호 없이 fallback 질문만 사용했습니다. Reddit OAuth 설정을 점검하세요."
+        warning = "Reddit 실제 신호 없이 fallback 질문만 사용했습니다. 하루 1개 자동 발행은 계속 가능하며, Reddit 승인 후 OAuth를 연결하세요."
     elif public_json_count and not oauth_count:
-        warning = "Reddit 실제 신호가 public JSON 경로에만 의존합니다. 403 차단 가능성을 줄이려면 Reddit OAuth 수집을 점검하세요."
+        warning = "Reddit 실제 신호가 public JSON 경로에만 의존합니다. 하루 1개 자동 발행은 계속 가능하며, 승인 후 Reddit OAuth 수집을 연결하세요."
     return {
         "live_reddit_signal_count": live_count,
         "reddit_oauth_signal_count": oauth_count,
