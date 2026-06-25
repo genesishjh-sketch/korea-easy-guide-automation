@@ -336,10 +336,20 @@ class WeeklyReporter:
         daily_success = operations.get("daily_success", {})
         operational_status = daily_success.get("operational_status", {})
         reddit_health = operations.get("reddit_health", {})
+        preflight_checks = operations.get("preflight", {}).get("checks", []) or []
+        launch_queue_check = next((check for check in preflight_checks if check.get("name") == "launch_queue"), {})
         if preflight_status == "fail":
             actions.append("Preflight 실패 항목을 먼저 복구하세요. 설정, workflow 안전장치, 알림 설정을 확인해야 합니다.")
         elif preflight_status == "warn":
             actions.append("Preflight 주의 항목을 확인하세요. 자동화는 계속되지만 운영 리스크가 있습니다.")
+        if launch_queue_check.get("status") in {"warn", "fail"}:
+            launch_message = launch_queue_check.get("message", "")
+            if "long-term seed list" in launch_message:
+                actions.append(
+                    "Launch queue가 소진되어 장기 Windows topic seed 목록으로 운영 중입니다. 새 블로그 초반 집중 주제가 더 필요하면 launch queue를 보충하세요."
+                )
+            else:
+                actions.append(f"Launch queue 상태를 확인하세요. {launch_message}")
         if daily_failure_status == "failed":
             actions.append("최근 일일 자동화 실패 리포트를 확인하세요. daily failure JSON의 오류 타입, 메시지, traceback을 우선 점검해야 합니다.")
         if publication_status == "missing_today":

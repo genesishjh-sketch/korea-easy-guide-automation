@@ -376,6 +376,34 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("오늘 공개 글을 찾지 못했습니다", joined)
         self.assertIn("sitemap 제출 실패", joined)
 
+    def test_next_actions_explain_launch_queue_warn(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+
+        actions = reporter._next_actions(
+            articles=[{"blogger_status": "LIVE"}],
+            static_pages=[{"title": "About"}, {"title": "Contact"}, {"title": "Privacy Policy"}, {"title": "Disclaimer"}],
+            public_posts={"status": "connected", "posts": [{"title": "Published"}]},
+            operations={
+                "preflight": {
+                    "status": "warn",
+                    "checks": [
+                        {
+                            "name": "launch_queue",
+                            "status": "warn",
+                            "message": "0/14 launch topics remain unused before the long-term queue. Production will use the long-term seed list.",
+                        }
+                    ],
+                },
+            },
+            signal_quality={"status": "connected"},
+        )
+
+        joined = "\n".join(actions)
+        self.assertIn("Preflight 주의 항목", joined)
+        self.assertIn("Launch queue가 소진", joined)
+        self.assertIn("장기 Windows topic seed 목록", joined)
+
     def test_next_actions_include_signal_quality_fallback_warning(self) -> None:
         settings = load_settings("easy_pc_fix_guide")
         reporter = WeeklyReporter(settings)
