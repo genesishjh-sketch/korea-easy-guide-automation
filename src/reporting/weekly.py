@@ -293,6 +293,7 @@ class WeeklyReporter:
         daily_failure_status = operations.get("daily_failure", {}).get("status")
         publication_status = operations.get("publication_check", {}).get("status")
         sitemap_status = operations.get("sitemap_submit", {}).get("status")
+        operational_status = operations.get("daily_success", {}).get("operational_status", {})
         if preflight_status == "fail":
             actions.append("Preflight 실패 항목을 먼저 복구하세요. 설정, workflow 안전장치, 알림 설정을 확인해야 합니다.")
         elif preflight_status == "warn":
@@ -323,6 +324,10 @@ class WeeklyReporter:
             "reddit_oauth_signal_count", 0
         ):
             actions.append("Reddit 실제 신호가 public JSON 경로에만 의존하고 있습니다. 403 차단 가능성을 줄이려면 Reddit OAuth 수집을 점검하세요.")
+        if operational_status and not operational_status.get("ready_for_cadence_increase", False):
+            actions.append(
+                "일일 운영 상태 기준으로 아직 발행량 증량 준비가 아닙니다. 품질 통과와 Reddit OAuth 수집 안정성을 모두 확인한 뒤 증량하세요."
+            )
         actions.append("트래픽과 수익 신호가 보일 때까지 추가 유료 API 비용은 0원 정책을 유지하세요.")
         return actions
 
@@ -436,6 +441,18 @@ class WeeklyReporter:
             lines.append(f"  - URL: {daily_success.get('url', '')}")
         if daily_success.get("quality_score") is not None:
             lines.append(f"  - 품질점수: {daily_success.get('quality_score')}/100")
+        operational_status = daily_success.get("operational_status") or {}
+        if operational_status:
+            lines.append(f"  - 운영 상태: {operational_status.get('status_label', '확인 필요')}")
+            lines.append(
+                "  - 발행 품질 안정성: "
+                f"{'안정' if operational_status.get('publish_quality_ok') else '점검 필요'}"
+            )
+            lines.append(f"  - 수집 안정성: {operational_status.get('collection_status_label', '확인 필요')}")
+            lines.append(
+                "  - 발행량 증량 준비: "
+                f"{'예' if operational_status.get('ready_for_cadence_increase') else '아니오'}"
+            )
         lines.append(f"- 최근 일일 실패 리포트: {_status_kr(daily_failure.get('status', 'not_uploaded'))}")
         if daily_failure.get("error"):
             lines.append(f"  - 오류: {daily_failure.get('error')}")

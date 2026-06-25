@@ -88,6 +88,13 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                         "title": "Wi-Fi Button Missing on Windows 11",
                         "url": "https://easypcfixguide.blogspot.com/2026/06/example.html",
                         "quality_score": 100,
+                        "operational_status": {
+                            "publish_quality_ok": True,
+                            "collection_status": "fallback_only",
+                            "collection_status_label": "주의: fallback 질문 의존",
+                            "ready_for_cadence_increase": False,
+                            "status_label": "발행 품질 OK, 수집 안정성 점검 필요",
+                        },
                     },
                     "daily_failure": {"status": "not_uploaded"},
                     "preflight": {"status": "pass", "checks": []},
@@ -108,6 +115,8 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("## 운영 점검", markdown)
         self.assertIn("최근 일일 성공 리포트: 공개 발행", markdown)
         self.assertIn("품질점수: 100/100", markdown)
+        self.assertIn("운영 상태: 발행 품질 OK, 수집 안정성 점검 필요", markdown)
+        self.assertIn("발행량 증량 준비: 아니오", markdown)
         self.assertIn("최근 일일 실패 리포트: 미업로드", markdown)
         self.assertIn("Preflight: 통과", markdown)
         self.assertIn("발행 확인: 오늘 공개 글 확인", markdown)
@@ -254,6 +263,32 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         joined = "\n".join(actions)
         self.assertIn("public JSON", joined)
         self.assertIn("Reddit OAuth 수집", joined)
+
+    def test_next_actions_include_operational_status_cadence_warning(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+
+        actions = reporter._next_actions(
+            articles=[{"blogger_status": "LIVE"}],
+            static_pages=[{"title": "About"}, {"title": "Contact"}, {"title": "Privacy Policy"}, {"title": "Disclaimer"}],
+            public_posts={"status": "connected", "posts": [{"title": "Published"}]},
+            operations={
+                "preflight": {"status": "pass"},
+                "daily_success": {
+                    "status": "published",
+                    "operational_status": {
+                        "publish_quality_ok": True,
+                        "collection_status": "fallback_only",
+                        "ready_for_cadence_increase": False,
+                    },
+                },
+            },
+            signal_quality={"status": "fallback_only"},
+        )
+
+        joined = "\n".join(actions)
+        self.assertIn("아직 발행량 증량 준비가 아닙니다", joined)
+        self.assertIn("Reddit OAuth 수집 안정성", joined)
 
     def test_operations_result_reads_daily_success_and_failure_reports(self) -> None:
         settings = load_settings("easy_pc_fix_guide")
