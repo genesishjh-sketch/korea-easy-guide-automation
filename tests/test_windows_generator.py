@@ -7,6 +7,7 @@ import unittest
 from src.content.topic_scoring import infer_category
 from src.content.windows_generator import _fixes
 from src.content.windows_generator import _meaning
+from src.content.windows_generator import _after_each_step
 from src.content.windows_generator import _quick_summary
 from src.content.windows_generator import _error_title
 from src.content.windows_generator import _related_guides
@@ -74,6 +75,26 @@ class WindowsGeneratorSourceTests(unittest.TestCase):
         urls = [source["url"] for source in _sources_for_topic("microsoft store not opening windows 11")]
 
         self.assertTrue(any("Microsoft%20Store" in url for url in urls))
+
+    def test_app_topics_use_specific_app_troubleshooting_copy(self) -> None:
+        text = "snipping tool not working windows 11"
+        combined = "\n".join(
+            [
+                *_quick_summary(text, None),
+                *_symptoms(text, None),
+                *_meaning(text, None),
+                *_fixes(text, None),
+                *_after_each_step(text),
+            ]
+        )
+
+        self.assertIn("Snipping Tool", combined)
+        self.assertIn("Microsoft Store > Library", combined)
+        self.assertIn("Repair", combined)
+        self.assertIn("Windows logo key + Shift + S", combined)
+        self.assertNotIn("The Windows feature does not respond normally.", combined)
+        self.assertNotIn("Wi-Fi button returned", combined)
+        self.assertNotIn("printer prints one page", combined)
 
     def test_related_guides_use_internal_blog_search_links(self) -> None:
         guides = _related_guides("Apps & Settings", "https://easypcfixguide.blogspot.com")

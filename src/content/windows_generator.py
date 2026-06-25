@@ -324,6 +324,34 @@ def _risk_level(text: str) -> str:
     return "Low"
 
 
+def _is_app_topic(text: str) -> bool:
+    app_terms = (
+        "microsoft store",
+        "photos app",
+        "snipping tool",
+        "calculator app",
+        "settings app",
+        "default apps",
+    )
+    return any(term in text for term in app_terms)
+
+
+def _app_name(text: str) -> str:
+    if "microsoft store" in text:
+        return "Microsoft Store"
+    if "photos app" in text:
+        return "Photos app"
+    if "snipping tool" in text:
+        return "Snipping Tool"
+    if "calculator app" in text:
+        return "Calculator app"
+    if "settings app" in text:
+        return "Settings app"
+    if "default apps" in text:
+        return "Default apps"
+    return "the app"
+
+
 def _quick_summary(keyword: str, error: str | None) -> list[str]:
     normalized = keyword.lower()
     if error and "onedrive" in normalized:
@@ -343,6 +371,16 @@ def _quick_summary(keyword: str, error: str | None) -> list[str]:
             "If updates keep failing, use Microsoft guidance before trying advanced commands.",
             "This guide keeps advanced repair steps separate so beginners do not start with risky changes.",
             "If this is a work or school device, check with the administrator before changing drivers, services, or update settings.",
+        ]
+    if _is_app_topic(normalized):
+        app = _app_name(normalized)
+        return [
+            f"{app} problems are often caused by a stuck app process, a pending Microsoft Store update, or a damaged app install.",
+            "Start with restart, Windows Update, Microsoft Store library updates, and the app repair option before reinstalling anything.",
+            "Do not reset Windows, edit the Registry, or install third-party repair tools for a single app problem.",
+            "If only one Windows app fails, focus on that app first instead of changing system-wide settings.",
+            "If many built-in apps fail at once, check Windows Update and Microsoft Store updates before deeper troubleshooting.",
+            "This guide keeps app repair and app reset separate so beginners understand which steps can remove app data.",
         ]
     return [
         f"The problem is usually fixable with basic Windows settings, restart, or built-in troubleshooters.",
@@ -389,6 +427,15 @@ def _before_start(text: str, error: str | None) -> list[str]:
             [
                 "For printer problems, check the physical printer first. Paper, ink, toner, power, sleep mode, Wi-Fi status, and a stuck queue can all look like a Windows problem.",
                 "If several people use the same printer, ask whether it works for someone else before removing and adding devices on your PC.",
+            ]
+        )
+    elif _is_app_topic(text):
+        app = _app_name(text)
+        base.extend(
+            [
+                f"For {app}, first note exactly what happens: it will not open, opens and closes, freezes, saves nothing, or shows an error.",
+                "Close the app before changing its settings. Repair or reset options can fail if the app is still running in the background.",
+                "If you rely on the app for work or school, save any open files and check whether the same task works in another app before resetting anything.",
             ]
         )
     else:
@@ -438,6 +485,23 @@ def _symptoms(text: str, error: str | None) -> list[str]:
         return ["Speakers or headphones produce no sound.", "The volume icon looks normal but nothing plays.", "The issue started after a Windows update or restart.", "Bluetooth headphones may connect but stay silent.", "One app may have sound while another app is muted."]
     if "printer" in text:
         return ["Windows says the printer is offline.", "Print jobs stay in the queue.", "The printer works on another device but not this PC.", "The printer appears more than once in Settings.", "A document prints only after restarting the printer or computer."]
+    if _is_app_topic(text):
+        app = _app_name(text)
+        if "snipping tool" in text:
+            return [
+                "Snipping Tool does not open from Start or the keyboard shortcut.",
+                "The screenshot overlay appears, then disappears or freezes.",
+                "Screenshots are not saved or copied as expected.",
+                "The app may show a blank window or close immediately.",
+                "The problem may start after a Windows update, Microsoft Store update, or app permission change.",
+            ]
+        return [
+            f"{app} does not open normally.",
+            "The app opens and closes immediately, freezes, or shows a blank window.",
+            "Only this app may fail while other Windows apps still work.",
+            "The problem may start after an update, restart, sign-in change, or Store app update.",
+            "Repairing the app may help before a full reset or reinstall is needed.",
+        ]
     return ["The Windows feature does not respond normally.", "Restarting may help temporarily.", "The issue returns during normal use.", "The problem may affect one account, one device, or one Windows feature.", "Windows may show no clear error message."]
 
 
@@ -471,6 +535,13 @@ def _meaning(text: str, error: str | None) -> list[str]:
             "Windows may be using the wrong printer status, a stuck queue, a disconnected printer, or an outdated printer connection.",
             "A printer can also appear offline when the printer is asleep, on another Wi-Fi network, or paused in Windows.",
             "Start with connection and queue checks before removing drivers or changing advanced printer settings.",
+        ]
+    if _is_app_topic(text):
+        app = _app_name(text)
+        return [
+            f"{app} may be stuck, outdated, missing a Microsoft Store update, or blocked by a damaged app package.",
+            "It does not usually mean Windows itself is broken, especially if other apps still open normally.",
+            "The safest path is to restart the app, update it through Microsoft Store, then use Windows app repair before trying reset or reinstall steps.",
         ]
     return [
         "This usually means Windows needs a basic reset of the affected feature, a settings check, or an official troubleshooter.",
@@ -525,6 +596,17 @@ def _try_first(text: str) -> list[str]:
             "Sign in to your Microsoft account in a browser to confirm the account itself works.",
             *base,
         ]
+    if _is_app_topic(text):
+        app = _app_name(text)
+        return [
+            f"Close {app}, open it again from Start, and check whether the problem repeats.",
+            "Restart the PC once so stuck app processes are cleared.",
+            "Open Microsoft Store > Library and install app updates if they are available.",
+            "Open Settings > Apps > Installed apps and find the affected app before using Repair or Reset.",
+            "Check that Windows is connected to the internet so Store app updates can download.",
+            "Write down what changed before the problem started, such as a Windows update, Store update, new account sign-in, or permission change.",
+            "If this is a work or school PC, remember that administrators may control built-in apps and Store updates.",
+        ]
     return base
 
 
@@ -574,6 +656,20 @@ def _fixes(text: str, error: str | None) -> list[str]:
             "Make sure Windows is not set to use the wrong copy of the same printer.",
             "If the printer is shared through another computer, confirm that computer is turned on and connected.",
         ]
+    if _is_app_topic(text):
+        app = _app_name(text)
+        fixes = [
+            f"Open {app} from the Start menu instead of a shortcut. If it opens this way, the shortcut may be the problem.",
+            "Open Microsoft Store > Library and select Get updates so built-in apps can receive pending fixes.",
+            f"Open Settings > Apps > Installed apps, find {app}, select Advanced options when available, and choose Repair first.",
+            "If Repair does not help, use Reset only after understanding that app data or preferences may be removed.",
+            "Check Windows Update because built-in app problems can be tied to pending Windows or Store components.",
+            "If the app still fails, reinstall it only from Microsoft Store or official Microsoft guidance.",
+        ]
+        if "snipping tool" in text:
+            fixes.insert(1, "Try both Start > Snipping Tool and the Windows logo key + Shift + S shortcut so you know whether the app or only the shortcut is failing.")
+            fixes.append("Check whether screenshots are being copied to the clipboard, saved to the Screenshots folder, or blocked by focus/security settings.")
+        return fixes
     return [
         "Open the related Windows Settings page and check the basic option first.",
         "Run the relevant Windows troubleshooter.",
@@ -586,6 +682,17 @@ def _fixes(text: str, error: str | None) -> list[str]:
 
 
 def _after_each_step(text: str) -> list[str]:
+    if _is_app_topic(text):
+        app = _app_name(text)
+        return [
+            f"After each app step, open {app} from Start and test the exact action that failed before.",
+            "If a step changes app settings, write down the original setting first. This makes it easier to undo the change if it does not help.",
+            "If the app works for a few minutes and then fails again, note whether it happens after restart, sleep mode, Store update, or sign-in.",
+            "Do not keep repeating the same failed repair or reset step many times. If one official app repair path does not help, move on carefully or stop and ask for help.",
+            "Keep screenshots of unusual messages so you can compare them with official support instructions later.",
+            "If Repair helps but the issue returns after a Store update, write down the date and app version if Windows shows it.",
+            "If Reset changes app preferences, set them back slowly instead of changing several options at once.",
+        ]
     checks = [
         "Test the problem again before moving to the next fix. For example, check whether the Wi-Fi button returned, the printer prints one page, or Windows Update starts installing normally.",
         "If a step changes a setting, write down the original setting first. This makes it easier to undo the change if it does not help.",
