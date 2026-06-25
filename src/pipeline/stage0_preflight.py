@@ -699,6 +699,24 @@ def build_setup_actions(checks: list[PreflightCheck]) -> list[dict]:
                     "next_step": "NOTIFICATION_PROVIDER=telegram, TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID를 설정하세요.",
                 }
             )
+        elif check.name == "seed_inventory":
+            is_failure = check.status == "fail"
+            actions.append(
+                {
+                    "name": "seed_inventory",
+                    "label": "Windows topic seed 재고",
+                    "status": check.status,
+                    "owner": "automation",
+                    "urgency": "before_unattended_publish" if is_failure else "before_cadence_increase",
+                    "blocks_unattended_publish": is_failure,
+                    "blocks_cadence_increase": True,
+                    "message": check.message,
+                    "next_step": (
+                        "새 Windows 오류/증상 seed를 최소 14개 이상 보충하고, "
+                        "중복/모호한 주제가 없는지 preflight를 다시 실행하세요."
+                    ),
+                }
+            )
         elif check.name == "python_runtime":
             actions.append(
                 {

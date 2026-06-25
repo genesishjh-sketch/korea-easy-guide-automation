@@ -274,6 +274,45 @@ class PreflightTests(unittest.TestCase):
         self.assertTrue(readiness["ready_for_cadence_increase"])
         self.assertEqual(readiness["failed_checks"], ["telegram"])
 
+    def test_setup_actions_classify_low_seed_inventory_as_cadence_blocker(self) -> None:
+        checks = [
+            stage0_preflight.PreflightCheck(
+                "seed_inventory",
+                "warn",
+                "10/20 exact-match topic seeds remain unused. Add at least two weeks of fresh topic seeds soon.",
+            ),
+        ]
+
+        actions = stage0_preflight.build_setup_actions(checks)
+        readiness = stage0_preflight.build_readiness_summary(checks, actions)
+
+        self.assertEqual(actions[0]["name"], "seed_inventory")
+        self.assertEqual(actions[0]["label"], "Windows topic seed 재고")
+        self.assertEqual(actions[0]["owner"], "automation")
+        self.assertFalse(actions[0]["blocks_unattended_publish"])
+        self.assertTrue(actions[0]["blocks_cadence_increase"])
+        self.assertIn("최소 14개", actions[0]["next_step"])
+        self.assertTrue(readiness["ready_for_unattended_publish"])
+        self.assertFalse(readiness["ready_for_cadence_increase"])
+
+    def test_setup_actions_classify_empty_seed_inventory_as_publish_blocker(self) -> None:
+        checks = [
+            stage0_preflight.PreflightCheck(
+                "seed_inventory",
+                "fail",
+                "0/5 exact-match topic seeds remain unused. Add fresh Windows topic seeds before the next unattended publish.",
+            ),
+        ]
+
+        actions = stage0_preflight.build_setup_actions(checks)
+        readiness = stage0_preflight.build_readiness_summary(checks, actions)
+
+        self.assertTrue(actions[0]["blocks_unattended_publish"])
+        self.assertTrue(actions[0]["blocks_cadence_increase"])
+        self.assertEqual(actions[0]["urgency"], "before_unattended_publish")
+        self.assertFalse(readiness["ready_for_unattended_publish"])
+        self.assertFalse(readiness["ready_for_cadence_increase"])
+
     def test_run_writes_readiness_and_setup_actions(self) -> None:
         checks = [
             stage0_preflight.PreflightCheck("reddit_collection", "warn", "Reddit OAuth credentials are missing."),
