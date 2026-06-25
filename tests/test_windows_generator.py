@@ -118,6 +118,36 @@ class WindowsGeneratorSourceTests(unittest.TestCase):
         self.assertNotIn("Windows says the printer is offline.", combined)
         self.assertNotIn("A printer can also appear offline", combined)
 
+    def test_network_connection_topics_preserve_distinctive_seed_intent(self) -> None:
+        cases = {
+            "wifi keeps disconnecting windows 11": "Wi-Fi Keeps Disconnecting on Windows 11: Safe Fixes for Beginners",
+            "network adapter missing windows 11": "Network Adapter Missing on Windows 11: Safe Fixes for Beginners",
+            "windows cannot connect to this network": "Windows Cannot Connect to This Network: Safe Fixes for Beginners",
+            "no internet secured windows 11": "No Internet, Secured on Windows 11: Safe Fixes for Beginners",
+            "dns server not responding windows 11": "DNS Server Not Responding on Windows 11: Safe Fixes for Beginners",
+            "ethernet connected but no internet windows 11": "Ethernet Connected but No Internet on Windows 11: Safe Fixes for Beginners",
+        }
+
+        for seed, expected_title in cases.items():
+            with self.subTest(seed=seed):
+                profile = _topic_profile(seed, "Wi-Fi & Internet", "https://easypcfixguide.blogspot.com")
+                combined = "\n".join(
+                    [
+                        profile["title"],
+                        *profile["quick_summary"],
+                        *profile["symptoms"],
+                        *profile["meaning"],
+                        *profile["try_first"],
+                        *profile["fixes"],
+                    ]
+                ).lower()
+
+                self.assertEqual(profile["title"], expected_title)
+                normalized_combined = combined.replace("wi-fi", "wifi")
+                for word in [part for part in seed.replace(",", "").split() if len(part) > 3]:
+                    self.assertIn(word.lower(), normalized_combined)
+                self.assertNotEqual(profile["title"], "Wi-Fi Button Missing on Windows 11: Simple Fixes for Beginners")
+
     def test_related_guides_use_internal_blog_search_links(self) -> None:
         guides = _related_guides("Apps & Settings", "https://easypcfixguide.blogspot.com")
 

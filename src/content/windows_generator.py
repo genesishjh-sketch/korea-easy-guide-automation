@@ -220,6 +220,18 @@ def _topic_profile(keyword: str, category: str, site_url: str = "") -> dict:
 
     if error:
         title = _error_title(normalized, error)
+    elif _is_wifi_disconnect_topic(normalized):
+        title = "Wi-Fi Keeps Disconnecting on Windows 11: Safe Fixes for Beginners"
+    elif _is_network_adapter_topic(normalized):
+        title = "Network Adapter Missing on Windows 11: Safe Fixes for Beginners"
+    elif _is_cannot_connect_topic(normalized):
+        title = "Windows Cannot Connect to This Network: Safe Fixes for Beginners"
+    elif _is_no_internet_secured_topic(normalized):
+        title = "No Internet, Secured on Windows 11: Safe Fixes for Beginners"
+    elif "dns" in normalized:
+        title = "DNS Server Not Responding on Windows 11: Safe Fixes for Beginners"
+    elif "ethernet" in normalized:
+        title = "Ethernet Connected but No Internet on Windows 11: Safe Fixes for Beginners"
     elif "wifi" in normalized or "wi-fi" in normalized:
         title = "Wi-Fi Button Missing on Windows 11: Simple Fixes for Beginners"
     elif "bluetooth" in normalized:
@@ -358,6 +370,34 @@ def _is_printer_queue_topic(text: str) -> bool:
     return "printer" in text and ("queue" in text or "stuck" in text or "clear" in text)
 
 
+def _is_wifi_disconnect_topic(text: str) -> bool:
+    return ("wifi" in text or "wi-fi" in text) and any(term in text for term in ("disconnect", "disconnecting", "drops", "keeps"))
+
+
+def _is_network_adapter_topic(text: str) -> bool:
+    return "network adapter" in text and any(term in text for term in ("missing", "disappeared", "not showing"))
+
+
+def _is_cannot_connect_topic(text: str) -> bool:
+    return "cannot connect to this network" in text
+
+
+def _is_no_internet_secured_topic(text: str) -> bool:
+    return "no internet secured" in text or "no internet, secured" in text
+
+
+def _is_network_connection_topic(text: str) -> bool:
+    return any(
+        predicate(text)
+        for predicate in (
+            _is_wifi_disconnect_topic,
+            _is_network_adapter_topic,
+            _is_cannot_connect_topic,
+            _is_no_internet_secured_topic,
+        )
+    ) or "dns" in text or "ethernet" in text
+
+
 def _quick_summary(keyword: str, error: str | None) -> list[str]:
     normalized = keyword.lower()
     if error and "onedrive" in normalized:
@@ -387,6 +427,16 @@ def _quick_summary(keyword: str, error: str | None) -> list[str]:
             "If only one Windows app fails, focus on that app first instead of changing system-wide settings.",
             "If many built-in apps fail at once, check Windows Update and Microsoft Store updates before deeper troubleshooting.",
             "This guide keeps app repair and app reset separate so beginners understand which steps can remove app data.",
+        ]
+    if _is_network_connection_topic(normalized):
+        focus = _network_focus(normalized)
+        return [
+            f"{focus} is usually caused by a connection state, adapter, driver, router, DNS, or network profile problem.",
+            "Start by checking whether other devices work on the same network so you know whether the issue is the PC or the network.",
+            "Do not install random driver tools or reset Windows as the first step.",
+            "Use restart, adapter, router, Windows network settings, and official support steps before advanced repair.",
+            "Test after each change with a simple website, not only the Windows network icon.",
+            "If you need internet immediately, use a temporary trusted network, Ethernet, or phone hotspot while you troubleshoot.",
         ]
     if _is_printer_queue_topic(normalized):
         return [
@@ -427,6 +477,14 @@ def _before_start(text: str, error: str | None) -> list[str]:
             [
                 "For Windows Update errors, do not assume the error code always has one single cause. The same code can appear because of pending restarts, network problems, free-space problems, update cache issues, or a temporary Microsoft-side issue.",
                 "Before trying commands, check whether the update is known to have problems on the Windows release health page. If Microsoft is already investigating an issue, waiting may be safer than changing your PC repeatedly.",
+            ]
+        )
+    elif _is_network_connection_topic(text):
+        base.extend(
+            [
+                "For network connection problems, first separate the PC from the network. If other devices also fail, the router or internet service may be the real problem.",
+                "If only this PC fails, write down whether the issue affects Wi-Fi, Ethernet, DNS, or one saved network profile.",
+                "If you need internet immediately, use a temporary safe workaround such as Ethernet, phone hotspot, or another trusted network while you complete the checks.",
             ]
         )
     elif "wifi" in text or "wi-fi" in text:
@@ -488,6 +546,54 @@ def _symptoms(text: str, error: str | None) -> list[str]:
             "The update history may show failed install attempts.",
             "The PC may work normally except for the update problem.",
         ]
+    if _is_wifi_disconnect_topic(text):
+        return [
+            "Wi-Fi connects, then drops again after a few minutes.",
+            "The network may reconnect by itself, then disconnect again later.",
+            "Other devices may stay connected while this Windows PC drops.",
+            "The issue may happen after sleep mode, moving rooms, or a Windows update.",
+            "A phone hotspot or Ethernet connection may work more reliably than Wi-Fi.",
+        ]
+    if _is_network_adapter_topic(text):
+        return [
+            "The network adapter is missing from Settings, Quick Settings, or Device Manager.",
+            "Wi-Fi or Ethernet options may disappear after restart, sleep mode, or an update.",
+            "Windows may show no available networks even though other devices can connect.",
+            "The adapter may reappear after restart, then disappear again later.",
+            "Internet may work only through another adapter, hotspot, or USB network device.",
+        ]
+    if _is_cannot_connect_topic(text):
+        return [
+            "Windows shows 'Cannot connect to this network'.",
+            "The same Wi-Fi name may work on a phone or another computer.",
+            "The saved network may fail after a password, router, or Windows update change.",
+            "Windows may ask for the password again but still fail.",
+            "Another network or hotspot may connect normally.",
+        ]
+    if _is_no_internet_secured_topic(text):
+        return [
+            "Windows says 'No Internet, secured' under a Wi-Fi network.",
+            "The PC is connected to Wi-Fi but websites do not load.",
+            "Other devices on the same network may or may not have internet.",
+            "The message may appear after sleep mode, router restart, VPN use, or a Windows update.",
+            "The Wi-Fi signal can look normal even though internet access is blocked.",
+        ]
+    if "dns" in text:
+        return [
+            "Windows or a browser says the DNS server is not responding.",
+            "The PC may connect to Wi-Fi or Ethernet but websites do not open.",
+            "Some apps may work while browser pages fail.",
+            "Other devices may work normally on the same network.",
+            "The issue may appear after router, VPN, DNS, or network adapter changes.",
+        ]
+    if "ethernet" in text:
+        return [
+            "The Ethernet cable shows connected, but websites do not load.",
+            "Wi-Fi may work while Ethernet does not, or the opposite may happen.",
+            "Windows may show an unidentified network or no internet access.",
+            "The issue may start after changing router ports, cables, VPN, or adapter settings.",
+            "Another cable or router port may work normally.",
+        ]
     if "wifi" in text or "wi-fi" in text:
         return [
             "The Wi-Fi button is missing from Quick Settings.",
@@ -548,6 +654,12 @@ def _meaning(text: str, error: str | None) -> list[str]:
             "Windows Update may be blocked by a pending restart, low disk space, a damaged update cache, or a service problem.",
             "It does not always mean your PC is broken. Many update errors are temporary or related to a specific update package.",
             "The safest approach is to remove simple blockers first, then check whether Microsoft has listed a known issue.",
+        ]
+    if _is_network_connection_topic(text):
+        return [
+            f"{_network_focus(text)} can happen when Windows has a stale network profile, adapter state, DNS issue, router issue, or driver problem.",
+            "It does not always mean the PC is broken. Often the safest fix is to reset the connection path step by step.",
+            "Because network drivers affect internet access, avoid random driver installers and use official sources only.",
         ]
     if "wifi" in text or "wi-fi" in text:
         return [
@@ -611,6 +723,14 @@ def _try_first(text: str) -> list[str]:
         "Write down what changed before the problem started, such as an update, new app, new printer, or new router.",
         "If you use antivirus, VPN, or device management software, remember that it may affect network, update, or printer behavior.",
     ]
+    if _is_network_connection_topic(text):
+        return [
+            "Restart the PC and the router once.",
+            "Check whether other devices work on the same network.",
+            "Turn airplane mode off and disconnect any VPN temporarily if you normally use one.",
+            "Forget and reconnect to the network only after confirming you know the Wi-Fi password.",
+            *base,
+        ]
     if "wifi" in text or "wi-fi" in text:
         return ["Restart the PC and router.", "Turn airplane mode off.", "Open Settings > Network & internet and check whether Wi-Fi appears.", *base]
     if "bluetooth" in text:
@@ -671,6 +791,25 @@ def _fixes(text: str, error: str | None) -> list[str]:
             "Pause updates briefly, resume them, and try again.",
             "Check Windows release health to see whether Microsoft has listed a known update issue.",
         ]
+    if _is_network_connection_topic(text):
+        fixes = [
+            "Open Settings > Network & internet and confirm whether the affected connection is Wi-Fi or Ethernet.",
+            "Restart the router and PC, then test a simple website before changing drivers.",
+            "Forget the saved Wi-Fi network and reconnect if the problem is only one network and you know the password.",
+            "Run the Windows network troubleshooter from Settings before using reset options.",
+            "Check Device Manager for the network adapter without installing unknown driver tools.",
+            "Install driver updates from Windows Update or the PC maker's official support page.",
+            "Use Network reset only after basic checks, because it removes and reinstalls network adapters.",
+        ]
+        if "dns" in text:
+            fixes.insert(2, "Restart the router and try another browser so you know whether the issue is DNS, the browser, or the whole connection.")
+        if "ethernet" in text:
+            fixes.insert(2, "Try another Ethernet cable or router port before changing Windows settings.")
+        if _is_no_internet_secured_topic(text):
+            fixes.insert(2, "Check whether the router itself has internet access. A secured Wi-Fi connection can still have no internet from the provider.")
+        if _is_network_adapter_topic(text):
+            fixes.insert(2, "In Device Manager, select View > Show hidden devices and look for the missing adapter before reinstalling anything.")
+        return fixes
     if "wifi" in text or "wi-fi" in text:
         return [
             "Open Settings > Network & internet and confirm Wi-Fi is available.",
@@ -782,6 +921,22 @@ def _after_each_step(text: str) -> list[str]:
             ]
         )
     return checks
+
+
+def _network_focus(text: str) -> str:
+    if _is_wifi_disconnect_topic(text):
+        return "Wi-Fi that keeps disconnecting"
+    if _is_network_adapter_topic(text):
+        return "a missing network adapter"
+    if _is_cannot_connect_topic(text):
+        return "the 'Cannot connect to this network' message"
+    if _is_no_internet_secured_topic(text):
+        return "the 'No Internet, secured' message"
+    if "dns" in text:
+        return "a DNS server not responding error"
+    if "ethernet" in text:
+        return "Ethernet connected with no internet"
+    return "a Windows network connection problem"
 
 
 def _advanced_fixes(text: str, risk: str) -> list[str]:
