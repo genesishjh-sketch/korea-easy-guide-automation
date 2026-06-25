@@ -403,11 +403,15 @@ class WeeklyReporter:
             "reddit_public_json_signal_count": 0,
             "fallback_reddit_signal_count": 0,
             "google_suggest_signal_count": 0,
+            "google_suggest_live_signal_count": 0,
+            "google_suggest_fallback_signal_count": 0,
         }
         source_counts: dict[str, int] = {}
         reddit_method_counts: dict[str, int] = {}
+        google_method_counts: dict[str, int] = {}
         fallback_articles: list[str] = []
         reddit_diagnostics: list[dict] = []
+        google_diagnostics: list[dict] = []
         for article in articles:
             research_path = Path(article.get("article_dir", "")) / "research_report.json"
             if not research_path.exists():
@@ -423,12 +427,16 @@ class WeeklyReporter:
                 "reddit_public_json_signal_count",
                 "fallback_reddit_signal_count",
                 "google_suggest_signal_count",
+                "google_suggest_live_signal_count",
+                "google_suggest_fallback_signal_count",
             ]:
                 totals[key] += int(report.get(key, 0) or 0)
             for source, count in report.get("signal_source_counts", {}).items():
                 source_counts[source] = source_counts.get(source, 0) + int(count or 0)
             for method, count in report.get("reddit_collection_method_counts", {}).items():
                 reddit_method_counts[method] = reddit_method_counts.get(method, 0) + int(count or 0)
+            for method, count in report.get("google_suggest_method_counts", {}).items():
+                google_method_counts[method] = google_method_counts.get(method, 0) + int(count or 0)
             if int(report.get("fallback_reddit_signal_count", 0) or 0) and not int(
                 report.get("live_reddit_signal_count", 0) or 0
             ):
@@ -450,6 +458,19 @@ class WeeklyReporter:
                         "oauth_error": diagnostics.get("oauth_error", ""),
                     }
                 )
+            google_diagnostic = report.get("google_suggest_diagnostics") or {}
+            if google_diagnostic:
+                google_diagnostics.append(
+                    {
+                        "title": article.get("title") or article.get("slug") or article.get("article_dir", ""),
+                        "status": google_diagnostic.get("status", "unknown"),
+                        "live_suggestion_count": int(google_diagnostic.get("live_suggestion_count", 0) or 0),
+                        "fallback_suggestion_count": int(google_diagnostic.get("fallback_suggestion_count", 0) or 0),
+                        "used_fallback": bool(google_diagnostic.get("used_fallback")),
+                        "fallback_reason": google_diagnostic.get("fallback_reason", ""),
+                        "error": google_diagnostic.get("error", ""),
+                    }
+                )
 
         status = "not_uploaded"
         if totals["article_count_with_research"]:
@@ -459,8 +480,10 @@ class WeeklyReporter:
             **totals,
             "signal_source_counts": dict(sorted(source_counts.items())),
             "reddit_collection_method_counts": dict(sorted(reddit_method_counts.items())),
+            "google_suggest_method_counts": dict(sorted(google_method_counts.items())),
             "fallback_only_articles": fallback_articles,
             "reddit_collection_diagnostics": reddit_diagnostics,
+            "google_suggest_diagnostics": google_diagnostics,
         }
 
     def _next_actions(
@@ -646,6 +669,8 @@ class WeeklyReporter:
         lines.append(f"- Reddit public JSON 신호 수: {signal_quality.get('reddit_public_json_signal_count', 0)}")
         lines.append(f"- Reddit fallback 신호 수: {signal_quality.get('fallback_reddit_signal_count', 0)}")
         lines.append(f"- Google Suggest 신호 수: {signal_quality.get('google_suggest_signal_count', 0)}")
+        lines.append(f"- Google Suggest live 신호 수: {signal_quality.get('google_suggest_live_signal_count', 0)}")
+        lines.append(f"- Google Suggest fallback 신호 수: {signal_quality.get('google_suggest_fallback_signal_count', 0)}")
         if signal_quality.get("fallback_only_articles"):
             lines.append("- fallback만 사용한 글:")
             for title in signal_quality.get("fallback_only_articles", [])[:5]:
@@ -663,6 +688,17 @@ class WeeklyReporter:
                     lines.append(f"    - fallback 이유: {item.get('fallback_reason')}")
                 if item.get("oauth_error"):
                     lines.append(f"    - OAuth 오류: {item.get('oauth_error')}")
+        if signal_quality.get("google_suggest_diagnostics"):
+            lines.append("- 최근 Google Suggest 수집 진단:")
+            for item in signal_quality.get("google_suggest_diagnostics", [])[:5]:
+                lines.append(
+                    f"  - {item.get('title', '')}: {_status_kr(item.get('status'))}, "
+                    f"live {item.get('live_suggestion_count', 0)}개, fallback {item.get('fallback_suggestion_count', 0)}개"
+                )
+                if item.get("fallback_reason"):
+                    lines.append(f"    - fallback 이유: {item.get('fallback_reason')}")
+                if item.get("error"):
+                    lines.append(f"    - 오류: {item.get('error')}")
 
         lines.extend(["", "## Search Console", ""])
         search_console = report.get("search_console", {})
@@ -1013,6 +1049,8 @@ def _status_kr(status: str | None) -> str:
         "skipped_duplicate": "중복 건너뜀",
         "skipped_daily_limit": "하루 1개 제한으로 건너뜀",
         "fallback_only": "fallback 사용",
+        "live_connected": "live 연결",
+        "no_google_suggestions": "Google Suggest 신호 없음",
         "public_json_connected": "public JSON 연결",
         "no_reddit_signals": "Reddit 신호 없음",
         "failed": "실패",

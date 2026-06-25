@@ -73,20 +73,36 @@ def run(seed: str | None = None, site: str | None = None) -> Path:
         else:
             create_korea_svg_assets(output_dir, article.title, keyword)
     (output_dir / "research_report.json").write_text(
-        json.dumps(build_research_report(settings, keyword, article, signals, reddit.diagnostics), ensure_ascii=False, indent=2),
+        json.dumps(
+            build_research_report(settings, keyword, article, signals, reddit.diagnostics, google.diagnostics),
+            ensure_ascii=False,
+            indent=2,
+        ),
         encoding="utf-8",
     )
     LOGGER.info("Saved article to %s", output_dir)
     return output_dir
 
 
-def build_research_report(settings, keyword: str, article, signals: list, reddit_diagnostics: dict | None = None) -> dict:
+def build_research_report(
+    settings,
+    keyword: str,
+    article,
+    signals: list,
+    reddit_diagnostics: dict | None = None,
+    google_diagnostics: dict | None = None,
+) -> dict:
     signal_queries = [signal.title for signal in signals[:4] if signal.title]
     signal_source_counts = Counter(signal.source for signal in signals)
     reddit_method_counts = Counter(
         (signal.metadata or {}).get("collection_method", "unknown")
         for signal in signals
         if signal.source in {"reddit", "reddit_fallback"}
+    )
+    google_method_counts = Counter(
+        (signal.metadata or {}).get("collection_method", "unknown")
+        for signal in signals
+        if signal.source == "google_suggest"
     )
     queries = [keyword, f"{keyword} official", f"{keyword} beginner fix", *signal_queries]
     if settings.content_domain == "windows_help":
@@ -126,7 +142,11 @@ def build_research_report(settings, keyword: str, article, signals: list, reddit
         "reddit_public_json_signal_count": reddit_method_counts.get("public_json", 0),
         "fallback_reddit_signal_count": signal_source_counts.get("reddit_fallback", 0),
         "google_suggest_signal_count": signal_source_counts.get("google_suggest", 0),
+        "google_suggest_live_signal_count": google_method_counts.get("live", 0),
+        "google_suggest_fallback_signal_count": google_method_counts.get("fallback", 0),
+        "google_suggest_method_counts": dict(sorted(google_method_counts.items())),
         "reddit_collection_diagnostics": reddit_diagnostics or {},
+        "google_suggest_diagnostics": google_diagnostics or {},
         "notes": [
             "Reddit and Google Suggest are used for topic discovery.",
             "Official/platform sources are used for publishing validation.",

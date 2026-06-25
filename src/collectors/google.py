@@ -84,17 +84,37 @@ WINDOWS_FALLBACK_SUGGESTIONS = {
 class GoogleSuggestCollector:
     def __init__(self, timeout: int = 12) -> None:
         self.timeout = timeout
+        self.diagnostics: dict = {}
 
     def collect(self, query: str, limit: int = 10) -> list[TopicSignal]:
+        self.diagnostics = {
+            "query": query,
+            "status": "not_started",
+            "live_suggestion_count": 0,
+            "fallback_suggestion_count": 0,
+            "used_fallback": False,
+            "fallback_reason": "",
+            "error": "",
+        }
         url = f"https://suggestqueries.google.com/complete/search?client=firefox&hl=en&q={quote_plus(query)}"
+        collection_method = "live"
         try:
             response = requests.get(url, timeout=self.timeout)
             response.raise_for_status()
             payload = response.json()
             suggestions = payload[1] if len(payload) > 1 else []
+            self.diagnostics["status"] = "live_connected" if suggestions else "no_google_suggestions"
+            self.diagnostics["live_suggestion_count"] = len(suggestions)
         except Exception as exc:
             LOGGER.warning("Google suggestion collection failed: %s", exc)
+            self.diagnostics["error"] = str(exc)
             suggestions = fallback_suggestions(query)
+            collection_method = "fallback"
+            self.diagnostics["status"] = "fallback_only" if suggestions else "no_google_suggestions"
+            self.diagnostics["fallback_suggestion_count"] = len(suggestions)
+            self.diagnostics["used_fallback"] = bool(suggestions)
+            if suggestions:
+                self.diagnostics["fallback_reason"] = "Google Suggest request failed; used local query-intent fallback."
 
         return [
             TopicSignal(
@@ -102,6 +122,7 @@ class GoogleSuggestCollector:
                 keyword=query,
                 title=clean_space(suggestion),
                 score=max(1.0, float(limit - index)),
+                metadata={"collection_method": collection_method},
             )
             for index, suggestion in enumerate(suggestions[:limit])
             if clean_space(suggestion)

@@ -504,8 +504,11 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                         "reddit_public_json_signal_count": 0,
                         "fallback_reddit_signal_count": 2,
                         "google_suggest_signal_count": 4,
+                        "google_suggest_live_signal_count": 0,
+                        "google_suggest_fallback_signal_count": 4,
                         "signal_source_counts": {"reddit_fallback": 2, "google_suggest": 4},
                         "reddit_collection_method_counts": {"fallback": 2},
+                        "google_suggest_method_counts": {"fallback": 4},
                         "reddit_collection_diagnostics": {
                             "status": "fallback_only",
                             "oauth_configured": False,
@@ -515,6 +518,14 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                                 {"subreddit": "Windows11", "error": "403 blocked"},
                             ],
                             "fallback_reason": "All available Reddit live collection paths returned no usable signals; public JSON had errors.",
+                        },
+                        "google_suggest_diagnostics": {
+                            "status": "fallback_only",
+                            "live_suggestion_count": 0,
+                            "fallback_suggestion_count": 4,
+                            "used_fallback": True,
+                            "fallback_reason": "Google Suggest request failed; used local query-intent fallback.",
+                            "error": "timeout",
                         },
                     }
                 ),
@@ -528,8 +539,11 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                         "reddit_public_json_signal_count": 1,
                         "fallback_reddit_signal_count": 1,
                         "google_suggest_signal_count": 2,
+                        "google_suggest_live_signal_count": 2,
+                        "google_suggest_fallback_signal_count": 0,
                         "signal_source_counts": {"reddit": 3, "reddit_fallback": 1, "google_suggest": 2},
                         "reddit_collection_method_counts": {"oauth": 2, "public_json": 1, "fallback": 1},
+                        "google_suggest_method_counts": {"live": 2},
                     }
                 ),
                 encoding="utf-8",
@@ -549,13 +563,19 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertEqual(result["reddit_public_json_signal_count"], 1)
         self.assertEqual(result["fallback_reddit_signal_count"], 3)
         self.assertEqual(result["google_suggest_signal_count"], 6)
+        self.assertEqual(result["google_suggest_live_signal_count"], 2)
+        self.assertEqual(result["google_suggest_fallback_signal_count"], 4)
         self.assertEqual(result["signal_source_counts"]["reddit"], 3)
         self.assertEqual(result["reddit_collection_method_counts"]["oauth"], 2)
         self.assertEqual(result["reddit_collection_method_counts"]["public_json"], 1)
+        self.assertEqual(result["google_suggest_method_counts"]["fallback"], 4)
+        self.assertEqual(result["google_suggest_method_counts"]["live"], 2)
         self.assertEqual(result["fallback_only_articles"], ["Fallback only article"])
         self.assertEqual(result["reddit_collection_diagnostics"][0]["title"], "Fallback only article")
         self.assertEqual(result["reddit_collection_diagnostics"][0]["public_json_error_count"], 4)
         self.assertEqual(result["reddit_collection_diagnostics"][0]["failed_subreddits"], ["WindowsHelp", "Windows11"])
+        self.assertEqual(result["google_suggest_diagnostics"][0]["title"], "Fallback only article")
+        self.assertEqual(result["google_suggest_diagnostics"][0]["fallback_suggestion_count"], 4)
 
     def test_next_actions_do_not_ask_for_first_article_when_public_feed_has_posts(self) -> None:
         settings = load_settings("easy_pc_fix_guide")

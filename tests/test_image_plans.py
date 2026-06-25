@@ -102,7 +102,12 @@ class ImagePlanTests(unittest.TestCase):
                 stage1_generate.GoogleSuggestCollector,
                 "collect",
                 return_value=[
-                    TopicSignal("google_suggest", "incheon airport to seoul", "incheon airport to seoul by train")
+                    TopicSignal(
+                        "google_suggest",
+                        "incheon airport to seoul",
+                        "incheon airport to seoul by train",
+                        metadata={"collection_method": "live"},
+                    )
                 ],
             ):
                 load_settings.return_value.site_key = "korea_easy_guide"
@@ -134,7 +139,11 @@ class ImagePlanTests(unittest.TestCase):
         self.assertEqual(research_report["reddit_oauth_signal_count"], 1)
         self.assertEqual(research_report["reddit_public_json_signal_count"], 0)
         self.assertEqual(research_report["fallback_reddit_signal_count"], 1)
+        self.assertEqual(research_report["google_suggest_live_signal_count"], 1)
+        self.assertEqual(research_report["google_suggest_fallback_signal_count"], 0)
+        self.assertEqual(research_report["google_suggest_method_counts"]["live"], 1)
         self.assertIn("reddit_collection_diagnostics", research_report)
+        self.assertIn("google_suggest_diagnostics", research_report)
         self.assertTrue(hero_exists)
         self.assertTrue(inline_exists)
 
