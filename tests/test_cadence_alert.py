@@ -10,7 +10,7 @@ from src.pipeline import stage3_cadence_alert
 class CadenceAlertTests(unittest.TestCase):
     def test_skips_when_today_is_not_review_date(self) -> None:
         with patch("src.pipeline.stage3_cadence_alert.NotificationClient") as notification:
-            sent = stage3_cadence_alert.run(today=date(2026, 7, 21), site="easy_pc_fix_guide")
+            sent = stage3_cadence_alert.run(today=date(2026, 7, 21), site="easy_pc_fix_guide", verbose=False)
 
         self.assertFalse(sent)
         notification.assert_not_called()
@@ -40,6 +40,7 @@ class CadenceAlertTests(unittest.TestCase):
                 today=date(2026, 7, 22),
                 force=True,
                 site="easy_pc_fix_guide",
+                verbose=False,
             )
 
         self.assertTrue(sent)
@@ -72,6 +73,7 @@ class CadenceAlertTests(unittest.TestCase):
                     today=date(2026, 7, 22),
                     force=True,
                     site="easy_pc_fix_guide",
+                    verbose=False,
                 )
 
 

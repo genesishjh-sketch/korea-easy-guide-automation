@@ -16,12 +16,13 @@ from src.reporting.search_console import SearchConsoleClient
 from src.reporting.weekly import WeeklyReporter
 
 
-def run(today: date | None = None, force: bool = False, site: str | None = None) -> bool:
+def run(today: date | None = None, force: bool = False, site: str | None = None, verbose: bool = True) -> bool:
     settings = load_settings(site)
     selected_date = today or datetime.utcnow().date()
 
     if not force and selected_date not in {TWO_POST_REVIEW_DATE, THREE_POST_REVIEW_DATE}:
-        print(f"No cadence alert scheduled for {selected_date.isoformat()}.")
+        if verbose:
+            print(f"No cadence alert scheduled for {selected_date.isoformat()}.")
         return False
 
     week_start = selected_date - timedelta(days=7)
@@ -45,8 +46,9 @@ def run(today: date | None = None, force: bool = False, site: str | None = None)
 
     message = build_cadence_alert_message(settings.site_name, settings.site_url, review)
     NotificationClient(settings).send_required(message)
-    print(message)
-    print("sent: True")
+    if verbose:
+        print(message)
+        print("sent: True")
     return True
 
 
