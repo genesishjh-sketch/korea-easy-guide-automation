@@ -17,6 +17,7 @@ class SiteProfile:
     launch_seed_file: Path | None
     reddit_user_agent: str
     reddit_subreddits: list[str]
+    reddit_data_access_request_submitted_at: str = ""
     automation_start_date: str = "2026-06-24"
     default_blogger_blog_id: str = ""
     default_search_console_site_url: str = ""
@@ -50,6 +51,7 @@ SITE_PROFILES = {
         launch_seed_file=ROOT_DIR / "data" / "seeds" / "windows_launch_queue.json",
         reddit_user_agent="easy-pc-fix-guide/0.1",
         reddit_subreddits=["WindowsHelp", "Windows11", "techsupport", "pchelp"],
+        reddit_data_access_request_submitted_at="2026-06-25",
         automation_start_date="2026-06-24",
         default_blogger_blog_id="8389138341810407852",
         default_search_console_site_url="https://easypcfixguide.blogspot.com/",

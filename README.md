@@ -104,6 +104,7 @@ Recommended GitHub Variable:
 
 ```text
 EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT
+EASY_PC_FIX_GUIDE_REDDIT_DATA_ACCESS_REQUEST_SUBMITTED_AT
 ```
 
 Setup links:
@@ -114,6 +115,13 @@ Setup links:
 - GitHub Actions Secrets: https://github.com/genesishjh-sketch/korea-easy-guide-automation/settings/secrets/actions
 
 Create the Reddit app as `script`, then copy the app client id and secret into the two GitHub Secrets above. If Reddit shows the Responsible Builder Policy/Data API registration message instead of creating the app, submit the Data Access Request first and wait for approval. The health check never prints secret values; it only reports whether OAuth can collect live Reddit signals.
+
+Current Reddit Data Access Request status:
+
+```text
+Submitted: 2026-06-25
+Next step: wait for Reddit approval, then create the script app and store REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET.
+```
 
 Suggested Reddit app fields:
 

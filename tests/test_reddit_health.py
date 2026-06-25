@@ -42,6 +42,23 @@ class RedditHealthTests(unittest.TestCase):
             any("Easy PC Fix Reddit OAuth Health" in step for step in result["setup_links"]["user_action_checklist"])
         )
 
+    def test_missing_credentials_reports_submitted_data_access_request(self) -> None:
+        settings = replace(
+            load_settings("easy_pc_fix_guide"),
+            reddit_client_id="",
+            reddit_client_secret="",
+            reddit_user_agent="easy-pc-fix-guide/0.1",
+            reddit_data_access_request_submitted_at="2026-06-25",
+        )
+
+        result = stage0_reddit_health.check_reddit_oauth(settings, "wifi button missing windows 11")
+
+        self.assertEqual(result["status"], "missing_credentials")
+        self.assertEqual(result["data_access_request_submitted_at"], "2026-06-25")
+        self.assertIn("제출 완료했습니다", result["action_required"])
+        self.assertIn("Reddit 승인 메일을 기다리세요.", result["remediation_steps"])
+        self.assertEqual(result["setup_links"]["data_access_request_submitted_at"], "2026-06-25")
+
     def test_reports_oauth_connected_with_sample_titles(self) -> None:
         settings = replace(
             load_settings("easy_pc_fix_guide"),
@@ -216,6 +233,30 @@ class RedditHealthTests(unittest.TestCase):
         self.assertIn("앱 타입은 반드시 script를 선택하세요.", message)
         self.assertIn("Easy PC Fix Reddit OAuth Health workflow를 Run workflow로 실행하세요.", message)
         self.assertIn("검색어 재시도 기록:", message)
+
+    def test_run_message_includes_submitted_data_access_request_date(self) -> None:
+        settings = replace(
+            load_settings("easy_pc_fix_guide"),
+            reddit_client_id="",
+            reddit_client_secret="",
+            reddit_data_access_request_submitted_at="2026-06-25",
+            notification_provider="telegram",
+            telegram_bot_token="token",
+            telegram_chat_id="chat",
+        )
+        with tempfile.TemporaryDirectory() as tmpdir, patch.object(stage0_reddit_health, "ROOT_DIR", Path(tmpdir)), patch.object(
+            stage0_reddit_health, "load_settings", return_value=settings
+        ), patch.object(stage0_reddit_health, "NotificationClient") as notifier:
+            path = stage0_reddit_health.run("easy_pc_fix_guide", query="wifi button missing windows 11", notify=True)
+
+            payload = json.loads(path.read_text(encoding="utf-8"))
+
+        self.assertEqual(payload["data_access_request_submitted_at"], "2026-06-25")
+        self.assertIn("Data Access Request submitted at: 2026-06-25", payload["human_summary_markdown"])
+        message = notifier.return_value.send_required.call_args.args[0]
+        self.assertIn("Data Access Request 제출일: 2026-06-25", message)
+        self.assertIn("승인 메일을 기다리세요.", message)
+
 
     def test_run_persists_reports_before_notification_failure(self) -> None:
         settings = replace(

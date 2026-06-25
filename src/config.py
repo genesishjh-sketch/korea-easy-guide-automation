@@ -28,6 +28,7 @@ class Settings:
     reddit_client_id: str
     reddit_client_secret: str
     reddit_user_agent: str
+    reddit_data_access_request_submitted_at: str
     google_search_provider: str
     google_api_key: str
     google_cse_id: str
@@ -80,6 +81,10 @@ def load_settings(site_key: str | None = None) -> Settings:
         reddit_client_id=os.getenv("REDDIT_CLIENT_ID", ""),
         reddit_client_secret=os.getenv("REDDIT_CLIENT_SECRET", ""),
         reddit_user_agent=site_getenv("REDDIT_USER_AGENT", profile.reddit_user_agent),
+        reddit_data_access_request_submitted_at=site_getenv(
+            "REDDIT_DATA_ACCESS_REQUEST_SUBMITTED_AT",
+            profile.reddit_data_access_request_submitted_at,
+        ),
         google_search_provider=os.getenv("GOOGLE_SEARCH_PROVIDER", "suggest"),
         google_api_key=os.getenv("GOOGLE_API_KEY", ""),
         google_cse_id=os.getenv("GOOGLE_CSE_ID", ""),

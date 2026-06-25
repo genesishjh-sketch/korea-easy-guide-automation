@@ -138,17 +138,15 @@ def check_reddit_oauth(settings: Any, query: str, limit: int = 3) -> dict:
             ],
         }
     if not settings.reddit_client_id or not settings.reddit_client_secret:
+        data_access_submitted_at = getattr(settings, "reddit_data_access_request_submitted_at", "")
+        action_required, remediation_steps = missing_credentials_guidance(data_access_submitted_at)
         return {
             **base,
             "status": "missing_credentials",
             **reddit_health_metadata("missing_credentials"),
-            "action_required": f"{reddit_oauth_secret_label()}을 GitHub Secrets 또는 .env에 설정하세요.",
-            "remediation_steps": [
-                "Reddit 앱을 script 타입으로 만들고 client id와 secret을 확인하세요.",
-                f"GitHub Secrets에 {REDDIT_CLIENT_ID_SECRET}를 추가하세요.",
-                f"GitHub Secrets에 {REDDIT_CLIENT_SECRET_SECRET}을 추가하세요.",
-                "Actions > Easy PC Fix Reddit OAuth Health에서 수동 재실행하세요.",
-            ],
+            "data_access_request_submitted_at": data_access_submitted_at,
+            "action_required": action_required,
+            "remediation_steps": remediation_steps,
         }
     try:
         import praw
@@ -293,6 +291,30 @@ def reddit_health_metadata(status: str) -> dict:
     )
 
 
+def missing_credentials_guidance(data_access_submitted_at: str = "") -> tuple[str, list[str]]:
+    if data_access_submitted_at:
+        return (
+            f"Reddit Data Access Request는 {data_access_submitted_at}에 제출 완료했습니다. "
+            f"승인 메일을 받은 뒤 {reddit_oauth_secret_label()}을 GitHub Secrets 또는 .env에 설정하세요.",
+            [
+                "Reddit 승인 메일을 기다리세요.",
+                "승인 후 Reddit 앱을 script 타입으로 만들고 client id와 secret을 확인하세요.",
+                f"GitHub Secrets에 {REDDIT_CLIENT_ID_SECRET}를 추가하세요.",
+                f"GitHub Secrets에 {REDDIT_CLIENT_SECRET_SECRET}을 추가하세요.",
+                "Actions > Easy PC Fix Reddit OAuth Health에서 수동 재실행하세요.",
+            ],
+        )
+    return (
+        f"{reddit_oauth_secret_label()}을 GitHub Secrets 또는 .env에 설정하세요.",
+        [
+            "Reddit 앱을 script 타입으로 만들고 client id와 secret을 확인하세요.",
+            f"GitHub Secrets에 {REDDIT_CLIENT_ID_SECRET}를 추가하세요.",
+            f"GitHub Secrets에 {REDDIT_CLIENT_SECRET_SECRET}을 추가하세요.",
+            "Actions > Easy PC Fix Reddit OAuth Health에서 수동 재실행하세요.",
+        ],
+    )
+
+
 def default_query(site: str | None = None) -> str:
     try:
         seeds = load_seed_list(site)
@@ -317,6 +339,7 @@ def setup_links(settings: Any) -> dict:
         "reddit_data_access_request_guide": reddit_data_access_request_guide(),
         "github_secret_mapping": github_secret_mapping(),
         "user_action_checklist": user_action_checklist(recommended_app_name, recommended_user_agent),
+        "data_access_request_submitted_at": getattr(settings, "reddit_data_access_request_submitted_at", ""),
     }
 
 
@@ -344,6 +367,8 @@ def build_message(result: dict) -> str:
         f"- 발행량 증량 차단: {'예' if result.get('blocks_cadence_increase', True) else '아니오'}",
         f"- 조치: {result.get('action_required') or '확인 필요'}",
     ]
+    if result.get("data_access_request_submitted_at"):
+        lines.append(f"- Data Access Request 제출일: {result.get('data_access_request_submitted_at')}")
     if result.get("remediation_steps"):
         lines.extend(["", "다음 조치:"])
         for step in result.get("remediation_steps", [])[:6]:
@@ -416,6 +441,8 @@ def build_console_summary(result: dict) -> str:
         "query_attempt_count": result.get("query_attempt_count", 0),
         "query_attempts": result.get("query_attempts", [])[:5],
     }
+    if result.get("data_access_request_submitted_at"):
+        payload["data_access_request_submitted_at"] = result.get("data_access_request_submitted_at")
     if result.get("error_type"):
         payload["error_type"] = result.get("error_type")
     if result.get("error"):
@@ -441,6 +468,8 @@ def build_markdown_report(result: dict) -> str:
         "",
         result.get("action_required") or "None",
     ]
+    if result.get("data_access_request_submitted_at"):
+        lines.extend(["", f"- Data Access Request submitted at: {result.get('data_access_request_submitted_at')}"])
     if result.get("remediation_steps"):
         lines.extend(["", "## Remediation Steps", ""])
         lines.extend(f"- {step}" for step in result.get("remediation_steps", []))
