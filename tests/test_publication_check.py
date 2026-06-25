@@ -21,6 +21,8 @@ class PublicationCheckTests(unittest.TestCase):
 
         with patch.object(stage4_publication_check, "fetch_public_feed", return_value={}), patch.object(
             stage4_publication_check, "parse_posts", return_value=[post]
+        ), patch.object(
+            stage4_publication_check, "check_daily_workflow_status", return_value={"status": "success", "today_run_count": 1}
         ), patch("src.pipeline.stage4_publication_check.NotificationClient") as notification:
             result = stage4_publication_check.run(
                 "easy_pc_fix_guide",
@@ -30,6 +32,7 @@ class PublicationCheckTests(unittest.TestCase):
 
         self.assertEqual(result["status"], "published_today")
         self.assertEqual(result["today_post_count"], 1)
+        self.assertEqual(result["daily_workflow"]["status"], "success")
         notification.return_value.send_required.assert_called_once()
 
     def test_run_accepts_today_post_before_cutoff(self) -> None:
@@ -41,6 +44,10 @@ class PublicationCheckTests(unittest.TestCase):
 
         with patch.object(stage4_publication_check, "fetch_public_feed", return_value={}), patch.object(
             stage4_publication_check, "parse_posts", return_value=[post]
+        ), patch.object(
+            stage4_publication_check,
+            "check_daily_workflow_status",
+            return_value={"status": "no_run_today", "today_run_count": 0},
         ), patch("src.pipeline.stage4_publication_check.NotificationClient") as notification:
             result = stage4_publication_check.run(
                 "easy_pc_fix_guide",
@@ -51,6 +58,7 @@ class PublicationCheckTests(unittest.TestCase):
         self.assertEqual(result["status"], "published_today_before_cutoff")
         self.assertEqual(result["today_post_count"], 0)
         self.assertEqual(result["today_total_post_count"], 1)
+        self.assertEqual(result["daily_workflow"]["status"], "no_run_today")
         notification.return_value.send_required.assert_called_once()
 
     def test_run_raises_when_publication_check_notification_fails(self) -> None:
@@ -62,6 +70,8 @@ class PublicationCheckTests(unittest.TestCase):
 
         with patch.object(stage4_publication_check, "fetch_public_feed", return_value={}), patch.object(
             stage4_publication_check, "parse_posts", return_value=[post]
+        ), patch.object(
+            stage4_publication_check, "check_daily_workflow_status", return_value={"status": "success", "today_run_count": 1}
         ), patch("src.pipeline.stage4_publication_check.NotificationClient") as notification:
             notification.return_value.send_required.side_effect = RuntimeError("telegram failed")
 
@@ -124,6 +134,37 @@ class PublicationCheckTests(unittest.TestCase):
         self.assertTrue(saved_exists)
         self.assertEqual(saved["status"], "published_today")
 
+    def test_daily_workflow_status_summarizes_today_success_run(self) -> None:
+        runs = [
+            {
+                "id": 123,
+                "event": "schedule",
+                "status": "completed",
+                "conclusion": "success",
+                "created_at": "2026-06-25T00:25:07Z",
+                "html_url": "https://github.com/run/123",
+                "head_sha": "abcdef123456",
+            }
+        ]
+
+        with patch.object(stage4_publication_check, "fetch_daily_workflow_runs", return_value=runs):
+            result = stage4_publication_check.check_daily_workflow_status(
+                datetime(2026, 6, 25, 9, 45, tzinfo=ZoneInfo("Asia/Seoul"))
+            )
+
+        self.assertEqual(result["status"], "success")
+        self.assertEqual(result["today_run_count"], 1)
+        self.assertEqual(result["latest_run"]["head_sha"], "abcdef1")
+
+    def test_daily_workflow_status_reports_no_run_today(self) -> None:
+        with patch.object(stage4_publication_check, "fetch_daily_workflow_runs", return_value=[]):
+            result = stage4_publication_check.check_daily_workflow_status(
+                datetime(2026, 6, 25, 9, 45, tzinfo=ZoneInfo("Asia/Seoul"))
+            )
+
+        self.assertEqual(result["status"], "no_run_today")
+        self.assertEqual(result["today_run_count"], 0)
+
     def test_publication_message_surfaces_confirmed_post_url(self) -> None:
         message = stage4_publication_check.build_message(
             {
@@ -133,6 +174,15 @@ class PublicationCheckTests(unittest.TestCase):
                 "cutoff_kst": "2026-06-25T09:00:00+09:00",
                 "status": "published_today",
                 "today_post_count": 1,
+                "daily_workflow": {
+                    "status": "success",
+                    "today_run_count": 1,
+                    "latest_run": {
+                        "created_at_kst": "2026-06-25T09:25:07+09:00",
+                        "conclusion": "success",
+                        "url": "https://github.com/run/123",
+                    },
+                },
                 "latest_posts": [
                     {
                         "title": "Fresh post",
@@ -145,6 +195,7 @@ class PublicationCheckTests(unittest.TestCase):
 
         self.assertIn("- 확인된 최신 글: Fresh post", message)
         self.assertIn("- 최신 글 URL: https://easypcfixguide.blogspot.com/2026/06/fresh-post.html", message)
+        self.assertIn("- Daily workflow 상태: 오늘 실행 성공", message)
 
     def test_publication_message_explains_before_cutoff_post(self) -> None:
         message = stage4_publication_check.build_message(
@@ -156,6 +207,7 @@ class PublicationCheckTests(unittest.TestCase):
                 "status": "published_today_before_cutoff",
                 "today_post_count": 0,
                 "today_total_post_count": 1,
+                "daily_workflow": {"status": "no_run_today", "today_run_count": 0},
                 "latest_posts": [
                     {
                         "title": "Early post",
@@ -169,6 +221,7 @@ class PublicationCheckTests(unittest.TestCase):
         self.assertIn("오늘 공개 글 확인, 기준시각 전 발행", message)
         self.assertIn("- 확인된 오늘 글: Early post", message)
         self.assertIn("- 오늘 전체 공개 글 수: 1", message)
+        self.assertIn("공개 글은 확인됐지만 Daily workflow 상태 점검이 필요합니다.", message)
 
 
 if __name__ == "__main__":

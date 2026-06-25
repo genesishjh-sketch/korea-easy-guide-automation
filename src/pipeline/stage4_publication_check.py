@@ -5,6 +5,7 @@ from datetime import datetime
 from datetime import timezone
 import json
 from pathlib import Path
+from urllib.parse import quote
 from zoneinfo import ZoneInfo
 
 import requests
@@ -15,6 +16,7 @@ from src.notifications.telegram import NotificationClient
 
 
 KST = ZoneInfo("Asia/Seoul")
+DEFAULT_GITHUB_REPOSITORY = "genesishjh-sketch/korea-easy-guide-automation"
 
 
 def run(site: str | None = None, today: datetime | None = None, after_hour: int | None = None) -> dict:
@@ -34,6 +36,7 @@ def run(site: str | None = None, today: datetime | None = None, after_hour: int 
         if cutoff is None or post["published_kst"] >= cutoff
     ]
     status = publication_status(todays_posts, all_todays_posts, cutoff)
+    daily_workflow = check_daily_workflow_status(now)
     result = {
         "site": settings.site_key,
         "site_name": settings.site_name,
@@ -43,6 +46,7 @@ def run(site: str | None = None, today: datetime | None = None, after_hour: int 
         "status": status,
         "today_post_count": len(todays_posts),
         "today_total_post_count": len(all_todays_posts),
+        "daily_workflow": daily_workflow,
         "latest_posts": [
             {
                 "title": post["title"],
@@ -69,6 +73,77 @@ def fetch_public_feed(site_url: str) -> dict:
     response = requests.get(f"{base}/feeds/posts/default?alt=json&max-results=10", timeout=20)
     response.raise_for_status()
     return response.json()
+
+
+def check_daily_workflow_status(now: datetime, repository: str = DEFAULT_GITHUB_REPOSITORY) -> dict:
+    try:
+        runs = fetch_daily_workflow_runs(repository)
+    except Exception as exc:
+        return {
+            "status": "unknown",
+            "error_type": type(exc).__name__,
+            "error": str(exc),
+            "note": "GitHub Actions 실행 상태를 확인하지 못했습니다. Blogger 공개 글 기준으로 발행 여부를 판단합니다.",
+        }
+
+    today_runs = []
+    for run in runs:
+        created_at = parse_github_datetime(run.get("created_at", ""))
+        if created_at and created_at.astimezone(KST).date() == now.date():
+            today_runs.append(
+                {
+                    "id": run.get("id"),
+                    "event": run.get("event", ""),
+                    "status": run.get("status", ""),
+                    "conclusion": run.get("conclusion"),
+                    "created_at_kst": created_at.astimezone(KST).isoformat(),
+                    "url": run.get("html_url", ""),
+                    "head_sha": run.get("head_sha", "")[:7],
+                }
+            )
+
+    if not today_runs:
+        return {
+            "status": "no_run_today",
+            "today_run_count": 0,
+            "note": "오늘 Easy PC Daily workflow 실행 기록이 아직 없습니다.",
+        }
+
+    latest = today_runs[0]
+    latest_status = latest.get("status")
+    latest_conclusion = latest.get("conclusion")
+    if latest_status == "completed" and latest_conclusion == "success":
+        status = "success"
+    elif latest_status == "completed":
+        status = "failed"
+    else:
+        status = "in_progress"
+    return {
+        "status": status,
+        "today_run_count": len(today_runs),
+        "latest_run": latest,
+    }
+
+
+def fetch_daily_workflow_runs(repository: str) -> list[dict]:
+    workflow = quote("easy-pc-daily.yml", safe="")
+    url = f"https://api.github.com/repos/{repository}/actions/workflows/{workflow}/runs?per_page=10"
+    response = requests.get(
+        url,
+        headers={"Accept": "application/vnd.github+json", "User-Agent": "easy-pc-fix-publication-check"},
+        timeout=20,
+    )
+    response.raise_for_status()
+    return response.json().get("workflow_runs", [])
+
+
+def parse_github_datetime(value: str) -> datetime | None:
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
 
 
 def parse_posts(feed: dict) -> list[dict]:
@@ -123,6 +198,21 @@ def build_message(result: dict) -> str:
         f"- 기준 이후 공개 글 수: {result['today_post_count']}",
         f"- 오늘 전체 공개 글 수: {result.get('today_total_post_count', result['today_post_count'])}",
     ]
+    workflow = result.get("daily_workflow") or {}
+    if workflow:
+        lines.extend(
+            [
+                f"- Daily workflow 상태: {daily_workflow_status_label(workflow.get('status'))}",
+                f"- 오늘 Daily workflow 실행 수: {workflow.get('today_run_count', 0)}",
+            ]
+        )
+        latest_run = workflow.get("latest_run") or {}
+        if latest_run:
+            lines.append(f"- 최신 workflow run: {latest_run.get('created_at_kst')} | {latest_run.get('conclusion') or latest_run.get('status')}")
+            if latest_run.get("url"):
+                lines.append(f"  {latest_run.get('url')}")
+        if workflow.get("note"):
+            lines.append(f"- workflow 참고: {workflow.get('note')}")
     todays_latest = [
         post
         for post in result.get("latest_posts", [])
@@ -168,6 +258,15 @@ def build_message(result: dict) -> str:
                 "- 글이 발행됐지만 feed 반영이 늦는 경우 10~20분 후 다시 확인하세요.",
             ]
         )
+    elif workflow.get("status") in {"no_run_today", "failed", "unknown"}:
+        lines.extend(
+            [
+                "",
+                "운영 참고:",
+                "- 공개 글은 확인됐지만 Daily workflow 상태 점검이 필요합니다.",
+                "- GitHub Actions Easy PC Fix Daily Publish 실행 기록과 다음 백업 스케줄을 확인하세요.",
+            ]
+        )
     return "\n".join(lines)
 
 
@@ -177,6 +276,17 @@ def publication_status_label(status: str | None) -> str:
     if status == "published_today_before_cutoff":
         return "오늘 공개 글 확인, 기준시각 전 발행"
     return "기준 이후 공개 글 없음"
+
+
+def daily_workflow_status_label(status: str | None) -> str:
+    labels = {
+        "success": "오늘 실행 성공",
+        "failed": "오늘 실행 실패",
+        "in_progress": "실행 중",
+        "no_run_today": "오늘 실행 기록 없음",
+        "unknown": "확인 불가",
+    }
+    return labels.get(status or "", status or "확인 불가")
 
 
 def main() -> None:
