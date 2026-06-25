@@ -226,6 +226,8 @@ def _topic_profile(keyword: str, category: str, site_url: str = "") -> dict:
         title = "Bluetooth Not Working on Windows: Beginner-Friendly Fixes"
     elif "sound" in normalized or "audio" in normalized:
         title = "No Sound After Windows Update? Try These Easy Steps First"
+    elif _is_printer_queue_topic(normalized):
+        title = "How to Clear the Printer Queue on Windows: Safe Steps for Beginners"
     elif "printer" in normalized:
         title = "Printer Says Offline on Windows 11? Simple Fixes for Beginners"
     elif "search" in normalized:
@@ -352,6 +354,10 @@ def _app_name(text: str) -> str:
     return "the app"
 
 
+def _is_printer_queue_topic(text: str) -> bool:
+    return "printer" in text and ("queue" in text or "stuck" in text or "clear" in text)
+
+
 def _quick_summary(keyword: str, error: str | None) -> list[str]:
     normalized = keyword.lower()
     if error and "onedrive" in normalized:
@@ -381,6 +387,15 @@ def _quick_summary(keyword: str, error: str | None) -> list[str]:
             "If only one Windows app fails, focus on that app first instead of changing system-wide settings.",
             "If many built-in apps fail at once, check Windows Update and Microsoft Store updates before deeper troubleshooting.",
             "This guide keeps app repair and app reset separate so beginners understand which steps can remove app data.",
+        ]
+    if _is_printer_queue_topic(normalized):
+        return [
+            "A stuck printer queue means Windows still has one or more print jobs waiting, paused, or failing.",
+            "Start by canceling stuck jobs and restarting the printer before removing devices or changing drivers.",
+            "Do not repeatedly send the same document because that can fill the queue again.",
+            "If the queue will not clear, restart the print spooler only after saving work and understanding that active print jobs can be removed.",
+            "Use a one-page test print after each step so you know whether the queue is actually clear.",
+            "If this is an office or shared printer, check whether someone else is using or managing it before deleting jobs.",
         ]
     return [
         f"The problem is usually fixable with basic Windows settings, restart, or built-in troubleshooters.",
@@ -420,6 +435,14 @@ def _before_start(text: str, error: str | None) -> list[str]:
                 "For Wi-Fi problems, first separate the PC from the network. If phones and other laptops also cannot connect, the router or internet service may be the real problem, not Windows.",
                 "If Ethernet works but Wi-Fi does not, the issue is more likely related to the wireless adapter, airplane mode, power saving, or the wireless driver.",
                 "If you need internet immediately, use a temporary safe workaround such as Ethernet, phone hotspot, or another trusted network while you complete the checks.",
+            ]
+        )
+    elif _is_printer_queue_topic(text):
+        base.extend(
+            [
+                "For printer queue problems, check whether one failed document is blocking everything behind it. A single stuck job can stop later jobs from printing.",
+                "If this is a shared printer, make sure you are allowed to cancel jobs before clearing the queue.",
+                "Avoid repeatedly clicking Print while troubleshooting. Each attempt can add another copy of the job to the queue.",
             ]
         )
     elif "printer" in text:
@@ -483,6 +506,14 @@ def _symptoms(text: str, error: str | None) -> list[str]:
         ]
     if "sound" in text or "audio" in text:
         return ["Speakers or headphones produce no sound.", "The volume icon looks normal but nothing plays.", "The issue started after a Windows update or restart.", "Bluetooth headphones may connect but stay silent.", "One app may have sound while another app is muted."]
+    if _is_printer_queue_topic(text):
+        return [
+            "Print jobs stay in the queue and do not finish.",
+            "A document says Printing, Paused, Error, or Deleting for a long time.",
+            "New print jobs line up behind an older failed job.",
+            "The printer may be online, but Windows still will not send the next page.",
+            "The same document may print only after canceling the stuck job or restarting the printer.",
+        ]
     if "printer" in text:
         return ["Windows says the printer is offline.", "Print jobs stay in the queue.", "The printer works on another device but not this PC.", "The printer appears more than once in Settings.", "A document prints only after restarting the printer or computer."]
     if _is_app_topic(text):
@@ -529,6 +560,12 @@ def _meaning(text: str, error: str | None) -> list[str]:
             "Windows may not detect the Bluetooth adapter, the device may need pairing again, or a driver may need attention.",
             "It can also happen when airplane mode, battery saving, or a temporary hardware state disables Bluetooth.",
             "Because Bluetooth problems often involve drivers, avoid random driver tools and use Windows Update, Device Manager, or the device maker's official support page.",
+        ]
+    if _is_printer_queue_topic(text):
+        return [
+            "Windows may be waiting on a failed, paused, or corrupted print job before it can send newer jobs.",
+            "This does not always mean the printer driver is broken. Often the queue just needs to be canceled and tested carefully.",
+            "Start with canceling stuck jobs and restarting the printer before reinstalling anything.",
         ]
     if "printer" in text:
         return [
@@ -582,6 +619,13 @@ def _try_first(text: str) -> list[str]:
             "Turn airplane mode off.",
             "Open Settings > Bluetooth & devices and check whether Bluetooth appears.",
             "Keep the Bluetooth device charged and close to the PC during pairing.",
+            *base,
+        ]
+    if _is_printer_queue_topic(text):
+        return [
+            "Open Settings > Bluetooth & devices > Printers & scanners and select the printer you meant to use.",
+            "Open the printer queue and cancel only the stuck job first.",
+            "Turn the printer off, wait about 30 seconds, turn it back on, and send one test page.",
             *base,
         ]
     if "printer" in text:
@@ -646,6 +690,15 @@ def _fixes(text: str, error: str | None) -> list[str]:
             "Install driver updates from Windows Update or the PC/device maker's official support page.",
             "If only one accessory fails, test that accessory with another device before changing Windows settings.",
             "If Bluetooth disappears again after sleep or restart, check for pending Windows updates and official driver updates.",
+        ]
+    if _is_printer_queue_topic(text):
+        return [
+            "Open Settings > Bluetooth & devices > Printers & scanners, choose the printer, and open the print queue.",
+            "Cancel the stuck document. Wait a moment because Windows may take time to remove a job marked Deleting.",
+            "Restart the printer and check for paper, ink, toner, or display messages on the printer itself.",
+            "Send one short test page instead of the original large document.",
+            "If the same document gets stuck again, try printing a different file so you know whether the file is the problem.",
+            "If the queue still will not clear, use official Microsoft printer troubleshooting guidance before restarting print services.",
         ]
     if "printer" in text:
         return [

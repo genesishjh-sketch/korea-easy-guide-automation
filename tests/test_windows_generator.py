@@ -13,6 +13,7 @@ from src.content.windows_generator import _error_title
 from src.content.windows_generator import _related_guides
 from src.content.windows_generator import _sources_for_topic
 from src.content.windows_generator import _symptoms
+from src.content.windows_generator import _topic_profile
 
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
@@ -95,6 +96,27 @@ class WindowsGeneratorSourceTests(unittest.TestCase):
         self.assertNotIn("The Windows feature does not respond normally.", combined)
         self.assertNotIn("Wi-Fi button returned", combined)
         self.assertNotIn("printer prints one page", combined)
+
+    def test_printer_queue_topic_uses_queue_specific_title_and_copy(self) -> None:
+        text = "how to clear printer queue"
+        profile = _topic_profile(text, "Printer & Scanner", "https://easypcfixguide.blogspot.com")
+        combined = "\n".join(
+            [
+                *profile["quick_summary"],
+                *profile["symptoms"],
+                *profile["meaning"],
+                *profile["try_first"],
+                *profile["fixes"],
+            ]
+        )
+
+        self.assertEqual(profile["title"], "How to Clear the Printer Queue on Windows: Safe Steps for Beginners")
+        self.assertEqual(profile["slug"], "how-to-clear-the-printer-queue-on-windows-safe-steps-for-beginners")
+        self.assertIn("stuck printer queue", combined)
+        self.assertIn("cancel", combined.lower())
+        self.assertIn("one test page", combined)
+        self.assertNotIn("Windows says the printer is offline.", combined)
+        self.assertNotIn("A printer can also appear offline", combined)
 
     def test_related_guides_use_internal_blog_search_links(self) -> None:
         guides = _related_guides("Apps & Settings", "https://easypcfixguide.blogspot.com")
