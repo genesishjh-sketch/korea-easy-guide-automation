@@ -62,6 +62,7 @@ def run(site: str | None = None, today: datetime | None = None, after_hour: int 
         ],
     }
     result["publication_evidence"] = assess_publication_evidence(result)
+    save_result(result)
     NotificationClient(settings).send_required(build_message(result))
     return result
 

@@ -88,13 +88,13 @@ class PublicationCheckTests(unittest.TestCase):
             "published_kst": datetime(2026, 6, 25, 9, 12, tzinfo=ZoneInfo("Asia/Seoul")),
         }
 
-        with patch.object(stage4_publication_check, "fetch_public_feed", return_value={}), patch.object(
-            stage4_publication_check, "parse_posts", return_value=[post]
-        ), patch.object(
+        with tempfile.TemporaryDirectory() as tmpdir, patch.object(stage4_publication_check, "ROOT_DIR", Path(tmpdir)), patch.object(
+            stage4_publication_check, "fetch_public_feed", return_value={}
+        ), patch.object(stage4_publication_check, "parse_posts", return_value=[post]), patch.object(
             stage4_publication_check, "check_daily_workflow_status", return_value={"status": "success", "today_run_count": 1}
-        ), patch.object(
-            stage4_publication_check, "read_daily_success_report", return_value={"status": "not_uploaded"}
-        ), patch("src.pipeline.stage4_publication_check.NotificationClient") as notification:
+        ), patch.object(stage4_publication_check, "read_daily_success_report", return_value={"status": "not_uploaded"}), patch(
+            "src.pipeline.stage4_publication_check.NotificationClient"
+        ) as notification:
             notification.return_value.send_required.side_effect = RuntimeError("telegram failed")
 
             with self.assertRaises(RuntimeError):
@@ -103,6 +103,11 @@ class PublicationCheckTests(unittest.TestCase):
                     today=datetime(2026, 6, 25, 9, 45, tzinfo=ZoneInfo("Asia/Seoul")),
                     after_hour=9,
                 )
+            report_path = Path(tmpdir) / "reports" / "easy_pc_fix_guide-publication-check.json"
+            saved = json.loads(report_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(saved["status"], "published_today")
+        self.assertEqual(saved["publication_evidence"]["status"], "feed_and_workflow_confirmed_report_unavailable")
 
     def test_main_accepts_today_post_before_cutoff(self) -> None:
         early_result = {
