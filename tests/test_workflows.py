@@ -161,9 +161,12 @@ class WorkflowSafetyTests(unittest.TestCase):
         self.assertIn("REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}", workflow)
         self.assertIn("EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT", workflow)
         self.assertIn("python -m src.pipeline.stage0_reddit_health --site easy_pc_fix_guide", workflow)
+        self.assertIn('EVENT_NAME="${{ github.event_name }}"', workflow)
+        self.assertIn('"workflow_dispatch"', workflow)
         self.assertIn("--notify", workflow)
         self.assertIn("actions/upload-artifact@v6", workflow)
         self.assertIn("reports/easy_pc_fix_guide-reddit-health.json", workflow)
+        self.assertIn("reports/easy_pc_fix_guide-reddit-health.md", workflow)
 
 
 if __name__ == "__main__":

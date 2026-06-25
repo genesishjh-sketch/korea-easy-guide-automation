@@ -478,13 +478,19 @@ def check_reddit_health_workflow() -> PreflightCheck:
         "REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}",
         "REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}",
         "python -m src.pipeline.stage0_reddit_health --site easy_pc_fix_guide",
+        'EVENT_NAME="${{ github.event_name }}"',
         "--notify",
         "reports/easy_pc_fix_guide-reddit-health.json",
+        "reports/easy_pc_fix_guide-reddit-health.md",
     ]
     missing = [item for item in required if item not in text]
     if missing:
         return PreflightCheck("reddit_health_workflow", "fail", f"Missing Reddit health workflow safeguards: {', '.join(missing)}")
-    return PreflightCheck("reddit_health_workflow", "pass", "Reddit health workflow checks OAuth with secrets and uploads its report.")
+    return PreflightCheck(
+        "reddit_health_workflow",
+        "pass",
+        "Reddit health workflow checks OAuth with secrets, keeps scheduled runs quiet, and uploads JSON/Markdown reports.",
+    )
 
 
 def check_reddit_health_report_persistence() -> PreflightCheck:

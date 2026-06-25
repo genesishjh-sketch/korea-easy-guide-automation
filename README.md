@@ -182,7 +182,7 @@ GitHub Actions health check:
 .github/workflows/easy-pc-reddit-health.yml
 ```
 
-The health check writes `reports/easy_pc_fix_guide-reddit-health.json` and `reports/easy_pc_fix_guide-reddit-health.md`. The JSON file also embeds a `human_summary_markdown` field, so the GitHub Actions artifact remains readable even when only the JSON artifact is uploaded. It prints a sanitized action summary in the Actions log and sends the same action summary to the Korean Posting Bot when Telegram is configured.
+The health check writes `reports/easy_pc_fix_guide-reddit-health.json` and `reports/easy_pc_fix_guide-reddit-health.md`. The JSON file also embeds a `human_summary_markdown` field. Scheduled runs upload both files quietly without Posting Bot noise while Reddit approval is pending; manual workflow runs can still send the same action summary to the Korean Posting Bot with `notify=true`.
 It checks every configured subreddit and reports tested subreddits, matched subreddits, and per-subreddit signal counts so OAuth stability is visible before cadence increases.
 
 ## Daily Automation
