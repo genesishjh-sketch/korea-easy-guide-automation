@@ -8,7 +8,9 @@ from zoneinfo import ZoneInfo
 from src.config import ROOT_DIR, Settings
 from src.pipeline.stage4_publication_check import classify_daily_success_context
 from src.pipeline.stage4_publication_check import fetch_public_feed
+from src.pipeline.stage4_publication_check import is_success_status
 from src.pipeline.stage4_publication_check import parse_posts
+from src.pipeline.stage4_publication_check import publication_status
 from src.reporting.daily_reports import read_daily_success_report
 from src.reporting.cadence import review_cadence
 from src.reporting.analytics import GA4Client
@@ -296,8 +298,9 @@ class WeeklyReporter:
                 all_todays_posts.append(post)
                 if published_at >= cutoff:
                     todays_posts.append(post)
-        status = "published_today" if todays_posts else "published_today_before_cutoff" if all_todays_posts else "missing_today"
-        public_feed_ok = status in {"published_today", "published_today_before_cutoff"}
+        status = publication_status(todays_posts, all_todays_posts, cutoff)
+        public_feed_ok = is_success_status(status)
+        duplicate_today = status == "duplicate_today"
         return {
             "site": self.settings.site_key,
             "site_name": self.settings.site_name,
@@ -310,14 +313,30 @@ class WeeklyReporter:
             "today_total_post_count": len(all_todays_posts),
             "latest_posts": public_posts.get("posts", [])[:5],
             "publication_evidence": {
-                "status": "weekly_public_feed_confirmed" if public_feed_ok else "weekly_public_feed_missing_today",
-                "label": "주간 보고 공개 피드 기준 확인" if public_feed_ok else "주간 보고 공개 피드 기준 오늘 글 없음",
+                "status": (
+                    "weekly_duplicate_publication_detected"
+                    if duplicate_today
+                    else "weekly_public_feed_confirmed"
+                    if public_feed_ok
+                    else "weekly_public_feed_missing_today"
+                ),
+                "label": (
+                    "주간 보고 공개 피드 기준 오늘 글 2개 이상 감지"
+                    if duplicate_today
+                    else "주간 보고 공개 피드 기준 확인"
+                    if public_feed_ok
+                    else "주간 보고 공개 피드 기준 오늘 글 없음"
+                ),
                 "note": (
+                    "하루 1개 운영 기준을 초과했습니다. 자동 발행 중복 또는 예약 발행 충돌 가능성을 확인하세요."
+                    if duplicate_today
+                    else (
                     "발행 확인 workflow artifact가 없거나 오래되어 공개 Blogger feed로 재계산했습니다."
                     if public_feed_ok
                     else "공개 Blogger feed에서 오늘 공개 글을 찾지 못했습니다."
+                    )
                 ),
-                "needs_attention": not public_feed_ok,
+                "needs_attention": not public_feed_ok or duplicate_today,
             },
         }
 
@@ -986,6 +1005,7 @@ def _status_kr(status: str | None) -> str:
         "fail": "실패",
         "published_today": "오늘 공개 글 확인",
         "published_today_before_cutoff": "오늘 공개 글 확인(기준 전 발행)",
+        "duplicate_today": "오늘 공개 글 2개 이상",
         "missing_today": "오늘 공개 글 없음",
         "validated": "검증 완료",
         "draft_uploaded": "초안 업로드",

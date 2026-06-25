@@ -211,6 +211,13 @@ def classify_daily_success_context(report: dict) -> dict:
 
 
 def assess_publication_evidence(result: dict) -> dict:
+    if result.get("status") == "duplicate_today":
+        return {
+            "status": "duplicate_publication_detected",
+            "label": "오늘 공개 글이 하루 1개 기준을 초과",
+            "note": "자동 발행 중복, 수동 발행, 또는 예약 발행 충돌 가능성이 있습니다. 최신 공개 글 목록과 Daily workflow 실행 수를 확인하세요.",
+            "needs_attention": True,
+        }
     public_feed_ok = is_success_status(result.get("status"))
     workflow_status = (result.get("daily_workflow") or {}).get("status")
     workflow_ok = workflow_status == "success"
@@ -270,6 +277,8 @@ def assess_publication_evidence(result: dict) -> dict:
 
 
 def publication_status(todays_posts: list[dict], all_todays_posts: list[dict], cutoff: datetime | None) -> str:
+    if len(all_todays_posts) > 1:
+        return "duplicate_today"
     if todays_posts:
         return "published_today"
     if cutoff is not None and all_todays_posts:
@@ -323,6 +332,8 @@ def build_message(result: dict) -> str:
         lines.append(f"  - 판정 참고: {evidence.get('note')}")
     if evidence.get("needs_attention"):
         lines.append("  - 추가 확인 필요: 예")
+        if result.get("status") == "duplicate_today":
+            lines.append("  - 중복 주의: 하루 1개 운영 기준을 초과했습니다. 오늘 공개 글 URL과 Daily workflow 실행 수를 확인하세요.")
         if before_cutoff:
             lines.append("  - 주의: 오늘 글은 확인됐지만 기준시각 이후 자동 발행 증거는 아직 부족합니다.")
         if daily_success_context.get("status") == "validation_only":
@@ -399,6 +410,8 @@ def build_message(result: dict) -> str:
 
 
 def publication_status_label(status: str | None) -> str:
+    if status == "duplicate_today":
+        return "오늘 공개 글 2개 이상 감지"
     if status == "published_today":
         return "기준 이후 공개 글 확인"
     if status == "published_today_before_cutoff":

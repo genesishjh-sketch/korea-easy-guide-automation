@@ -12,6 +12,13 @@ from src.pipeline import stage4_publication_check
 
 
 class PublicationCheckTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self._tmpdir = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmpdir.cleanup)
+        patcher = patch.object(stage4_publication_check, "ROOT_DIR", Path(self._tmpdir.name))
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
     def test_run_detects_post_after_cutoff(self) -> None:
         post = {
             "title": "Fresh post",
@@ -80,6 +87,42 @@ class PublicationCheckTests(unittest.TestCase):
         self.assertEqual(result["daily_workflow"]["status"], "no_run_today")
         self.assertEqual(result["publication_evidence"]["status"], "feed_confirmed_needs_workflow_check")
         notification.return_value.send_required.assert_called_once()
+
+    def test_run_flags_more_than_one_public_post_today(self) -> None:
+        posts = [
+            {
+                "title": "First post",
+                "url": "https://easypcfixguide.blogspot.com/2026/06/first-post.html",
+                "published_kst": datetime(2026, 6, 25, 9, 12, tzinfo=ZoneInfo("Asia/Seoul")),
+            },
+            {
+                "title": "Second post",
+                "url": "https://easypcfixguide.blogspot.com/2026/06/second-post.html",
+                "published_kst": datetime(2026, 6, 25, 9, 28, tzinfo=ZoneInfo("Asia/Seoul")),
+            },
+        ]
+
+        with patch.object(stage4_publication_check, "fetch_public_feed", return_value={}), patch.object(
+            stage4_publication_check, "parse_posts", return_value=posts
+        ), patch.object(
+            stage4_publication_check, "check_daily_workflow_status", return_value={"status": "success", "today_run_count": 2}
+        ), patch.object(
+            stage4_publication_check, "read_daily_success_report", return_value={"status": "published", "mode": "publish"}
+        ), patch("src.pipeline.stage4_publication_check.NotificationClient") as notification:
+            result = stage4_publication_check.run(
+                "easy_pc_fix_guide",
+                today=datetime(2026, 6, 25, 9, 45, tzinfo=ZoneInfo("Asia/Seoul")),
+                after_hour=9,
+            )
+
+        self.assertEqual(result["status"], "duplicate_today")
+        self.assertEqual(result["today_post_count"], 2)
+        self.assertEqual(result["today_total_post_count"], 2)
+        self.assertEqual(result["publication_evidence"]["status"], "duplicate_publication_detected")
+        self.assertTrue(result["publication_evidence"]["needs_attention"])
+        sent_message = notification.return_value.send_required.call_args.args[0]
+        self.assertIn("오늘 공개 글 2개 이상 감지", sent_message)
+        self.assertIn("하루 1개 운영 기준을 초과", sent_message)
 
     def test_run_raises_when_publication_check_notification_fails(self) -> None:
         post = {
