@@ -118,6 +118,37 @@ class WindowsGeneratorSourceTests(unittest.TestCase):
         self.assertNotIn("Windows says the printer is offline.", combined)
         self.assertNotIn("A printer can also appear offline", combined)
 
+    def test_specific_printer_topics_preserve_distinctive_seed_intent(self) -> None:
+        cases = {
+            "printer driver unavailable windows 11": "Printer Driver Unavailable on Windows 11: Safe Fixes for Beginners",
+            "printer stuck deleting windows 11": "Printer Job Stuck Deleting on Windows 11: Safe Fixes for Beginners",
+            "default printer keeps changing windows": "Default Printer Keeps Changing on Windows: Safe Fixes for Beginners",
+        }
+
+        slugs = set()
+        for seed, expected_title in cases.items():
+            with self.subTest(seed=seed):
+                profile = _topic_profile(seed, "Printer & Scanner", "https://easypcfixguide.blogspot.com")
+                combined = "\n".join(
+                    [
+                        profile["title"],
+                        *profile["quick_summary"],
+                        *profile["symptoms"],
+                        *profile["meaning"],
+                        *profile["try_first"],
+                        *profile["fixes"],
+                    ]
+                ).lower()
+
+                self.assertEqual(profile["title"], expected_title)
+                self.assertNotEqual(profile["title"], "Printer Says Offline on Windows 11? Simple Fixes for Beginners")
+                self.assertNotEqual(profile["title"], "How to Clear the Printer Queue on Windows: Safe Steps for Beginners")
+                for word in [part for part in seed.split() if len(part) > 3]:
+                    self.assertIn(word.lower(), combined)
+                slugs.add(profile["slug"])
+
+        self.assertEqual(len(slugs), len(cases))
+
     def test_network_connection_topics_preserve_distinctive_seed_intent(self) -> None:
         cases = {
             "wifi keeps disconnecting windows 11": "Wi-Fi Keeps Disconnecting on Windows 11: Safe Fixes for Beginners",

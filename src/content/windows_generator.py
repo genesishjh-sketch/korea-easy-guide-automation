@@ -238,6 +238,12 @@ def _topic_profile(keyword: str, category: str, site_url: str = "") -> dict:
         title = "Bluetooth Not Working on Windows: Beginner-Friendly Fixes"
     elif "sound" in normalized or "audio" in normalized:
         title = "No Sound After Windows Update? Try These Easy Steps First"
+    elif _is_printer_driver_unavailable_topic(normalized):
+        title = "Printer Driver Unavailable on Windows 11: Safe Fixes for Beginners"
+    elif _is_printer_stuck_deleting_topic(normalized):
+        title = "Printer Job Stuck Deleting on Windows 11: Safe Fixes for Beginners"
+    elif _is_default_printer_changing_topic(normalized):
+        title = "Default Printer Keeps Changing on Windows: Safe Fixes for Beginners"
     elif _is_printer_queue_topic(normalized):
         title = "How to Clear the Printer Queue on Windows: Safe Steps for Beginners"
     elif "printer" in normalized:
@@ -370,6 +376,29 @@ def _is_printer_queue_topic(text: str) -> bool:
     return "printer" in text and ("queue" in text or "stuck" in text or "clear" in text)
 
 
+def _is_printer_driver_unavailable_topic(text: str) -> bool:
+    return "printer" in text and "driver" in text and any(term in text for term in ("unavailable", "missing", "not available"))
+
+
+def _is_printer_stuck_deleting_topic(text: str) -> bool:
+    return "printer" in text and "deleting" in text
+
+
+def _is_default_printer_changing_topic(text: str) -> bool:
+    return "printer" in text and "default" in text and any(term in text for term in ("changing", "keeps", "switching", "changes"))
+
+
+def _is_specific_printer_topic(text: str) -> bool:
+    return any(
+        predicate(text)
+        for predicate in (
+            _is_printer_driver_unavailable_topic,
+            _is_printer_stuck_deleting_topic,
+            _is_default_printer_changing_topic,
+        )
+    )
+
+
 def _is_wifi_disconnect_topic(text: str) -> bool:
     return ("wifi" in text or "wi-fi" in text) and any(term in text for term in ("disconnect", "disconnecting", "drops", "keeps"))
 
@@ -438,6 +467,16 @@ def _quick_summary(keyword: str, error: str | None) -> list[str]:
             "Test after each change with a simple website, not only the Windows network icon.",
             "If you need internet immediately, use a temporary trusted network, Ethernet, or phone hotspot while you troubleshoot.",
         ]
+    if _is_specific_printer_topic(normalized):
+        focus = _printer_focus(normalized)
+        return [
+            f"{focus} is usually caused by a printer setting, print queue state, driver package, or Windows printer preference.",
+            "Start with the printer, cable or Wi-Fi, and Windows printer settings before removing anything.",
+            "Do not install random driver tools or delete printer drivers as the first step.",
+            "Use Windows Settings, Windows Update, and the printer maker's official support page for driver-related checks.",
+            "Send only one short test page after each change so you do not fill the queue again.",
+            "If this is a shared office or school printer, check with the person who manages it before changing default or driver settings.",
+        ]
     if _is_printer_queue_topic(normalized):
         return [
             "A stuck printer queue means Windows still has one or more print jobs waiting, paused, or failing.",
@@ -493,6 +532,14 @@ def _before_start(text: str, error: str | None) -> list[str]:
                 "For Wi-Fi problems, first separate the PC from the network. If phones and other laptops also cannot connect, the router or internet service may be the real problem, not Windows.",
                 "If Ethernet works but Wi-Fi does not, the issue is more likely related to the wireless adapter, airplane mode, power saving, or the wireless driver.",
                 "If you need internet immediately, use a temporary safe workaround such as Ethernet, phone hotspot, or another trusted network while you complete the checks.",
+            ]
+        )
+    elif _is_specific_printer_topic(text):
+        base.extend(
+            [
+                "For printer setting or driver problems, identify whether the problem affects only one printer, all printers, or only one document.",
+                "If the printer is shared, confirm whether other people can print before changing drivers or default printer settings.",
+                "Keep one short test document ready. Repeatedly printing a large file can make the queue harder to understand.",
             ]
         )
     elif _is_printer_queue_topic(text):
@@ -620,6 +667,38 @@ def _symptoms(text: str, error: str | None) -> list[str]:
             "The printer may be online, but Windows still will not send the next page.",
             "The same document may print only after canceling the stuck job or restarting the printer.",
         ]
+    if _is_printer_driver_unavailable_topic(text):
+        return [
+            "Windows shows 'Driver is unavailable' for a printer.",
+            "The printer may appear in Settings but will not print.",
+            "A print job may fail even though the printer has power and paper.",
+            "The problem may start after a Windows update, printer reinstall, or moving to a new PC.",
+            "Another computer may print normally while this Windows PC cannot.",
+        ]
+    if _is_printer_stuck_deleting_topic(text):
+        return [
+            "A print job says Deleting for a long time.",
+            "New print jobs may wait behind the stuck deleting job.",
+            "The printer may not respond even after canceling the document.",
+            "The queue may look empty only after restarting the printer or PC.",
+            "The same document may get stuck again if you send it repeatedly.",
+        ]
+    if _is_default_printer_changing_topic(text):
+        return [
+            "Windows keeps switching the default printer.",
+            "Documents open the wrong printer by default.",
+            "The default printer may change after using another printer or reconnecting to a network.",
+            "A shared, virtual, or PDF printer may become the default unexpectedly.",
+            "The correct printer may still work when selected manually.",
+        ]
+    if "scanner" in text:
+        return [
+            "The scanner is not detected by Windows or the scanning app.",
+            "The printer may print, but scanning still fails.",
+            "The scanner may appear offline, unavailable, or missing from the app.",
+            "The issue may start after a driver update, cable change, Wi-Fi change, or app update.",
+            "Another PC or mobile app may detect the scanner while this Windows PC cannot.",
+        ]
     if "printer" in text:
         return ["Windows says the printer is offline.", "Print jobs stay in the queue.", "The printer works on another device but not this PC.", "The printer appears more than once in Settings.", "A document prints only after restarting the printer or computer."]
     if _is_app_topic(text):
@@ -678,6 +757,12 @@ def _meaning(text: str, error: str | None) -> list[str]:
             "Windows may be waiting on a failed, paused, or corrupted print job before it can send newer jobs.",
             "This does not always mean the printer driver is broken. Often the queue just needs to be canceled and tested carefully.",
             "Start with canceling stuck jobs and restarting the printer before reinstalling anything.",
+        ]
+    if _is_specific_printer_topic(text):
+        return [
+            f"{_printer_focus(text)} usually means Windows is confused about a printer setting, queue state, or driver package.",
+            "It does not always mean the printer is broken. Often the safest fix is to confirm the correct printer, clear one stuck state, then use official driver sources.",
+            "Because printer driver changes can affect every print job on the PC, avoid random driver installers and make one change at a time.",
         ]
     if "printer" in text:
         return [
@@ -748,6 +833,20 @@ def _try_first(text: str) -> list[str]:
             "Turn the printer off, wait about 30 seconds, turn it back on, and send one test page.",
             *base,
         ]
+    if _is_specific_printer_topic(text):
+        steps = [
+            "Open Settings > Bluetooth & devices > Printers & scanners and select the exact printer that has the problem.",
+            "Turn the printer off, wait about 30 seconds, turn it back on, and send one short test page.",
+            "Check whether the same printer works from another PC or phone before changing drivers.",
+            *base,
+        ]
+        if _is_printer_driver_unavailable_topic(text):
+            steps.insert(2, "Check Windows Update and the printer maker's official support page before removing the printer.")
+        if _is_printer_stuck_deleting_topic(text):
+            steps.insert(2, "Wait a moment after canceling the job, because Windows can take time to remove a job marked Deleting.")
+        if _is_default_printer_changing_topic(text):
+            steps.insert(2, "Check which printer is currently marked Default before printing again.")
+        return steps
     if "printer" in text:
         return ["Make sure the printer is turned on.", "Check the cable or Wi-Fi connection.", "Cancel stuck print jobs before adding the printer again.", *base]
     if "sound" in text or "audio" in text:
@@ -839,6 +938,24 @@ def _fixes(text: str, error: str | None) -> list[str]:
             "If the same document gets stuck again, try printing a different file so you know whether the file is the problem.",
             "If the queue still will not clear, use official Microsoft printer troubleshooting guidance before restarting print services.",
         ]
+    if _is_specific_printer_topic(text):
+        fixes = [
+            "Open Settings > Bluetooth & devices > Printers & scanners and select the affected printer.",
+            "Check the printer's own display, paper, ink or toner, cable, Wi-Fi, and power state before changing Windows.",
+            "Send one short test page after each change.",
+            "Use Windows Update and the printer maker's official support page for driver checks.",
+            "Remove and add the printer again only after basic checks and only if you know how to reconnect it.",
+            "Avoid third-party driver updater tools.",
+        ]
+        if _is_printer_driver_unavailable_topic(text):
+            fixes.insert(1, "If Windows says the driver is unavailable, look for an official driver or app from the printer maker before deleting anything.")
+        if _is_printer_stuck_deleting_topic(text):
+            fixes.insert(1, "Open the print queue, cancel only the stuck deleting job, and wait before sending another document.")
+            fixes.insert(3, "Restart the printer and PC once if the job remains stuck, then check the queue again.")
+        if _is_default_printer_changing_topic(text):
+            fixes.insert(1, "Turn off automatic default-printer switching if Windows is choosing the last-used printer instead of your preferred printer.")
+            fixes.insert(2, "Manually set the correct printer as default, then test from one simple document.")
+        return fixes
     if "printer" in text:
         return [
             "Open Settings > Bluetooth & devices > Printers & scanners and select the correct printer.",
@@ -937,6 +1054,18 @@ def _network_focus(text: str) -> str:
     if "ethernet" in text:
         return "Ethernet connected with no internet"
     return "a Windows network connection problem"
+
+
+def _printer_focus(text: str) -> str:
+    if _is_printer_driver_unavailable_topic(text):
+        return "a printer driver unavailable message"
+    if _is_printer_stuck_deleting_topic(text):
+        return "a printer job stuck deleting"
+    if _is_default_printer_changing_topic(text):
+        return "a default printer that keeps changing"
+    if _is_printer_queue_topic(text):
+        return "a stuck printer queue"
+    return "a Windows printer problem"
 
 
 def _advanced_fixes(text: str, risk: str) -> list[str]:

@@ -19,8 +19,8 @@ class LaunchQueueValidationTests(unittest.TestCase):
 
         self.assertEqual(payload["status"], "pass")
         self.assertEqual(payload["mode"], "static")
-        self.assertEqual(payload["seed_count"], 14)
-        self.assertEqual(payload["passed_seed_count"], 14)
+        self.assertEqual(payload["seed_count"], 30)
+        self.assertEqual(payload["passed_seed_count"], 30)
         self.assertTrue(all(item["status"] == "pass" for item in payload["items"]))
 
     def test_static_validation_rejects_used_or_generic_seed(self) -> None:
