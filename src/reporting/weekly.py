@@ -12,6 +12,7 @@ from src.pipeline.stage4_publication_check import parse_posts
 from src.reporting.cadence import review_cadence
 from src.reporting.analytics import GA4Client
 from src.reporting.search_console import SearchConsoleClient
+from src.quality.action_guidance import quality_issue_actions
 from src.utils.reddit_setup import GITHUB_SECRETS_URL
 from src.utils.reddit_setup import REDDIT_APPS_URL
 from src.utils.reddit_setup import reddit_oauth_secret_label
@@ -425,7 +426,7 @@ class WeeklyReporter:
             actions.append(
                 "최근 자동 발행에서 품질검수 실패 후 다른 시드로 재시도했습니다. 실패 시드의 공식 출처, 이미지 계획, beginner-safe 섹션 구성을 보강하세요."
             )
-        actions.extend(_quality_issue_actions(quality_issues or []))
+        actions.extend(quality_issue_actions(quality_issues or []))
         if (signal_quality or {}).get("status") == "fallback_only":
             actions.append(
                 "Reddit 실제 신호 없이 fallback 질문만 사용한 글이 있습니다. Reddit OAuth 설정을 추가해 주제 수집 품질을 안정화하세요. "
@@ -761,22 +762,3 @@ def _status_kr(status: str | None) -> str:
         "oauth_error": "OAuth 오류",
     }
     return mapping.get(status or "not_uploaded", status or "미업로드")
-
-
-def _quality_issue_actions(quality_issues: list[dict]) -> list[str]:
-    codes = {issue.get("code", "") for issue in quality_issues}
-    actions = []
-    if {"weak_related_guides", "weak_related_guide_links"} & codes:
-        actions.append(
-            "품질검수에서 Related Guides 내부 링크 문제가 감지되었습니다. Windows 글 템플릿과 related_guides 생성기가 "
-            "블로그 내부 검색 링크 3개 이상을 출력하는지 확인하세요."
-        )
-    if {"missing_required_image_assets", "missing_images", "weak_image_plan"} & codes:
-        actions.append(
-            "품질검수에서 이미지 문제가 감지되었습니다. hero/inline 이미지 2개와 strict image_plan이 생성됐는지 확인하세요."
-        )
-    if {"weak_sources", "weak_microsoft_sources", "missing_microsoft_source", "shallow_microsoft_sources"} & codes:
-        actions.append(
-            "품질검수에서 공식 출처 문제가 감지되었습니다. Microsoft Support/Learn 직접 링크와 주제별 공식 출처를 보강하세요."
-        )
-    return actions

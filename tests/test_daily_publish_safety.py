@@ -264,6 +264,62 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertIn("REDDIT_CLIENT_ID", message)
         self.assertIn("Easy PC Fix Reddit OAuth Health", message)
 
+    def test_daily_success_message_includes_quality_issue_actions(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            article_dir = Path(tmpdir)
+            publish_result_path = article_dir / "validation_result.json"
+            (article_dir / "metadata.json").write_text(
+                json.dumps(
+                    {
+                        "article": {
+                            "title": "Microsoft Store Not Opening on Windows 11",
+                            "category": "Apps & Settings",
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (article_dir / "quality_report.json").write_text(
+                json.dumps(
+                    {
+                        "score": 64,
+                        "passed": False,
+                        "issues": [
+                            {"code": "weak_related_guide_links", "message": "Missing internal related guide links."},
+                            {"code": "missing_required_image_assets", "message": "Missing image assets."},
+                            {"code": "shallow_microsoft_sources", "message": "Direct Microsoft source links missing."},
+                        ],
+                        "metrics": {
+                            "word_count": 1501,
+                            "image_count": 0,
+                            "official_link_count": 4,
+                            "faq_question_count": 6,
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (article_dir / "research_report.json").write_text(json.dumps({}), encoding="utf-8")
+            publish_result_path.write_text(json.dumps({"draft": True, "blogger": {"status": "DRAFT"}}), encoding="utf-8")
+
+            message = daily_draft.build_daily_success_message(
+                {
+                    "site": "easy_pc_fix_guide",
+                    "mode": "validate",
+                    "seed": "microsoft store not opening windows 11",
+                    "article_dir": str(article_dir),
+                    "publish_result": str(publish_result_path),
+                }
+            )
+
+        self.assertIn("품질 이슈:", message)
+        self.assertIn("weak_related_guide_links", message)
+        self.assertIn("품질 조치:", message)
+        self.assertIn("Related Guides 내부 링크 문제", message)
+        self.assertIn("블로그 내부 검색 링크 3개 이상", message)
+        self.assertIn("이미지 문제가 감지", message)
+        self.assertIn("공식 출처 문제가 감지", message)
+
     def test_operational_status_allows_cadence_increase_only_with_oauth_signals(self) -> None:
         result = daily_draft.build_operational_status(
             {"score": 100, "passed": True, "issues": []},

@@ -15,6 +15,7 @@ from src.pipeline.stage4_publication_check import fetch_public_feed
 from src.pipeline.stage4_publication_check import parse_posts
 from src.pipeline.stage1_generate import run as run_stage1
 from src.pipeline.stage2_publish import run as run_stage2
+from src.quality.action_guidance import quality_issue_actions
 from src.quality.hades import HadesQualityGate
 from src.utils.reddit_setup import GITHUB_SECRETS_URL
 from src.utils.reddit_setup import REDDIT_APPS_URL
@@ -570,6 +571,10 @@ def build_daily_success_message(result: dict[str, str]) -> str:
         lines.extend(["", "품질 이슈:"])
         for issue in issues[:5]:
             lines.append(f"- {issue.get('code')}: {issue.get('message')}")
+        issue_actions = quality_issue_actions(issues)
+        if issue_actions:
+            lines.extend(["", "품질 조치:"])
+            lines.extend(f"- {action}" for action in issue_actions)
 
     if result.get("daily_limit_skipped"):
         lines.extend(
