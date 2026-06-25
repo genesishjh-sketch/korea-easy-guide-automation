@@ -58,9 +58,10 @@ jobs:
             python -m src.pipeline.daily_draft --site easy_pc_fix_guide --mode validate
           fi
       - name: Upload validation outputs
+        if: ${{ always() }}
         uses: actions/upload-artifact@v6
         with:
           name: easy-pc-fix-validate-smoke-output
           path: |
             data/generated/easy_pc_fix_guide/
-            reports/easy_pc_fix_guide-preflight.json
+            reports/
