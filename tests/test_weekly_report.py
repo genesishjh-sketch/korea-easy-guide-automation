@@ -1016,6 +1016,73 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertEqual(operations["daily_failure"]["status"], "failed")
         self.assertEqual(operations["daily_failure"]["error"], "today failure")
 
+    def test_operations_result_marks_missing_reddit_health_as_cadence_blocker(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+        now = datetime(2026, 6, 25, 9, 40, tzinfo=ZoneInfo("Asia/Seoul"))
+
+        with tempfile.TemporaryDirectory() as tmpdir, patch("src.reporting.weekly.ROOT_DIR", Path(tmpdir)):
+            operations = reporter._operations_result(now=now)
+
+        self.assertEqual(operations["reddit_health"]["status"], "reddit_health_missing")
+        self.assertEqual(operations["reddit_health"]["health_score"], 0)
+        self.assertTrue(operations["reddit_health"]["blocks_cadence_increase"])
+        self.assertIn("workflow", operations["reddit_health"]["action_required"])
+
+    def test_operations_result_marks_stale_reddit_health_as_cadence_blocker(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+        now = datetime(2026, 6, 25, 9, 40, tzinfo=ZoneInfo("Asia/Seoul"))
+
+        with tempfile.TemporaryDirectory() as tmpdir, patch("src.reporting.weekly.ROOT_DIR", Path(tmpdir)):
+            report_dir = Path(tmpdir) / "reports"
+            report_dir.mkdir()
+            (report_dir / "easy_pc_fix_guide-reddit-health.json").write_text(
+                json.dumps(
+                    {
+                        "status": "oauth_connected",
+                        "checked_at": "2026-06-24T00:20:00Z",
+                        "health_score": 100,
+                        "blocks_cadence_increase": False,
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            operations = reporter._operations_result(now=now)
+
+        self.assertEqual(operations["reddit_health"]["status"], "stale_reddit_health")
+        self.assertEqual(operations["reddit_health"]["previous_status"], "oauth_connected")
+        self.assertEqual(operations["reddit_health"]["previous_checked_at"], "2026-06-24T00:20:00Z")
+        self.assertEqual(operations["reddit_health"]["health_score"], 0)
+        self.assertTrue(operations["reddit_health"]["blocks_cadence_increase"])
+
+    def test_operations_result_keeps_current_reddit_health(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+        now = datetime(2026, 6, 25, 9, 40, tzinfo=ZoneInfo("Asia/Seoul"))
+
+        with tempfile.TemporaryDirectory() as tmpdir, patch("src.reporting.weekly.ROOT_DIR", Path(tmpdir)):
+            report_dir = Path(tmpdir) / "reports"
+            report_dir.mkdir()
+            (report_dir / "easy_pc_fix_guide-reddit-health.json").write_text(
+                json.dumps(
+                    {
+                        "status": "oauth_connected",
+                        "checked_at": "2026-06-25T00:20:00Z",
+                        "health_score": 100,
+                        "blocks_cadence_increase": False,
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            operations = reporter._operations_result(now=now)
+
+        self.assertEqual(operations["reddit_health"]["status"], "oauth_connected")
+        self.assertEqual(operations["reddit_health"]["health_score"], 100)
+        self.assertFalse(operations["reddit_health"]["blocks_cadence_increase"])
+
     def test_operations_result_accepts_today_post_before_cutoff(self) -> None:
         settings = load_settings("easy_pc_fix_guide")
         reporter = WeeklyReporter(settings)

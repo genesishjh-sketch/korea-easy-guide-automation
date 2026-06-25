@@ -13,7 +13,7 @@ from src.reporting.cadence import (
     review_cadence,
 )
 from src.reporting.search_console import SearchConsoleClient
-from src.reporting.weekly import WeeklyReporter
+from src.reporting.weekly import KST, WeeklyReporter
 
 
 def run(today: date | None = None, force: bool = False, site: str | None = None, verbose: bool = True) -> bool:
@@ -31,7 +31,7 @@ def run(today: date | None = None, force: bool = False, site: str | None = None,
     published_count = actual_public_post_count(settings, articles)
     quality_issue_count = reporter._quality_issue_count(articles)
     signal_quality = reporter._signal_quality_result(articles)
-    operations = reporter._operations_result()
+    operations = reporter._operations_result(now=datetime.combine(selected_date, datetime.min.time(), tzinfo=KST))
 
     search_console_client = SearchConsoleClient(settings)
     search_console = search_console_client.summary(week_start, selected_date)

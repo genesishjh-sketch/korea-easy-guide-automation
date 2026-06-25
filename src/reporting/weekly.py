@@ -195,7 +195,10 @@ class WeeklyReporter:
             "daily_success_context": daily_success_context,
             "daily_failure": daily_failure,
             "preflight": self._read_report(report_dir / f"{self.settings.site_key}-preflight.json"),
-            "reddit_health": self._read_report(report_dir / f"{self.settings.site_key}-reddit-health.json"),
+            "reddit_health": self._reddit_health_for_current_day(
+                self._read_report(report_dir / f"{self.settings.site_key}-reddit-health.json"),
+                now,
+            ),
             "publication_check": publication_check,
             "sitemap_submit": sitemap_submit,
         }
@@ -243,6 +246,31 @@ class WeeklyReporter:
             "error_type": daily_failure.get("error_type", ""),
             "error": daily_failure.get("error", ""),
             "seed": daily_failure.get("seed", ""),
+        }
+
+    def _reddit_health_for_current_day(self, reddit_health: dict, now: datetime | None) -> dict:
+        if now is None:
+            return reddit_health
+        if reddit_health.get("status") == "not_uploaded":
+            return {
+                "status": "reddit_health_missing",
+                "status_label": "Reddit Health 리포트 없음",
+                "health_score": 0,
+                "blocks_cadence_increase": True,
+                "action_required": "Easy PC Fix Reddit OAuth Health workflow를 실행해 오늘 Reddit 수집 상태를 확인하세요.",
+            }
+        checked_at = _parse_datetime(str(reddit_health.get("checked_at", "")))
+        if checked_at and checked_at.astimezone(KST).date() == now.astimezone(KST).date():
+            return reddit_health
+        return {
+            **reddit_health,
+            "status": "stale_reddit_health",
+            "status_label": "이전 Reddit Health 리포트",
+            "health_score": 0,
+            "blocks_cadence_increase": True,
+            "action_required": "Reddit Health 리포트가 오늘 실행된 결과가 아닙니다. workflow를 다시 실행해 최신 상태를 확인하세요.",
+            "previous_status": reddit_health.get("status", "unknown"),
+            "previous_checked_at": reddit_health.get("checked_at", ""),
         }
 
     def _publication_check_from_public_posts(self, now: datetime, public_posts: dict) -> dict:
@@ -720,6 +748,8 @@ class WeeklyReporter:
         lines.append(f"- Reddit OAuth Health: {_status_kr(reddit_health.get('status', 'not_uploaded'))}")
         if reddit_health.get("status_label"):
             lines.append(f"  - 상태: {reddit_health.get('status_label')}")
+        if reddit_health.get("previous_checked_at"):
+            lines.append(f"  - 이전 점검 시각: {reddit_health.get('previous_checked_at')}")
         if reddit_health.get("health_score") is not None:
             lines.append(f"  - 상태 점수: {reddit_health.get('health_score')}/100")
         if reddit_health.get("blocks_cadence_increase") is not None:
@@ -855,6 +885,8 @@ def _status_kr(status: str | None) -> str:
         "missing_user_agent": "Reddit User-Agent 없음",
         "missing_praw": "PRAW 패키지 없음",
         "oauth_error": "OAuth 오류",
+        "reddit_health_missing": "Reddit Health 리포트 없음",
+        "stale_reddit_health": "이전 Reddit Health 리포트",
     }
     return mapping.get(status or "not_uploaded", status or "미업로드")
 
