@@ -447,9 +447,11 @@ def save_daily_success_report(result: dict[str, str]) -> Path:
     existing_post = result.get("existing_post") or {}
     if result.get("daily_limit_skipped"):
         reddit_signal_quality = {}
+        google_signal_quality = {}
         operational_status = build_daily_limit_operational_status()
     else:
         reddit_signal_quality = build_reddit_signal_quality(research_report)
+        google_signal_quality = build_google_signal_quality(research_report)
         operational_status = build_operational_status(quality_report, reddit_signal_quality)
     seed_attempt_summary = build_seed_attempt_summary(result)
     output_dir = ROOT_DIR / "reports"
@@ -473,6 +475,7 @@ def save_daily_success_report(result: dict[str, str]) -> Path:
         "quality_passed": quality_report.get("passed"),
         "quality_metrics": quality_report.get("metrics", {}),
         "reddit_signal_quality": reddit_signal_quality,
+        "google_signal_quality": google_signal_quality,
         "operational_status": operational_status,
         "seed_attempt_summary": seed_attempt_summary,
         "existing_post": existing_post,
@@ -540,9 +543,11 @@ def build_daily_success_message(result: dict[str, str]) -> str:
     issues = quality_report.get("issues", [])
     if daily_limit_skipped:
         reddit_signal_quality = {}
+        google_signal_quality = {}
         operational_status = build_daily_limit_operational_status()
     else:
         reddit_signal_quality = build_reddit_signal_quality(research_report)
+        google_signal_quality = build_google_signal_quality(research_report)
         operational_status = build_operational_status(quality_report, reddit_signal_quality)
     if mode == "validate":
         status = "검증 완료"
@@ -577,6 +582,9 @@ def build_daily_success_message(result: dict[str, str]) -> str:
             f"- Reddit OAuth 신호 수: {reddit_signal_quality.get('reddit_oauth_signal_count', 0)}",
             f"- Reddit public JSON 신호 수: {reddit_signal_quality.get('reddit_public_json_signal_count', 0)}",
             f"- Reddit fallback 신호 수: {reddit_signal_quality.get('fallback_reddit_signal_count', 0)}",
+            f"- Google Suggest 신호 수: {google_signal_quality.get('google_suggest_signal_count', 0)}",
+            f"- Google Suggest live 신호 수: {google_signal_quality.get('google_suggest_live_signal_count', 0)}",
+            f"- Google Suggest fallback 신호 수: {google_signal_quality.get('google_suggest_fallback_signal_count', 0)}",
             f"- 운영 상태: {operational_status.get('status_label')}",
             f"- 발행 품질 안정성: {'안정' if operational_status.get('publish_quality_ok') else '점검 필요'}",
             f"- 수집 안정성: {operational_status.get('collection_status_label')}",
@@ -602,8 +610,11 @@ def build_daily_success_message(result: dict[str, str]) -> str:
         f"- 생성 폴더: {result.get('article_dir', '')}",
     ]
     reddit_warning = reddit_signal_quality.get("warning")
+    google_warning = google_signal_quality.get("warning")
+    if reddit_warning or google_warning:
+        lines.extend(["", "수집 품질 경고:"])
     if reddit_warning:
-        lines.extend(["", "수집 품질 경고:", f"- {reddit_warning}"])
+        lines.append(f"- {reddit_warning}")
         reddit_diagnostics = build_reddit_diagnostics_summary(research_report)
         if reddit_diagnostics:
             lines.extend(reddit_diagnostics)
@@ -614,6 +625,11 @@ def build_daily_success_message(result: dict[str, str]) -> str:
                 "- 저장 후 Actions > Easy PC Fix Reddit OAuth Health를 수동 실행하세요.",
             ]
         )
+    if google_warning:
+        lines.append(f"- {google_warning}")
+        google_diagnostics = build_google_diagnostics_summary(research_report)
+        if google_diagnostics:
+            lines.extend(google_diagnostics)
     skipped_duplicate_seeds = result.get("skipped_duplicate_seeds") or []
     if skipped_duplicate_seeds:
         lines.append(f"- 중복으로 건너뛴 시드 수: {len(skipped_duplicate_seeds)}")
@@ -726,6 +742,42 @@ def build_reddit_signal_quality(research_report: dict) -> dict:
         "reddit_public_json_signal_count": public_json_count,
         "fallback_reddit_signal_count": fallback_count,
         "reddit_collection_method_counts": method_counts,
+        "warning": warning,
+    }
+
+
+def build_google_diagnostics_summary(research_report: dict) -> list[str]:
+    diagnostics = research_report.get("google_suggest_diagnostics") or {}
+    if not diagnostics:
+        return []
+    lines = []
+    status = diagnostics.get("status")
+    if status:
+        lines.append(f"- Google Suggest 수집 진단 상태: {status}")
+    lines.append(f"- Google Suggest live 제안 수: {int(diagnostics.get('live_suggestion_count', 0) or 0)}")
+    lines.append(f"- Google Suggest fallback 제안 수: {int(diagnostics.get('fallback_suggestion_count', 0) or 0)}")
+    if diagnostics.get("fallback_reason"):
+        lines.append(f"- Google Suggest fallback 이유: {diagnostics.get('fallback_reason')}")
+    if diagnostics.get("error"):
+        lines.append(f"- Google Suggest 오류: {diagnostics.get('error')}")
+    return lines
+
+
+def build_google_signal_quality(research_report: dict) -> dict:
+    total_count = int(research_report.get("google_suggest_signal_count", 0) or 0)
+    live_count = int(research_report.get("google_suggest_live_signal_count", 0) or 0)
+    fallback_count = int(research_report.get("google_suggest_fallback_signal_count", 0) or 0)
+    method_counts = research_report.get("google_suggest_method_counts", {}) or {}
+    warning = ""
+    if fallback_count and not live_count:
+        warning = "Google Suggest live 신호 없이 fallback 검색 의도만 사용했습니다. 네트워크 또는 Google Suggest 응답 상태를 확인하세요."
+    elif not total_count:
+        warning = "Google Suggest 신호가 없습니다. 글 주제 확장 신호가 부족할 수 있습니다."
+    return {
+        "google_suggest_signal_count": total_count,
+        "google_suggest_live_signal_count": live_count,
+        "google_suggest_fallback_signal_count": fallback_count,
+        "google_suggest_method_counts": method_counts,
         "warning": warning,
     }
 

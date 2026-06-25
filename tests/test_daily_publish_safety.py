@@ -43,7 +43,11 @@ class DuplicatePublishGuardTests(unittest.TestCase):
                         "reddit_oauth_signal_count": 0,
                         "reddit_public_json_signal_count": 0,
                         "fallback_reddit_signal_count": 6,
+                        "google_suggest_signal_count": 5,
+                        "google_suggest_live_signal_count": 0,
+                        "google_suggest_fallback_signal_count": 5,
                         "reddit_collection_method_counts": {"fallback": 6},
+                        "google_suggest_method_counts": {"fallback": 5},
                         "reddit_collection_diagnostics": {
                             "status": "fallback_only",
                             "public_json_error_count": 4,
@@ -54,6 +58,14 @@ class DuplicatePublishGuardTests(unittest.TestCase):
                                 {"subreddit": "pchelp", "error": "403 blocked"},
                             ],
                             "fallback_reason": "All available Reddit live collection paths returned no usable signals; public JSON had errors.",
+                        },
+                        "google_suggest_diagnostics": {
+                            "status": "fallback_only",
+                            "live_suggestion_count": 0,
+                            "fallback_suggestion_count": 5,
+                            "used_fallback": True,
+                            "fallback_reason": "Google Suggest request failed; used local query-intent fallback.",
+                            "error": "timeout",
                         },
                     }
                 ),
@@ -97,6 +109,8 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertEqual(payload["quality_metrics"]["word_count"], 1512)
         self.assertEqual(payload["reddit_signal_quality"]["fallback_reddit_signal_count"], 6)
         self.assertIn("fallback 질문만 사용", payload["reddit_signal_quality"]["warning"])
+        self.assertEqual(payload["google_signal_quality"]["google_suggest_fallback_signal_count"], 5)
+        self.assertIn("Google Suggest live 신호 없이 fallback", payload["google_signal_quality"]["warning"])
         self.assertTrue(payload["operational_status"]["publish_quality_ok"])
         self.assertEqual(payload["operational_status"]["collection_status"], "fallback_only")
         self.assertFalse(payload["operational_status"]["ready_for_cadence_increase"])
@@ -255,7 +269,11 @@ class DuplicatePublishGuardTests(unittest.TestCase):
                         "reddit_oauth_signal_count": 0,
                         "reddit_public_json_signal_count": 0,
                         "fallback_reddit_signal_count": 6,
+                        "google_suggest_signal_count": 5,
+                        "google_suggest_live_signal_count": 0,
+                        "google_suggest_fallback_signal_count": 5,
                         "reddit_collection_method_counts": {"fallback": 6},
+                        "google_suggest_method_counts": {"fallback": 5},
                         "reddit_collection_diagnostics": {
                             "status": "fallback_only",
                             "public_json_error_count": 4,
@@ -266,6 +284,14 @@ class DuplicatePublishGuardTests(unittest.TestCase):
                                 {"subreddit": "pchelp", "error": "403 blocked"},
                             ],
                             "fallback_reason": "All available Reddit live collection paths returned no usable signals; public JSON had errors.",
+                        },
+                        "google_suggest_diagnostics": {
+                            "status": "fallback_only",
+                            "live_suggestion_count": 0,
+                            "fallback_suggestion_count": 5,
+                            "used_fallback": True,
+                            "fallback_reason": "Google Suggest request failed; used local query-intent fallback.",
+                            "error": "timeout",
                         },
                     }
                 ),
@@ -299,6 +325,9 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertIn("- 공식 링크 수: 7", message)
         self.assertIn("- FAQ 수: 9", message)
         self.assertIn("- Reddit fallback 신호 수: 6", message)
+        self.assertIn("- Google Suggest 신호 수: 5", message)
+        self.assertIn("- Google Suggest live 신호 수: 0", message)
+        self.assertIn("- Google Suggest fallback 신호 수: 5", message)
         self.assertIn("- 운영 상태: 발행 품질 OK, 수집 안정성 점검 필요", message)
         self.assertIn("- 발행 품질 안정성: 안정", message)
         self.assertIn("- 수집 안정성: 주의: fallback 질문 의존", message)
@@ -308,6 +337,10 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertIn("- Reddit public JSON 실패 수: 4", message)
         self.assertIn("- 실패 subreddit: WindowsHelp, Windows11, techsupport, pchelp", message)
         self.assertIn("- fallback 이유: All available Reddit live collection paths returned no usable signals", message)
+        self.assertIn("Google Suggest live 신호 없이 fallback", message)
+        self.assertIn("- Google Suggest 수집 진단 상태: fallback_only", message)
+        self.assertIn("- Google Suggest fallback 제안 수: 5", message)
+        self.assertIn("- Google Suggest 오류: timeout", message)
         self.assertIn("https://www.reddit.com/prefs/apps", message)
         self.assertIn("REDDIT_CLIENT_ID", message)
         self.assertIn("Easy PC Fix Reddit OAuth Health", message)
