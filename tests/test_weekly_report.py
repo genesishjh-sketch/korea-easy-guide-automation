@@ -460,6 +460,60 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("다음 무인 발행 전", joined)
         self.assertIn("0/103 exact-match topic seeds remain unused", joined)
 
+    def test_next_actions_include_seed_file_duplicate_guidance(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+
+        actions = reporter._next_actions(
+            articles=[{"blogger_status": "LIVE"}],
+            static_pages=[{"title": "About"}, {"title": "Contact"}, {"title": "Privacy Policy"}, {"title": "Disclaimer"}],
+            public_posts={"status": "connected", "posts": [{"title": "Published"}]},
+            operations={
+                "preflight": {
+                    "status": "fail",
+                    "checks": [
+                        {
+                            "name": "seed_file",
+                            "status": "fail",
+                            "message": "Duplicate topic seeds found: wifi button missing windows 11.",
+                        }
+                    ],
+                },
+            },
+            signal_quality={"status": "connected"},
+        )
+
+        joined = "\n".join(actions)
+        self.assertIn("Windows topic seed 파일에 중복", joined)
+        self.assertIn("중복 시드를 제거", joined)
+
+    def test_next_actions_include_seed_file_weak_seed_guidance(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+
+        actions = reporter._next_actions(
+            articles=[{"blogger_status": "LIVE"}],
+            static_pages=[{"title": "About"}, {"title": "Contact"}, {"title": "Privacy Policy"}, {"title": "Disclaimer"}],
+            public_posts={"status": "connected", "posts": [{"title": "Published"}]},
+            operations={
+                "preflight": {
+                    "status": "fail",
+                    "checks": [
+                        {
+                            "name": "seed_file",
+                            "status": "fail",
+                            "message": "Weak Windows topic seeds found: windows error.",
+                        }
+                    ],
+                },
+            },
+            signal_quality={"status": "connected"},
+        )
+
+        joined = "\n".join(actions)
+        self.assertIn("Windows topic seed가 너무 모호", joined)
+        self.assertIn("오류 코드, 증상, 앱, Windows 기능", joined)
+
     def test_next_actions_include_signal_quality_fallback_warning(self) -> None:
         settings = load_settings("easy_pc_fix_guide")
         reporter = WeeklyReporter(settings)

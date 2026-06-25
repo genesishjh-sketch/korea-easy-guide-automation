@@ -337,6 +337,7 @@ class WeeklyReporter:
         operational_status = daily_success.get("operational_status", {})
         reddit_health = operations.get("reddit_health", {})
         preflight_checks = operations.get("preflight", {}).get("checks", []) or []
+        seed_file_check = next((check for check in preflight_checks if check.get("name") == "seed_file"), {})
         seed_inventory_check = next((check for check in preflight_checks if check.get("name") == "seed_inventory"), {})
         launch_queue_check = next((check for check in preflight_checks if check.get("name") == "launch_queue"), {})
         if preflight_status == "fail":
@@ -351,6 +352,20 @@ class WeeklyReporter:
                 )
             else:
                 actions.append(f"Launch queue 상태를 확인하세요. {launch_message}")
+        if seed_file_check.get("status") in {"warn", "fail"}:
+            seed_file_message = seed_file_check.get("message", "")
+            if "Duplicate topic seeds" in seed_file_message:
+                actions.append(f"Windows topic seed 파일에 중복이 있습니다. 중복 시드를 제거한 뒤 다시 실행하세요. {seed_file_message}")
+            elif "blank topic seed" in seed_file_message:
+                actions.append(f"Windows topic seed 파일에 빈 항목이 있습니다. 빈 줄/빈 문자열을 제거하세요. {seed_file_message}")
+            elif "Weak Windows topic seeds" in seed_file_message:
+                actions.append(
+                    f"Windows topic seed가 너무 모호합니다. 오류 코드, 증상, 앱, Windows 기능이 드러나는 구체 주제로 바꾸세요. {seed_file_message}"
+                )
+            elif seed_file_check.get("status") == "warn":
+                actions.append(f"Windows topic seed 수가 부족합니다. 장기 자동화를 위해 새 주제를 보충하세요. {seed_file_message}")
+            else:
+                actions.append(f"Windows topic seed 파일을 확인하세요. {seed_file_message}")
         if seed_inventory_check.get("status") in {"warn", "fail"}:
             seed_message = seed_inventory_check.get("message", "")
             if seed_inventory_check.get("status") == "fail":
