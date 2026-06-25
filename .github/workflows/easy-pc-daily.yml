@@ -48,6 +48,13 @@ jobs:
         run: python -m unittest discover -v
       - name: Run automation preflight
         run: python -m src.pipeline.stage0_preflight --site easy_pc_fix_guide
+      - name: Write daily seed plan
+        run: |
+          if [ -n "${{ github.event.inputs.seed }}" ]; then
+            python -m src.pipeline.daily_draft --site easy_pc_fix_guide --mode plan --seed "${{ github.event.inputs.seed }}" --no-notify
+          else
+            python -m src.pipeline.daily_draft --site easy_pc_fix_guide --mode plan --no-notify
+          fi
       - name: Write Google OAuth files
         run: |
           mkdir -p .credentials
