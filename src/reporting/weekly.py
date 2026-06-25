@@ -546,6 +546,20 @@ class WeeklyReporter:
             )
         if reddit_health.get("action_required"):
             lines.append(f"  - 조치: {reddit_health.get('action_required')}")
+        if reddit_health.get("query_attempt_count") is not None:
+            lines.append(f"  - 검색어 재시도 수: {reddit_health.get('query_attempt_count', 0)}")
+        if reddit_health.get("query_attempts"):
+            lines.append("  - 검색어 재시도 기록:")
+            for attempt in reddit_health.get("query_attempts", [])[:5]:
+                lines.append(
+                    f"    - {attempt.get('query', '')}: {_status_kr(attempt.get('status'))} "
+                    f"/ OAuth 신호 {attempt.get('oauth_signal_count', 0)}개"
+                )
+        if reddit_health.get("per_subreddit_counts"):
+            subreddit_counts = ", ".join(
+                f"{subreddit} {count}개" for subreddit, count in reddit_health.get("per_subreddit_counts", {}).items()
+            )
+            lines.append(f"  - subreddit별 결과: {subreddit_counts}")
         setup_links = reddit_health.get("setup_links") or {}
         if setup_links and reddit_health.get("blocks_cadence_increase"):
             lines.append(f"  - Reddit 앱 타입: {setup_links.get('recommended_app_type', 'script')}")

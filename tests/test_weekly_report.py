@@ -104,6 +104,20 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                         "health_score": 0,
                         "blocks_cadence_increase": True,
                         "action_required": "REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET을 GitHub Secrets 또는 .env에 설정하세요.",
+                        "query_attempt_count": 2,
+                        "query_attempts": [
+                            {
+                                "query": "rare windows error",
+                                "status": "oauth_connected_no_results",
+                                "oauth_signal_count": 0,
+                            },
+                            {
+                                "query": "windows update error",
+                                "status": "oauth_connected",
+                                "oauth_signal_count": 3,
+                            },
+                        ],
+                        "per_subreddit_counts": {"WindowsHelp": 0, "Windows11": 3},
                         "setup_links": {
                             "recommended_app_type": "script",
                             "recommended_redirect_uri": "http://localhost:8080",
@@ -191,6 +205,10 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("Reddit OAuth Health: Reddit OAuth 키 없음", markdown)
         self.assertIn("상태 점수: 0/100", markdown)
         self.assertIn("발행량 증량 차단: 예", markdown)
+        self.assertIn("검색어 재시도 수: 2", markdown)
+        self.assertIn("rare windows error: OAuth 연결됨, 결과 없음 / OAuth 신호 0개", markdown)
+        self.assertIn("windows update error: OAuth 연결 확인 / OAuth 신호 3개", markdown)
+        self.assertIn("subreddit별 결과: WindowsHelp 0개, Windows11 3개", markdown)
         self.assertIn("Reddit 앱 타입: script", markdown)
         self.assertIn("Redirect URI: http://localhost:8080", markdown)
         self.assertIn("REDDIT_CLIENT_SECRET = Reddit 앱 상세 화면의 secret", markdown)
