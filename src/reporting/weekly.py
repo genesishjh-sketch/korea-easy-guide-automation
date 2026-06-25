@@ -579,6 +579,13 @@ class WeeklyReporter:
             lines.append(f"  - 참고: {sitemap_submit.get('note')}")
         if sitemap_submit.get("sitemap_url"):
             lines.append(f"  - {sitemap_submit.get('sitemap_url')}")
+        indexing_guidance = sitemap_submit.get("indexing_guidance") or {}
+        if indexing_guidance:
+            lines.append(f"  - 색인 안내: {indexing_guidance.get('summary', '확인 필요')}")
+            if indexing_guidance.get("expected_wait"):
+                lines.append(f"  - 예상 대기: {indexing_guidance.get('expected_wait')}")
+            if indexing_guidance.get("check_location"):
+                lines.append(f"  - 확인 위치: {indexing_guidance.get('check_location')}")
         if sitemap_submit.get("error"):
             lines.append(f"  - 오류: {sitemap_submit.get('error')}")
 

@@ -7,6 +7,7 @@ import unittest
 from unittest.mock import patch
 
 from src.pipeline import stage3_submit_sitemap
+from src.pipeline.stage3_submit_sitemap import build_indexing_guidance
 from src.pipeline.stage3_submit_sitemap import build_message
 
 
@@ -24,6 +25,9 @@ class SearchConsoleSitemapMessageTests(unittest.TestCase):
         self.assertIn("Search Console sitemap 제출 결과", message)
         self.assertIn("제출 완료", message)
         self.assertIn("https://easypcfixguide.blogspot.com/sitemap.xml", message)
+        self.assertIn("색인 안내", message)
+        self.assertIn("즉시 검색 노출을 보장하지는 않습니다", message)
+        self.assertIn("Search Console > Sitemaps", message)
 
     def test_error_message_contains_action_items(self) -> None:
         message = build_message(
@@ -39,6 +43,19 @@ class SearchConsoleSitemapMessageTests(unittest.TestCase):
         self.assertIn("제출 실패", message)
         self.assertIn("permission denied", message)
         self.assertIn("조치 필요", message)
+
+    def test_indexing_guidance_explains_wait_after_success(self) -> None:
+        guidance = build_indexing_guidance({"status": "submitted"})
+
+        self.assertEqual(guidance["status"], "submitted_waiting")
+        self.assertIn("즉시 검색 노출", guidance["summary"])
+        self.assertIn("며칠", guidance["expected_wait"])
+
+    def test_indexing_guidance_blocks_wait_message_on_error(self) -> None:
+        guidance = build_indexing_guidance({"status": "error"})
+
+        self.assertEqual(guidance["status"], "needs_fix")
+        self.assertIn("오류", guidance["summary"])
 
     def test_main_exits_nonzero_when_sitemap_submit_fails(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -56,7 +73,10 @@ class SearchConsoleSitemapMessageTests(unittest.TestCase):
     def test_main_accepts_successful_sitemap_submit(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             report_path = Path(tmpdir) / "sitemap.json"
-            report_path.write_text(json.dumps({"status": "submitted"}), encoding="utf-8")
+            report_path.write_text(
+                json.dumps({"status": "submitted", "indexing_guidance": build_indexing_guidance({"status": "submitted"})}),
+                encoding="utf-8",
+            )
 
             with patch.object(stage3_submit_sitemap, "run", return_value=report_path), patch(
                 "sys.argv", ["stage3_submit_sitemap"]

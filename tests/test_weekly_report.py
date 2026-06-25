@@ -137,6 +137,12 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                     "sitemap_submit": {
                         "status": "submitted",
                         "sitemap_url": "https://easypcfixguide.blogspot.com/sitemap.xml",
+                        "indexing_guidance": {
+                            "status": "submitted_waiting",
+                            "summary": "sitemap 제출은 Google에 새 글을 알려주는 단계이며, 즉시 검색 노출을 보장하지는 않습니다.",
+                            "expected_wait": "보통 며칠, 새 블로그는 더 오래 걸릴 수 있음",
+                            "check_location": "Search Console > Sitemaps, URL 검사, 페이지 색인 생성",
+                        },
                     },
                 },
                 "cadence_review": {
@@ -192,6 +198,9 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("발행 증거 판정: 공개 피드와 workflow는 확인, 일일 리포트는 발행 리포트 아님", markdown)
         self.assertIn("추가 확인 필요: 예", markdown)
         self.assertIn("Sitemap 제출: 제출됨", markdown)
+        self.assertIn("색인 안내: sitemap 제출은 Google에 새 글을 알려주는 단계", markdown)
+        self.assertIn("예상 대기: 보통 며칠", markdown)
+        self.assertIn("확인 위치: Search Console > Sitemaps", markdown)
         self.assertIn("## 수집 신호 품질", markdown)
         self.assertIn("Reddit OAuth 신호 수: 0", markdown)
         self.assertIn("Reddit public JSON 신호 수: 0", markdown)
