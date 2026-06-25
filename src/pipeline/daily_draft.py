@@ -11,6 +11,7 @@ from zoneinfo import ZoneInfo
 from src.config import ROOT_DIR
 from src.config import load_settings
 from src.content.topic_scoring import infer_category
+from src.content.windows_generator import _sources_for_topic as windows_sources_for_topic
 from src.notifications.telegram import NotificationClient
 from src.pipeline.stage4_publication_check import fetch_public_feed
 from src.pipeline.stage4_publication_check import parse_posts
@@ -151,6 +152,7 @@ def build_seed_plan(
             "category": infer_category(seed, settings.content_domain),
             "already_published_or_duplicate": seed.lower() in publish_used,
             "already_generated_or_validated": seed.lower() in generated_used,
+            "quality_precheck": seed_quality_precheck(seed, settings.content_domain),
         }
         for seed in candidates[:10]
     ]
@@ -185,6 +187,42 @@ def build_seed_plan(
     else:
         plan["note"] = "Seed plan is ready."
     return plan
+
+
+def seed_quality_precheck(seed: str, content_domain: str) -> dict:
+    if content_domain != "windows_help":
+        return {"status": "not_applicable", "issues": []}
+    sources = windows_sources_for_topic(seed.casefold())
+    urls = [source.get("url", "") for source in sources]
+    microsoft_count = sum(1 for url in urls if is_microsoft_url(url))
+    direct_microsoft_count = sum(1 for url in urls if is_direct_microsoft_url(url))
+    issues = []
+    if microsoft_count < 4:
+        issues.append("microsoft_source_count_below_hades_minimum")
+    if direct_microsoft_count < 2:
+        issues.append("direct_microsoft_source_count_below_hades_minimum")
+    return {
+        "status": "ready" if not issues else "warn",
+        "microsoft_source_count": microsoft_count,
+        "direct_microsoft_source_count": direct_microsoft_count,
+        "source_count": len(sources),
+        "issues": issues,
+    }
+
+
+def is_microsoft_url(url: str) -> bool:
+    return any(domain in url for domain in ("microsoft.com", "learn.microsoft.com", "support.microsoft.com"))
+
+
+def is_direct_microsoft_url(url: str) -> bool:
+    if not is_microsoft_url(url):
+        return False
+    blocked_fragments = (
+        "support.microsoft.com/search/results",
+        "support.microsoft.com/search?",
+        "bing.com/search",
+    )
+    return not any(fragment in url for fragment in blocked_fragments)
 
 
 def choose_seed_for_date(seeds: list[str], start_date: str, today: date) -> str:
@@ -464,6 +502,14 @@ def build_seed_plan_message(seed_plan: dict) -> str:
             flags.append("공개/중복 이력 있음")
         if item.get("already_generated_or_validated"):
             flags.append("생성/검증 이력 있음")
+        precheck = item.get("quality_precheck") or {}
+        if precheck.get("status") == "ready":
+            flags.append(
+                "소스 OK "
+                f"MS {precheck.get('microsoft_source_count', 0)}/직접 {precheck.get('direct_microsoft_source_count', 0)}"
+            )
+        elif precheck.get("status") == "warn":
+            flags.append(f"소스 점검 필요: {', '.join(precheck.get('issues') or [])}")
         flag_text = f" ({', '.join(flags)})" if flags else ""
         preview_lines.append(f"- {index}. {item.get('seed')} / {item.get('category')}{flag_text}")
     if not preview_lines:

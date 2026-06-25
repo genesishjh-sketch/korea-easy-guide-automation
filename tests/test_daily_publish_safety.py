@@ -594,6 +594,9 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertEqual(plan["candidate_count"], 2)
         self.assertEqual(plan["unused_active_seed_count"], 0)
         self.assertEqual(plan["candidate_preview"][0]["category"], "Wi-Fi & Internet")
+        self.assertEqual(plan["candidate_preview"][0]["quality_precheck"]["status"], "ready")
+        self.assertGreaterEqual(plan["candidate_preview"][0]["quality_precheck"]["microsoft_source_count"], 4)
+        self.assertGreaterEqual(plan["candidate_preview"][0]["quality_precheck"]["direct_microsoft_source_count"], 2)
 
     def test_plan_mode_writes_seed_plan_without_generating_article(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -645,6 +648,12 @@ class DuplicatePublishGuardTests(unittest.TestCase):
                         "category": "Wi-Fi & Internet",
                         "already_published_or_duplicate": True,
                         "already_generated_or_validated": True,
+                        "quality_precheck": {
+                            "status": "ready",
+                            "microsoft_source_count": 6,
+                            "direct_microsoft_source_count": 3,
+                            "issues": [],
+                        },
                     }
                 ],
             }
@@ -653,6 +662,24 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertIn("[Posting Bot] 일일 포스팅 시드 계획", message)
         self.assertIn("wifi button missing / Wi-Fi & Internet", message)
         self.assertIn("공개/중복 이력 있음", message)
+        self.assertIn("소스 OK MS 6/직접 3", message)
+
+    def test_seed_quality_precheck_warns_when_windows_sources_are_too_shallow(self) -> None:
+        with patch.object(
+            daily_draft,
+            "windows_sources_for_topic",
+            return_value=[
+                {
+                    "name": "Microsoft Support search",
+                    "url": "https://support.microsoft.com/search/results?query=generic",
+                }
+            ],
+        ):
+            result = daily_draft.seed_quality_precheck("generic windows problem", "windows_help")
+
+        self.assertEqual(result["status"], "warn")
+        self.assertIn("microsoft_source_count_below_hades_minimum", result["issues"])
+        self.assertIn("direct_microsoft_source_count_below_hades_minimum", result["issues"])
 
     def test_used_keywords_can_ignore_validation_only_artifacts(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir, patch.object(daily_draft, "load_settings") as load_settings:
