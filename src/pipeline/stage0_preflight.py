@@ -24,6 +24,7 @@ from src.pipeline.stage4_publication_check import parse_posts
 from src.utils.reddit_setup import GITHUB_SECRETS_URL
 from src.utils.reddit_setup import REDDIT_APPS_URL
 from src.utils.reddit_setup import reddit_oauth_secret_label
+from src.utils.reddit_setup import user_action_checklist
 
 
 @dataclass(frozen=True)
@@ -608,6 +609,10 @@ def build_setup_actions(checks: list[PreflightCheck]) -> list[dict]:
                         "reddit_apps": REDDIT_APPS_URL,
                         "github_secrets": GITHUB_SECRETS_URL,
                     },
+                    "user_action_checklist": user_action_checklist(
+                        "Easy PC Fix Guide Automation",
+                        "easy-pc-fix-guide/0.1 by posting-automation-alert-bot",
+                    ),
                 }
             )
         elif check.name == "reporting_google_files":
@@ -740,6 +745,11 @@ def build_preflight_markdown(result: dict) -> str:
                 lines.append("- 링크:")
                 for label, url in links.items():
                     lines.append(f"  - {label}: {url}")
+            checklist = action.get("user_action_checklist") or []
+            if checklist:
+                lines.append("- 사용자가 직접 할 일:")
+                for item in checklist:
+                    lines.append(f"  - {item}")
             lines.append("")
     else:
         lines.append("- 추가 조치 없음")

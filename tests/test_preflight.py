@@ -309,11 +309,15 @@ class PreflightTests(unittest.TestCase):
         self.assertIn("setup_actions", payload)
         self.assertFalse(payload["readiness"]["ready_for_cadence_increase"])
         self.assertEqual(payload["setup_actions"][0]["name"], "reddit_oauth")
+        self.assertIn("user_action_checklist", payload["setup_actions"][0])
+        self.assertIn("앱 타입은 반드시 script를 선택하세요.", "\n".join(payload["setup_actions"][0]["user_action_checklist"]))
         self.assertIn("# Preflight Report: Easy PC Fix Guide", markdown)
         self.assertIn("무인 발행 준비: 예", markdown)
         self.assertIn("발행량 증량 준비: 아니오", markdown)
         self.assertIn("Reddit OAuth 연결", markdown)
         self.assertIn("REDDIT_CLIENT_ID", markdown)
+        self.assertIn("사용자가 직접 할 일", markdown)
+        self.assertIn("Easy PC Fix Reddit OAuth Health workflow를 Run workflow로 실행하세요.", markdown)
         self.assertIn("## 전체 점검", markdown)
 
     def test_preflight_markdown_summarizes_no_action_state(self) -> None:
