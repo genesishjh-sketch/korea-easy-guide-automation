@@ -11,6 +11,7 @@ from zoneinfo import ZoneInfo
 
 from src.config import load_settings
 from src.reporting.weekly import WeeklyReporter
+from src.reporting.weekly import monitoring_review_items
 
 
 class WeeklyReportPublicFeedTests(unittest.TestCase):
@@ -332,9 +333,34 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("Reddit Health 상태: Reddit OAuth 키 없음", markdown)
         self.assertIn("Reddit Health 점수: 0/100", markdown)
         self.assertIn("Reddit Health 증량 차단: 예", markdown)
+        self.assertIn("## 2~3주 모니터링", markdown)
+        self.assertIn("2주 점검일: 2026-07-08", markdown)
+        self.assertIn("3주 점검일: 2026-07-15", markdown)
+        self.assertIn("Reddit OAuth Health", markdown)
         self.assertIn("품질 이슈 상세", markdown)
         self.assertIn("Windows Update Error 0x80070643", markdown)
         self.assertIn("missing_required_image_assets", markdown)
+
+    def test_monitoring_review_items_flag_user_attention_after_two_weeks(self) -> None:
+        items = monitoring_review_items(
+            {
+                "week_end": "2026-07-08",
+                "published_count": 14,
+                "quality_issues": [],
+                "indexed_pages": {"page_count_with_search_data": 0},
+                "search_console": {"totals_from_top_queries": {"impressions": 0}},
+                "operations": {
+                    "daily_success": {"seed_attempt_summary": {"attempted_seed_count": 2}},
+                    "reddit_health": {"status": "missing_credentials"},
+                    "publication_check": {"status": "published_today"},
+                },
+            }
+        )
+
+        self.assertEqual(items[0]["label"], "2주차 안정성 점검")
+        self.assertEqual(items[0]["status_label"], "점검 필요")
+        self.assertEqual(items[0]["target_date"], "2026-07-08")
+        self.assertEqual(items[0]["reddit_health_status"], "missing_credentials")
 
     def test_markdown_article_list_includes_seed_and_domain(self) -> None:
         settings = load_settings("easy_pc_fix_guide")

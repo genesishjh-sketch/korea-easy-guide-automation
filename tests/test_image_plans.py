@@ -44,6 +44,20 @@ class ImagePlanTests(unittest.TestCase):
         self.assertIn("command prompts", combined_prompts)
         self.assertIn("registry editors", combined_prompts)
 
+    def test_windows_prompts_are_topic_specific_and_deep(self) -> None:
+        candidate = build_candidate("wifi button missing windows 11", [], "windows_help")
+
+        with patch.dict("os.environ", {"IMAGE_ASSET_MODE": "manual_jpg"}, clear=True):
+            plan = build_article_image_plan(candidate, "Wi-Fi Button Missing on Windows 11")
+
+        combined_prompts = " ".join(image.prompt for image in plan.images).lower()
+        self.assertIn("use case: photorealistic-natural", combined_prompts)
+        self.assertIn("router", combined_prompts)
+        self.assertIn("wi-fi wave", combined_prompts)
+        self.assertIn("composition/framing", combined_prompts)
+        self.assertIn("distorted hands", combined_prompts)
+        self.assertIn("extra fingers", combined_prompts)
+
     def test_windows_image_plan_has_descriptive_alt_and_captions(self) -> None:
         candidate = build_candidate("windows update error 0x80070643", [], "windows_help")
 

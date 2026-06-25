@@ -111,18 +111,27 @@ def build_article_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
 
 def build_windows_image_plan(candidate: TopicCandidate, title: str) -> ArticleImagePlan:
     extension = _planned_image_extension()
+    topic_scene = _windows_topic_scene(candidate.keyword, title)
+    hero_subject = _windows_hero_subject(topic_scene)
+    inline_subject = _windows_inline_subject(topic_scene)
+    palette = _windows_palette(topic_scene)
     hero = PlannedImage(
         role="hero",
         filename=f"ai-hero.{extension}",
         alt=f"{title} beginner-friendly Windows help visual",
         caption="A calm beginner-friendly visual for solving this Windows problem safely.",
         prompt=(
+            "Use case: photorealistic-natural. "
             f"Create a realistic 16:9 hero image for an English beginner computer help article titled '{title}'. "
-            "Show a clean home desk with a laptop displaying only abstract update, checklist, shield, and repair symbols. "
+            f"Primary request: help a non-technical reader understand a safe first-step fix for {candidate.keyword}. "
+            f"Scene/backdrop: {hero_subject}. "
             "Use blank cards, abstract lines, and icon-like shapes instead of any readable interface. "
+            f"Composition/framing: horizontal 16:9, uncluttered desk-level editorial photo, clear foreground subject, generous negative space. "
+            f"Lighting/mood: bright natural daylight, calm, reassuring, practical. Color palette: {palette}. "
             "Do not show real Microsoft logos, fake Windows UI, readable error codes, readable letters or numbers, brand marks, "
             "private information, warning screens, command prompts, registry editors, or text overlays. "
-            "Style: modern trustworthy tech-help editorial photography, bright natural light, clear composition, practical and safe."
+            "Avoid fake support documents, fake screenshots, scary alert dialogs, distorted hands, extra fingers, watermarks, and cartoon/vector art. "
+            "Style: modern trustworthy tech-help editorial photography, polished blog image, practical and safe."
         ),
     )
     inline = PlannedImage(
@@ -131,11 +140,15 @@ def build_windows_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
         alt=f"Safe step-by-step troubleshooting setup for {candidate.keyword}",
         caption="Work through the safe checks first before trying advanced repair steps.",
         prompt=(
+            "Use case: photorealistic-natural. "
             f"Create a realistic 16:9 in-article image for a beginner Windows troubleshooting guide about '{candidate.keyword}'. "
-            "Show a simple visual troubleshooting flow using abstract icons such as restart arrows, checklist, clock, shield, "
-            "repair gear, and a gentle caution symbol when relevant. Use blank cards and abstract lines only. "
+            f"Primary request: visually support the step-by-step safe checks before advanced fixes. Scene/backdrop: {inline_subject}. "
+            "Show a simple troubleshooting flow using abstract icons such as restart arrows, checklist, clock, shield, "
+            "repair gear, Wi-Fi waves, speaker waves, folder shapes, or device outlines when relevant. Use blank cards and abstract lines only. "
+            "Composition/framing: horizontal 16:9, clean in-article explanatory photo, one clear action area, no clutter. "
+            f"Lighting/mood: bright, calm, beginner-friendly. Color palette: {palette}. "
             "Avoid real or fake operating-system screens, Microsoft logos, readable UI text, readable letters or numbers, "
-            "error codes, scary warning overlays, command prompts, registry editors, and watermarks."
+            "error codes, scary warning overlays, command prompts, registry editors, fake official documentation, watermarks, distorted hands, and extra fingers."
         ),
     )
     return ArticleImagePlan(
@@ -207,3 +220,69 @@ def _inline_caption(scene: str) -> str:
         "shopping": "Check payment options and app requirements before depending on a local service.",
     }
     return captions.get(scene, "Use the visual checklist to make the process easier in Korea.")
+
+
+def _windows_topic_scene(keyword: str, title: str) -> str:
+    text = f"{keyword} {title}".lower()
+    if any(token in text for token in ["wi-fi", "wifi", "internet", "network"]):
+        return "network"
+    if "bluetooth" in text or "device" in text:
+        return "device"
+    if any(token in text for token in ["sound", "audio", "microphone", "mic"]):
+        return "audio"
+    if any(token in text for token in ["printer", "scanner"]):
+        return "printer"
+    if any(token in text for token in ["onedrive", "account", "sign in", "sync"]):
+        return "account"
+    if any(token in text for token in ["search", "file explorer", "folder", "explorer"]):
+        return "files"
+    if any(token in text for token in ["boot", "startup", "recovery", "repair"]):
+        return "recovery"
+    if any(token in text for token in ["update", "0x", "error code"]):
+        return "update"
+    return "general"
+
+
+def _windows_hero_subject(scene: str) -> str:
+    subjects = {
+        "network": "a clean home desk with a laptop, router silhouette, soft Wi-Fi wave symbols, and a simple paper checklist",
+        "device": "a tidy desk with a laptop, generic wireless earbuds or mouse, connection symbols, and a beginner checklist",
+        "audio": "a laptop beside generic headphones and a small microphone, with abstract sound-wave symbols and a safe checklist",
+        "printer": "a small home office desk with a generic printer shape, laptop, cable, and abstract repair checklist symbols",
+        "account": "a laptop next to a notebook and cloud-shaped abstract sync symbols, with calm privacy-focused desk styling",
+        "files": "a laptop with blank folder-shaped cards, magnifying glass, and tidy file organization props",
+        "recovery": "a calm repair desk with a laptop, backup drive, shield symbol, and step-by-step safety checklist cards",
+        "update": "a clean home desk with a laptop displaying only abstract update, checklist, shield, and repair symbols",
+        "general": "a clean home desk with a laptop, notebook, abstract checklist cards, shield, and repair symbols",
+    }
+    return subjects.get(scene, subjects["general"])
+
+
+def _windows_inline_subject(scene: str) -> str:
+    subjects = {
+        "network": "a beginner-friendly desk scene showing a router, laptop, restart arrow, Wi-Fi waves, and a three-step blank checklist",
+        "device": "a simple connection-check scene with a laptop, generic device outline, restart arrow, and blank troubleshooting cards",
+        "audio": "a calm audio-check scene with headphones, microphone shape, volume wave icons, and blank checklist cards",
+        "printer": "a home printer troubleshooting scene with cable, printer outline, clock icon, and blank step cards",
+        "account": "a privacy-safe sync-check scene with cloud icons, shield icon, clock icon, and blank checklist cards",
+        "files": "a file search help scene with folder cards, magnifying glass, restart arrow, and blank checklist cards",
+        "recovery": "a cautious repair-prep scene with backup drive, shield, clock, and blank step cards for safe recovery order",
+        "update": "an update repair flow with restart arrows, clock, shield, repair gear, and blank checklist cards",
+        "general": "a simple safe troubleshooting flow with restart arrow, checklist, clock, shield, and repair gear symbols",
+    }
+    return subjects.get(scene, subjects["general"])
+
+
+def _windows_palette(scene: str) -> str:
+    palettes = {
+        "network": "clean whites, soft teal accents, muted graphite, and light desk wood",
+        "device": "clean whites, muted blue accents, graphite, and soft gray",
+        "audio": "clean whites, soft green accents, graphite, and warm neutral desk tones",
+        "printer": "clean whites, muted cyan accents, graphite, and light gray",
+        "account": "clean whites, soft sky-blue accents, graphite, and gentle warm neutrals",
+        "files": "clean whites, muted amber accents, graphite, and pale gray",
+        "recovery": "clean whites, restrained red caution accent, graphite, and calm neutral tones",
+        "update": "clean whites, soft blue accents, graphite, and light desk wood",
+        "general": "clean whites, soft blue-green accents, graphite, and calm neutral tones",
+    }
+    return palettes.get(scene, palettes["general"])

@@ -20,6 +20,9 @@ from src.utils.reddit_setup import reddit_oauth_secret_label
 
 
 KST = ZoneInfo("Asia/Seoul")
+MONITORING_START_DATE = datetime(2026, 6, 24, tzinfo=KST).date()
+TWO_WEEK_MONITORING_DATE = datetime(2026, 7, 8, tzinfo=KST).date()
+THREE_WEEK_MONITORING_DATE = datetime(2026, 7, 15, tzinfo=KST).date()
 
 
 class WeeklyReporter:
@@ -871,11 +874,97 @@ class WeeklyReporter:
                     f"  - {issue.get('title', '')}: {issue.get('code', 'unknown')} - {issue.get('message', '')}"
                 )
 
+        lines.extend(["", "## 2~3주 모니터링", ""])
+        monitoring_items = monitoring_review_items(report)
+        lines.append(f"- 운영 시작 기준일: {MONITORING_START_DATE.isoformat()}")
+        lines.append(f"- 2주 점검일: {TWO_WEEK_MONITORING_DATE.isoformat()}")
+        lines.append(f"- 3주 점검일: {THREE_WEEK_MONITORING_DATE.isoformat()}")
+        for item in monitoring_items:
+            lines.append(
+                f"- {item['label']}: {item['status_label']} / 목표 {item['target_date']} "
+                f"/ 조치: {item['action']}"
+            )
+        lines.append("- 확인 항목: 공개 발행 누락, 품질점수, Search Console 색인/노출, Reddit OAuth Health, 중복/품질 재시도 수")
+
         lines.extend(["", "## 다음 할 일", ""])
         for action in report["next_actions"]:
             lines.append(f"- {action}")
         lines.append("")
         return "\n".join(lines)
+
+
+def monitoring_review_items(report: dict) -> list[dict]:
+    today = _parse_report_date(report)
+    operations = report.get("operations", {})
+    daily_success = operations.get("daily_success", {})
+    reddit_health = operations.get("reddit_health", {})
+    publication_check = operations.get("publication_check", {})
+    quality_issues = report.get("quality_issues", [])
+    indexed_pages = report.get("indexed_pages", {})
+    search_console = report.get("search_console", {})
+    common = {
+        "published_count": report.get("published_count", 0),
+        "quality_issue_count": len(quality_issues),
+        "reddit_health_status": reddit_health.get("status", "not_uploaded"),
+        "publication_status": publication_check.get("status", "not_uploaded"),
+        "indexed_page_count": indexed_pages.get("page_count_with_search_data", 0),
+        "recent_impressions": search_console.get("totals_from_top_queries", {}).get("impressions", 0),
+        "seed_attempt_count": (daily_success.get("seed_attempt_summary") or {}).get("attempted_seed_count", 0),
+    }
+    return [
+        _monitoring_item(
+            label="2주차 안정성 점검",
+            target_date=TWO_WEEK_MONITORING_DATE,
+            today=today,
+            common=common,
+            action=(
+                "하루 1개 발행이 누락 없이 유지되는지 확인하고, Reddit OAuth 키/색인/품질 이슈가 있으면 먼저 복구"
+            ),
+        ),
+        _monitoring_item(
+            label="3주차 증량 사전 점검",
+            target_date=THREE_WEEK_MONITORING_DATE,
+            today=today,
+            common=common,
+            action=(
+                "색인/노출과 품질검수 안정성을 확인한 뒤 7/22 하루 2개 전환 알림을 받을 준비"
+            ),
+        ),
+    ]
+
+
+def _monitoring_item(label: str, target_date, today, common: dict, action: str) -> dict:
+    if today < target_date:
+        status_label = "예정"
+    elif common["quality_issue_count"] or common["reddit_health_status"] in {
+        "missing_credentials",
+        "missing_user_agent",
+        "reddit_health_missing",
+        "stale_reddit_health",
+        "oauth_error",
+    }:
+        status_label = "점검 필요"
+    elif common["publication_status"] in {"missing_today", "error", "not_uploaded"}:
+        status_label = "발행 확인 필요"
+    else:
+        status_label = "점검일 도달"
+    return {
+        "label": label,
+        "target_date": target_date.isoformat(),
+        "status_label": status_label,
+        "action": action,
+        **common,
+    }
+
+
+def _parse_report_date(report: dict):
+    try:
+        return datetime.fromisoformat(str(report.get("week_end"))).date()
+    except ValueError:
+        try:
+            return datetime.fromisoformat(str(report.get("generated_at"))).astimezone(KST).date()
+        except ValueError:
+            return datetime.now(tz=KST).date()
 
 
 def _status_kr(status: str | None) -> str:

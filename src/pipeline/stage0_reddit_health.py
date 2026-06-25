@@ -14,9 +14,12 @@ from src.utils.reddit_setup import GITHUB_SECRETS_URL
 from src.utils.reddit_setup import REDDIT_APPS_URL
 from src.utils.reddit_setup import REDDIT_CLIENT_ID_SECRET
 from src.utils.reddit_setup import REDDIT_CLIENT_SECRET_SECRET
+from src.utils.reddit_setup import DEFAULT_REDDIT_REDIRECT_URI
+from src.utils.reddit_setup import DEFAULT_REDDIT_USER_AGENT
 from src.utils.reddit_setup import github_secret_mapping
 from src.utils.reddit_setup import reddit_app_field_guide
 from src.utils.reddit_setup import reddit_oauth_secret_label
+from src.utils.reddit_setup import user_action_checklist
 from src.utils.text import clean_space
 
 
@@ -297,16 +300,17 @@ def default_query(site: str | None = None) -> str:
 
 def setup_links(settings: Any) -> dict:
     recommended_app_name = f"{settings.site_name} Automation"
-    recommended_user_agent = settings.reddit_user_agent or "easy-pc-fix-guide/0.1 by your-reddit-username"
+    recommended_user_agent = settings.reddit_user_agent or DEFAULT_REDDIT_USER_AGENT
     return {
         "reddit_apps_url": REDDIT_APPS_URL,
         "github_actions_secrets_url": GITHUB_SECRETS_URL,
         "recommended_app_type": "script",
         "recommended_app_name": recommended_app_name,
-        "recommended_redirect_uri": "http://localhost:8080",
+        "recommended_redirect_uri": DEFAULT_REDDIT_REDIRECT_URI,
         "recommended_user_agent": recommended_user_agent,
         "reddit_app_field_guide": reddit_app_field_guide(recommended_app_name, recommended_user_agent),
         "github_secret_mapping": github_secret_mapping(),
+        "user_action_checklist": user_action_checklist(recommended_app_name, recommended_user_agent),
     }
 
 
@@ -365,6 +369,10 @@ def build_message(result: dict) -> str:
         if setup.get("github_secret_mapping"):
             lines.extend(["", "GitHub에 넣을 값:"])
             for step in setup.get("github_secret_mapping", [])[:3]:
+                lines.append(f"- {step}")
+        if setup.get("user_action_checklist"):
+            lines.extend(["", "사용자가 직접 해야 할 일:"])
+            for step in setup.get("user_action_checklist", [])[:7]:
                 lines.append(f"- {step}")
     if result.get("error"):
         lines.append(f"- 오류: {result.get('error_type')}: {result.get('error')}")
@@ -445,6 +453,9 @@ def build_markdown_report(result: dict) -> str:
                 f"- Recommended user agent: {setup.get('recommended_user_agent', '')}",
             ]
         )
+        if setup.get("user_action_checklist"):
+            lines.extend(["", "## User Action Checklist", ""])
+            lines.extend(f"- {step}" for step in setup.get("user_action_checklist", []))
     if result.get("sample_titles"):
         lines.extend(["", "## Sample Signals", ""])
         lines.extend(f"- {title}" for title in result.get("sample_titles", [])[:10])

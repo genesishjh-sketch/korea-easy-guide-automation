@@ -37,6 +37,10 @@ class RedditHealthTests(unittest.TestCase):
             "REDDIT_CLIENT_SECRET = Reddit 앱 상세 화면의 secret",
             result["setup_links"]["github_secret_mapping"],
         )
+        self.assertIn("user_action_checklist", result["setup_links"])
+        self.assertTrue(
+            any("Easy PC Fix Reddit OAuth Health" in step for step in result["setup_links"]["user_action_checklist"])
+        )
 
     def test_reports_oauth_connected_with_sample_titles(self) -> None:
         settings = replace(

@@ -7,6 +7,7 @@ from src.utils.reddit_setup import REDDIT_APPS_URL
 from src.utils.reddit_setup import github_secret_mapping
 from src.utils.reddit_setup import reddit_app_field_guide
 from src.utils.reddit_setup import reddit_oauth_secret_label
+from src.utils.reddit_setup import user_action_checklist
 
 
 class RedditSetupTests(unittest.TestCase):
@@ -29,6 +30,20 @@ class RedditSetupTests(unittest.TestCase):
         self.assertIn("REDDIT_CLIENT_ID = Reddit 앱 이름 아래에 표시되는 client id", mapping)
         self.assertIn("REDDIT_CLIENT_SECRET = Reddit 앱 상세 화면의 secret", mapping)
         self.assertIn("EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT = 권장 User-Agent 문자열", mapping)
+
+    def test_user_action_checklist_is_copy_ready(self) -> None:
+        checklist = user_action_checklist(
+            "Easy PC Fix Guide Automation",
+            "easy-pc-fix-guide/0.1 by posting-automation-alert-bot",
+        )
+
+        joined = "\n".join(checklist)
+        self.assertIn("Easy PC Fix Guide Automation", joined)
+        self.assertIn("script", joined)
+        self.assertIn("http://localhost:8080", joined)
+        self.assertIn("REDDIT_CLIENT_ID", joined)
+        self.assertIn("REDDIT_CLIENT_SECRET", joined)
+        self.assertIn("Easy PC Fix Reddit OAuth Health", joined)
 
 
 if __name__ == "__main__":
