@@ -879,6 +879,7 @@ class WeeklyReporter:
                 "  - 후보 상태 집계: "
                 f"{_format_seed_plan_status_counts_kr(daily_seed_plan.get('candidate_status_counts') or {})}"
             )
+        lines.extend(_seed_plan_source_quality_lines(daily_seed_plan))
         if daily_seed_plan.get("unused_active_seed_count") is not None:
             lines.append(f"  - 미사용 활성 시드 수: {daily_seed_plan.get('unused_active_seed_count')}")
         if daily_seed_plan.get("note"):
@@ -1125,6 +1126,55 @@ def article_status_summary(articles: list[dict]) -> dict[str, int]:
         if status not in ordered:
             ordered[status] = count
     return ordered
+
+
+def _seed_plan_source_quality_lines(daily_seed_plan: dict) -> list[str]:
+    candidate_preview = daily_seed_plan.get("candidate_preview") or []
+    prechecks = [
+        item.get("quality_precheck") or {}
+        for item in candidate_preview
+        if isinstance(item.get("quality_precheck"), dict)
+    ]
+    if not candidate_preview or not prechecks:
+        return []
+
+    ready_count = sum(1 for item in candidate_preview if (item.get("quality_precheck") or {}).get("status") == "ready")
+    direct_counts = [_safe_int(precheck.get("direct_microsoft_source_count")) for precheck in prechecks]
+    search_counts = [_safe_int(precheck.get("search_result_source_count")) for precheck in prechecks]
+    lines = [
+        "  - 후보 소스 품질: "
+        f"발행 가능 {ready_count}/{len(candidate_preview)}개, "
+        f"직접 Microsoft 최소 {min(direct_counts)}개, 검색 결과 최대 {max(search_counts)}개"
+    ]
+
+    next_seed = daily_seed_plan.get("next_publishable_seed") or daily_seed_plan.get("selected_seed")
+    next_candidate = next((item for item in candidate_preview if item.get("seed") == next_seed), None)
+    if next_candidate:
+        precheck = next_candidate.get("quality_precheck") or {}
+        lines.append(
+            "  - 다음 시드 출처: "
+            f"MS {_safe_int(precheck.get('microsoft_source_count'))}/"
+            f"직접 {_safe_int(precheck.get('direct_microsoft_source_count'))}/"
+            f"검색 {_safe_int(precheck.get('search_result_source_count'))}"
+        )
+
+    warning_candidates = [
+        item for item in candidate_preview if (item.get("quality_precheck") or {}).get("status") == "warn"
+    ]
+    if warning_candidates:
+        lines.append(f"  - 소스 점검 후보 수: {len(warning_candidates)}")
+        for item in warning_candidates[:3]:
+            precheck = item.get("quality_precheck") or {}
+            issues = ", ".join(precheck.get("issues") or [])
+            lines.append(f"    - {item.get('seed', 'unknown')}: {issues or '확인 필요'}")
+    return lines
+
+
+def _safe_int(value) -> int:
+    try:
+        return int(value or 0)
+    except (TypeError, ValueError):
+        return 0
 
 
 def _format_article_status_counts(counts: dict) -> str:

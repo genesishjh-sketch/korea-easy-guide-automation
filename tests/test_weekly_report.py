@@ -11,6 +11,7 @@ from zoneinfo import ZoneInfo
 
 from src.config import load_settings
 from src.reporting.weekly import WeeklyReporter
+from src.reporting.weekly import _seed_plan_source_quality_lines
 from src.reporting.weekly import article_status_summary
 from src.reporting.weekly import monitoring_review_items
 
@@ -183,6 +184,28 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                             "already_published_or_duplicate": 1,
                             "ready": 53,
                         },
+                        "candidate_preview": [
+                            {
+                                "seed": "how to check windows version",
+                                "quality_precheck": {
+                                    "status": "ready",
+                                    "microsoft_source_count": 6,
+                                    "direct_microsoft_source_count": 5,
+                                    "search_result_source_count": 1,
+                                    "issues": [],
+                                },
+                            },
+                            {
+                                "seed": "windows search not working",
+                                "quality_precheck": {
+                                    "status": "ready",
+                                    "microsoft_source_count": 7,
+                                    "direct_microsoft_source_count": 6,
+                                    "search_result_source_count": 0,
+                                    "issues": [],
+                                },
+                            },
+                        ],
                         "unused_active_seed_count": 53,
                         "note": "Seed plan is ready.",
                     },
@@ -360,6 +383,8 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("다음 발행 가능 시드: how to check windows version", markdown)
         self.assertIn("다음 발행 가능 시드 상태: 발행 가능", markdown)
         self.assertIn("후보 상태 집계: 생성/검증 이력 있음 49개, 공개/중복 이력 있음 1개, 발행 가능 53개", markdown)
+        self.assertIn("후보 소스 품질: 발행 가능 2/2개, 직접 Microsoft 최소 5개, 검색 결과 최대 1개", markdown)
+        self.assertIn("다음 시드 출처: MS 6/직접 5/검색 1", markdown)
         self.assertIn("미사용 활성 시드 수: 53", markdown)
         self.assertIn("최근 일일 실패 리포트: 미업로드", markdown)
         self.assertIn("Preflight: 통과", markdown)
@@ -457,6 +482,41 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
             result,
             {"LIVE": 1, "validated": 2, "failed": 1, "not_uploaded": 1, "unknown": 1},
         )
+
+    def test_seed_plan_source_quality_lines_include_warning_details(self) -> None:
+        lines = _seed_plan_source_quality_lines(
+            {
+                "next_publishable_seed": "safe mode windows 11",
+                "candidate_preview": [
+                    {
+                        "seed": "safe mode windows 11",
+                        "quality_precheck": {
+                            "status": "ready",
+                            "microsoft_source_count": 6,
+                            "direct_microsoft_source_count": 5,
+                            "search_result_source_count": 1,
+                        },
+                    },
+                    {
+                        "seed": "thin windows update topic",
+                        "quality_precheck": {
+                            "status": "warn",
+                            "microsoft_source_count": 3,
+                            "direct_microsoft_source_count": 2,
+                            "search_result_source_count": 2,
+                            "issues": ["direct_microsoft_sources_below_minimum"],
+                        },
+                    },
+                ],
+            }
+        )
+
+        markdown = "\n".join(lines)
+
+        self.assertIn("후보 소스 품질: 발행 가능 1/2개, 직접 Microsoft 최소 2개, 검색 결과 최대 2개", markdown)
+        self.assertIn("다음 시드 출처: MS 6/직접 5/검색 1", markdown)
+        self.assertIn("소스 점검 후보 수: 1", markdown)
+        self.assertIn("thin windows update topic: direct_microsoft_sources_below_minimum", markdown)
 
     def test_markdown_article_list_includes_seed_and_domain(self) -> None:
         settings = load_settings("easy_pc_fix_guide")
