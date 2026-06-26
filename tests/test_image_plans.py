@@ -14,13 +14,13 @@ from src.pipeline import stage1_generate
 
 
 class ImagePlanTests(unittest.TestCase):
-    def test_default_uses_local_svg_fallback_filenames(self) -> None:
+    def test_default_uses_codex_generated_jpg_filenames(self) -> None:
         candidate = build_candidate("windows update error 0x80070643", [], "windows_help")
 
         with patch.dict("os.environ", {}, clear=True):
             plan = build_article_image_plan(candidate, "Windows Update Error 0x80070643")
 
-        self.assertEqual([image.filename for image in plan.images], ["ai-hero.svg", "ai-inline-1.svg"])
+        self.assertEqual([image.filename for image in plan.images], ["ai-hero.jpg", "ai-inline-1.jpg"])
         self.assertTrue(plan.strict)
 
     def test_manual_jpg_mode_uses_jpg_filenames(self) -> None:
@@ -52,7 +52,7 @@ class ImagePlanTests(unittest.TestCase):
             plan = build_article_image_plan(candidate, "Wi-Fi Button Missing on Windows 11")
 
         combined_prompts = " ".join(image.prompt for image in plan.images).lower()
-        self.assertIn("use case: photorealistic-natural", combined_prompts)
+        self.assertIn("use case: realistic editorial hero image", combined_prompts)
         self.assertIn("router", combined_prompts)
         self.assertIn("wi-fi wave", combined_prompts)
         self.assertIn("composition/framing", combined_prompts)
@@ -70,13 +70,13 @@ class ImagePlanTests(unittest.TestCase):
                 self.assertGreaterEqual(len(image.caption.split()), 7)
                 self.assertNotIn(image.alt.lower(), {"hero", "inline", "image", "photo", "picture"})
 
-    def test_korea_production_uses_local_svg_fallback_filenames(self) -> None:
+    def test_korea_production_uses_codex_generated_jpg_filenames(self) -> None:
         candidate = build_candidate("incheon airport to seoul", [], "korea_travel")
 
         with patch.dict("os.environ", {"APP_ENV": "production"}, clear=False):
             plan = build_article_image_plan(candidate, "How to Get from Incheon Airport to Seoul")
 
-        self.assertEqual([image.filename for image in plan.images], ["ai-hero.svg", "ai-inline-1.svg"])
+        self.assertEqual([image.filename for image in plan.images], ["ai-hero.jpg", "ai-inline-1.jpg"])
         self.assertTrue(plan.strict)
 
     def test_easy_pc_approval_pending_skips_unstable_reddit_public_json(self) -> None:
@@ -108,7 +108,7 @@ class ImagePlanTests(unittest.TestCase):
         self.assertEqual(stage1_generate.reddit_public_json_skip_reason_for_settings(korea), "")
         self.assertEqual(stage1_generate.reddit_public_json_skip_reason_for_settings(oauth_ready), "")
 
-    def test_korea_stage1_creates_two_local_svg_assets_in_production(self) -> None:
+    def test_korea_stage1_creates_two_codex_jpg_assets_in_production(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             generated_dir = Path(tmpdir) / "generated"
             seed_file = Path(tmpdir) / "seeds.json"
@@ -156,10 +156,10 @@ class ImagePlanTests(unittest.TestCase):
 
             image_plan = json.loads((article_dir / "image_plan.json").read_text(encoding="utf-8"))
             research_report = json.loads((article_dir / "research_report.json").read_text(encoding="utf-8"))
-            hero_exists = (article_dir / "assets" / "ai-hero.svg").exists()
-            inline_exists = (article_dir / "assets" / "ai-inline-1.svg").exists()
+            hero_exists = (article_dir / "assets" / "ai-hero.jpg").exists()
+            inline_exists = (article_dir / "assets" / "ai-inline-1.jpg").exists()
 
-        self.assertEqual([image["url"] for image in image_plan["images"]], ["assets/ai-hero.svg", "assets/ai-inline-1.svg"])
+        self.assertEqual([image["url"] for image in image_plan["images"]], ["assets/ai-hero.jpg", "assets/ai-inline-1.jpg"])
         self.assertEqual(research_report["signal_source_counts"]["reddit"], 1)
         self.assertEqual(research_report["signal_source_counts"]["reddit_fallback"], 1)
         self.assertEqual(research_report["signal_source_counts"]["google_suggest"], 1)
