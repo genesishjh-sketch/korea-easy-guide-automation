@@ -84,21 +84,9 @@ def build_article_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
             "and current rather than cartoonish."
         ),
     )
-    inline = PlannedImage(
-        role="inline",
-        filename=f"ai-inline-1.{extension}",
-        alt=f"Step-by-step example for {candidate.keyword} in Korea",
-        caption=_inline_caption(scene),
-        prompt=(
-            f"Create a realistic 16:9 in-article image for a Korea travel guide about '{candidate.keyword}'. "
-            f"Show a practical step in the process: {_inline_subject(scene)}. "
-            "Make it look like an authentic travel help image, with clear environment details, natural colors, "
-            "no readable private information, no text overlays, no watermarks, and no fake app screens."
-        ),
-    )
     inline_checklist = PlannedImage(
         role="inline",
-        filename=f"ai-inline-2.{extension}",
+        filename=f"ai-inline-1.{extension}",
         alt=f"Visual checklist for {candidate.keyword} in Korea",
         caption="Use the visual checklist to avoid common mistakes before relying on the service.",
         prompt=(
@@ -115,10 +103,12 @@ def build_article_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
         notes=[
             "Do not call paid image APIs in the Python pipeline.",
             "Use Codex-generated JPG assets from src/images/ai_assets/korea.",
-            "Korea posts should use at least two images; long practical guides should use three or more when available.",
+            "Default Korea image roles are hero photo plus one information-rich checklist/flow image.",
+            "Only add a third or fourth image when it has a distinct role such as comparison, map flow, warning, or cost decision.",
+            "Do not add multiple similar lifestyle/photos just to increase image count.",
             "Publishing should stop when required image files are missing.",
         ],
-        images=[hero, inline, inline_checklist],
+        images=[hero, inline_checklist],
     )
 
 
@@ -172,6 +162,7 @@ def build_windows_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
             "Use Codex-generated JPG assets from src/images/ai_assets/windows.",
             "Do not use SVG fallback for Windows help public posts.",
             "Do not generate fake Windows UI or readable error screens.",
+            "Do not add extra images unless each image has a distinct role such as hero, troubleshooting flow, warning, or decision checklist.",
             "Publishing should stop when required image files are missing.",
         ],
         images=[hero, inline],

@@ -44,14 +44,24 @@ def install_korea_ai_assets(article_dir: Path, title: str, keyword: str) -> str:
 
     assets_dir = article_dir / "assets"
     assets_dir.mkdir(parents=True, exist_ok=True)
-    required = (("hero.jpg", "ai-hero.jpg"), ("inline-1.jpg", "ai-inline-1.jpg"))
-    optional = (("inline-2.jpg", "ai-inline-2.jpg"), ("inline-3.jpg", "ai-inline-3.jpg"))
-    for source_name, target_name in (*required, *optional):
-        source = source_dir / source_name
-        if not source.exists():
-            if (source_name, target_name) in optional:
-                continue
-            raise FileNotFoundError(f"Missing Korea AI image asset: {source}")
+    for stale in ("ai-hero.jpg", "ai-inline-1.jpg", "ai-inline-2.jpg", "ai-inline-3.jpg", "ai-inline-4.jpg"):
+        try:
+            (assets_dir / stale).unlink()
+        except FileNotFoundError:
+            pass
+    role_assets = [
+        ("hero", ("hero.jpg",), "ai-hero.jpg", True),
+        ("checklist", ("checklist.jpg", "inline-2.jpg"), "ai-inline-1.jpg", True),
+        ("process", ("process.jpg",), "ai-inline-2.jpg", False),
+        ("decision", ("decision.jpg",), "ai-inline-3.jpg", False),
+    ]
+    for role, source_names, target_name, required in role_assets:
+        source = next((source_dir / name for name in source_names if (source_dir / name).exists()), None)
+        if source is None:
+            if required:
+                expected = " or ".join(str(source_dir / name) for name in source_names)
+                raise FileNotFoundError(f"Missing Korea AI image asset for role '{role}': {expected}")
+            continue
         shutil.copy2(source, assets_dir / target_name)
     return scene
 
