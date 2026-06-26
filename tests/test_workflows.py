@@ -58,6 +58,8 @@ class WorkflowSafetyTests(unittest.TestCase):
         self.assertIn("cancel-in-progress: false", korea_workflow)
         self.assertIn("python -m src.pipeline.stage3_submit_sitemap", korea_workflow)
         self.assertIn("env.BLOGGER_PUBLISH_MODE == 'publish'", korea_workflow)
+        self.assertIn("python -m src.pipeline.daily_batch --mode publish", korea_workflow)
+        self.assertIn("DAILY_BATCH_MAX_POSTS", korea_workflow)
         self.assertIn('cron: "10 0 * * *"', easy_pc_workflow)
         self.assertIn('cron: "25 0 * * *"', easy_pc_workflow)
 
@@ -101,6 +103,8 @@ class WorkflowSafetyTests(unittest.TestCase):
         self.assertLess(oauth_index, publish_index)
         self.assertIn("python -m src.pipeline.stage0_preflight --site easy_pc_fix_guide", workflow)
         self.assertIn("python -m src.pipeline.daily_draft --site easy_pc_fix_guide --mode plan", workflow)
+        self.assertIn("python -m src.pipeline.daily_batch --site easy_pc_fix_guide --mode publish", workflow)
+        self.assertIn("DAILY_BATCH_MAX_POSTS", workflow)
         self.assertIn("--no-notify", workflow)
         self.assertIn("EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT", workflow)
         self.assertIn("easy-pc-fix-guide/0.1 by posting-automation-alert-bot", workflow)
