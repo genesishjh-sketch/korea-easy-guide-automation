@@ -34,7 +34,7 @@ jobs:
       GOOGLE_OAUTH_CLIENT_SECRET_FILE: .credentials/client_secret.json
       GOOGLE_OAUTH_TOKEN_FILE: .credentials/google_token.json
       BLOGGER_PUBLISH_MODE: ${{ github.event_name == 'schedule' && 'publish' || github.event.inputs.mode || 'validate' }}
-      DAILY_BATCH_MAX_POSTS: ${{ vars.EASY_PC_FIX_GUIDE_DAILY_BATCH_MAX_POSTS || '3' }}
+      DAILY_BATCH_MAX_POSTS: ${{ vars.EASY_PC_FIX_GUIDE_DAILY_BATCH_MAX_POSTS || '2' }}
       REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
       REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
       EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT: ${{ vars.EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT || 'easy-pc-fix-guide/0.1 by posting-automation-alert-bot' }}
