@@ -13,6 +13,7 @@ from src.config import ROOT_DIR, load_settings
 from src.content.generator import EnglishArticleGenerator
 from src.content.topic_scoring import build_candidate
 from src.content.windows_generator import WindowsArticleGenerator
+from src.images.ai_library import install_korea_ai_assets
 from src.images.ai_library import install_windows_ai_assets
 from src.images.ai_plan import build_article_image_plan
 from src.images.local_svg import create_korea_svg_assets
@@ -73,6 +74,8 @@ def run(seed: str | None = None, site: str | None = None) -> Path:
     )
     if settings.content_domain == "windows_help":
         install_windows_ai_assets(output_dir, article.title, keyword)
+    elif settings.content_domain == "korea_travel":
+        install_korea_ai_assets(output_dir, article.title, keyword)
     elif image_plan.images[0].filename.endswith(".svg"):
         create_korea_svg_assets(output_dir, article.title, keyword)
     article = apply_high_quality_korea_post_if_available(output_dir, article, settings.content_domain)

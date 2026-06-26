@@ -193,6 +193,15 @@
     {% endfor %}
   </ol>
 
+  {% if inline_images|length > 1 %}
+  <figure class="keg-post__inline-image">
+    <img src="{{ inline_images[1].url or inline_images[1].path }}" alt="{{ inline_images[1].alt }}" loading="lazy">
+    <figcaption class="keg-post__caption">
+      {% if inline_images[1].caption %}{{ inline_images[1].caption }}{% else %}Use this visual checklist before moving to payment or backup options.{% endif %}
+    </figcaption>
+  </figure>
+  {% endif %}
+
   <h2>Costs / Payment</h2>
   <table>
     <tr><th>Item</th><th>What to Know</th></tr>
@@ -207,6 +216,15 @@
     <li>{{ mistake }}</li>
     {% endfor %}
   </ul>
+
+  {% if inline_images|length > 2 %}
+  <figure class="keg-post__inline-image">
+    <img src="{{ inline_images[2].url or inline_images[2].path }}" alt="{{ inline_images[2].alt }}" loading="lazy">
+    <figcaption class="keg-post__caption">
+      {% if inline_images[2].caption %}{{ inline_images[2].caption }}{% else %}Keep this visual reminder in mind before relying on the service during your trip.{% endif %}
+    </figcaption>
+  </figure>
+  {% endif %}
 
   <h2>Useful Tips for Foreign Visitors</h2>
   <table>

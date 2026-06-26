@@ -165,10 +165,12 @@
   <p>{{ paragraph }}</p>
   {% endfor %}
 
+  {% if inline_images %}
   <figure class="keg-post__inline-image">
-    <img src="{{ inline_image.url }}" alt="{{ inline_image.alt }}" loading="lazy">
-    <figcaption class="keg-post__caption">{{ post.inline_caption }}</figcaption>
+    <img src="{{ inline_images[0].url }}" alt="{{ inline_images[0].alt }}" loading="lazy">
+    <figcaption class="keg-post__caption">{{ inline_images[0].caption }}</figcaption>
   </figure>
+  {% endif %}
 
   <h2>Step-by-Step Guide</h2>
   <ol>
@@ -176,6 +178,13 @@
     <li>{{ step }}</li>
     {% endfor %}
   </ol>
+
+  {% if inline_images|length > 1 %}
+  <figure class="keg-post__inline-image">
+    <img src="{{ inline_images[1].url }}" alt="{{ inline_images[1].alt }}" loading="lazy">
+    <figcaption class="keg-post__caption">{{ inline_images[1].caption }}</figcaption>
+  </figure>
+  {% endif %}
 
   <h2>Costs / Payment</h2>
   <table>
@@ -191,6 +200,13 @@
     <li>{{ problem }}</li>
     {% endfor %}
   </ul>
+
+  {% if inline_images|length > 2 %}
+  <figure class="keg-post__inline-image">
+    <img src="{{ inline_images[2].url }}" alt="{{ inline_images[2].alt }}" loading="lazy">
+    <figcaption class="keg-post__caption">{{ inline_images[2].caption }}</figcaption>
+  </figure>
+  {% endif %}
 
   <h2>Useful Tips for Foreign Visitors</h2>
   <table>

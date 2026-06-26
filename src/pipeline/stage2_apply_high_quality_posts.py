@@ -39,15 +39,12 @@ def render_post(article_dir: Path, env: Environment) -> Path | None:
     image_url = image.get("url") or "assets/ai-hero.jpg"
     image_alt = image.get("alt") or post["title"]
 
-    inline_image = {
-        "url": "assets/ai-inline-1.jpg",
-        "alt": post.get("inline_alt", post["inline_caption"]),
-    }
+    inline_images = build_inline_images(article_dir, article, post)
 
     html = env.get_template("high_quality_article.html.j2").render(
         post=post,
         image={"url": image_url, "alt": image_alt},
-        inline_image=inline_image,
+        inline_images=inline_images,
     )
 
     article["title"] = post["title"]
@@ -60,14 +57,46 @@ def render_post(article_dir: Path, env: Environment) -> Path | None:
             "alt": inline_image["alt"],
             "source": "codex_image_plan",
             "credit": "Generated with Codex image generation",
-            "caption": post["inline_caption"],
+            "caption": inline_image["caption"],
         }
+        for inline_image in inline_images
     ]
     article["sources"] = [{"name": name, "url": url} for name, url in post["sources"]]
 
     (article_dir / "article.html").write_text(html, encoding="utf-8")
     metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8")
     return article_dir / "article.html"
+
+
+def build_inline_images(article_dir: Path, article: dict, post: dict) -> list[dict[str, str]]:
+    existing = list(article.get("inline_images") or [])
+    captions = [
+        post.get("inline_caption", "Use this visual checkpoint before continuing with the next step."),
+        "Use this visual checklist before moving to payment, timing, or backup options.",
+        "Keep this reminder in mind before relying on the service during your trip.",
+    ]
+    images = []
+    for index in range(1, 5):
+        url = f"assets/ai-inline-{index}.jpg"
+        if not (article_dir / url).exists():
+            continue
+        previous = existing[index - 1] if index - 1 < len(existing) else {}
+        images.append(
+            {
+                "url": url,
+                "alt": previous.get("alt") or post.get("inline_alt") or captions[min(index - 1, len(captions) - 1)],
+                "caption": previous.get("caption") or captions[min(index - 1, len(captions) - 1)],
+            }
+        )
+    if images:
+        return images
+    return [
+        {
+            "url": "assets/ai-inline-1.jpg",
+            "alt": post.get("inline_alt", post["inline_caption"]),
+            "caption": post["inline_caption"],
+        }
+    ]
 
 
 def run(root: Path | None) -> list[Path]:

@@ -63,7 +63,7 @@ def build_article_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
     }:
         return build_windows_image_plan(candidate, title)
 
-    extension = _planned_image_extension()
+    extension = "jpg"
     scene = detect_scene(f"{candidate.keyword} {title}")
     visual_subject = _visual_subject(scene, candidate.keyword)
     style = (
@@ -96,16 +96,29 @@ def build_article_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
             "no readable private information, no text overlays, no watermarks, and no fake app screens."
         ),
     )
+    inline_checklist = PlannedImage(
+        role="inline",
+        filename=f"ai-inline-2.{extension}",
+        alt=f"Visual checklist for {candidate.keyword} in Korea",
+        caption="Use the visual checklist to avoid common mistakes before relying on the service.",
+        prompt=(
+            f"Create a premium 16:9 illustrated checklist for a Korea travel guide about '{candidate.keyword}'. "
+            f"Show the key process visually: {_inline_subject(scene)}. "
+            "Use a modern soft 3D/editorial illustration style with icons, cards, and clear visual flow. "
+            "No readable text, no Korean letters, no logos, no fake app UI, no private information, and no watermarks."
+        ),
+    )
 
     return ArticleImagePlan(
         mode="codex_generated_no_api",
         strict=True,
         notes=[
             "Do not call paid image APIs in the Python pipeline.",
-            "Generate these assets manually with Codex image generation, or use local SVG fallback in CI.",
+            "Use Codex-generated JPG assets from src/images/ai_assets/korea.",
+            "Korea posts should use at least two images; long practical guides should use three or more when available.",
             "Publishing should stop when required image files are missing.",
         ],
-        images=[hero, inline],
+        images=[hero, inline, inline_checklist],
     )
 
 

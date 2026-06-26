@@ -7,6 +7,7 @@ from src.config import ROOT_DIR
 
 
 WINDOWS_AI_ASSET_DIR = ROOT_DIR / "src" / "images" / "ai_assets" / "windows"
+KOREA_AI_ASSET_DIR = ROOT_DIR / "src" / "images" / "ai_assets" / "korea"
 
 
 def install_windows_ai_assets(article_dir: Path, title: str, keyword: str) -> str:
@@ -26,6 +27,31 @@ def install_windows_ai_assets(article_dir: Path, title: str, keyword: str) -> st
         source = source_dir / source_name
         if not source.exists():
             raise FileNotFoundError(f"Missing Windows AI image asset: {source}")
+        shutil.copy2(source, assets_dir / target_name)
+    return scene
+
+
+def install_korea_ai_assets(article_dir: Path, title: str, keyword: str) -> str:
+    scene = korea_scene(f"{keyword} {title}")
+    source_dir = KOREA_AI_ASSET_DIR / scene
+    if not source_dir.exists():
+        source_dir = KOREA_AI_ASSET_DIR / "general"
+    if not source_dir.exists():
+        raise FileNotFoundError(
+            f"Korea AI image library is missing scene '{scene}' and fallback 'general'. "
+            "Generate Codex AI images and save hero.jpg/inline-1.jpg/inline-2.jpg before publishing."
+        )
+
+    assets_dir = article_dir / "assets"
+    assets_dir.mkdir(parents=True, exist_ok=True)
+    required = (("hero.jpg", "ai-hero.jpg"), ("inline-1.jpg", "ai-inline-1.jpg"))
+    optional = (("inline-2.jpg", "ai-inline-2.jpg"), ("inline-3.jpg", "ai-inline-3.jpg"))
+    for source_name, target_name in (*required, *optional):
+        source = source_dir / source_name
+        if not source.exists():
+            if (source_name, target_name) in optional:
+                continue
+            raise FileNotFoundError(f"Missing Korea AI image asset: {source}")
         shutil.copy2(source, assets_dir / target_name)
     return scene
 
@@ -50,4 +76,23 @@ def windows_scene(text: str) -> str:
         return "version"
     if any(token in value for token in ["update", "restart", "0x", "error code"]):
         return "update"
+    return "general"
+
+
+def korea_scene(text: str) -> str:
+    value = text.lower()
+    if any(token in value for token in ["airport", "incheon", "arex", "limousine"]):
+        return "airport"
+    if any(token in value for token in ["ktx", "korail", "train", "rail"]):
+        return "ktx"
+    if any(token in value for token in ["esim", "sim", "mobile data", "roaming"]):
+        return "esim"
+    if any(token in value for token in ["taxi", "kakao t", "ride"]):
+        return "taxi"
+    if any(token in value for token in ["naver map", "kakaomap", "map", "navigation"]):
+        return "map"
+    if any(token in value for token in ["t-money", "tmoney", "transport card", "subway", "bus"]):
+        return "transport"
+    if any(token in value for token in ["baemin", "delivery", "coupang", "shopping", "convenience"]):
+        return "delivery"
     return "general"
