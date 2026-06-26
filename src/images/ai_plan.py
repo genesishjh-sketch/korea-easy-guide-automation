@@ -110,7 +110,7 @@ def build_article_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
 
 
 def build_windows_image_plan(candidate: TopicCandidate, title: str) -> ArticleImagePlan:
-    extension = _planned_image_extension()
+    extension = "jpg"
     topic_scene = _windows_topic_scene(candidate.keyword, title)
     hero_subject = _windows_hero_subject(topic_scene)
     inline_subject = _windows_inline_subject(topic_scene)
@@ -156,7 +156,8 @@ def build_windows_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
         strict=True,
         notes=[
             "Do not call paid image APIs in the Python pipeline.",
-            "Generate these assets manually with Codex image generation, or use local SVG fallback in CI.",
+            "Use Codex-generated JPG assets from src/images/ai_assets/windows.",
+            "Do not use SVG fallback for Windows help public posts.",
             "Do not generate fake Windows UI or readable error screens.",
             "Publishing should stop when required image files are missing.",
         ],
