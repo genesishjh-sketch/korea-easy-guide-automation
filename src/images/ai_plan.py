@@ -119,9 +119,9 @@ def build_windows_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
         role="hero",
         filename=f"ai-hero.{extension}",
         alt=f"{title} beginner-friendly Windows help visual",
-        caption="A calm beginner-friendly visual for solving this Windows problem safely.",
+        caption="A realistic beginner-friendly visual for solving this Windows problem safely.",
         prompt=(
-            "Use case: photorealistic-natural. "
+            "Use case: realistic editorial hero image. "
             f"Create a realistic 16:9 hero image for an English beginner computer help article titled '{title}'. "
             f"Primary request: help a non-technical reader understand a safe first-step fix for {candidate.keyword}. "
             f"Scene/backdrop: {hero_subject}. "
@@ -140,15 +140,15 @@ def build_windows_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
         alt=f"Safe step-by-step troubleshooting setup for {candidate.keyword}",
         caption="Work through the safe checks first before trying advanced repair steps.",
         prompt=(
-            "Use case: photorealistic-natural. "
-            f"Create a realistic 16:9 in-article image for a beginner Windows troubleshooting guide about '{candidate.keyword}'. "
-            f"Primary request: visually support the step-by-step safe checks before advanced fixes. Scene/backdrop: {inline_subject}. "
-            "Show a simple troubleshooting flow using abstract icons such as restart arrows, checklist, clock, shield, "
-            "repair gear, Wi-Fi waves, speaker waves, folder shapes, or device outlines when relevant. Use blank cards and abstract lines only. "
-            "Composition/framing: horizontal 16:9, clean in-article explanatory photo, one clear action area, no clutter. "
-            f"Lighting/mood: bright, calm, beginner-friendly. Color palette: {palette}. "
-            "Avoid real or fake operating-system screens, Microsoft logos, readable UI text, readable letters or numbers, "
-            "error codes, scary warning overlays, command prompts, registry editors, fake official documentation, watermarks, distorted hands, and extra fingers."
+            "Use case: friendly illustrated troubleshooting infographic. "
+            f"Create a clean 16:9 in-article illustration for a beginner Windows troubleshooting guide about '{candidate.keyword}'. "
+            f"Primary request: visually support the step-by-step safe checks before advanced fixes. Concept: {inline_subject}. "
+            "Use a warm modern editorial illustration style, soft shadows, simple geometric icons, and clear visual hierarchy. "
+            "Show the troubleshooting flow with abstract symbols such as restart arrows, checklist cards, clock, shield, "
+            "repair gear, Wi-Fi waves, speaker waves, folder shapes, or device outlines when relevant. "
+            f"Color palette: {palette}. "
+            "No real or fake operating-system screens, Microsoft logos, readable UI text, error codes, scary warning overlays, "
+            "command prompts, registry editors, fake official documentation, watermarks, or brand marks."
         ),
     )
     return ArticleImagePlan(
