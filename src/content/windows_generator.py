@@ -412,6 +412,8 @@ def _topic_profile(keyword: str, category: str, site_url: str = "") -> dict:
 
     if error:
         title = _error_title(normalized, error)
+    elif _is_windows_version_topic(normalized):
+        title = "How to Check Your Windows Version: Simple Steps for Beginners"
     elif _is_wifi_disconnect_topic(normalized):
         title = "Wi-Fi Keeps Disconnecting on Windows 11: Safe Fixes for Beginners"
     elif _is_network_adapter_topic(normalized):
@@ -571,6 +573,20 @@ def _is_app_topic(text: str) -> bool:
     return any(term in text for term in app_terms)
 
 
+def _is_windows_version_topic(text: str) -> bool:
+    return any(
+        term in text
+        for term in (
+            "windows version",
+            "check windows version",
+            "which version",
+            "system type",
+            "32-bit",
+            "64-bit",
+        )
+    )
+
+
 def _app_name(text: str) -> str:
     if "microsoft store" in text:
         return "Microsoft Store"
@@ -672,6 +688,15 @@ def _quick_summary(keyword: str, error: str | None) -> list[str]:
             "If many built-in apps fail at once, check Windows Update and Microsoft Store updates before deeper troubleshooting.",
             "This guide keeps app repair and app reset separate so beginners understand which steps can remove app data.",
         ]
+    if _is_windows_version_topic(normalized):
+        return [
+            "You can check your Windows edition, version, OS build, and system type from Windows Settings.",
+            "The fastest path is Settings > System > About, then the Windows specifications and Device specifications sections.",
+            "Use the version and build number when checking app requirements, driver support, or Microsoft support instructions.",
+            "Check whether the PC is Windows 10 or Windows 11 before following screenshots from another guide.",
+            "The system type tells you whether Windows is 64-bit or 32-bit, which matters for some downloads.",
+            "This is a low-risk information check. You do not need cleanup tools, driver tools, or advanced commands.",
+        ]
     if _is_network_connection_topic(normalized):
         focus = _network_focus(normalized)
         return [
@@ -731,6 +756,16 @@ def _before_start(text: str, error: str | None) -> list[str]:
             [
                 "For Windows Update errors, do not assume the error code always has one single cause. The same code can appear because of pending restarts, network problems, free-space problems, update cache issues, or a temporary Microsoft-side issue.",
                 "Before trying commands, check whether the update is known to have problems on the Windows release health page. If Microsoft is already investigating an issue, waiting may be safer than changing your PC repeatedly.",
+            ]
+        )
+    elif _is_windows_version_topic(text):
+        base.extend(
+            [
+                "You are only checking information, not changing Windows settings. This is safe to do before installing an app, updating a driver, or asking for support.",
+                "Keep the Settings window open while you compare official instructions. Windows edition, version, OS build, and system type are different details.",
+                "Do not download a system scanner just to find this information. Windows already shows it in Settings.",
+                "If you are following a tutorial, check its Windows version before copying the steps. A Windows 10 menu path can look different from a Windows 11 menu path.",
+                "If you are checking software compatibility, keep the download page open and compare both the Windows version and the system type before choosing an installer.",
             ]
         )
     elif _is_network_connection_topic(text):
@@ -916,6 +951,14 @@ def _symptoms(text: str, error: str | None) -> list[str]:
         ]
     if "printer" in text:
         return ["Windows says the printer is offline.", "Print jobs stay in the queue.", "The printer works on another device but not this PC.", "The printer appears more than once in Settings.", "A document prints only after restarting the printer or computer."]
+    if _is_windows_version_topic(text):
+        return [
+            "You need to know whether the PC runs Windows 10 or Windows 11.",
+            "A support page asks for your Windows version, edition, or OS build.",
+            "An app, driver, or accessory says it needs a specific Windows version.",
+            "You need to know whether the PC is 64-bit or 32-bit before downloading software.",
+            "You want to check whether the PC is still on an older Windows release.",
+        ]
     if _is_app_topic(text):
         app = _app_name(text)
         if "snipping tool" in text:
@@ -948,6 +991,14 @@ def _meaning(text: str, error: str | None) -> list[str]:
             "Windows Update may be blocked by a pending restart, low disk space, a damaged update cache, or a service problem.",
             "It does not always mean your PC is broken. Many update errors are temporary or related to a specific update package.",
             "The safest approach is to remove simple blockers first, then check whether Microsoft has listed a known issue.",
+        ]
+    if _is_windows_version_topic(text):
+        return [
+            "Windows version information helps you match instructions to the PC in front of you.",
+            "Edition usually means Home, Pro, Enterprise, or another Windows edition. Version and OS build describe the installed Windows release.",
+            "System type tells you whether Windows and the processor support 64-bit software. This is different from the Windows edition.",
+            "Installed on is the date Windows says this installation or major update was installed. It is useful context, but it is not the same as the release date for everyone.",
+            "Device name and product ID may appear near the same page. You usually do not need to share those publicly when asking a general support question.",
         ]
     if _is_network_connection_topic(text):
         return [
@@ -1023,6 +1074,16 @@ def _try_first(text: str) -> list[str]:
         "Write down what changed before the problem started, such as an update, new app, new printer, or new router.",
         "If you use antivirus, VPN, or device management software, remember that it may affect network, update, or printer behavior.",
     ]
+    if _is_windows_version_topic(text):
+        return [
+            "Press Windows key + I to open Settings.",
+            "Select System, then select About.",
+            "Look under Windows specifications for Edition, Version, Installed on, and OS build.",
+            "Look under Device specifications for System type.",
+            "Copy the details carefully if a support person or official guide asks for them.",
+            "If you are comparing a download page, check whether it asks for Windows 10/11, 64-bit/32-bit, or a minimum build number.",
+            "Avoid sharing product ID, device ID, serial number, or screenshots with personal account details in public forums.",
+        ]
     if _is_network_connection_topic(text):
         return [
             "Restart the PC and the router once.",
@@ -1104,6 +1165,17 @@ def _fixes(text: str, error: str | None) -> list[str]:
             "Run the Windows Update troubleshooter from Settings > System > Troubleshoot > Other troubleshooters.",
             "Pause updates briefly, resume them, and try again.",
             "Check Windows release health to see whether Microsoft has listed a known update issue.",
+        ]
+    if _is_windows_version_topic(text):
+        return [
+            "Open Settings > System > About and read the Windows specifications section.",
+            "Write down Edition, Version, and OS build exactly as shown.",
+            "In the same About page, read System type under Device specifications to confirm 64-bit or 32-bit Windows.",
+            "If Settings will not open, press Windows key + R, type winver, and press Enter to see the Windows version dialog.",
+            "Use the Microsoft support links below to confirm what each field means before downloading apps or drivers.",
+            "If a guide does not match your Windows version, look for the Windows 10 or Windows 11 version of that guide instead of guessing.",
+            "If an app says it requires a newer Windows version, check Windows Update separately instead of downloading an unofficial updater.",
+            "If you are helping someone else, ask them to read the fields aloud or send a cropped screenshot that hides device ID and account details.",
         ]
     if _is_network_connection_topic(text):
         fixes = [
@@ -1206,6 +1278,16 @@ def _fixes(text: str, error: str | None) -> list[str]:
 
 
 def _after_each_step(text: str) -> list[str]:
+    if _is_windows_version_topic(text):
+        return [
+            "After checking Settings, compare the version number with the requirement you were given.",
+            "If you used winver, remember that it shows Windows version details but not every device specification.",
+            "If you are downloading software, choose the download that matches your Windows version and system type.",
+            "If you are asking for help, share the edition, version, OS build, and whether the PC is 64-bit or 32-bit.",
+            "Do not change advanced settings just because a version number looks old. Check official Microsoft guidance first.",
+            "If the support article mentions a known issue for a specific build, compare the build number exactly. One digit can point to a different update state.",
+            "If a menu name does not match the guide, pause and confirm whether the guide is for Windows 10, Windows 11, or a different release.",
+        ]
     if _is_app_topic(text):
         app = _app_name(text)
         return [
@@ -1298,6 +1380,19 @@ def _advanced_fixes(text: str, risk: str) -> list[str]:
 
 
 def _faq(keyword: str, error: str | None) -> list[dict[str, str]]:
+    if _is_windows_version_topic(keyword.lower()):
+        return [
+            {"question": "What is the fastest way to check my Windows version?", "answer": "Open Settings > System > About and read the Windows specifications section."},
+            {"question": "What does OS build mean?", "answer": "OS build is a more specific Windows build number. It helps match your PC to support articles and known issue pages."},
+            {"question": "How do I check 64-bit or 32-bit Windows?", "answer": "Open Settings > System > About and look for System type under Device specifications."},
+            {"question": "Can I use winver instead?", "answer": "Yes. Press Windows key + R, type winver, and press Enter. It is useful for version and build, but Settings shows more device details."},
+            {"question": "Should I install a tool to check this?", "answer": "No. Windows already shows this information in Settings, so a third-party scanner is not needed."},
+            {"question": "Does this change anything on my PC?", "answer": "No. Checking the version is an information-only step and should not change files or settings."},
+            {"question": "Why does the version matter?", "answer": "Some apps, drivers, and support steps depend on whether you use Windows 10, Windows 11, a specific version, or a 64-bit system."},
+            {"question": "What should I send to support?", "answer": "Send Windows edition, version, OS build, and system type. Avoid sharing your device ID or product ID publicly."},
+            {"question": "Is Edition the same as Version?", "answer": "No. Edition is usually Home or Pro. Version and OS build describe the installed Windows release more specifically."},
+            {"question": "Why do my menus look different from a guide?", "answer": "The guide may be written for a different Windows version or build. Check your version first, then use instructions that match it."},
+        ]
     return [
         {"question": "Should I reset my PC first?", "answer": "No. Resetting is not a first step. Try low-risk settings, restart, troubleshooters, and official Microsoft guidance first."},
         {"question": "Is it safe to use driver updater tools?", "answer": "Avoid random driver tools. Use Windows Update, your PC maker, or the hardware maker's official website."},

@@ -97,6 +97,32 @@ class WindowsGeneratorSourceTests(unittest.TestCase):
         self.assertNotIn("Wi-Fi button returned", combined)
         self.assertNotIn("printer prints one page", combined)
 
+    def test_windows_version_topic_uses_information_guide_copy(self) -> None:
+        text = "how to check windows version"
+        profile = _topic_profile(text, "Beginner PC Tips", "https://easypcfixguide.blogspot.com")
+        combined = "\n".join(
+            [
+                profile["title"],
+                *profile["quick_summary"],
+                *profile["symptoms"],
+                *profile["meaning"],
+                *profile["try_first"],
+                *profile["fixes"],
+                *profile["after_each_step"],
+                *[item["question"] + " " + item["answer"] for item in profile["faq"]],
+            ]
+        )
+
+        self.assertEqual(profile["title"], "How to Check Your Windows Version: Simple Steps for Beginners")
+        self.assertIn("Settings > System > About", combined)
+        self.assertIn("Windows specifications", combined)
+        self.assertIn("OS build", combined)
+        self.assertIn("System type", combined)
+        self.assertIn("winver", combined)
+        self.assertNotIn("The Windows feature does not respond normally.", combined)
+        self.assertNotIn("Run the relevant Windows troubleshooter.", combined)
+        self.assertNotIn("The problem is usually fixable", combined)
+
     def test_printer_queue_topic_uses_queue_specific_title_and_copy(self) -> None:
         text = "how to clear printer queue"
         profile = _topic_profile(text, "Printer & Scanner", "https://easypcfixguide.blogspot.com")
