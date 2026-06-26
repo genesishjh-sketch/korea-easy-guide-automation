@@ -1,13 +1,24 @@
 name: Daily Draft Pipeline
 
 on:
-  # Legacy Korea workflow is manual-only while Easy PC Fix Guide is the active
-  # scheduled production site.
   workflow_dispatch:
     inputs:
       seed:
         description: "Optional topic seed"
         required: false
+      mode:
+        description: "draft or publish"
+        required: false
+        default: "draft"
+  schedule:
+    # 09:40 KST primary Korea publish, after Easy PC Fix Guide finishes.
+    - cron: "40 0 * * *"
+    # 09:55 KST backup. The daily limit guard prevents duplicate publishing.
+    - cron: "55 0 * * *"
+
+concurrency:
+  group: korea-easy-guide-daily-publish
+  cancel-in-progress: false
 
 jobs:
   daily-draft:
@@ -20,7 +31,7 @@ jobs:
       BLOGGER_BLOG_ID: ${{ vars.BLOGGER_BLOG_ID || '288143591612645486' }}
       GOOGLE_OAUTH_CLIENT_SECRET_FILE: .credentials/client_secret.json
       GOOGLE_OAUTH_TOKEN_FILE: .credentials/google_token.json
-      BLOGGER_PUBLISH_MODE: draft
+      BLOGGER_PUBLISH_MODE: ${{ github.event_name == 'schedule' && 'publish' || github.event.inputs.mode || 'draft' }}
       REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
       REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
       REDDIT_USER_AGENT: ${{ vars.REDDIT_USER_AGENT || 'korea-easy-guide/0.1' }}
@@ -42,14 +53,19 @@ jobs:
           mkdir -p .credentials
           printf '%s' '${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET_JSON }}' > .credentials/client_secret.json
           printf '%s' '${{ secrets.GOOGLE_OAUTH_TOKEN_JSON }}' > .credentials/google_token.json
+          printf '%s' '${{ secrets.GOOGLE_OAUTH_TOKEN_SEARCH_CONSOLE_JSON }}' > .credentials/google_token.search-console.json
       - name: Run daily draft pipeline
         run: |
           if [ -n "${{ github.event.inputs.seed }}" ]; then
-            python -m src.pipeline.daily_draft --seed "${{ github.event.inputs.seed }}"
+            python -m src.pipeline.daily_draft --mode "${BLOGGER_PUBLISH_MODE}" --seed "${{ github.event.inputs.seed }}"
           else
-            python -m src.pipeline.daily_draft
+            python -m src.pipeline.daily_draft --mode "${BLOGGER_PUBLISH_MODE}"
           fi
+      - name: Submit sitemap
+        if: ${{ success() && env.BLOGGER_PUBLISH_MODE == 'publish' }}
+        run: python -m src.pipeline.stage3_submit_sitemap
       - name: Upload generated outputs
+        if: ${{ always() }}
         uses: actions/upload-artifact@v6
         with:
           name: daily-draft-output
