@@ -32,7 +32,7 @@ jobs:
       GOOGLE_OAUTH_CLIENT_SECRET_FILE: .credentials/client_secret.json
       GOOGLE_OAUTH_TOKEN_FILE: .credentials/google_token.json
       BLOGGER_PUBLISH_MODE: ${{ github.event_name == 'schedule' && 'publish' || github.event.inputs.mode || 'draft' }}
-      DAILY_BATCH_MAX_POSTS: ${{ vars.KOREA_EASY_GUIDE_DAILY_BATCH_MAX_POSTS || '3' }}
+      DAILY_BATCH_MAX_POSTS: ${{ vars.KOREA_EASY_GUIDE_DAILY_BATCH_MAX_POSTS || '2' }}
       REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
       REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
       REDDIT_USER_AGENT: ${{ vars.REDDIT_USER_AGENT || 'korea-easy-guide/0.1' }}
