@@ -159,6 +159,18 @@ TOPIC_SOURCE_RULES = [
     (
         ("usb", "camera", "touchpad", "mouse", "keyboard", "device not recognized", "device manager", "external hard drive", "sd card", "monitor", "driver"),
         [
+            {
+                "name": "Microsoft Support: Camera doesn't work in Windows",
+                "url": "https://support.microsoft.com/en-us/windows/camera-doesn-t-work-in-windows-32adb016-b29c-a928-0073-53d31da0dad5",
+            },
+            {
+                "name": "Microsoft Support: Manage cameras with Camera settings in Windows 11",
+                "url": "https://support.microsoft.com/en-us/windows/manage-cameras-with-camera-settings-in-windows-11-97997ed5-bb98-47b6-a13d-964106997757",
+            },
+            {
+                "name": "Microsoft Support: Windows troubleshooters",
+                "url": "https://support.microsoft.com/en-us/windows/windows-troubleshooters-1c8cf7ce-0388-4ed3-985d-a305432ae702",
+            },
             {"name": "Microsoft Support search: device problems", "url": "https://support.microsoft.com/search/results?query=device%20not%20recognized%20Windows"},
             {"name": "Microsoft Support search: camera problems", "url": "https://support.microsoft.com/search/results?query=camera%20not%20working%20Windows"},
             {"name": "Microsoft Support search: drivers in Windows", "url": "https://support.microsoft.com/search/results?query=drivers%20in%20Windows"},
@@ -167,6 +179,18 @@ TOPIC_SOURCE_RULES = [
     (
         ("sound", "audio", "microphone", "headphones", "realtek"),
         [
+            {
+                "name": "Microsoft Support: Fix sound or audio problems in Windows",
+                "url": "https://support.microsoft.com/en-us/windows/fix-sound-or-audio-problems-in-windows-73025246-b61c-40fb-671a-2535c7cd56c8",
+            },
+            {
+                "name": "Microsoft Support: Fix audio issues when no sound plays",
+                "url": "https://support.microsoft.com/en-us/windows/hardware/audio/fix-audio-issues-when-no-sound-plays-from-speakers-or-headphones-in-windows",
+            },
+            {
+                "name": "Microsoft Support: Update audio drivers in Windows",
+                "url": "https://support.microsoft.com/en-us/windows/hardware/audio/update-audio-drivers-in-windows",
+            },
             {"name": "Microsoft Support search: sound problems in Windows", "url": "https://support.microsoft.com/search/results?query=sound%20problems%20Windows"},
             {"name": "Microsoft Support search: microphone problems in Windows", "url": "https://support.microsoft.com/search/results?query=microphone%20problems%20Windows"},
             {"name": "Microsoft Support search: audio drivers in Windows", "url": "https://support.microsoft.com/search/results?query=audio%20drivers%20Windows"},
@@ -193,6 +217,18 @@ TOPIC_SOURCE_RULES = [
     (
         ("microsoft store", "photos app", "calculator app", "settings app", "default apps", "default browser", "uninstall apps", "taskbar", "start menu", "notifications", "clock", "windows explorer"),
         [
+            {
+                "name": "Microsoft Support: Repair apps and programs in Windows",
+                "url": "https://support.microsoft.com/en-us/windows/apps/repair-apps-and-programs-in-windows",
+            },
+            {
+                "name": "Microsoft Support: Fix problems that block programs from being installed or removed",
+                "url": "https://support.microsoft.com/en-us/windows/deployment/install-upgrade/fix-problems-that-block-programs-from-being-installed-or-removed",
+            },
+            {
+                "name": "Microsoft Support: Uninstall or remove apps and programs in Windows",
+                "url": "https://support.microsoft.com/en-us/windows/uninstall-or-remove-apps-and-programs-in-windows-4b55f974-2cc6-2d2b-d092-5905080eaf98",
+            },
             {"name": "Microsoft Support search: Microsoft Store app problems", "url": "https://support.microsoft.com/search/results?query=Microsoft%20Store%20not%20working%20Windows"},
             {"name": "Microsoft Support search: Windows apps troubleshooting", "url": "https://support.microsoft.com/search/results?query=Windows%20apps%20troubleshooting"},
             {"name": "Microsoft Support search: Windows settings and personalization", "url": "https://support.microsoft.com/search/results?query=Windows%20settings%20taskbar%20start%20menu"},
@@ -208,6 +244,18 @@ TOPIC_SOURCE_RULES = [
     (
         ("file explorer", "folder", "downloads folder", "desktop icons", "recycle bin", "cannot find file", "pdf files"),
         [
+            {
+                "name": "Microsoft Support: File Explorer in Windows",
+                "url": "https://support.microsoft.com/en-us/windows/file-explorer-in-windows-ef370130-1cca-9dc5-e0df-2f7416fe1cb1",
+            },
+            {
+                "name": "Microsoft Support: Fix File Explorer if it won't open or start",
+                "url": "https://support.microsoft.com/en-us/windows/fix-file-explorer-if-it-won-t-open-or-start-ce614e06-be97-fe4a-a7ce-d6bf13a8cb98",
+            },
+            {
+                "name": "Microsoft Support: Find your files and apps in Windows",
+                "url": "https://support.microsoft.com/en-us/windows/find-your-files-and-apps-in-windows-5c7c8cfe-c289-fae4-f5f8-6b3fdba418d2",
+            },
             {"name": "Microsoft Support search: File Explorer", "url": "https://support.microsoft.com/search/results?query=File%20Explorer%20not%20responding%20Windows"},
             {"name": "Microsoft Support search: Windows files and folders", "url": "https://support.microsoft.com/search/results?query=Windows%20files%20and%20folders"},
             {"name": "Microsoft Support search: default apps and file types", "url": "https://support.microsoft.com/search/results?query=default%20apps%20file%20types%20Windows"},
@@ -216,6 +264,18 @@ TOPIC_SOURCE_RULES = [
     (
         ("disk space", "storage space", "storage sense"),
         [
+            {
+                "name": "Microsoft Support: Free up drive space in Windows",
+                "url": "https://support.microsoft.com/en-us/windows/free-up-drive-space-in-windows-85529ccb-c365-490d-b548-831022bc9b32",
+            },
+            {
+                "name": "Microsoft Support: Manage drive space with Storage Sense",
+                "url": "https://support.microsoft.com/en-us/windows/manage-drive-space-with-storage-sense-654f6ada-7bfc-45e5-966b-e24aded96ad5",
+            },
+            {
+                "name": "Microsoft Support: Storage settings in Windows",
+                "url": "https://support.microsoft.com/en-us/windows/storage-settings-in-windows-5bc98443-0711-8038-4621-6a18ddc904f2",
+            },
             {"name": "Microsoft Support search: free up drive space", "url": "https://support.microsoft.com/search/results?query=free%20up%20drive%20space%20Windows"},
             {"name": "Microsoft Support search: Storage Sense", "url": "https://support.microsoft.com/search/results?query=Storage%20Sense%20Windows"},
         ],
@@ -230,6 +290,18 @@ TOPIC_SOURCE_RULES = [
     (
         ("safe mode", "blue screen", "automatic repair", "recovery", "bitlocker", "restore point", "restarting screen", "preparing automatic repair", "black screen", "blank desktop"),
         [
+            {
+                "name": "Microsoft Support: Windows Startup Settings",
+                "url": "https://support.microsoft.com/en-us/windows/windows-startup-settings-1af6ec8c-4d4a-4b23-adb7-e76eef0b847f",
+            },
+            {
+                "name": "Microsoft Support: Recovery options in Windows",
+                "url": "https://support.microsoft.com/en-us/windows/recovery-options-in-windows-31ce2444-7de3-818c-d626-e3b5a3024da5",
+            },
+            {
+                "name": "Microsoft Support: Startup Repair",
+                "url": "https://support.microsoft.com/en-us/windows/startup-repair-85deb0b9-fa3d-44a3-a3d0-d0f1515c2c9b",
+            },
             {"name": "Microsoft Support search: Windows recovery options", "url": "https://support.microsoft.com/search/results?query=Windows%20recovery%20options"},
             {"name": "Microsoft Support search: Safe Mode Windows", "url": "https://support.microsoft.com/search/results?query=start%20Windows%20in%20safe%20mode"},
             {"name": "Microsoft Support search: startup repair Windows", "url": "https://support.microsoft.com/search/results?query=startup%20repair%20Windows"},
@@ -238,6 +310,18 @@ TOPIC_SOURCE_RULES = [
     (
         ("pin", "windows hello", "fingerprint", "password sign in", "sign in option", "login"),
         [
+            {
+                "name": "Microsoft Support: Configure Windows Hello",
+                "url": "https://support.microsoft.com/en-us/windows/configure-windows-hello-dae28983-8242-bb2a-d3d1-87c9d265a5f0",
+            },
+            {
+                "name": "Microsoft Support: Change or reset your PIN in Windows",
+                "url": "https://support.microsoft.com/en-us/windows/change-or-reset-your-pin-in-windows-a386c519-3ab2-b873-1e9b-bb228a98b904",
+            },
+            {
+                "name": "Microsoft Support: Troubleshoot problems signing in to Windows",
+                "url": "https://support.microsoft.com/en-us/windows/troubleshoot-problems-signing-in-to-windows-298cfd5f-df1f-c66b-36ad-f2a61a73baad",
+            },
             {"name": "Microsoft Support search: Windows sign-in options", "url": "https://support.microsoft.com/search/results?query=Windows%20sign-in%20options"},
             {"name": "Microsoft Support search: Windows Hello", "url": "https://support.microsoft.com/search/results?query=Windows%20Hello"},
             {"name": "Microsoft Support search: PIN sign-in Windows", "url": "https://support.microsoft.com/search/results?query=PIN%20sign-in%20Windows"},
@@ -418,9 +502,9 @@ def _error_title(text: str, error: str) -> str:
 def _sources_for_topic(text: str) -> list[dict[str, str]]:
     for terms, topic_sources in TOPIC_SOURCE_RULES:
         if any(term in text for term in terms):
-            return _unique_sources([*topic_sources, *MICROSOFT_SOURCES])[:8]
+            return _prioritize_sources(_unique_sources([*topic_sources, *MICROSOFT_SOURCES]))[:8]
     sources = [*MICROSOFT_SOURCES]
-    return _unique_sources(sources)[:8]
+    return _prioritize_sources(_unique_sources(sources))[:8]
 
 
 def _unique_sources(sources: list[dict[str, str]]) -> list[dict[str, str]]:
@@ -433,6 +517,20 @@ def _unique_sources(sources: list[dict[str, str]]) -> list[dict[str, str]]:
         seen.add(url)
         unique.append(source)
     return unique
+
+
+def _prioritize_sources(sources: list[dict[str, str]]) -> list[dict[str, str]]:
+    def priority(source: dict[str, str]) -> tuple[int, str]:
+        url = source.get("url", "")
+        if "/search/results" in url:
+            return (3, url)
+        if url.startswith("https://support.microsoft.com/en-us/windows/") or url.startswith("https://learn.microsoft.com/windows/release-health/"):
+            return (0, url)
+        if "microsoft.com" in url or "learn.microsoft.com" in url:
+            return (1, url)
+        return (2, url)
+
+    return sorted(sources, key=priority)
 
 
 def _risk_level(text: str) -> str:

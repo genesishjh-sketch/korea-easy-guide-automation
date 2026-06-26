@@ -205,6 +205,26 @@ class WindowsGeneratorSourceTests(unittest.TestCase):
                 self.assertFalse(any(url.endswith("/windows/bluetooth") for url in urls))
                 self.assertFalse(any(url.endswith("/windows/printers-scanners") for url in urls))
 
+    def test_common_topic_groups_prioritize_direct_microsoft_documents(self) -> None:
+        topics = [
+            "microsoft store not opening windows 11",
+            "settings app not opening windows 11",
+            "camera not working windows 11",
+            "sound not working windows 11",
+            "file explorer keeps freezing windows 11",
+            "disk space low windows 11",
+            "safe mode windows 11",
+            "windows hello pin not working",
+        ]
+
+        for topic in topics:
+            with self.subTest(topic=topic):
+                urls = [source["url"] for source in _sources_for_topic(topic)]
+                search_urls = [url for url in urls if "/search/results" in url]
+
+                self.assertGreaterEqual(_direct_microsoft_document_count(urls), 5)
+                self.assertLessEqual(len(search_urls), 1)
+
     def test_launch_queue_topics_have_enough_microsoft_sources_for_hades(self) -> None:
         seeds = json.loads((ROOT_DIR / "data" / "seeds" / "windows_launch_queue.json").read_text(encoding="utf-8"))
 
