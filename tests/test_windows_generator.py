@@ -123,6 +123,32 @@ class WindowsGeneratorSourceTests(unittest.TestCase):
         self.assertNotIn("Run the relevant Windows troubleshooter.", combined)
         self.assertNotIn("The problem is usually fixable", combined)
 
+    def test_windows_update_pending_restart_topic_uses_specific_copy(self) -> None:
+        text = "windows update pending restart stuck"
+        profile = _topic_profile(text, "Windows Update", "https://easypcfixguide.blogspot.com")
+        combined = "\n".join(
+            [
+                profile["title"],
+                *profile["quick_summary"],
+                *profile["before_start"],
+                *profile["symptoms"],
+                *profile["meaning"],
+                *profile["try_first"],
+                *profile["fixes"],
+                *profile["after_each_step"],
+            ]
+        )
+
+        self.assertEqual(profile["title"], "Windows Update Pending Restart Stuck: Safe Fixes for Beginners")
+        self.assertIn("Pending restart", combined)
+        self.assertIn("Restart now", combined)
+        self.assertIn("Windows Update troubleshooter", combined)
+        self.assertIn("Windows release health", combined)
+        self.assertIn("free space", combined)
+        self.assertNotIn("The Windows feature does not respond normally.", combined)
+        self.assertNotIn("Open the related Windows Settings page", combined)
+        self.assertNotIn("printer prints one page", combined)
+
     def test_printer_queue_topic_uses_queue_specific_title_and_copy(self) -> None:
         text = "how to clear printer queue"
         profile = _topic_profile(text, "Printer & Scanner", "https://easypcfixguide.blogspot.com")

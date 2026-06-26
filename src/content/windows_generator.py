@@ -446,6 +446,8 @@ def _topic_profile(keyword: str, category: str, site_url: str = "") -> dict:
         title = "Windows Search Not Working: Beginner-Friendly Fixes to Try First"
     elif "file explorer" in normalized:
         title = "File Explorer Keeps Freezing on Windows: Simple Fixes for Beginners"
+    elif _is_windows_update_pending_restart_topic(normalized):
+        title = "Windows Update Pending Restart Stuck: Safe Fixes for Beginners"
     elif "safe mode" in normalized:
         title = "How to Start Windows in Safe Mode: Beginner-Friendly Guide"
     elif "disk space" in normalized:
@@ -587,6 +589,10 @@ def _is_windows_version_topic(text: str) -> bool:
     )
 
 
+def _is_windows_update_pending_restart_topic(text: str) -> bool:
+    return "windows update" in text and "pending restart" in text
+
+
 def _app_name(text: str) -> str:
     if "microsoft store" in text:
         return "Microsoft Store"
@@ -697,6 +703,15 @@ def _quick_summary(keyword: str, error: str | None) -> list[str]:
             "The system type tells you whether Windows is 64-bit or 32-bit, which matters for some downloads.",
             "This is a low-risk information check. You do not need cleanup tools, driver tools, or advanced commands.",
         ]
+    if _is_windows_update_pending_restart_topic(normalized):
+        return [
+            "A pending restart message usually means Windows installed part of an update and needs a full restart to finish.",
+            "Start with a normal Restart from the Start menu, not just closing the laptop lid or using Sleep.",
+            "Check Windows Update again after the restart before trying deeper repair steps.",
+            "Do not reset the PC, delete update folders, or try advanced repair as the first step.",
+            "If the same pending restart message returns, write down the update name or error message shown in Windows Update.",
+            "This guide keeps basic restart and update checks separate from advanced repair so beginners avoid unnecessary risk.",
+        ]
     if _is_network_connection_topic(normalized):
         focus = _network_focus(normalized)
         return [
@@ -766,6 +781,14 @@ def _before_start(text: str, error: str | None) -> list[str]:
                 "Do not download a system scanner just to find this information. Windows already shows it in Settings.",
                 "If you are following a tutorial, check its Windows version before copying the steps. A Windows 10 menu path can look different from a Windows 11 menu path.",
                 "If you are checking software compatibility, keep the download page open and compare both the Windows version and the system type before choosing an installer.",
+            ]
+        )
+    elif _is_windows_update_pending_restart_topic(text):
+        base.extend(
+            [
+                "Save your work before restarting. A pending restart is usually safe, but open documents and browser forms can be lost if apps close.",
+                "Use the Start menu power option or Settings > Windows Update restart button. Sleep, hibernate, or closing the lid may not finish the update.",
+                "If this is a work or school PC, give the restart enough time and avoid forcing power off unless the device is completely stuck.",
             ]
         )
     elif _is_network_connection_topic(text):
@@ -959,6 +982,14 @@ def _symptoms(text: str, error: str | None) -> list[str]:
             "You need to know whether the PC is 64-bit or 32-bit before downloading software.",
             "You want to check whether the PC is still on an older Windows release.",
         ]
+    if _is_windows_update_pending_restart_topic(text):
+        return [
+            "Windows Update says Pending restart, Restart required, or Restart to finish installing updates.",
+            "The same message comes back after you think you already restarted.",
+            "Windows Update will not install the next update because one restart is still waiting.",
+            "The PC sleeps or shuts down, but Windows Update still asks for a restart afterward.",
+            "You are not sure whether it is safe to restart or whether the update is stuck.",
+        ]
     if _is_app_topic(text):
         app = _app_name(text)
         if "snipping tool" in text:
@@ -999,6 +1030,12 @@ def _meaning(text: str, error: str | None) -> list[str]:
             "System type tells you whether Windows and the processor support 64-bit software. This is different from the Windows edition.",
             "Installed on is the date Windows says this installation or major update was installed. It is useful context, but it is not the same as the release date for everyone.",
             "Device name and product ID may appear near the same page. You usually do not need to share those publicly when asking a general support question.",
+        ]
+    if _is_windows_update_pending_restart_topic(text):
+        return [
+            "Windows may have staged update files and is waiting for a full restart to replace files that are currently in use.",
+            "A shutdown is not always the same as Restart, especially when fast startup, sleep, or laptop lid settings are involved.",
+            "If the message returns after a real restart, Windows Update may need another check, more free space, or official troubleshooting steps.",
         ]
     if _is_network_connection_topic(text):
         return [
@@ -1083,6 +1120,15 @@ def _try_first(text: str) -> list[str]:
             "Copy the details carefully if a support person or official guide asks for them.",
             "If you are comparing a download page, check whether it asks for Windows 10/11, 64-bit/32-bit, or a minimum build number.",
             "Avoid sharing product ID, device ID, serial number, or screenshots with personal account details in public forums.",
+        ]
+    if _is_windows_update_pending_restart_topic(text):
+        return [
+            "Save open files and plug in the laptop charger.",
+            "Open Start > Power and choose Restart. Do not choose Sleep.",
+            "After signing in again, open Settings > Windows Update.",
+            "Select Check for updates and wait to see whether the pending restart message clears.",
+            "If Windows asks to restart again, do one more normal restart before trying advanced fixes.",
+            *base,
         ]
     if _is_network_connection_topic(text):
         return [
@@ -1176,6 +1222,16 @@ def _fixes(text: str, error: str | None) -> list[str]:
             "If a guide does not match your Windows version, look for the Windows 10 or Windows 11 version of that guide instead of guessing.",
             "If an app says it requires a newer Windows version, check Windows Update separately instead of downloading an unofficial updater.",
             "If you are helping someone else, ask them to read the fields aloud or send a cropped screenshot that hides device ID and account details.",
+        ]
+    if _is_windows_update_pending_restart_topic(text):
+        return [
+            "Open Settings > Windows Update and check whether Windows names the update that is pending restart.",
+            "Use the Restart now button in Windows Update if it is available, then wait for the PC to return to the sign-in screen.",
+            "After the restart, open Windows Update again and select Check for updates.",
+            "Make sure the Windows drive has free space before retrying the update.",
+            "If the message still returns, run the Windows Update troubleshooter from Settings > System > Troubleshoot > Other troubleshooters.",
+            "Check Windows release health to see whether Microsoft lists a known issue for the update.",
+            "Avoid deleting update folders or trying advanced repair unless you are following official Microsoft guidance.",
         ]
     if _is_network_connection_topic(text):
         fixes = [
@@ -1287,6 +1343,14 @@ def _after_each_step(text: str) -> list[str]:
             "Do not change advanced settings just because a version number looks old. Check official Microsoft guidance first.",
             "If the support article mentions a known issue for a specific build, compare the build number exactly. One digit can point to a different update state.",
             "If a menu name does not match the guide, pause and confirm whether the guide is for Windows 10, Windows 11, or a different release.",
+        ]
+    if _is_windows_update_pending_restart_topic(text):
+        return [
+            "After each restart, return to Settings > Windows Update and check whether the message changed.",
+            "If Windows Update shows an error code, write it down exactly before searching for fixes.",
+            "If the PC takes longer than usual to restart, give it time while it shows normal update progress.",
+            "If the same pending restart message appears after two normal restarts, stop repeating restarts and use the troubleshooter or official Microsoft guidance.",
+            "Keep the laptop plugged in until Windows Update finishes checking again.",
         ]
     if _is_app_topic(text):
         app = _app_name(text)
