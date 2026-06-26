@@ -479,7 +479,7 @@ def _topic_profile(keyword: str, category: str, site_url: str = "") -> dict:
             "A step mentions reset, recovery, partition, format, Registry, BIOS, or advanced commands and you do not understand the risk.",
         ],
         "faq": _faq(keyword, error),
-        "related_guides": _related_guides(category, site_url),
+        "related_guides": _related_guides(category, site_url, normalized),
         "sources": _sources_for_topic(normalized),
     }
 
@@ -1293,7 +1293,28 @@ def _faq(keyword: str, error: str | None) -> list[dict[str, str]]:
     ]
 
 
-def _related_guides(category: str, site_url: str = "") -> list[dict[str, str]]:
+def _related_guides(category: str, site_url: str = "", keyword: str = "") -> list[dict[str, str]]:
+    normalized = keyword.casefold()
+    topic_mapping = [
+        (("onedrive",), ["OneDrive not syncing on Windows", "OneDrive sign-in problems", "How to check Windows date and time"]),
+        (("wifi", "wi-fi"), ["Wi-Fi keeps disconnecting on Windows", "Wi-Fi button missing on Windows", "Network adapter missing on Windows"]),
+        (("dns",), ["DNS server not responding on Windows", "Internet connected but not working", "How to reset network settings safely"]),
+        (("ethernet",), ["Ethernet connected but no internet", "Network adapter missing on Windows", "How to reset network settings safely"]),
+        (("bluetooth",), ["Bluetooth missing from Windows settings", "Bluetooth headphones connected but no sound", "How to check Device Manager safely"]),
+        (("printer", "driver"), ["Printer driver unavailable on Windows", "How to clear the printer queue", "Printer not showing in Windows"]),
+        (("printer", "queue"), ["How to clear the printer queue", "Printer job stuck deleting", "Printer not showing in Windows"]),
+        (("microsoft store", "store"), ["Microsoft Store not opening", "Windows apps not updating", "How to repair apps safely"]),
+        (("settings app", "default apps"), ["Windows Settings app not opening", "How to change default apps safely", "Microsoft Store not opening"]),
+        (("sound", "audio", "microphone"), ["No sound after Windows update", "Bluetooth headphones connected but no sound", "How to update drivers safely"]),
+        (("file explorer", "folder"), ["File Explorer keeps freezing", "Cannot find downloaded files", "How to change default apps safely"]),
+        (("disk space", "storage"), ["How to free up disk space on Windows", "Storage Sense settings on Windows", "Windows Update stuck at 100%"]),
+        (("safe mode", "recovery", "blue screen"), ["How to start Windows in Safe Mode", "Recovery options in Windows", "What to record before asking for PC help"]),
+        (("pin", "windows hello", "login", "sign in"), ["Windows Hello PIN not working", "How to check your Windows version", "What to record before asking for PC help"]),
+    ]
+    for markers, titles in topic_mapping:
+        if any(marker in normalized for marker in markers):
+            return _related_guide_links(titles, site_url)
+
     mapping = {
         "Windows Update": ["How to check your Windows version", "How to free up disk space on Windows", "Windows Update stuck at 100%"],
         "Wi-Fi & Internet": ["Internet connected but not working", "DNS problems on Windows", "How to reset network settings safely"],
@@ -1302,6 +1323,10 @@ def _related_guides(category: str, site_url: str = "") -> list[dict[str, str]]:
         "Printer & Scanner": ["How to clear the printer queue", "Printer not showing in Windows", "Scanner not detected on Windows"],
     }
     titles = mapping.get(category, ["How to start Windows in Safe Mode", "How to check your Windows version", "Beginner PC troubleshooting checklist"])
+    return _related_guide_links(titles, site_url)
+
+
+def _related_guide_links(titles: list[str], site_url: str = "") -> list[dict[str, str]]:
     base_url = (site_url or "").rstrip("/")
     return [
         {

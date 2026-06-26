@@ -186,6 +186,25 @@ class WindowsGeneratorSourceTests(unittest.TestCase):
         self.assertTrue(all(guide["title"] for guide in guides))
         self.assertTrue(all(guide["url"].startswith("https://easypcfixguide.blogspot.com/search?q=") for guide in guides))
 
+    def test_related_guides_follow_topic_intent_inside_category(self) -> None:
+        cases = {
+            ("Wi-Fi & Internet", "wifi keeps disconnecting windows 11"): "Wi-Fi keeps disconnecting on Windows",
+            ("Wi-Fi & Internet", "dns server not responding windows 11"): "DNS server not responding on Windows",
+            ("Printer & Scanner", "printer driver unavailable windows 11"): "Printer driver unavailable on Windows",
+            ("Apps & Settings", "settings app not opening windows 11"): "Windows Settings app not opening",
+            ("Bluetooth & Devices", "sound not working windows 11"): "No sound after Windows update",
+            ("Recovery & Startup", "safe mode windows 11"): "How to start Windows in Safe Mode",
+        }
+
+        for (category, keyword), expected_title in cases.items():
+            with self.subTest(keyword=keyword):
+                guides = _related_guides(category, "https://easypcfixguide.blogspot.com", keyword)
+                titles = [guide["title"] for guide in guides]
+
+                self.assertIn(expected_title, titles)
+                self.assertEqual(len(guides), 3)
+                self.assertTrue(all(guide["url"].startswith("https://easypcfixguide.blogspot.com/search?q=") for guide in guides))
+
     def test_sources_are_unique(self) -> None:
         urls = [source["url"] for source in _sources_for_topic("windows update error 0x800f0922")]
 
