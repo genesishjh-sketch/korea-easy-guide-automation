@@ -278,6 +278,20 @@ class Stage2ImageGateTests(unittest.TestCase):
 
         self.assertNotIn("dangerous_windows_recommendation", {issue.code for issue in issues})
 
+    def test_hades_allows_faq_question_about_driver_updater_safety(self) -> None:
+        gate = HadesQualityGate("windows_help")
+        text = (
+            "Applies to Windows 11. Risk level Low. Data loss risk No. "
+            "Estimated time 10 minutes. Last checked 2026-06-26. Advanced fixes. "
+            "Back up important files before advanced fixes.\n"
+            "### Is it safe to use driver updater tools?\n"
+            "Avoid random driver tools. Use Windows Update or the device maker's official website."
+        ).casefold()
+
+        issues = gate._review_windows_article(None, text, links=[])
+
+        self.assertNotIn("dangerous_windows_recommendation", {issue.code for issue in issues})
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -716,6 +716,16 @@ def _review_windows_dangerous_recommendations(text_lower: str) -> list[QualityIs
             guard_context = text_lower[max(0, match.start() - 24) : match.start()]
             if any(guard in guard_context for guard in ("avoid ", "do not ", "don't ", "never ")):
                 continue
+            question_context = text_lower[max(0, match.start() - 32) : min(len(text_lower), match.end() + 48)]
+            if any(prefix in question_context for prefix in ("is it safe to ", "should i ", "can i ")) and "?" in question_context:
+                continue
+            line_start = text_lower.rfind("\n", 0, match.start()) + 1
+            line_end = text_lower.find("\n", match.end())
+            if line_end == -1:
+                line_end = len(text_lower)
+            line = text_lower[line_start:line_end].strip("# \t")
+            if line.endswith("?") and line.startswith(("is it safe to ", "should i ", "can i ")):
+                continue
             matches.append(match.group(0))
     if not matches:
         return []
