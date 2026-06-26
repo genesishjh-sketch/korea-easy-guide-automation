@@ -462,7 +462,7 @@ def _topic_profile(keyword: str, category: str, site_url: str = "") -> dict:
     return {
         "title": title,
         "slug": slugify(title),
-        "meta_description": f"Beginner-friendly Windows help for {keyword}, with safe first steps, risk level, official Microsoft sources, and clear warnings before advanced fixes.",
+        "meta_description": _meta_description(keyword, normalized, error),
         "lead": (
             "This guide is written for everyday Windows users who want clear steps without risky shortcuts. "
             "Start with the low-risk checks first, stop if you see signs of data loss, and use the official Microsoft links at the end to confirm current guidance."
@@ -499,6 +499,22 @@ def _topic_profile(keyword: str, category: str, site_url: str = "") -> dict:
 def _error_code(text: str) -> str | None:
     match = re.search(r"0x[a-f0-9]{8}", text)
     return match.group(0).upper() if match else None
+
+
+def _meta_description(keyword: str, normalized: str, error: str | None) -> str:
+    if error:
+        return f"{error} Windows fix guide for beginners, covering likely causes, safe first checks, Microsoft source links, advanced warnings, and when to stop."
+    if "wifi" in normalized or "wi-fi" in normalized or "network" in normalized:
+        return f"{keyword.title()} guide for Windows users, covering safe network checks, router basics, driver cautions, official sources, and next steps."
+    if "printer" in normalized:
+        return f"{keyword.title()} guide for Windows users, covering queue checks, printer settings, driver cautions, official sources, and safe next steps."
+    if "bluetooth" in normalized:
+        return f"{keyword.title()} guide for Windows users, covering device checks, Bluetooth settings, driver cautions, official sources, and safe fixes."
+    if "sound" in normalized or "audio" in normalized or "microphone" in normalized:
+        return f"{keyword.title()} guide for Windows users, covering sound settings, app permissions, driver cautions, official sources, and safe checks."
+    if "version" in normalized:
+        return f"{keyword.title()} guide for beginners, covering where to check Windows version details, what the fields mean, and when the information matters."
+    return f"{keyword.title()} guide for Windows users, covering safe first checks, common causes, Microsoft source links, advanced warnings, and next steps."
 
 
 def _error_title(text: str, error: str) -> str:

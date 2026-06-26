@@ -119,8 +119,17 @@ class EnglishArticleGenerator:
 
     def _meta_description(self, keyword: str) -> str:
         if self._is_tmoney(keyword):
-            return "Complete T-money card guide for Korea visitors: where to buy, recharge, tap in and out, use buses, check balance, avoid mistakes, and compare tourist card options."
-        return f"Simple English guide to {keyword} for travelers, exchange students, and long-term foreign visitors in Korea."
+            return "T-money card in Korea guide for visitors, covering where to buy it, how to recharge, subway and bus use, balance checks, refunds, and common mistakes."
+        normalized = keyword.strip()
+        if "kakao taxi" in normalized.lower():
+            return "Kakao T Taxi in Korea guide for foreigners, including setup, destination search, pickup points, payment backups, and common taxi app problems."
+        if "esim" in normalized.lower():
+            return "Korea eSIM guide for tourists, covering when to buy, activation timing, airport setup, mobile data checks, and backup options after arrival."
+        if "ktx" in normalized.lower():
+            return "KTX tickets in Korea guide for foreign visitors, including booking options, station checks, seat rules, payment issues, and travel-day tips."
+        if "naver map" in normalized.lower():
+            return "Naver Map in Korea guide for foreign visitors, covering route search, Korean addresses, subway exits, walking directions, and common mistakes."
+        return f"{normalized.title()} in Korea guide for foreign visitors, covering practical steps, payment or app checks, common problems, official links, and safe backup options."
 
     def _intro(self, keyword: str) -> str:
         if self._is_tmoney(keyword):

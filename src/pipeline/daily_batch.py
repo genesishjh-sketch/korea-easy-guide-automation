@@ -9,6 +9,7 @@ import traceback
 
 from src.config import ROOT_DIR
 from src.config import load_settings
+from src.content.adsense_rules import daily_publish_limit_from_env
 from src.content.article_types import infer_article_type
 from src.content.topic_scoring import infer_category
 from src.notifications.telegram import NotificationClient
@@ -38,7 +39,7 @@ def run(
     notify: bool = True,
 ) -> dict:
     settings = load_settings(site)
-    max_posts = max(1, min(max_posts, 3))
+    max_posts = daily_publish_limit_from_env(str(max_posts), quality_review_enabled=True)
     if mode != "publish":
         raise ValueError("daily_batch currently supports publish mode only.")
 
@@ -266,7 +267,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Publish up to three meaningful daily posts without filling weak slots.")
     parser.add_argument("--site", help="Site profile key, for example: easy_pc_fix_guide")
     parser.add_argument("--mode", choices=["publish"], default="publish")
-    parser.add_argument("--max-posts", type=int, default=int(os.getenv("DAILY_BATCH_MAX_POSTS", "3")))
+    parser.add_argument("--max-posts", type=int, default=daily_publish_limit_from_env(os.getenv("DAILY_BATCH_MAX_POSTS"), quality_review_enabled=True))
     parser.add_argument("--seed", help="Optional explicit seed. Publishes at most one post.")
     parser.add_argument("--no-notify", action="store_true")
     args = parser.parse_args()

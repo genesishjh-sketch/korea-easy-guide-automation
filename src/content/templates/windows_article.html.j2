@@ -17,6 +17,12 @@
   .epfg-post * { box-sizing: border-box; }
   .epfg-post figure { margin: 0 0 28px; }
   .epfg-post img { display: block; width: 100%; height: auto; }
+  .epfg-post h1 {
+    margin: 0 0 18px;
+    color: var(--ink);
+    font-size: 34px;
+    line-height: 1.18;
+  }
   .epfg-post__hero,
   .epfg-post__inline {
     overflow: hidden;
@@ -94,6 +100,8 @@
 </style>
 
 <article class="epfg-post">
+  <h1>{{ title }}</h1>
+
   <figure class="epfg-post__hero">
     <img src="{{ image.url or image.path }}" alt="{{ image.alt }}" loading="lazy">
   </figure>
@@ -208,4 +216,7 @@
     <li><a href="{{ source.url }}" target="_blank" rel="noopener noreferrer">{{ source.name }}</a></li>
     {% endfor %}
   </ul>
+
+  <h2>Final Summary</h2>
+  <p>{{ title }} should be handled in a safe order. Start with the simple checks, record what changes after each step, and avoid advanced repair steps unless you understand the risk or are following official Microsoft guidance. If the problem affects important files, work, school, or sign-in access, stop and get help before changing deeper system settings.</p>
 </article>

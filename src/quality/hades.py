@@ -7,6 +7,15 @@ import re
 
 from bs4 import BeautifulSoup
 
+from src.content.adsense_rules import ENGLISH_MIN_WORD_COUNT
+from src.content.adsense_rules import KOREAN_MIN_CHAR_COUNT
+from src.content.adsense_rules import META_DESCRIPTION_MAX_CHARS
+from src.content.adsense_rules import META_DESCRIPTION_MIN_CHARS
+from src.content.adsense_rules import contains_forbidden_monetization
+from src.content.adsense_rules import contains_forbidden_phrase
+from src.content.adsense_rules import contains_forbidden_policy_topic
+from src.content.adsense_rules import domain_rule
+
 
 REQUIRED_HEADINGS = {
     "Quick Answer",
@@ -17,6 +26,7 @@ REQUIRED_HEADINGS = {
     "Useful Tips for Foreign Visitors",
     "FAQ",
     "Official Links to Check",
+    "Final Summary",
 }
 
 MIN_WORD_COUNT = 1400
@@ -97,6 +107,7 @@ WINDOWS_REQUIRED_HEADINGS = {
     "FAQ",
     "Related Guides",
     "Sources",
+    "Final Summary",
 }
 
 WINDOWS_BLOCKED_PHRASES = {
@@ -238,7 +249,9 @@ class HadesQualityGate:
         text = soup.get_text(" ", strip=True)
         text_lower = text.lower()
         words = re.findall(r"[A-Za-z0-9']+", text)
+        korean_chars = len(re.findall(r"[가-힣]", text))
         headings = {heading.get_text(" ", strip=True) for heading in soup.find_all(["h2", "h3"])}
+        h1_headings = [heading.get_text(" ", strip=True) for heading in soup.find_all("h1")]
         images = soup.find_all("img")
         links = soup.find_all("a")
         official_links = [
@@ -256,8 +269,24 @@ class HadesQualityGate:
         missing_headings = sorted(required_headings - headings)
         if missing_headings:
             issues.append(QualityIssue("missing_required_sections", f"Missing sections: {', '.join(missing_headings)}."))
+        if not h1_headings:
+            issues.append(QualityIssue("missing_h1", "Article HTML must include an H1 title for AdSense-ready structure."))
         if len(words) < MIN_WORD_COUNT:
             issues.append(QualityIssue("thin_content", f"Article must contain at least {MIN_WORD_COUNT} words before public publishing."))
+        if korean_chars >= 200 and korean_chars < KOREAN_MIN_CHAR_COUNT:
+            issues.append(
+                QualityIssue(
+                    "thin_korean_content",
+                    f"Korean articles must contain at least {KOREAN_MIN_CHAR_COUNT} Korean characters before public publishing.",
+                )
+            )
+        if korean_chars < 200 and len(words) < ENGLISH_MIN_WORD_COUNT:
+            issues.append(
+                QualityIssue(
+                    "thin_english_content",
+                    f"English articles must contain at least {ENGLISH_MIN_WORD_COUNT} words before public publishing.",
+                )
+            )
         if len(images) < 2:
             issues.append(QualityIssue("missing_images", "Article must include at least one hero image and one inline image."))
         if len(official_links) < MIN_OFFICIAL_LINKS:
@@ -268,6 +297,8 @@ class HadesQualityGate:
         for phrase in BLOCKED_PHRASES:
             if phrase in text_lower:
                 issues.append(QualityIssue("blocked_phrase", f"Blocked phrase found: {phrase}."))
+
+        issues.extend(self._review_adsense_rules(soup, text_lower, metadata, h1_headings, links))
 
         if self.content_domain == "windows_help":
             issues.extend(self._review_windows_article(soup, text_lower, links))
@@ -302,6 +333,16 @@ class HadesQualityGate:
         article = metadata.get("article", {})
         if not article.get("meta_description"):
             issues.append(QualityIssue("missing_meta_description", "Meta description is required."))
+        else:
+            description_length = len(str(article.get("meta_description") or "").strip())
+            if not (META_DESCRIPTION_MIN_CHARS <= description_length <= META_DESCRIPTION_MAX_CHARS):
+                issues.append(
+                    QualityIssue(
+                        "bad_meta_description_length",
+                        "Meta description should be around 140-160 characters "
+                        f"({META_DESCRIPTION_MIN_CHARS}-{META_DESCRIPTION_MAX_CHARS} allowed); found {description_length}.",
+                    )
+                )
         if not article.get("tags"):
             issues.append(QualityIssue("missing_tags", "Tags are required."))
         if self.content_domain == "windows_help":
@@ -313,6 +354,7 @@ class HadesQualityGate:
         score = max(0, 100 - sum(12 if issue.severity == "error" else 4 for issue in issues))
         metrics = {
             "word_count": len(words),
+            "korean_char_count": korean_chars,
             "image_count": len(images),
             "official_link_count": len(official_links),
             "faq_question_count": faq_questions,
@@ -320,6 +362,83 @@ class HadesQualityGate:
             **research_metrics,
         }
         return self._report(score, issues, metrics)
+
+    def _review_adsense_rules(
+        self,
+        soup: BeautifulSoup,
+        text_lower: str,
+        metadata: dict,
+        h1_headings: list[str],
+        links: list,
+    ) -> list[QualityIssue]:
+        issues: list[QualityIssue] = []
+        article = metadata.get("article", {}) or {}
+        candidate = metadata.get("candidate", {}) or {}
+        title = str(article.get("title") or "").strip()
+        keyword = str(candidate.get("keyword") or "").strip()
+        meta_description = str(article.get("meta_description") or "").strip()
+        topic_text = f"{title} {keyword} {meta_description} {text_lower}".casefold()
+        rule = domain_rule(self.content_domain)
+
+        if h1_headings and title and h1_headings[0].strip().casefold() != title.casefold():
+            issues.append(QualityIssue("h1_title_mismatch", "H1 should match the article title."))
+        if keyword and title:
+            first_words = " ".join(title.casefold().replace("-", " ").split()[:8])
+            keyword_tokens = [token for token in re.findall(r"[a-z0-9가-힣]+", keyword.casefold()) if len(token) > 2]
+            if keyword_tokens and not any(token in first_words for token in keyword_tokens[:3]):
+                issues.append(
+                    QualityIssue(
+                        "keyword_not_near_title_front",
+                        "The main keyword should appear naturally near the front of the title.",
+                    )
+                )
+
+        if not any(term in topic_text for term in rule.required_topic_terms):
+            issues.append(
+                QualityIssue(
+                    "blog_topic_mismatch",
+                    f"Article does not clearly match the site topic: {rule.topic_description}.",
+                )
+            )
+        blocked_topic_terms = sorted(term for term in rule.blocked_topic_terms if term in topic_text)
+        if blocked_topic_terms:
+            issues.append(
+                QualityIssue(
+                    "off_topic_terms",
+                    f"Article contains terms outside the approved site topic: {', '.join(blocked_topic_terms)}.",
+                )
+            )
+
+        promotional = contains_forbidden_phrase(text_lower)
+        if promotional:
+            issues.append(QualityIssue("promotional_or_casual_tone", f"Forbidden promotional/casual phrases found: {', '.join(promotional)}."))
+
+        monetization = contains_forbidden_monetization(text_lower)
+        if monetization:
+            issues.append(QualityIssue("forbidden_monetization_language", "AdSense approval-stage posts must not include affiliate, sponsorship, or ad-like sales language."))
+
+        policy_topics = contains_forbidden_policy_topic(text_lower)
+        if policy_topics:
+            issues.append(QualityIssue("high_risk_policy_topic", f"High-risk approval-stage topic terms found: {', '.join(policy_topics)}."))
+
+        external_links = [_href(link) for link in links if _href(link).startswith(("http://", "https://"))]
+        official_links = [
+            url for url in external_links if any(domain in url for domain in OFFICIAL_SOURCE_DOMAINS)
+        ]
+        non_official_external_links = [url for url in external_links if url not in official_links]
+        if len(non_official_external_links) > 6:
+            issues.append(
+                QualityIssue(
+                    "too_many_non_official_external_links",
+                    "Approval-stage posts should limit non-official external links and focus on official or platform sources.",
+                )
+            )
+
+        if not soup.find(string=re.compile(r"final summary|마무리 요약|최종 요약", re.I)):
+            issues.append(QualityIssue("missing_final_summary", "Article must include a final summary section."))
+        if not soup.find(string=re.compile(r"FAQ|자주 묻는 질문", re.I)):
+            issues.append(QualityIssue("missing_faq_section", "Article must include an FAQ section."))
+        return issues
 
     def _review_windows_article(self, soup: BeautifulSoup | None, text_lower: str, links: list) -> list[QualityIssue]:
         issues: list[QualityIssue] = []
