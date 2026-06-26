@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter
+from types import SimpleNamespace
 import json
 import logging
 from pathlib import Path
@@ -75,6 +76,7 @@ def run(seed: str | None = None, site: str | None = None) -> Path:
             create_windows_svg_assets(output_dir, article.title, keyword)
         else:
             create_korea_svg_assets(output_dir, article.title, keyword)
+    article = apply_high_quality_korea_post_if_available(output_dir, article, settings.content_domain)
     (output_dir / "research_report.json").write_text(
         json.dumps(
             build_research_report(settings, keyword, article, signals, reddit.diagnostics, google.diagnostics),
@@ -85,6 +87,17 @@ def run(seed: str | None = None, site: str | None = None) -> Path:
     )
     LOGGER.info("Saved article to %s", output_dir)
     return output_dir
+
+
+def apply_high_quality_korea_post_if_available(output_dir: Path, article, content_domain: str):
+    if content_domain == "windows_help":
+        return article
+    from src.pipeline.stage2_apply_high_quality_posts import run as apply_high_quality_posts
+
+    if not apply_high_quality_posts(output_dir):
+        return article
+    metadata = json.loads((output_dir / "metadata.json").read_text(encoding="utf-8"))
+    return SimpleNamespace(**metadata["article"])
 
 
 def reddit_public_json_skip_reason_for_settings(settings) -> str:
@@ -137,6 +150,23 @@ def build_research_report(
         }
         for source in article.sources
     ]
+    if settings.content_domain == "windows_help":
+        reader_questions = [
+            f"What does {keyword} mean?",
+            f"How do I fix {keyword} safely?",
+            f"Should beginners try advanced fixes for {keyword}?",
+            f"Can {keyword} cause data loss?",
+            f"When should I get help for {keyword}?",
+        ]
+    else:
+        reader_questions = [
+            f"What is the easiest way to handle {keyword} in Korea?",
+            f"What should foreign visitors prepare before using {keyword}?",
+            f"What official links should I check for {keyword}?",
+            f"What can go wrong with {keyword} during a Korea trip?",
+            f"What backup option should I keep for {keyword}?",
+        ]
+
     return {
         "site": settings.site_key,
         "content_domain": settings.content_domain,
@@ -144,13 +174,7 @@ def build_research_report(
         "topic": article.title,
         "queries": list(dict.fromkeys(queries))[:10],
         "sources": sources,
-        "reader_questions": [
-            f"What does {keyword} mean?",
-            f"How do I fix {keyword} safely?",
-            f"Should beginners try advanced fixes for {keyword}?",
-            f"Can {keyword} cause data loss?",
-            f"When should I get help for {keyword}?",
-        ],
+        "reader_questions": reader_questions,
         "signal_source_counts": dict(sorted(signal_source_counts.items())),
         "reddit_collection_method_counts": dict(sorted(reddit_method_counts.items())),
         "live_reddit_signal_count": signal_source_counts.get("reddit", 0),

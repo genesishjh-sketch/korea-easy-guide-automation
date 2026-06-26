@@ -161,6 +161,8 @@ HIGH_QUALITY_POSTS = {
             ("Kakao T Google Play listing", "https://play.google.com/store/apps/details?id=com.kakao.taxi"),
             ("Kakao Mobility official website", "https://www.kakaomobility.com/"),
             ("Kakao T official Kakao service page", "https://www.kakaocorp.com/page/service/service/KakaoT?lang=ENG"),
+            ("VISITKOREA taxi guide", "https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=140661"),
+            ("VISITKOREA ride-hailing apps guide", "https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=197907"),
             ("VISITKOREA official travel information", "https://english.visitkorea.or.kr/"),
         ],
     },
