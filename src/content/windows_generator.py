@@ -25,6 +25,10 @@ TOPIC_SOURCE_RULES = [
         ("slow after update", "startup apps", "high disk", "high cpu", "high memory", "battery draining", "sleep mode", "wake from sleep"),
         [
             {
+                "name": "Microsoft Support: Windows troubleshooters",
+                "url": "https://support.microsoft.com/en-us/windows/windows-troubleshooters-1c8cf7ce-0388-4ed3-985d-a305432ae702",
+            },
+            {
                 "name": "Microsoft Support search: improve Windows PC performance",
                 "url": "https://support.microsoft.com/search/results?query=improve%20Windows%20PC%20performance",
             },
@@ -237,6 +241,10 @@ TOPIC_SOURCE_RULES = [
     (
         ("windows search", "search not working", "indexing"),
         [
+            {
+                "name": "Microsoft Support: Windows troubleshooters",
+                "url": "https://support.microsoft.com/en-us/windows/windows-troubleshooters-1c8cf7ce-0388-4ed3-985d-a305432ae702",
+            },
             {"name": "Microsoft Support search: Windows Search", "url": "https://support.microsoft.com/search/results?query=Windows%20Search%20not%20working"},
             {"name": "Microsoft Support search: search indexing", "url": "https://support.microsoft.com/search/results?query=Windows%20search%20indexing"},
         ],
@@ -530,7 +538,17 @@ def _prioritize_sources(sources: list[dict[str, str]]) -> list[dict[str, str]]:
             return (1, url)
         return (2, url)
 
-    return sorted(sources, key=priority)
+    prioritized = sorted(sources, key=priority)
+    selected = []
+    search_result_count = 0
+    for source in prioritized:
+        url = source.get("url", "")
+        if "/search/results" in url:
+            if search_result_count >= 1:
+                continue
+            search_result_count += 1
+        selected.append(source)
+    return selected
 
 
 def _risk_level(text: str) -> str:

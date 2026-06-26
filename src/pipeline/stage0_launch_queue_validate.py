@@ -20,7 +20,8 @@ from src.pipeline.daily_draft import used_keywords
 
 MIN_LAUNCH_QUEUE_SIZE = 7
 MIN_MICROSOFT_SOURCES = 6
-MIN_DIRECT_MICROSOFT_SOURCES = 2
+MIN_DIRECT_MICROSOFT_SOURCES = 5
+MAX_SEARCH_RESULT_SOURCES = 1
 
 
 @dataclass(frozen=True)
@@ -30,6 +31,7 @@ class LaunchSeedValidation:
     category: str
     source_count: int
     direct_microsoft_source_count: int
+    search_result_source_count: int
     issues: list[str]
     article_dir: str = ""
     quality_score: int | None = None
@@ -88,12 +90,14 @@ def validate_seed(
         except Exception as exc:
             issues.append(f"generation_failed: {exc}")
     sources = _sources_for_topic(seed)
+    search_result_source_count = sum(1 for source in sources if is_search_result_url(source.get("url", "")))
     return LaunchSeedValidation(
         seed=seed,
         status="pass" if not issues else "fail",
         category=infer_category(seed, "windows_help"),
         source_count=len(sources),
         direct_microsoft_source_count=sum(1 for source in sources if is_direct_microsoft_url(source.get("url", ""))),
+        search_result_source_count=search_result_source_count,
         issues=issues,
         article_dir=article_dir,
         quality_score=quality_score,
@@ -128,6 +132,9 @@ def static_seed_issues(seed: str, main_seeds: set[str], used: set[str]) -> list[
     direct_sources = [source for source in sources if is_direct_microsoft_url(source.get("url", ""))]
     if len(direct_sources) < MIN_DIRECT_MICROSOFT_SOURCES:
         issues.append("shallow_microsoft_sources")
+    search_result_sources = [source for source in sources if is_search_result_url(source.get("url", ""))]
+    if len(search_result_sources) > MAX_SEARCH_RESULT_SOURCES:
+        issues.append("too_many_microsoft_search_result_sources")
     return issues
 
 
@@ -140,6 +147,10 @@ def is_direct_microsoft_url(url: str) -> bool:
         "bing.com/search",
     )
     return not any(fragment in url for fragment in blocked_fragments)
+
+
+def is_search_result_url(url: str) -> bool:
+    return "support.microsoft.com/search/results" in url or "support.microsoft.com/search?" in url or "bing.com/search" in url
 
 
 def main() -> None:

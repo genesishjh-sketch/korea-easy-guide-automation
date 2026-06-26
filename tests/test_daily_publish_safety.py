@@ -630,8 +630,9 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         )
         self.assertEqual(plan["candidate_preview"][0]["category"], "Wi-Fi & Internet")
         self.assertEqual(plan["candidate_preview"][0]["quality_precheck"]["status"], "ready")
-        self.assertGreaterEqual(plan["candidate_preview"][0]["quality_precheck"]["microsoft_source_count"], 4)
-        self.assertGreaterEqual(plan["candidate_preview"][0]["quality_precheck"]["direct_microsoft_source_count"], 2)
+        self.assertGreaterEqual(plan["candidate_preview"][0]["quality_precheck"]["microsoft_source_count"], 6)
+        self.assertGreaterEqual(plan["candidate_preview"][0]["quality_precheck"]["direct_microsoft_source_count"], 5)
+        self.assertLessEqual(plan["candidate_preview"][0]["quality_precheck"]["search_result_source_count"], 1)
 
     def test_build_seed_plan_shows_next_publishable_seed_after_date_seed(self) -> None:
         settings = SimpleNamespace(
@@ -725,7 +726,8 @@ class DuplicatePublishGuardTests(unittest.TestCase):
                         "quality_precheck": {
                             "status": "ready",
                             "microsoft_source_count": 6,
-                            "direct_microsoft_source_count": 3,
+                            "direct_microsoft_source_count": 5,
+                            "search_result_source_count": 1,
                             "issues": [],
                         },
                     }
@@ -740,7 +742,7 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertIn("후보 상태 집계: 발행 가능 1개", message)
         self.assertIn("wifi button missing / Wi-Fi & Internet", message)
         self.assertIn("공개/중복 이력 있음", message)
-        self.assertIn("소스 OK MS 6/직접 3", message)
+        self.assertIn("소스 OK MS 6/직접 5/검색 1", message)
 
     def test_seed_quality_precheck_warns_when_windows_sources_are_too_shallow(self) -> None:
         with patch.object(
@@ -758,6 +760,26 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertEqual(result["status"], "warn")
         self.assertIn("microsoft_source_count_below_hades_minimum", result["issues"])
         self.assertIn("direct_microsoft_source_count_below_hades_minimum", result["issues"])
+
+    def test_seed_quality_precheck_warns_when_search_results_dominate_sources(self) -> None:
+        with patch.object(
+            daily_draft,
+            "windows_sources_for_topic",
+            return_value=[
+                {"name": "Direct 1", "url": "https://support.microsoft.com/en-us/windows/direct-one"},
+                {"name": "Direct 2", "url": "https://support.microsoft.com/en-us/windows/direct-two"},
+                {"name": "Direct 3", "url": "https://support.microsoft.com/en-us/windows/direct-three"},
+                {"name": "Direct 4", "url": "https://support.microsoft.com/en-us/windows/direct-four"},
+                {"name": "Search 1", "url": "https://support.microsoft.com/search/results?query=one"},
+                {"name": "Search 2", "url": "https://support.microsoft.com/search/results?query=two"},
+            ],
+        ):
+            result = daily_draft.seed_quality_precheck("specific windows topic", "windows_help")
+
+        self.assertEqual(result["status"], "warn")
+        self.assertEqual(result["search_result_source_count"], 2)
+        self.assertIn("direct_microsoft_source_count_below_quality_minimum", result["issues"])
+        self.assertIn("microsoft_search_result_source_count_above_quality_maximum", result["issues"])
 
     def test_used_keywords_can_ignore_validation_only_artifacts(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir, patch.object(daily_draft, "load_settings") as load_settings:

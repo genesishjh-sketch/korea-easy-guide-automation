@@ -22,6 +22,8 @@ class LaunchQueueValidationTests(unittest.TestCase):
         self.assertEqual(payload["seed_count"], 30)
         self.assertEqual(payload["passed_seed_count"], 30)
         self.assertTrue(all(item["status"] == "pass" for item in payload["items"]))
+        self.assertTrue(all(item["direct_microsoft_source_count"] >= 5 for item in payload["items"]))
+        self.assertTrue(all(item["search_result_source_count"] <= 1 for item in payload["items"]))
 
     def test_static_validation_rejects_used_or_generic_seed(self) -> None:
         main_seeds = {"windows problem", "wifi button missing windows 11"}
@@ -33,6 +35,26 @@ class LaunchQueueValidationTests(unittest.TestCase):
         self.assertIn("generic_computer_help_category", generic.issues)
         self.assertIn("weak_microsoft_sources", generic.issues)
         self.assertIn("already_used", used_seed.issues)
+
+    def test_static_validation_rejects_search_heavy_source_mix(self) -> None:
+        main_seeds = {"specific windows problem"}
+        with patch.object(
+            stage0_launch_queue_validate,
+            "_sources_for_topic",
+            return_value=[
+                {"name": "Direct 1", "url": "https://support.microsoft.com/en-us/windows/direct-one"},
+                {"name": "Direct 2", "url": "https://support.microsoft.com/en-us/windows/direct-two"},
+                {"name": "Direct 3", "url": "https://support.microsoft.com/en-us/windows/direct-three"},
+                {"name": "Direct 4", "url": "https://support.microsoft.com/en-us/windows/direct-four"},
+                {"name": "Search 1", "url": "https://support.microsoft.com/search/results?query=one"},
+                {"name": "Search 2", "url": "https://support.microsoft.com/search/results?query=two"},
+            ],
+        ), patch.object(stage0_launch_queue_validate, "infer_category", return_value="Windows Update"):
+            result = stage0_launch_queue_validate.validate_seed("specific windows problem", main_seeds, set())
+
+        self.assertIn("shallow_microsoft_sources", result.issues)
+        self.assertIn("too_many_microsoft_search_result_sources", result.issues)
+        self.assertEqual(result.search_result_source_count, 2)
 
     def test_global_validation_rejects_short_duplicate_or_missing_queue(self) -> None:
         issues = stage0_launch_queue_validate.global_launch_queue_issues(

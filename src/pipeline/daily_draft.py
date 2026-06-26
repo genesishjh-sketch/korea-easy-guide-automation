@@ -26,6 +26,9 @@ from src.utils.reddit_setup import reddit_oauth_secret_label
 
 KST = ZoneInfo("Asia/Seoul")
 MAX_QUALITY_ATTEMPTS = 3
+MIN_WINDOWS_PRECHECK_MICROSOFT_SOURCES = 6
+MIN_WINDOWS_PRECHECK_DIRECT_MICROSOFT_SOURCES = 5
+MAX_WINDOWS_PRECHECK_SEARCH_RESULT_SOURCES = 1
 
 
 def used_keywords(site: str | None = None, include_validation: bool = True) -> set[str]:
@@ -234,15 +237,21 @@ def seed_quality_precheck(seed: str, content_domain: str) -> dict:
     urls = [source.get("url", "") for source in sources]
     microsoft_count = sum(1 for url in urls if is_microsoft_url(url))
     direct_microsoft_count = sum(1 for url in urls if is_direct_microsoft_url(url))
+    search_result_count = sum(1 for url in urls if is_search_result_url(url))
     issues = []
-    if microsoft_count < 4:
+    if microsoft_count < MIN_WINDOWS_PRECHECK_MICROSOFT_SOURCES:
         issues.append("microsoft_source_count_below_hades_minimum")
     if direct_microsoft_count < 2:
         issues.append("direct_microsoft_source_count_below_hades_minimum")
+    elif direct_microsoft_count < MIN_WINDOWS_PRECHECK_DIRECT_MICROSOFT_SOURCES:
+        issues.append("direct_microsoft_source_count_below_quality_minimum")
+    if search_result_count > MAX_WINDOWS_PRECHECK_SEARCH_RESULT_SOURCES:
+        issues.append("microsoft_search_result_source_count_above_quality_maximum")
     return {
         "status": "ready" if not issues else "warn",
         "microsoft_source_count": microsoft_count,
         "direct_microsoft_source_count": direct_microsoft_count,
+        "search_result_source_count": search_result_count,
         "source_count": len(sources),
         "issues": issues,
     }
@@ -261,6 +270,10 @@ def is_direct_microsoft_url(url: str) -> bool:
         "bing.com/search",
     )
     return not any(fragment in url for fragment in blocked_fragments)
+
+
+def is_search_result_url(url: str) -> bool:
+    return "support.microsoft.com/search/results" in url or "support.microsoft.com/search?" in url or "bing.com/search" in url
 
 
 def choose_seed_for_date(seeds: list[str], start_date: str, today: date) -> str:
@@ -545,6 +558,7 @@ def build_seed_plan_message(seed_plan: dict) -> str:
             flags.append(
                 "소스 OK "
                 f"MS {precheck.get('microsoft_source_count', 0)}/직접 {precheck.get('direct_microsoft_source_count', 0)}"
+                f"/검색 {precheck.get('search_result_source_count', 0)}"
             )
         elif precheck.get("status") == "warn":
             flags.append(f"소스 점검 필요: {', '.join(precheck.get('issues') or [])}")
@@ -721,7 +735,8 @@ def build_seed_plan_markdown(seed_plan: dict) -> str:
             issues = ", ".join(precheck.get("issues") or [])
             source_text = (
                 f"{precheck.get('microsoft_source_count', 0)} / 직접 "
-                f"{precheck.get('direct_microsoft_source_count', 0)}"
+                f"{precheck.get('direct_microsoft_source_count', 0)} / 검색 "
+                f"{precheck.get('search_result_source_count', 0)}"
                 if precheck
                 else ""
             )
