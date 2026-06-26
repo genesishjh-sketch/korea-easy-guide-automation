@@ -97,6 +97,12 @@ class PreflightTests(unittest.TestCase):
         self.assertEqual(check.status, "pass")
         self.assertIn("Weekly report failures write JSON action items", check.message)
 
+    def test_seed_plan_source_quality_reporting_passes(self) -> None:
+        check = stage0_preflight.check_seed_plan_source_quality_reporting()
+
+        self.assertEqual(check.status, "pass")
+        self.assertIn("direct Microsoft source counts", check.message)
+
     def test_seed_file_fails_on_blank_topic_seed(self) -> None:
         with patch.object(stage0_preflight, "load_settings") as load_settings, patch.object(
             stage0_preflight, "load_seed_list", return_value=["wifi button missing windows 11", " "]
@@ -348,6 +354,7 @@ class PreflightTests(unittest.TestCase):
             "check_seed_file",
             "check_seed_inventory",
             "check_all_seed_quality",
+            "check_seed_plan_source_quality_reporting",
             "check_launch_queue",
             "check_launch_queue_quality",
             "check_zero_cost_image_policy",

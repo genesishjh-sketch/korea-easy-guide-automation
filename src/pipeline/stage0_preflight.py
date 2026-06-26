@@ -45,6 +45,7 @@ def run(site: str | None = None) -> Path:
         check_seed_file(site),
         check_seed_inventory(site),
         check_all_seed_quality(site),
+        check_seed_plan_source_quality_reporting(),
         check_launch_queue(site),
         check_launch_queue_quality(site),
         check_reddit_collection_settings(site),
@@ -652,6 +653,48 @@ def check_weekly_failure_report_persistence() -> PreflightCheck:
         "weekly_failure_report_persistence",
         "pass",
         "Weekly report failures write JSON action items, human summary, and traceback before notification.",
+    )
+
+
+def check_seed_plan_source_quality_reporting() -> PreflightCheck:
+    daily_path = ROOT_DIR / "src" / "pipeline" / "daily_draft.py"
+    weekly_path = ROOT_DIR / "src" / "reporting" / "weekly.py"
+    if not daily_path.exists() or not weekly_path.exists():
+        return PreflightCheck(
+            "seed_plan_source_quality_reporting",
+            "fail",
+            "Daily or weekly reporting file is missing.",
+        )
+    daily_text = daily_path.read_text(encoding="utf-8")
+    weekly_text = weekly_path.read_text(encoding="utf-8")
+    required = {
+        "daily_draft.py": [
+            "direct_microsoft_source_count",
+            "search_result_source_count",
+            "/검색",
+            "Microsoft 출처",
+        ],
+        "weekly.py": [
+            "_seed_plan_source_quality_lines",
+            "후보 소스 품질",
+            "다음 시드 출처",
+            "search_result_source_count",
+        ],
+    }
+    missing = []
+    for filename, snippets in required.items():
+        text = daily_text if filename == "daily_draft.py" else weekly_text
+        missing.extend(f"{filename}:{snippet}" for snippet in snippets if snippet not in text)
+    if missing:
+        return PreflightCheck(
+            "seed_plan_source_quality_reporting",
+            "fail",
+            f"Missing seed plan source quality reporting safeguards: {', '.join(missing)}",
+        )
+    return PreflightCheck(
+        "seed_plan_source_quality_reporting",
+        "pass",
+        "Daily and weekly reports show direct Microsoft source counts and Microsoft search-result counts.",
     )
 
 
