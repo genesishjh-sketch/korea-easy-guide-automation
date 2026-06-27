@@ -59,6 +59,10 @@ class BloggerPublisher:
         service = self._service()
         return service.posts().publish(blogId=self.blog_id, postId=post_id).execute()
 
+    def delete_post(self, post_id: str) -> None:
+        service = self._service()
+        service.posts().delete(blogId=self.blog_id, postId=post_id).execute()
+
     def public_post_count(self) -> int:
         service = self._service()
         count = 0
@@ -68,6 +72,16 @@ class BloggerPublisher:
             count += len(response.get("items", []))
             request = service.posts().list_next(request, response)
         return count
+
+    def list_live_posts(self) -> list[dict[str, Any]]:
+        service = self._service()
+        posts: list[dict[str, Any]] = []
+        request = service.posts().list(blogId=self.blog_id, fetchBodies=False, status=["LIVE"], maxResults=500)
+        while request is not None:
+            response = request.execute()
+            posts.extend(response.get("items", []))
+            request = service.posts().list_next(request, response)
+        return posts
 
     def upsert_page(self, title: str, html: str) -> dict[str, Any]:
         service = self._service()

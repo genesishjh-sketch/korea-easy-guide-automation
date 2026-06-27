@@ -16,12 +16,15 @@ from src.notifications.telegram import NotificationClient
 from src.pipeline.daily_draft import choose_publish_seed_candidates
 from src.pipeline.daily_draft import is_duplicate_publish_result
 from src.pipeline.daily_draft import is_quality_gate_failure
+from src.pipeline.daily_draft import normalize_match_text
 from src.pipeline.daily_draft import read_json
 from src.pipeline.daily_draft import run_publish_with_duplicate_guard
 from src.pipeline.daily_draft import save_daily_failure_report
 from src.pipeline.daily_draft import save_daily_success_report
 from src.pipeline.daily_draft import seed_quality_precheck
+from src.pipeline.daily_draft import title_matches_existing
 from src.pipeline.daily_draft import used_keywords
+from src.publishing.blogger import BloggerPublisher
 from src.pipeline.stage1_generate import run as run_stage1
 from src.pipeline.stage4_publication_check import fetch_public_feed
 from src.pipeline.stage4_publication_check import parse_posts
@@ -138,6 +141,7 @@ def select_seed_candidates(
     selected_types: set[str] = set()
     selected_categories: set[str] = set()
     max_precheck = int(os.getenv("DAILY_BATCH_MAX_PRECHECK", "12"))
+    existing_titles = public_post_titles(site)
 
     for seed in choose_publish_seed_candidates(explicit_seed, site)[:max_precheck]:
         normalized = seed.casefold()
@@ -146,6 +150,8 @@ def select_seed_candidates(
         precheck = seed_quality_precheck(seed, content_domain)
         precheck_status = precheck.get("status")
         if normalized in publish_used or normalized in generated_used:
+            continue
+        if seed_matches_existing_public_title(seed, existing_titles):
             continue
         if precheck_status not in {"ready", "not_applicable"}:
             continue
@@ -166,6 +172,19 @@ def select_seed_candidates(
         if len(selected) >= max_posts:
             break
     return selected
+
+
+def public_post_titles(site: str) -> list[str]:
+    try:
+        settings = load_settings(site)
+        return [post.get("title", "") for post in BloggerPublisher(settings).list_live_posts()]
+    except Exception:
+        return []
+
+
+def seed_matches_existing_public_title(seed: str, existing_titles: list[str]) -> bool:
+    normalized_seed = normalize_match_text(seed)
+    return any(title_matches_existing(normalized_seed, title) for title in existing_titles)
 
 
 def count_public_posts_today(site_url: str) -> int:

@@ -3,8 +3,10 @@ from __future__ import annotations
 import argparse
 from datetime import date
 from datetime import datetime
+from difflib import SequenceMatcher
 import json
 from pathlib import Path
+import re
 import traceback
 from zoneinfo import ZoneInfo
 
@@ -13,6 +15,8 @@ from src.config import load_settings
 from src.content.topic_scoring import infer_category
 from src.content.windows_generator import _sources_for_topic as windows_sources_for_topic
 from src.notifications.telegram import NotificationClient
+from src.publishing.blogger import BloggerCredentialsError
+from src.publishing.blogger import BloggerPublisher
 from src.pipeline.stage4_publication_check import fetch_public_feed
 from src.pipeline.stage4_publication_check import parse_posts
 from src.pipeline.stage1_generate import run as run_stage1
@@ -26,6 +30,33 @@ from src.utils.reddit_setup import reddit_oauth_secret_label
 
 KST = ZoneInfo("Asia/Seoul")
 MAX_QUALITY_ATTEMPTS = 3
+TITLE_DUPLICATE_SIMILARITY = 0.9
+TOPIC_TOKEN_DUPLICATE_THRESHOLD = 0.8
+TOPIC_TOKEN_STOPWORDS = {
+    "a",
+    "an",
+    "and",
+    "as",
+    "beginner",
+    "beginners",
+    "easy",
+    "fix",
+    "for",
+    "foreigner",
+    "foreigners",
+    "guide",
+    "how",
+    "in",
+    "it",
+    "korea",
+    "on",
+    "simple",
+    "the",
+    "to",
+    "what",
+    "windows",
+    "with",
+}
 MIN_WINDOWS_PRECHECK_MICROSOFT_SOURCES = 6
 MIN_WINDOWS_PRECHECK_DIRECT_MICROSOFT_SOURCES = 5
 MAX_WINDOWS_PRECHECK_SEARCH_RESULT_SOURCES = 1
@@ -452,7 +483,7 @@ def run_publish_with_duplicate_guard(article_dir: Path, site: str | None = None)
     article = metadata.get("article", {})
     slug = article.get("slug", "")
     title = article.get("title", "")
-    duplicate = find_public_post(settings.site_url, slug, title) if slug or title else None
+    duplicate = find_existing_public_post(settings, slug, title) if slug or title else None
     if duplicate:
         result_path = article_dir / "duplicate_publish_result.json"
         result_path.write_text(
@@ -489,11 +520,35 @@ def validate_existing_article(article_dir: Path, site: str | None = None) -> Non
     )
 
 
+def find_existing_public_post(settings, slug: str = "", title: str = "") -> dict | None:
+    try:
+        duplicate = find_blogger_live_post(settings, slug, title)
+    except BloggerCredentialsError:
+        duplicate = None
+    if duplicate:
+        return duplicate
+    return find_public_post(settings.site_url, slug, title)
+
+
+def find_blogger_live_post(settings, slug: str = "", title: str = "") -> dict | None:
+    posts = BloggerPublisher(settings).list_live_posts()
+    normalized_title = normalize_match_text(title)
+    normalized_slug = normalize_slug_for_match(slug)
+    for post in posts:
+        post_title = post.get("title", "")
+        post_url = post.get("url", "")
+        if title_matches_existing(normalized_title, post_title):
+            return duplicate_blogger_post_payload(post)
+        if normalized_slug and public_url_matches_slug(post_url, slug):
+            return duplicate_blogger_post_payload(post)
+    return None
+
+
 def find_public_post(site_url: str, slug: str = "", title: str = "") -> dict | None:
     posts = parse_posts(fetch_public_feed(site_url))
     normalized_title = normalize_match_text(title)
     for post in posts:
-        if normalized_title and normalize_match_text(post.get("title", "")) == normalized_title:
+        if title_matches_existing(normalized_title, post.get("title", "")):
             return duplicate_post_payload(post)
         if slug and public_url_matches_slug(post.get("url", ""), slug):
             return duplicate_post_payload(post)
@@ -510,10 +565,51 @@ def find_public_post_published_today(site_url: str, now: datetime | None = None)
 
 
 def public_url_matches_slug(url: str, slug: str) -> bool:
-    public_slug = Path(url.split("?", 1)[0]).stem
-    if not public_slug:
+    public_slug = normalize_slug_for_match(Path(url.split("?", 1)[0]).stem)
+    candidate_slug = normalize_slug_for_match(slug)
+    if not public_slug or not candidate_slug:
         return False
-    return public_slug == slug or slug.startswith(f"{public_slug}-")
+    return (
+        public_slug == candidate_slug
+        or candidate_slug.startswith(f"{public_slug}-")
+        or public_slug.startswith(f"{candidate_slug}-")
+    )
+
+
+def normalize_slug_for_match(value: str) -> str:
+    slug = Path(value.split("?", 1)[0]).stem if "/" in value else value
+    slug = slug.casefold().strip()
+    slug = re.sub(r"_[0-9]+$", "", slug)
+    slug = re.sub(r"[^a-z0-9]+", "-", slug)
+    return slug.strip("-")
+
+
+def title_matches_existing(normalized_title: str, existing_title: str) -> bool:
+    if not normalized_title:
+        return False
+    normalized_existing = normalize_match_text(existing_title)
+    if normalized_existing == normalized_title:
+        return True
+    if not normalized_existing:
+        return False
+    if topic_tokens_match(normalized_title, normalized_existing):
+        return True
+    similarity = SequenceMatcher(None, normalized_title, normalized_existing).ratio()
+    return similarity >= TITLE_DUPLICATE_SIMILARITY
+
+
+def topic_tokens_match(candidate_text: str, existing_text: str) -> bool:
+    candidate_tokens = meaningful_topic_tokens(candidate_text)
+    existing_tokens = meaningful_topic_tokens(existing_text)
+    if len(candidate_tokens) < 2 or len(existing_tokens) < 2:
+        return False
+    overlap = candidate_tokens & existing_tokens
+    return len(overlap) / len(candidate_tokens) >= TOPIC_TOKEN_DUPLICATE_THRESHOLD
+
+
+def meaningful_topic_tokens(value: str) -> set[str]:
+    tokens = set(re.findall(r"[a-z0-9]+", value.casefold()))
+    return {token for token in tokens if token not in TOPIC_TOKEN_STOPWORDS and len(token) > 1}
 
 
 def duplicate_post_payload(post: dict) -> dict:
@@ -522,6 +618,15 @@ def duplicate_post_payload(post: dict) -> dict:
         "title": post.get("title"),
         "url": post.get("url"),
         "published_kst": published.isoformat() if published else "",
+    }
+
+
+def duplicate_blogger_post_payload(post: dict) -> dict:
+    return {
+        "id": post.get("id"),
+        "title": post.get("title"),
+        "url": post.get("url"),
+        "published_kst": post.get("published", ""),
     }
 
 

@@ -837,6 +837,45 @@ class DuplicatePublishGuardTests(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 daily_draft.find_public_post("https://easypcfixguide.blogspot.com", "any-slug", "Any Title")
 
+    def test_slug_match_treats_blogger_numeric_suffix_as_duplicate(self) -> None:
+        existing_post = {
+            "title": "How to Buy KTX Tickets in Korea as a Foreigner",
+            "url": "https://koreaeasyguide.blogspot.com/2026/06/how-to-buy-ktx-tickets-in-korea-as_0392776620.html",
+            "published_kst": datetime(2026, 6, 27, 9, 6, tzinfo=ZoneInfo("Asia/Seoul")),
+        }
+
+        with patch.object(daily_draft, "fetch_public_feed", return_value={}), patch.object(
+            daily_draft, "parse_posts", return_value=[existing_post]
+        ):
+            duplicate = daily_draft.find_public_post(
+                "https://koreaeasyguide.blogspot.com",
+                "how-to-buy-ktx-tickets-in-korea-as-a-foreigner",
+                "How to Buy KTX Tickets in Korea as a Foreigner",
+            )
+
+        self.assertIsNotNone(duplicate)
+        self.assertEqual(duplicate["url"], existing_post["url"])
+
+    def test_topic_token_match_blocks_same_korea_and_windows_subjects(self) -> None:
+        self.assertTrue(
+            daily_draft.title_matches_existing(
+                daily_draft.normalize_match_text("how to buy ktx tickets in korea"),
+                "How to Buy KTX Tickets in Korea as a Foreigner",
+            )
+        )
+        self.assertTrue(
+            daily_draft.title_matches_existing(
+                daily_draft.normalize_match_text("windows update error 0x80073712"),
+                "Windows Update Error 0X80073712: What It Means and How to Fix It",
+            )
+        )
+        self.assertFalse(
+            daily_draft.title_matches_existing(
+                daily_draft.normalize_match_text("korea esim tourist guide"),
+                "How to Buy KTX Tickets in Korea as a Foreigner",
+            )
+        )
+
     def test_publish_mode_tries_next_seed_when_first_seed_is_duplicate(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
