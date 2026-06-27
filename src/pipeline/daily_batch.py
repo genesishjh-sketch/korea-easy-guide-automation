@@ -238,6 +238,10 @@ def save_batch_report(result: dict) -> Path:
 
 def notify_batch_completion(result: dict) -> None:
     settings = load_settings(result.get("site"))
+    if is_scheduled_github_run():
+        if settings.site_key == "korea_easy_guide":
+            NotificationClient(settings).send_required(build_combined_morning_message())
+        return
     NotificationClient(settings).send_required(build_batch_message(result))
 
 
@@ -280,6 +284,92 @@ def build_batch_message(result: dict) -> str:
     if not published:
         lines.extend(["", "메모:", "- 조건을 통과한 후보가 부족하면 3개를 억지로 채우지 않습니다."])
     return "\n".join(lines)
+
+
+def is_scheduled_github_run() -> bool:
+    return os.getenv("GITHUB_ACTIONS", "").lower() == "true" and os.getenv("GITHUB_EVENT_NAME") == "schedule"
+
+
+def build_combined_morning_message(now: datetime | None = None) -> str:
+    target_per_site = int(os.getenv("COMBINED_DAILY_TARGET_PER_SITE", "3"))
+    site_keys = ["easy_pc_fix_guide", "korea_easy_guide"]
+    site_results = [combined_site_result(site_key, target_per_site, now) for site_key in site_keys]
+    total_published = sum(len(item.get("posts") or []) for item in site_results)
+    total_target = target_per_site * len(site_results)
+
+    lines = [
+        "[Posting Bot] 매일 아침 통합 포스팅 결과",
+        "",
+        f"- 전체 목표: {total_target}개",
+        f"- 공개 확인: {total_published}개",
+        f"- 상태: {'목표 달성' if total_published >= total_target else '목표 미달 또는 피드 반영 대기'}",
+        "",
+        "블로그별 결과:",
+    ]
+    for item in site_results:
+        count = len(item.get("posts") or [])
+        lines.extend(
+            [
+                "",
+                f"[{item['site_name']}] {count}/{item['target']}개",
+                f"- 사이트: {item['site_url']}",
+            ]
+        )
+        if item.get("error"):
+            lines.append(f"- 확인 오류: {item['error']}")
+            continue
+        posts = item.get("posts") or []
+        if not posts:
+            lines.append("- 오늘 공개 피드에서 확인된 글 없음")
+            continue
+        for index, post in enumerate(posts, 1):
+            lines.extend(
+                [
+                    f"{index}. {post.get('title')}",
+                    f"   {post.get('url')}",
+                ]
+            )
+
+    lines.extend(
+        [
+            "",
+            "운영 규칙:",
+            "- 중복 주제는 발행하지 않고 건너뜁니다.",
+            "- 품질/공식출처/이미지 기준 미달 글은 3개를 억지로 채우지 않습니다.",
+            "- Search Console 색인과 실제 검색 노출은 며칠 지연될 수 있습니다.",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def combined_site_result(site_key: str, target: int, now: datetime | None = None) -> dict:
+    settings = load_settings(site_key)
+    try:
+        posts = today_public_posts(settings.site_url, now)
+        return {
+            "site": settings.site_key,
+            "site_name": settings.site_name,
+            "site_url": settings.site_url,
+            "target": target,
+            "posts": posts,
+            "error": "",
+        }
+    except Exception as exc:
+        return {
+            "site": settings.site_key,
+            "site_name": settings.site_name,
+            "site_url": settings.site_url,
+            "target": target,
+            "posts": [],
+            "error": str(exc),
+        }
+
+
+def today_public_posts(site_url: str, now: datetime | None = None) -> list[dict]:
+    selected_now = now or datetime.now(tz=KST)
+    posts = parse_posts(fetch_public_feed(site_url))
+    today = selected_now.date()
+    return [post for post in posts if post["published_kst"].date() == today]
 
 
 def main() -> None:

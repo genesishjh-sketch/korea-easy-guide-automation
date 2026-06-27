@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+from datetime import datetime
+from zoneinfo import ZoneInfo
 import unittest
 from unittest.mock import patch
 
 from src.content.article_types import infer_article_type
+from src.pipeline import daily_batch
+from src.pipeline.daily_batch import build_combined_morning_message
+from src.pipeline.daily_batch import notify_batch_completion
 from src.pipeline.daily_batch import select_seed_candidates
 from src.pipeline.daily_batch import seed_matches_existing_public_title
 
@@ -136,6 +141,60 @@ class DailyBatchSelectionTests(unittest.TestCase):
                 ["How to Buy KTX Tickets in Korea as a Foreigner"],
             )
         )
+
+    def test_combined_morning_message_lists_both_blogs(self) -> None:
+        now = datetime(2026, 6, 27, 9, 58, tzinfo=ZoneInfo("Asia/Seoul"))
+        posts_by_url = {
+            "https://easypcfixguide.blogspot.com": [
+                {
+                    "title": "PC One",
+                    "url": "https://easypcfixguide.blogspot.com/pc-one.html",
+                    "published_kst": now,
+                }
+            ],
+            "https://koreaeasyguide.blogspot.com": [
+                {
+                    "title": "Korea One",
+                    "url": "https://koreaeasyguide.blogspot.com/korea-one.html",
+                    "published_kst": now,
+                },
+                {
+                    "title": "Korea Two",
+                    "url": "https://koreaeasyguide.blogspot.com/korea-two.html",
+                    "published_kst": now,
+                },
+            ],
+        }
+
+        def fake_today_public_posts(site_url: str, selected_now: datetime | None = None) -> list[dict]:
+            return posts_by_url[site_url]
+
+        with patch.object(daily_batch, "today_public_posts", side_effect=fake_today_public_posts):
+            message = build_combined_morning_message(now)
+
+        self.assertIn("전체 목표: 6개", message)
+        self.assertIn("공개 확인: 3개", message)
+        self.assertIn("[Easy PC Fix Guide] 1/3개", message)
+        self.assertIn("[Korea Easy Guide] 2/3개", message)
+        self.assertIn("PC One", message)
+        self.assertIn("Korea Two", message)
+        self.assertIn("중복 주제는 발행하지 않고 건너뜁니다", message)
+
+    def test_scheduled_pc_batch_suppresses_individual_notification(self) -> None:
+        with patch.dict("os.environ", {"GITHUB_ACTIONS": "true", "GITHUB_EVENT_NAME": "schedule"}), patch(
+            "src.pipeline.daily_batch.NotificationClient"
+        ) as notification:
+            notify_batch_completion({"site": "easy_pc_fix_guide"})
+
+        notification.assert_not_called()
+
+    def test_scheduled_korea_batch_sends_one_combined_notification(self) -> None:
+        with patch.dict("os.environ", {"GITHUB_ACTIONS": "true", "GITHUB_EVENT_NAME": "schedule"}), patch(
+            "src.pipeline.daily_batch.build_combined_morning_message", return_value="combined"
+        ), patch("src.pipeline.daily_batch.NotificationClient") as notification:
+            notify_batch_completion({"site": "korea_easy_guide"})
+
+        notification.return_value.send_required.assert_called_once_with("combined")
 
 
 if __name__ == "__main__":

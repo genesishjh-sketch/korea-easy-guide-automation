@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 from datetime import datetime
 import json
+import os
 from pathlib import Path
 
 from src.config import ROOT_DIR, load_settings
@@ -25,8 +26,13 @@ def run(sitemap_url: str | None = None, site: str | None = None) -> Path:
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / f"{settings.site_key}-search-console-sitemap-submit.json"
     output_path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
-    NotificationClient(settings).send_required(result["human_summary"])
+    if should_notify_sitemap_submit():
+        NotificationClient(settings).send_required(result["human_summary"])
     return output_path
+
+
+def should_notify_sitemap_submit() -> bool:
+    return not (os.getenv("GITHUB_ACTIONS", "").lower() == "true" and os.getenv("GITHUB_EVENT_NAME") == "schedule")
 
 
 def build_message(site_name: str, result: dict) -> str:

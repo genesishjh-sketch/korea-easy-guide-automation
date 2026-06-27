@@ -153,6 +153,22 @@ class SearchConsoleSitemapMessageTests(unittest.TestCase):
         self.assertEqual(payload["daily_publish_context"]["title"], "Wi-Fi Button Missing on Windows 11")
         self.assertEqual(payload["daily_publish_context"]["quality_score"], 100)
 
+    def test_scheduled_run_skips_sitemap_telegram_notification(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir, patch.object(stage3_submit_sitemap, "ROOT_DIR", Path(tmpdir)), patch(
+            "src.pipeline.stage3_submit_sitemap.SearchConsoleClient"
+        ) as client, patch("src.pipeline.stage3_submit_sitemap.NotificationClient") as notification, patch.dict(
+            "os.environ", {"GITHUB_ACTIONS": "true", "GITHUB_EVENT_NAME": "schedule"}
+        ):
+            client.return_value.submit_sitemap.return_value = {
+                "status": "submitted",
+                "site_url": "https://easypcfixguide.blogspot.com/",
+                "sitemap_url": "https://easypcfixguide.blogspot.com/sitemap.xml",
+            }
+
+            stage3_submit_sitemap.run(site="easy_pc_fix_guide")
+
+        notification.assert_not_called()
+
     def test_daily_publish_status_label_describes_daily_limit_skip(self) -> None:
         self.assertEqual(
             daily_publish_status_label("skipped_daily_limit"),
