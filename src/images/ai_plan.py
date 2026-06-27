@@ -118,23 +118,26 @@ def build_windows_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
     hero_subject = _windows_hero_subject(topic_scene)
     inline_subject = _windows_inline_subject(topic_scene)
     palette = _windows_palette(topic_scene)
+    hero_style = _windows_hero_style(topic_scene)
+    hero_framing = _windows_hero_framing(topic_scene)
+    inline_style = _windows_inline_style(topic_scene)
     hero = PlannedImage(
         role="hero",
         filename=f"ai-hero.{extension}",
         alt=f"{title} beginner-friendly Windows help visual",
         caption="A realistic beginner-friendly visual for solving this Windows problem safely.",
         prompt=(
-            "Use case: realistic editorial hero image. "
+            f"Use case: {hero_style}. "
             f"Create a realistic 16:9 hero image for an English beginner computer help article titled '{title}'. "
             f"Primary request: help a non-technical reader understand a safe first-step fix for {candidate.keyword}. "
             f"Scene/backdrop: {hero_subject}. "
             "Use blank cards, abstract lines, and icon-like shapes instead of any readable interface. "
-            f"Composition/framing: horizontal 16:9, uncluttered desk-level editorial photo, clear foreground subject, generous negative space. "
+            f"Composition/framing: {hero_framing}. "
             f"Lighting/mood: bright natural daylight, calm, reassuring, practical. Color palette: {palette}. "
             "Do not show real Microsoft logos, fake Windows UI, readable error codes, readable letters or numbers, brand marks, "
             "private information, warning screens, command prompts, registry editors, or text overlays. "
             "Avoid fake support documents, fake screenshots, scary alert dialogs, distorted hands, extra fingers, watermarks, and cartoon/vector art. "
-            "Style: modern trustworthy tech-help editorial photography, polished blog image, practical and safe."
+            "Style diversity rule: avoid repeating the same laptop-on-white-desk composition across multiple Windows Update posts."
         ),
     )
     inline = PlannedImage(
@@ -143,10 +146,10 @@ def build_windows_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
         alt=f"Safe step-by-step troubleshooting setup for {candidate.keyword}",
         caption="Work through the safe checks first before trying advanced repair steps.",
         prompt=(
-            "Use case: friendly illustrated troubleshooting infographic. "
+            f"Use case: {inline_style}. "
             f"Create a clean 16:9 in-article illustration for a beginner Windows troubleshooting guide about '{candidate.keyword}'. "
             f"Primary request: visually support the step-by-step safe checks before advanced fixes. Concept: {inline_subject}. "
-            "Use a warm modern editorial illustration style, soft shadows, simple geometric icons, and clear visual hierarchy. "
+            "Use a visually distinct style from the hero image and from other Windows Update subtopics. "
             "Show the troubleshooting flow with abstract symbols such as restart arrows, checklist cards, clock, shield, "
             "repair gear, Wi-Fi waves, speaker waves, folder shapes, or device outlines when relevant. "
             f"Color palette: {palette}. "
@@ -162,6 +165,8 @@ def build_windows_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
             "Use Codex-generated JPG assets from src/images/ai_assets/windows.",
             "Do not use SVG fallback for Windows help public posts.",
             "Do not generate fake Windows UI or readable error screens.",
+            "Vary visual concepts across posts: change medium, camera angle, props, composition, and dominant accent color by article type.",
+            "Hero and inline images must have different roles and should not look like two versions of the same template.",
             "Do not add extra images unless each image has a distinct role such as hero, troubleshooting flow, warning, or decision checklist.",
             "Publishing should stop when required image files are missing.",
         ],
@@ -275,6 +280,44 @@ def _windows_hero_subject(scene: str) -> str:
     return subjects.get(scene, subjects["general"])
 
 
+def _windows_hero_style(scene: str) -> str:
+    styles = {
+        "network": "photorealistic home connectivity scene with router and laptop",
+        "device": "photorealistic peripheral setup scene with hands-free device props",
+        "audio": "photorealistic audio workspace scene with headphones and microphone props",
+        "printer": "photorealistic home-office printer troubleshooting scene",
+        "account": "privacy-focused editorial desk photo with cloud-sync metaphors",
+        "files": "organized file-management editorial flat-lay photo",
+        "recovery": "cautious repair-prep editorial photo with backup-drive emphasis",
+        "update_download": "photorealistic network-and-waiting scene with paused-progress metaphor",
+        "update_cleanup": "top-down storage cleanup flat-lay photo with backup and organization props",
+        "update_error_code": "cinematic diagnostic workbench photo with puzzle and investigation metaphors",
+        "update_restart": "photorealistic waiting-and-restart scene with clock and power-cycle metaphors",
+        "update": "photorealistic Windows update help scene with abstract update symbols",
+        "general": "photorealistic beginner computer help scene",
+    }
+    return styles.get(scene, styles["general"])
+
+
+def _windows_hero_framing(scene: str) -> str:
+    framings = {
+        "network": "horizontal 16:9, router in soft foreground, laptop offset to one side, visible home workspace depth",
+        "device": "horizontal 16:9, close desk-level angle with device props separated from the laptop",
+        "audio": "horizontal 16:9, close-up of headphones and microphone beside a softly blurred laptop",
+        "printer": "horizontal 16:9, wider home-office view with printer as the main object and laptop secondary",
+        "account": "horizontal 16:9, calm privacy-focused desk arrangement with cloud-shaped abstract props",
+        "files": "horizontal 16:9, top-down organized flat-lay with folder cards and magnifying glass",
+        "recovery": "horizontal 16:9, backup drive prominent in foreground, laptop and safety props behind",
+        "update_download": "horizontal 16:9, router and paused-progress metaphor visible, laptop angled away from center",
+        "update_cleanup": "horizontal 16:9, top-down flat-lay with storage drive, file boxes, cleanup tray, and laptop edge",
+        "update_error_code": "horizontal 16:9, lower-key diagnostic workbench composition with puzzle pieces in foreground",
+        "update_restart": "horizontal 16:9, clock and power-cycle object prominent, laptop secondary, patient waiting composition",
+        "update": "horizontal 16:9, uncluttered desk-level editorial photo, clear foreground subject, generous negative space",
+        "general": "horizontal 16:9, practical desk-level editorial photo with clear subject separation",
+    }
+    return framings.get(scene, framings["general"])
+
+
 def _windows_inline_subject(scene: str) -> str:
     subjects = {
         "network": "a beginner-friendly desk scene showing a router, laptop, restart arrow, Wi-Fi waves, and a three-step blank checklist",
@@ -292,6 +335,25 @@ def _windows_inline_subject(scene: str) -> str:
         "general": "a simple safe troubleshooting flow with restart arrow, checklist, clock, shield, and repair gear symbols",
     }
     return subjects.get(scene, subjects["general"])
+
+
+def _windows_inline_style(scene: str) -> str:
+    styles = {
+        "network": "isometric connectivity map illustration",
+        "device": "modular device-pairing card illustration",
+        "audio": "sound-wave troubleshooting board illustration",
+        "printer": "paper-path and queue-flow illustration",
+        "account": "privacy-safe account sync decision diagram",
+        "files": "folder organization flow illustration",
+        "recovery": "safety-first repair ladder illustration",
+        "update_download": "timeline-style network troubleshooting diagram",
+        "update_cleanup": "storage decision board with backup-first visual flow",
+        "update_error_code": "diagnostic decision tree with puzzle-piece investigation theme",
+        "update_restart": "restart sequence timeline with clock and power-cycle stages",
+        "update": "friendly illustrated troubleshooting infographic",
+        "general": "friendly illustrated troubleshooting infographic",
+    }
+    return styles.get(scene, styles["general"])
 
 
 def _windows_palette(scene: str) -> str:
