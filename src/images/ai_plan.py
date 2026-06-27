@@ -243,7 +243,15 @@ def _windows_topic_scene(keyword: str, title: str) -> str:
         return "files"
     if any(token in text for token in ["boot", "startup", "recovery", "repair"]):
         return "recovery"
-    if any(token in text for token in ["update", "0x", "error code"]):
+    if any(token in text for token in ["download stuck", "stuck at 0", "stuck at 0%", "stuck downloading"]):
+        return "update_download"
+    if any(token in text for token in ["cleanup", "clean up", "disk cleanup", "storage sense"]):
+        return "update_cleanup"
+    if any(token in text for token in ["0x", "error code", "install error", "update error"]):
+        return "update_error_code"
+    if any(token in text for token in ["pending restart", "restart stuck", "restart required"]):
+        return "update_restart"
+    if any(token in text for token in ["update", "restart"]):
         return "update"
     return "general"
 
@@ -257,6 +265,10 @@ def _windows_hero_subject(scene: str) -> str:
         "account": "a laptop next to a notebook and cloud-shaped abstract sync symbols, with calm privacy-focused desk styling",
         "files": "a laptop with blank folder-shaped cards, magnifying glass, and tidy file organization props",
         "recovery": "a calm repair desk with a laptop, backup drive, shield symbol, and step-by-step safety checklist cards",
+        "update_download": "a home laptop beside a router silhouette and a paused progress concept made from blank geometric blocks, with a calm checklist notebook nearby",
+        "update_cleanup": "a tidy desk with a laptop, storage drive, recycle-bin-shaped abstract container, and neat cleanup checklist cards",
+        "update_error_code": "a laptop on a repair desk with abstract puzzle pieces, shield symbol, and non-readable diagnostic cards arranged like a problem-solving workspace",
+        "update_restart": "a laptop beside a clock, circular restart arrows, and a simple power button symbol, arranged as a calm waiting-and-restart concept",
         "update": "a clean home desk with a laptop displaying only abstract update, checklist, shield, and repair symbols",
         "general": "a clean home desk with a laptop, notebook, abstract checklist cards, shield, and repair symbols",
     }
@@ -272,6 +284,10 @@ def _windows_inline_subject(scene: str) -> str:
         "account": "a privacy-safe sync-check scene with cloud icons, shield icon, clock icon, and blank checklist cards",
         "files": "a file search help scene with folder cards, magnifying glass, restart arrow, and blank checklist cards",
         "recovery": "a cautious repair-prep scene with backup drive, shield, clock, and blank step cards for safe recovery order",
+        "update_download": "a download troubleshooting flow with a paused progress symbol, network waves, clock, restart arrow, and blank step cards",
+        "update_cleanup": "a safe cleanup decision flow with storage blocks, broom-like abstract shape, shield, recycle container, and blank step cards",
+        "update_error_code": "an error-code troubleshooting flow with puzzle pieces, shield, magnifying glass, repair gear, and blank decision cards",
+        "update_restart": "a restart troubleshooting flow with circular arrows, clock, power symbol, shield, and blank safe-order cards",
         "update": "an update repair flow with restart arrows, clock, shield, repair gear, and blank checklist cards",
         "general": "a simple safe troubleshooting flow with restart arrow, checklist, clock, shield, and repair gear symbols",
     }
@@ -287,6 +303,10 @@ def _windows_palette(scene: str) -> str:
         "account": "clean whites, soft sky-blue accents, graphite, and gentle warm neutrals",
         "files": "clean whites, muted amber accents, graphite, and pale gray",
         "recovery": "clean whites, restrained red caution accent, graphite, and calm neutral tones",
+        "update_download": "clean whites, soft teal-blue accents, graphite, and pale desk wood",
+        "update_cleanup": "clean whites, fresh green accents, graphite, and light warm neutral tones",
+        "update_error_code": "clean whites, muted indigo accents, graphite, and soft gray repair-desk tones",
+        "update_restart": "clean whites, soft violet-blue accents, graphite, and calm neutral tones",
         "update": "clean whites, soft blue accents, graphite, and light desk wood",
         "general": "clean whites, soft blue-green accents, graphite, and calm neutral tones",
     }

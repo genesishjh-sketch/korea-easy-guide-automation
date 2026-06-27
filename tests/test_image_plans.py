@@ -8,6 +8,7 @@ import unittest
 from unittest.mock import patch
 
 from src.content.topic_scoring import build_candidate
+from src.images.ai_library import windows_scene
 from src.images.ai_plan import build_article_image_plan
 from src.models import TopicSignal
 from src.pipeline import stage1_generate
@@ -58,6 +59,38 @@ class ImagePlanTests(unittest.TestCase):
         self.assertIn("composition/framing", combined_prompts)
         self.assertIn("distorted hands", combined_prompts)
         self.assertIn("extra fingers", combined_prompts)
+
+    def test_windows_update_subtopics_use_different_image_scenes(self) -> None:
+        cases = {
+            "windows update download stuck at 0": "update_download",
+            "windows update cleanup safe for beginners": "update_cleanup",
+            "windows update install error 0x80248007": "update_error_code",
+            "windows update pending restart stuck": "update_restart",
+        }
+
+        for keyword, expected_scene in cases.items():
+            with self.subTest(keyword=keyword):
+                self.assertEqual(windows_scene(keyword), expected_scene)
+
+        self.assertEqual(len(set(cases.values())), len(cases))
+
+    def test_windows_update_subtopic_prompts_are_visually_distinct(self) -> None:
+        download = build_article_image_plan(
+            build_candidate("windows update download stuck at 0", [], "windows_help"),
+            "Windows Update Download Stuck At 0",
+        )
+        cleanup = build_article_image_plan(
+            build_candidate("windows update cleanup safe for beginners", [], "windows_help"),
+            "Windows Update Cleanup Safe for Beginners",
+        )
+        error_code = build_article_image_plan(
+            build_candidate("windows update install error 0x80248007", [], "windows_help"),
+            "Windows Update Error 0x80248007",
+        )
+
+        self.assertIn("paused progress", download.images[0].prompt.lower())
+        self.assertIn("storage drive", cleanup.images[0].prompt.lower())
+        self.assertIn("puzzle pieces", error_code.images[0].prompt.lower())
 
     def test_windows_image_plan_has_descriptive_alt_and_captions(self) -> None:
         candidate = build_candidate("windows update error 0x80070643", [], "windows_help")

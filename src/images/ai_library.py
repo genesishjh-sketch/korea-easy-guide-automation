@@ -84,7 +84,15 @@ def windows_scene(text: str) -> str:
         return "recovery"
     if any(token in value for token in ["version", "edition", "build", "about windows"]):
         return "version"
-    if any(token in value for token in ["update", "restart", "0x", "error code"]):
+    if any(token in value for token in ["download stuck", "stuck at 0", "stuck at 0%", "stuck downloading"]):
+        return "update_download"
+    if any(token in value for token in ["cleanup", "clean up", "disk cleanup", "storage sense"]):
+        return "update_cleanup"
+    if any(token in value for token in ["0x", "error code", "install error", "update error"]):
+        return "update_error_code"
+    if any(token in value for token in ["pending restart", "restart stuck", "restart required"]):
+        return "update_restart"
+    if any(token in value for token in ["update", "restart"]):
         return "update"
     return "general"
 
