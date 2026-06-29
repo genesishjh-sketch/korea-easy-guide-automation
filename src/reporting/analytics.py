@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import date
 from typing import Any
+from urllib.parse import urlparse
 
 from googleapiclient.discovery import build
 
@@ -13,6 +14,7 @@ class GA4Client:
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
         self.property_id = settings.ga4_property_id.strip()
+        self.hostname = site_hostname(settings.site_url)
 
     def summary(self, start_date: date, end_date: date) -> dict[str, Any]:
         if not self.property_id:
@@ -34,6 +36,7 @@ class GA4Client:
                         ],
                         "limit": 10,
                         "orderBys": [{"metric": {"metricName": "screenPageViews"}, "desc": True}],
+                        **hostname_filter(self.hostname),
                     },
                 )
                 .execute()
@@ -42,6 +45,7 @@ class GA4Client:
             return {
                 "status": "connected",
                 "property_id": self.property_id,
+                "hostname_filter": self.hostname,
                 "start_date": start_date.isoformat(),
                 "end_date": end_date.isoformat(),
                 "top_pages": [_parse_row(row) for row in rows],
@@ -63,6 +67,30 @@ def _parse_row(row: dict[str, Any]) -> dict[str, Any]:
         "active_users": _number(metrics, 1),
         "engagement_rate": _float(metrics, 2),
         "average_session_duration": _float(metrics, 3),
+    }
+
+
+def site_hostname(site_url: str) -> str:
+    parsed = urlparse(site_url.strip())
+    if parsed.hostname:
+        return parsed.hostname
+    parsed = urlparse(f"https://{site_url.strip()}")
+    return parsed.hostname or ""
+
+
+def hostname_filter(hostname: str) -> dict[str, Any]:
+    if not hostname:
+        return {}
+    return {
+        "dimensionFilter": {
+            "filter": {
+                "fieldName": "hostName",
+                "stringFilter": {
+                    "matchType": "EXACT",
+                    "value": hostname,
+                },
+            }
+        }
     }
 
 

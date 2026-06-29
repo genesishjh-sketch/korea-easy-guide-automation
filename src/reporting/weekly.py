@@ -798,6 +798,8 @@ class WeeklyReporter:
         analytics = report.get("analytics", {})
         lines.append(f"- 상태: {_status_kr(analytics.get('status', 'unknown'))}")
         if analytics.get("status") == "connected":
+            if analytics.get("hostname_filter"):
+                lines.append(f"- 집계 기준 블로그: {analytics.get('hostname_filter')}")
             lines.append("| 페이지 | 조회수 | 활성 사용자 | 참여율 |")
             lines.append("|---|---:|---:|---:|")
             for row in analytics.get("top_pages", []):
