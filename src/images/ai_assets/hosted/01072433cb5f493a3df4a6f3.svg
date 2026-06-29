@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 788" role="img" aria-label="Wi-Fi Button Missing on Windows 11: Simple Fixes for Beginners">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#f7fcfb"/>
+      <stop offset="0.58" stop-color="#eefaf7"/>
+      <stop offset="1" stop-color="#f5fbff"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="24" stdDeviation="28" flood-color="#172033" flood-opacity="0.13"/>
+    </filter>
+    <linearGradient id="screen" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#eff6ff"/>
+      <stop offset="1" stop-color="#dff7f0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1400" height="788" fill="url(#bg)"/>
+  <path d="M0 646c180-80 330-48 506-116 190-72 356-44 520-108 132-52 246-66 374-42v408H0z" fill="#d7eee9" opacity=".92"/>
+  <g transform="translate(104 110)" filter="url(#shadow)">
+    <rect x="0" y="0" width="1192" height="560" rx="42" fill="#ffffff" stroke="#dde7ee"/>
+    <rect x="64" y="84" width="642" height="372" rx="30" fill="#172033"/>
+    <rect x="100" y="120" width="570" height="296" rx="18" fill="url(#screen)"/>
+    <path d="M170 276c72-72 188-72 260 0" fill="none" stroke="#0f766e" stroke-width="22" stroke-linecap="round" opacity=".9"/>
+    <path d="M216 320c42-34 96-34 138 0" fill="none" stroke="#2563eb" stroke-width="14" stroke-linecap="round" opacity=".78"/>
+    <rect x="286" y="456" width="142" height="28" rx="14" fill="#172033"/>
+    <rect x="12" y="492" width="760" height="34" rx="17" fill="#d5dee7"/>
+    <g transform="translate(780 88)">
+      <rect x="0" y="0" width="310" height="160" rx="28" fill="#f0fdfa" stroke="#d8e4ec" stroke-width="4"/>
+      <circle cx="74" cy="80" r="34" fill="#0f766e" opacity=".18"/>
+      <path d="M54 92c42-42 110-42 152 0M82 122c26-22 70-22 96 0M130 146h1" fill="none" stroke="#0f766e" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M150 58h104M150 86h78M150 114h126" stroke="#9aa8b5" stroke-width="12" stroke-linecap="round"/>
+    </g>
+    <g transform="translate(850 328)"><rect width="180" height="86" rx="24" fill="#172033"/><path d="M42 44h96" stroke="#f8fafc" stroke-width="10" stroke-linecap="round"/><circle cx="48" cy="64" r="7" fill="#34d399"/><circle cx="76" cy="64" r="7" fill="#93c5fd"/><path d="M116 18v-52" stroke="#172033" stroke-width="12" stroke-linecap="round"/></g>
+  </g>
+</svg>

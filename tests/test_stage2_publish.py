@@ -4,8 +4,10 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from src.pipeline.stage2_publish import validate_required_images
+from src.pipeline.stage2_publish import rewrite_local_image_paths
 from src.quality.hades import HadesQualityGate
 
 
@@ -91,6 +93,29 @@ class Stage2ImageGateTests(unittest.TestCase):
             )
 
             validate_required_images(article_dir)
+
+    def test_rewrite_local_image_paths_uses_raw_github_url_not_base64(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            library_dir = root / "src" / "images" / "ai_assets" / "windows" / "general"
+            library_dir.mkdir(parents=True)
+            article_dir = root / "data" / "generated" / "article"
+            assets_dir = article_dir / "assets"
+            assets_dir.mkdir(parents=True)
+            image_bytes = b"fake-jpeg"
+            (library_dir / "hero.jpg").write_bytes(image_bytes)
+            (assets_dir / "ai-hero.jpg").write_bytes(image_bytes)
+            html = '<article><img src="assets/ai-hero.jpg" alt="Hero"></article>'
+
+            with patch("src.pipeline.stage2_publish.ROOT_DIR", root), patch(
+                "src.pipeline.stage2_publish.RAW_IMAGE_BASE_URL",
+                "https://raw.githubusercontent.com/example/repo/main",
+            ):
+                rewritten = rewrite_local_image_paths(html, article_dir)
+
+        self.assertIn("https://raw.githubusercontent.com/example/repo/main/src/images/ai_assets/windows/general/hero.jpg", rewritten)
+        self.assertNotIn("base64", rewritten)
+        self.assertNotIn("data:image", rewritten)
 
     def test_hades_blocks_articles_without_image_plan(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

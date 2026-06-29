@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import argparse
-import base64
+import hashlib
 import json
 import logging
 import mimetypes
+import os
 from pathlib import Path
 
 from bs4 import BeautifulSoup
@@ -16,6 +17,10 @@ from src.quality.hades import HadesQualityGate
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
 LOGGER = logging.getLogger("stage2")
+RAW_IMAGE_BASE_URL = os.getenv(
+    "RAW_IMAGE_BASE_URL",
+    "https://raw.githubusercontent.com/genesishjh-sketch/korea-easy-guide-automation/main",
+)
 
 
 def latest_article_dir(site: str | None = None) -> Path:
@@ -89,7 +94,7 @@ def validate_required_images(article_dir: Path) -> None:
 
 
 def rewrite_local_image_paths(html: str, article_dir: Path) -> str:
-    """Embed local image assets directly so Blogger posts have images without hosting costs."""
+    """Replace local image assets with stable raw GitHub URLs so Blogger lists stay lightweight."""
     soup = BeautifulSoup(html, "html.parser")
     for img in soup.find_all("img"):
         src = img.get("src", "")
@@ -102,10 +107,33 @@ def rewrite_local_image_paths(html: str, article_dir: Path) -> str:
             if mime_type not in {"image/svg+xml", "image/png", "image/jpeg", "image/webp"}:
                 img.decompose()
                 continue
-            encoded = base64.b64encode(asset_path.read_bytes()).decode("ascii")
-            img["src"] = f"data:{mime_type};base64,{encoded}"
+            img["src"] = raw_image_url_for_asset(asset_path)
             img["loading"] = "lazy"
     return str(soup)
+
+
+def raw_image_url_for_asset(asset_path: Path) -> str:
+    library_path = find_matching_ai_asset(asset_path)
+    if library_path is None:
+        raise FileNotFoundError(
+            f"Image asset is not available in src/images/ai_assets for lightweight Blogger publishing: {asset_path}. "
+            "Copy the generated image into the image asset library or provide a stable external image URL."
+        )
+    relative = library_path.relative_to(ROOT_DIR).as_posix()
+    return f"{RAW_IMAGE_BASE_URL.rstrip('/')}/{relative}"
+
+
+def find_matching_ai_asset(asset_path: Path) -> Path | None:
+    digest = sha256_file(asset_path)
+    for candidate in (ROOT_DIR / "src" / "images" / "ai_assets").rglob("*"):
+        if candidate.is_file() and candidate.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp", ".svg"}:
+            if sha256_file(candidate) == digest:
+                return candidate
+    return None
+
+
+def sha256_file(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def save_publish_result(article_dir: Path, result: dict, draft: bool) -> Path:
