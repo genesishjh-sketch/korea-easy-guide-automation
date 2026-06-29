@@ -5,6 +5,8 @@ from datetime import datetime
 import json
 import os
 from pathlib import Path
+import urllib.error
+import urllib.request
 
 from src.config import ROOT_DIR, load_settings
 from src.notifications.telegram import NotificationClient
@@ -18,6 +20,7 @@ def run(sitemap_url: str | None = None, site: str | None = None) -> Path:
     result = SearchConsoleClient(settings).submit_sitemap(selected_sitemap)
     result["submitted_at"] = datetime.utcnow().isoformat() + "Z"
     result["daily_publish_context"] = build_daily_publish_context(settings.site_key)
+    result["url_fetch_diagnostics"] = build_url_fetch_diagnostics(selected_sitemap, result["daily_publish_context"].get("url", ""))
     result["indexing_guidance"] = build_indexing_guidance(result)
     result["action_items"] = sitemap_action_items(result)
     result["human_summary"] = build_message(settings.site_name, result)
@@ -67,6 +70,7 @@ def build_message(site_name: str, result: dict) -> str:
             ]
         )
     else:
+        diagnostics = result.get("url_fetch_diagnostics") or {}
         lines.extend(
             [
                 "",
@@ -80,18 +84,31 @@ def build_message(site_name: str, result: dict) -> str:
                 f"- 다음 확인: {guidance.get('next_check')}",
             ]
         )
+        if diagnostics:
+            lines.extend(["", "URL 사전 점검:"])
+            for check in diagnostics.get("checks", []):
+                status = "정상" if check.get("ok") else "확인 필요"
+                lines.append(f"- {check.get('label')}: {status} / {check.get('final_status')} / {check.get('final_url')}")
     return "\n".join(lines)
 
 
 def sitemap_action_items(result: dict) -> list[str]:
     guidance = result.get("indexing_guidance") or build_indexing_guidance(result)
+    diagnostics = result.get("url_fetch_diagnostics") or {}
+    broken_checks = [check for check in diagnostics.get("checks", []) if not check.get("ok")]
     if result.get("status") == "submitted":
-        return [
+        items = [
             "Search Console > Sitemaps에서 제출 상태를 확인하세요.",
             f"URL 검사에서 최신 글 URL({guidance.get('url_inspection_target', 'daily publish URL')})이 발견되는지 확인하세요.",
             "색인은 즉시 보장되지 않으므로 노출/색인 데이터는 며칠 단위로 확인하세요.",
             "Search Console에 색인/노출 페이지가 충분히 쌓이기 전까지 하루 1개 발행 리듬을 유지하세요.",
         ]
+        if broken_checks:
+            items.insert(
+                0,
+                "URL 사전 점검에서 200이 아닌 항목이 있습니다. Search Console URL 검사는 sitemap에 있는 https 최종 글 URL만 사용하세요.",
+            )
+        return items
     return [
         "Google OAuth 토큰 또는 Search Console 권한을 확인하세요.",
         "sitemap URL이 공개 접속 가능한지 확인하세요.",
@@ -152,6 +169,79 @@ def build_indexing_guidance(result: dict) -> dict:
         "url_inspection_target": latest_url,
         "next_check": "다음 주간 보고서에서 색인/노출 페이지 수와 오류를 확인",
     }
+
+
+def build_url_fetch_diagnostics(sitemap_url: str, latest_post_url: str) -> dict:
+    checks = [fetch_url_status("sitemap", sitemap_url)]
+    if latest_post_url:
+        checks.append(fetch_url_status("latest_post", latest_post_url))
+    return {
+        "status": "ok" if all(check.get("ok") for check in checks) else "needs_attention",
+        "checks": checks,
+    }
+
+
+def fetch_url_status(label: str, url: str) -> dict:
+    current_url = url
+    chain = []
+    opener = urllib.request.build_opener(NoRedirectHandler)
+    for _ in range(8):
+        request = urllib.request.Request(
+            current_url,
+            headers={"User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"},
+        )
+        try:
+            with opener.open(request, timeout=20) as response:
+                chain.append({"url": current_url, "status": response.status, "location": response.headers.get("location", "")})
+                return {
+                    "label": label,
+                    "url": url,
+                    "ok": 200 <= response.status < 300,
+                    "final_status": response.status,
+                    "final_url": current_url,
+                    "redirect_count": len(chain) - 1,
+                    "chain": chain,
+                }
+        except urllib.error.HTTPError as exc:
+            location = exc.headers.get("location", "")
+            chain.append({"url": current_url, "status": exc.code, "location": location})
+            if exc.code in {301, 302, 303, 307, 308} and location:
+                current_url = urllib.request.urljoin(current_url, location)
+                continue
+            return {
+                "label": label,
+                "url": url,
+                "ok": False,
+                "final_status": exc.code,
+                "final_url": current_url,
+                "redirect_count": len(chain) - 1,
+                "chain": chain,
+            }
+        except Exception as exc:
+            chain.append({"url": current_url, "status": "error", "location": str(exc)})
+            return {
+                "label": label,
+                "url": url,
+                "ok": False,
+                "final_status": "error",
+                "final_url": current_url,
+                "redirect_count": len(chain) - 1,
+                "chain": chain,
+            }
+    return {
+        "label": label,
+        "url": url,
+        "ok": False,
+        "final_status": "redirect_loop",
+        "final_url": current_url,
+        "redirect_count": len(chain),
+        "chain": chain,
+    }
+
+
+class NoRedirectHandler(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
 
 
 def main() -> None:
