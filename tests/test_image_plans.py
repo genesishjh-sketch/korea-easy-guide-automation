@@ -54,7 +54,7 @@ class ImagePlanTests(unittest.TestCase):
 
         combined_prompts = " ".join(image.prompt for image in plan.images).lower()
         self.assertIn("visual brief", combined_prompts)
-        self.assertIn("visual fingerprint", combined_prompts)
+        self.assertIn("fresh prompt rule", combined_prompts)
         self.assertIn("distinctive props", combined_prompts)
         self.assertIn("composition/framing", combined_prompts)
         self.assertIn("distorted hands", combined_prompts)
@@ -103,12 +103,12 @@ class ImagePlanTests(unittest.TestCase):
             "Windows Update Error 0x80248007",
         )
 
-        self.assertIn("visual fingerprint", download.images[0].prompt.lower())
-        self.assertIn("visual fingerprint", cleanup.images[0].prompt.lower())
-        self.assertIn("visual fingerprint", error_code.images[0].prompt.lower())
-        self.assertIn("update_download-hero", download.images[0].prompt.lower())
-        self.assertIn("update_cleanup-hero", cleanup.images[0].prompt.lower())
-        self.assertIn("update_error_code-hero", error_code.images[0].prompt.lower())
+        self.assertIn("fresh prompt rule", download.images[0].prompt.lower())
+        self.assertIn("fresh prompt rule", cleanup.images[0].prompt.lower())
+        self.assertIn("fresh prompt rule", error_code.images[0].prompt.lower())
+        self.assertIn("download that is waiting or paused", download.images[0].prompt.lower())
+        self.assertIn("storage cleanup", cleanup.images[0].prompt.lower())
+        self.assertIn("diagnostic puzzle", error_code.images[0].prompt.lower())
         self.assertNotEqual(download.images[0].prompt, cleanup.images[0].prompt)
         self.assertNotEqual(cleanup.images[0].prompt, error_code.images[0].prompt)
 

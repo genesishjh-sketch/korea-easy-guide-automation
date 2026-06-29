@@ -81,7 +81,7 @@ def build_article_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
             f"Visual brief: {hero_brief['brief']}. Composition/framing: {hero_brief['framing']}. "
             f"Material/camera direction: {hero_brief['medium']}. Distinctive props: {hero_brief['props']}. "
             f"Lighting/mood: {hero_brief['mood']}. Accent color: {hero_brief['accent']}. "
-            f"Visual fingerprint for this exact article: {hero_brief['fingerprint']}. "
+            "Fresh prompt rule: this is a creative brief, not a reusable prompt; write a new one-off image prompt for this article. "
             "No text overlays, no readable app screens, no logos, no fake brand marks, no private information, no watermark. "
             "Avoid repeating the same traveler-with-phone composition across nearby Korea posts."
         ),
@@ -96,7 +96,7 @@ def build_article_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
             f"Show the key process visually: {_inline_subject(scene)}. Visual brief: {inline_brief['brief']}. "
             f"Composition/framing: {inline_brief['framing']}. Material/camera direction: {inline_brief['medium']}. "
             f"Distinctive props: {inline_brief['props']}. Accent color: {inline_brief['accent']}. "
-            f"Visual fingerprint for this exact article: {inline_brief['fingerprint']}. "
+            "Fresh prompt rule: create a new visual idea for this article instead of reusing a previous prompt, camera setup, or prop layout. "
             "No readable text, no Korean letters, no logos, no fake app UI, no private information, and no watermarks."
         ),
     )
@@ -137,7 +137,7 @@ def build_windows_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
             f"Material/camera direction: {hero_brief['medium']}. "
             f"Distinctive props: {hero_brief['props']}. "
             f"Lighting/mood: {hero_brief['mood']}. Color palette: {palette}; accent color: {hero_brief['accent']}. "
-            f"Visual fingerprint for this exact article: {hero_brief['fingerprint']}. "
+            "Fresh prompt rule: this is a creative brief, not a reusable prompt; write a new one-off image prompt for this article. "
             "Do not show real Microsoft logos, fake Windows UI, readable error codes, readable letters or numbers, brand marks, "
             "private information, warning screens, command prompts, registry editors, or text overlays. "
             "Avoid fake support documents, fake screenshots, scary alert dialogs, distorted hands, extra fingers, watermarks, and generic stock-photo office scenes. "
@@ -156,7 +156,7 @@ def build_windows_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
             f"Composition/framing: {inline_brief['framing']}. "
             f"Material/camera direction: {inline_brief['medium']}. "
             f"Distinctive props: {inline_brief['props']}. "
-            f"Visual fingerprint for this exact article: {inline_brief['fingerprint']}. "
+            "Fresh prompt rule: create a new visual idea for this article instead of reusing a previous prompt, camera setup, or prop layout. "
             f"Color palette: {palette}; accent color: {inline_brief['accent']}. "
             "No real or fake operating-system screens, Microsoft logos, readable UI text, error codes, scary warning overlays, "
             "command prompts, registry editors, fake official documentation, watermarks, or brand marks."
@@ -172,6 +172,7 @@ def build_windows_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
             "Do not generate fake Windows UI or readable error screens.",
             "Vary visual concepts across posts: change medium, camera angle, props, composition, and dominant accent color by article type.",
             "Hero and inline images must have different roles and should not look like two versions of the same template.",
+            "The saved image plan is only a creative brief; Codex image generation must use a fresh article-specific prompt instead of pasting a fixed formula.",
             "Do not add extra images unless each image has a distinct role such as hero, troubleshooting flow, warning, or decision checklist.",
             "Publishing should stop when required image files are missing.",
         ],
@@ -374,13 +375,7 @@ def _windows_visual_brief(text: str, scene: str, role: str) -> dict[str, str]:
         "props": _pick(props.get(scene, fallback_props), text, role, "props"),
         "accent": _pick(accents, text, role, "accent"),
         "mood": _pick(moods, text, role, "mood"),
-        "fingerprint": _visual_fingerprint(text, scene, role),
     }
-
-
-def _visual_fingerprint(text: str, scene: str, role: str) -> str:
-    digest = hashlib.sha256(f"{scene}|{role}|{text}".encode("utf-8")).hexdigest()[:8]
-    return f"{scene}-{role}-{digest}; use this as a uniqueness cue, not visible text"
 
 
 def _korea_visual_brief(text: str, scene: str, role: str) -> dict[str, str]:
@@ -443,7 +438,6 @@ def _korea_visual_brief(text: str, scene: str, role: str) -> dict[str, str]:
         "props": _pick(props.get(scene, fallback_props), text, role, "korea-props"),
         "accent": _pick(accents, text, role, "korea-accent"),
         "mood": _pick(moods, text, role, "korea-mood"),
-        "fingerprint": _visual_fingerprint(text, scene, f"korea-{role}"),
     }
 
 

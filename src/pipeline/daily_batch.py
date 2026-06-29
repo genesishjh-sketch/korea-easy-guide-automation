@@ -142,6 +142,8 @@ def select_seed_candidates(
     selected_categories: set[str] = set()
     max_precheck = int(os.getenv("DAILY_BATCH_MAX_PRECHECK", "12"))
     existing_titles = public_post_titles(site)
+    recent_categories = set(public_recent_categories(site, content_domain, limit=max(6, max_posts * 2)))
+    candidates: list[dict] = []
 
     for seed in choose_publish_seed_candidates(explicit_seed, site)[:max_precheck]:
         normalized = seed.casefold()
@@ -155,23 +157,39 @@ def select_seed_candidates(
             continue
         if precheck_status not in {"ready", "not_applicable"}:
             continue
-        if not explicit_seed and article_type in selected_types:
-            continue
-        if not explicit_seed and category in selected_categories and len(selected) < max_posts - 1:
-            continue
-        selected.append(
+        candidates.append(
             {
                 "seed": seed,
                 "category": category,
                 "article_type": article_type,
                 "quality_precheck": precheck,
+                "recent_category": category in recent_categories,
             }
         )
+
+    for candidate in sorted(candidates, key=lambda item: (item["recent_category"], item["category"] in selected_categories)):
+        category = candidate["category"]
+        article_type = candidate["article_type"]
+        if not explicit_seed and article_type in selected_types:
+            continue
+        if not explicit_seed and category in selected_categories:
+            continue
+        selected.append(candidate)
         selected_types.add(article_type)
         selected_categories.add(category)
         if len(selected) >= max_posts:
             break
     return selected
+
+
+def public_recent_categories(site: str, content_domain: str, limit: int = 6) -> list[str]:
+    try:
+        settings = load_settings(site)
+        posts = BloggerPublisher(settings).list_live_posts()
+    except Exception:
+        return []
+    sorted_posts = sorted(posts, key=lambda post: post.get("published", ""), reverse=True)
+    return [infer_category(post.get("title", ""), content_domain) for post in sorted_posts[:limit]]
 
 
 def public_post_titles(site: str) -> list[str]:

@@ -39,6 +39,8 @@ class DailyBatchSelectionTests(unittest.TestCase):
         with patch("src.pipeline.daily_batch.choose_publish_seed_candidates", return_value=seeds), patch(
             "src.pipeline.daily_batch.used_keywords", return_value=set()
         ), patch("src.pipeline.daily_batch.public_post_titles", return_value=[]), patch(
+            "src.pipeline.daily_batch.public_recent_categories", return_value=[]
+        ), patch(
             "src.pipeline.daily_batch.seed_quality_precheck", return_value={"status": "ready"}
         ):
             selected = select_seed_candidates("easy_pc_fix_guide", "windows_help", 3)
@@ -65,7 +67,9 @@ class DailyBatchSelectionTests(unittest.TestCase):
         ), patch(
             "src.pipeline.daily_batch.public_post_titles",
             return_value=["Windows Update Error 0X80073712: What It Means and How to Fix It"],
-        ), patch("src.pipeline.daily_batch.seed_quality_precheck", return_value={"status": "ready"}):
+        ), patch("src.pipeline.daily_batch.public_recent_categories", return_value=[]), patch(
+            "src.pipeline.daily_batch.seed_quality_precheck", return_value={"status": "ready"}
+        ):
             selected = select_seed_candidates("easy_pc_fix_guide", "windows_help", 3)
 
         self.assertNotIn("windows update error 0x80073712", [item["seed"] for item in selected])
@@ -83,9 +87,34 @@ class DailyBatchSelectionTests(unittest.TestCase):
         with patch("src.pipeline.daily_batch.choose_publish_seed_candidates", return_value=seeds), patch(
             "src.pipeline.daily_batch.used_keywords", side_effect=used_keywords_for_call
         ), patch("src.pipeline.daily_batch.public_post_titles", return_value=[]), patch(
+            "src.pipeline.daily_batch.public_recent_categories", return_value=[]
+        ), patch(
             "src.pipeline.daily_batch.seed_quality_precheck", return_value={"status": "ready"}
         ):
             selected = select_seed_candidates("easy_pc_fix_guide", "windows_help", 3)
+
+    def test_windows_batch_moves_recent_network_category_behind_other_topics(self) -> None:
+        seeds = [
+            "wifi keeps disconnecting windows 11",
+            "dns server not responding windows 11",
+            "network adapter missing windows 11",
+            "windows update error 0x80070005",
+            "how to check windows version",
+            "printer offline windows 11",
+        ]
+        with patch("src.pipeline.daily_batch.choose_publish_seed_candidates", return_value=seeds), patch(
+            "src.pipeline.daily_batch.used_keywords", return_value=set()
+        ), patch("src.pipeline.daily_batch.public_post_titles", return_value=[]), patch(
+            "src.pipeline.daily_batch.public_recent_categories", return_value=["Wi-Fi & Internet", "Wi-Fi & Internet"]
+        ), patch("src.pipeline.daily_batch.seed_quality_precheck", return_value={"status": "ready"}):
+            selected = select_seed_candidates("easy_pc_fix_guide", "windows_help", 3)
+
+        self.assertEqual([item["category"] for item in selected], [
+            "Windows Update",
+            "Beginner PC Tips",
+            "Printer & Scanner",
+        ])
+        self.assertNotIn("Wi-Fi & Internet", [item["category"] for item in selected])
 
         self.assertNotIn("wifi button missing windows 11", [item["seed"] for item in selected])
 
@@ -100,7 +129,9 @@ class DailyBatchSelectionTests(unittest.TestCase):
         ), patch(
             "src.pipeline.daily_batch.public_post_titles",
             return_value=["How to Buy KTX Tickets in Korea as a Foreigner"],
-        ), patch("src.pipeline.daily_batch.seed_quality_precheck", return_value={"status": "ready"}):
+        ), patch("src.pipeline.daily_batch.public_recent_categories", return_value=[]), patch(
+            "src.pipeline.daily_batch.seed_quality_precheck", return_value={"status": "ready"}
+        ):
             selected = select_seed_candidates("korea_easy_guide", "korea_travel", 3)
 
         self.assertNotIn("how to buy ktx tickets in korea", [item["seed"] for item in selected])
@@ -115,6 +146,8 @@ class DailyBatchSelectionTests(unittest.TestCase):
         with patch("src.pipeline.daily_batch.choose_publish_seed_candidates", return_value=seeds), patch(
             "src.pipeline.daily_batch.used_keywords", return_value=set()
         ), patch("src.pipeline.daily_batch.public_post_titles", return_value=[]), patch(
+            "src.pipeline.daily_batch.public_recent_categories", return_value=[]
+        ), patch(
             "src.pipeline.daily_batch.seed_quality_precheck", return_value={"status": "not_applicable"}
         ):
             selected = select_seed_candidates("korea_easy_guide", "korea_travel", 3)
