@@ -68,6 +68,14 @@ def install_korea_ai_assets(article_dir: Path, title: str, keyword: str) -> str:
 
 def windows_scene(text: str) -> str:
     value = text.lower()
+    if any(token in value for token in ["disconnect", "disconnecting", "keeps disconnecting", "drops", "dropping"]):
+        return "network_wifi_disconnect"
+    if any(token in value for token in ["cannot connect", "can't connect", "can not connect", "not connect to this network"]):
+        return "network_cannot_connect"
+    if any(token in value for token in ["adapter missing", "network adapter missing", "wireless adapter missing"]):
+        return "network_adapter_missing"
+    if any(token in value for token in ["dns", "server not responding"]):
+        return "network_dns"
     if any(token in value for token in ["wi-fi", "wifi", "internet", "network"]):
         return "network"
     if "bluetooth" in value or "device" in value:

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+import hashlib
 import os
 from pathlib import Path
 
@@ -66,11 +67,8 @@ def build_article_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
     extension = "jpg"
     scene = detect_scene(f"{candidate.keyword} {title}")
     visual_subject = _visual_subject(scene, candidate.keyword)
-    style = (
-        "premium editorial travel-guide photography, realistic but clean, bright natural light, "
-        "modern Korean urban environment, useful visual information, no text overlays, no logos, "
-        "no distorted UI, no fake brand marks, no watermark, sharp composition, professional blog header"
-    )
+    hero_brief = _korea_visual_brief(f"{candidate.keyword} {title}", scene, "hero")
+    inline_brief = _korea_visual_brief(f"{candidate.keyword} {title}", scene, "inline")
 
     hero = PlannedImage(
         role="hero",
@@ -80,8 +78,12 @@ def build_article_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
         prompt=(
             f"Create a 16:9 hero image for an English Korea travel guide article titled '{title}'. "
             f"Main subject: {visual_subject}. Audience: foreign tourists, exchange students, and long-stay visitors. "
-            f"Style: {style}. Composition should leave calm negative space and feel trustworthy, practical, "
-            "and current rather than cartoonish."
+            f"Visual brief: {hero_brief['brief']}. Composition/framing: {hero_brief['framing']}. "
+            f"Material/camera direction: {hero_brief['medium']}. Distinctive props: {hero_brief['props']}. "
+            f"Lighting/mood: {hero_brief['mood']}. Accent color: {hero_brief['accent']}. "
+            f"Visual fingerprint for this exact article: {hero_brief['fingerprint']}. "
+            "No text overlays, no readable app screens, no logos, no fake brand marks, no private information, no watermark. "
+            "Avoid repeating the same traveler-with-phone composition across nearby Korea posts."
         ),
     )
     inline_checklist = PlannedImage(
@@ -91,8 +93,10 @@ def build_article_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
         caption="Use the visual checklist to avoid common mistakes before relying on the service.",
         prompt=(
             f"Create a premium 16:9 illustrated checklist for a Korea travel guide about '{candidate.keyword}'. "
-            f"Show the key process visually: {_inline_subject(scene)}. "
-            "Use a modern soft 3D/editorial illustration style with icons, cards, and clear visual flow. "
+            f"Show the key process visually: {_inline_subject(scene)}. Visual brief: {inline_brief['brief']}. "
+            f"Composition/framing: {inline_brief['framing']}. Material/camera direction: {inline_brief['medium']}. "
+            f"Distinctive props: {inline_brief['props']}. Accent color: {inline_brief['accent']}. "
+            f"Visual fingerprint for this exact article: {inline_brief['fingerprint']}. "
             "No readable text, no Korean letters, no logos, no fake app UI, no private information, and no watermarks."
         ),
     )
@@ -115,29 +119,29 @@ def build_article_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
 def build_windows_image_plan(candidate: TopicCandidate, title: str) -> ArticleImagePlan:
     extension = "jpg"
     topic_scene = _windows_topic_scene(candidate.keyword, title)
-    hero_subject = _windows_hero_subject(topic_scene)
-    inline_subject = _windows_inline_subject(topic_scene)
+    text = f"{candidate.keyword} {title}"
+    hero_brief = _windows_visual_brief(text, topic_scene, "hero")
+    inline_brief = _windows_visual_brief(text, topic_scene, "inline")
     palette = _windows_palette(topic_scene)
-    hero_style = _windows_hero_style(topic_scene)
-    hero_framing = _windows_hero_framing(topic_scene)
-    inline_style = _windows_inline_style(topic_scene)
     hero = PlannedImage(
         role="hero",
         filename=f"ai-hero.{extension}",
         alt=f"{title} beginner-friendly Windows help visual",
         caption="A realistic beginner-friendly visual for solving this Windows problem safely.",
         prompt=(
-            f"Use case: {hero_style}. "
+            f"Use case: {hero_brief['use_case']}. "
             f"Create a realistic 16:9 hero image for an English beginner computer help article titled '{title}'. "
             f"Primary request: help a non-technical reader understand a safe first-step fix for {candidate.keyword}. "
-            f"Scene/backdrop: {hero_subject}. "
-            "Use blank cards, abstract lines, and icon-like shapes instead of any readable interface. "
-            f"Composition/framing: {hero_framing}. "
-            f"Lighting/mood: bright natural daylight, calm, reassuring, practical. Color palette: {palette}. "
+            f"Visual brief: {hero_brief['brief']}. "
+            f"Composition/framing: {hero_brief['framing']}. "
+            f"Material/camera direction: {hero_brief['medium']}. "
+            f"Distinctive props: {hero_brief['props']}. "
+            f"Lighting/mood: {hero_brief['mood']}. Color palette: {palette}; accent color: {hero_brief['accent']}. "
+            f"Visual fingerprint for this exact article: {hero_brief['fingerprint']}. "
             "Do not show real Microsoft logos, fake Windows UI, readable error codes, readable letters or numbers, brand marks, "
             "private information, warning screens, command prompts, registry editors, or text overlays. "
-            "Avoid fake support documents, fake screenshots, scary alert dialogs, distorted hands, extra fingers, watermarks, and cartoon/vector art. "
-            "Style diversity rule: avoid repeating the same laptop-on-white-desk composition across multiple Windows Update posts."
+            "Avoid fake support documents, fake screenshots, scary alert dialogs, distorted hands, extra fingers, watermarks, and generic stock-photo office scenes. "
+            "Do not reuse the same laptop-on-bright-desk composition from nearby posts."
         ),
     )
     inline = PlannedImage(
@@ -146,13 +150,14 @@ def build_windows_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
         alt=f"Safe step-by-step troubleshooting setup for {candidate.keyword}",
         caption="Work through the safe checks first before trying advanced repair steps.",
         prompt=(
-            f"Use case: {inline_style}. "
+            f"Use case: {inline_brief['use_case']}. "
             f"Create a clean 16:9 in-article illustration for a beginner Windows troubleshooting guide about '{candidate.keyword}'. "
-            f"Primary request: visually support the step-by-step safe checks before advanced fixes. Concept: {inline_subject}. "
-            "Use a visually distinct style from the hero image and from other Windows Update subtopics. "
-            "Show the troubleshooting flow with abstract symbols such as restart arrows, checklist cards, clock, shield, "
-            "repair gear, Wi-Fi waves, speaker waves, folder shapes, or device outlines when relevant. "
-            f"Color palette: {palette}. "
+            f"Primary request: visually support the step-by-step safe checks before advanced fixes. Visual brief: {inline_brief['brief']}. "
+            f"Composition/framing: {inline_brief['framing']}. "
+            f"Material/camera direction: {inline_brief['medium']}. "
+            f"Distinctive props: {inline_brief['props']}. "
+            f"Visual fingerprint for this exact article: {inline_brief['fingerprint']}. "
+            f"Color palette: {palette}; accent color: {inline_brief['accent']}. "
             "No real or fake operating-system screens, Microsoft logos, readable UI text, error codes, scary warning overlays, "
             "command prompts, registry editors, fake official documentation, watermarks, or brand marks."
         ),
@@ -234,6 +239,14 @@ def _inline_caption(scene: str) -> str:
 
 def _windows_topic_scene(keyword: str, title: str) -> str:
     text = f"{keyword} {title}".lower()
+    if any(token in text for token in ["disconnect", "disconnecting", "keeps disconnecting", "drops", "dropping"]):
+        return "network_wifi_disconnect"
+    if any(token in text for token in ["cannot connect", "can't connect", "can not connect", "not connect to this network"]):
+        return "network_cannot_connect"
+    if any(token in text for token in ["adapter missing", "network adapter missing", "wireless adapter missing"]):
+        return "network_adapter_missing"
+    if any(token in text for token in ["dns", "server not responding"]):
+        return "network_dns"
     if any(token in text for token in ["wi-fi", "wifi", "internet", "network"]):
         return "network"
     if "bluetooth" in text or "device" in text:
@@ -259,6 +272,184 @@ def _windows_topic_scene(keyword: str, title: str) -> str:
     if any(token in text for token in ["update", "restart"]):
         return "update"
     return "general"
+
+
+def _windows_visual_brief(text: str, scene: str, role: str) -> dict[str, str]:
+    scene_briefs = {
+        "network_wifi_disconnect": "home connectivity drops in and out, shown as an interrupted signal between a router and a personal device",
+        "network_cannot_connect": "a failed connection attempt, shown as two devices separated by an unfinished path",
+        "network_adapter_missing": "missing or unavailable network hardware, shown through adapter, cable, and safe inspection props",
+        "network_dns": "DNS lookup or routing failure, shown as abstract network nodes and a paused path",
+        "network": "basic home internet troubleshooting with router, device, and safe restart/checklist cues",
+        "device": "safe peripheral troubleshooting without showing real device manager screens",
+        "audio": "microphone or speaker troubleshooting using sound-wave and hardware props",
+        "printer": "printer queue or printer connection troubleshooting using paper path and cable cues",
+        "account": "account or sync troubleshooting using privacy-safe cloud and notebook metaphors",
+        "files": "file search or folder organization troubleshooting using folder-card and magnifier cues",
+        "recovery": "safe startup or recovery troubleshooting with backup-first visual cues",
+        "update_download": "an update download that is waiting or paused, shown without fake progress UI",
+        "update_cleanup": "storage cleanup and safe removal decisions using storage blocks and checklist cues",
+        "update_error_code": "error-code troubleshooting as a diagnostic puzzle without readable code text",
+        "update_restart": "restart or pending-restart troubleshooting using clock and power-cycle metaphors",
+        "update": "general update troubleshooting with shield, checklist, and repair symbols",
+        "general": "beginner computer help with safe, calm troubleshooting cues",
+    }
+    use_cases = {
+        "hero": [
+            "photorealistic-natural",
+            "stylized-concept",
+            "product-mockup",
+            "scientific-educational",
+        ],
+        "inline": [
+            "infographic-diagram",
+            "stylized-concept",
+            "productivity-visual",
+            "scientific-educational",
+        ],
+    }
+    media = {
+        "hero": [
+            "low-angle macro photo with one foreground object in sharp focus",
+            "top-down editorial flat lay with physical cards and device props",
+            "miniature tabletop model made from matte paper and soft plastic",
+            "real home troubleshooting scene with warm practical lighting",
+            "dark repair-bench close-up with controlled rim light",
+        ],
+        "inline": [
+            "clean 3D diagram made from unlabeled cards, arrows, and simple objects",
+            "paper cutout flow on a desk, photographed from above",
+            "abstract glass-node network map with no letters or numbers",
+            "step-by-step object arrangement using three distinct physical zones",
+            "soft isometric educational illustration rendered as premium bitmap art",
+        ],
+    }
+    framings = [
+        "strong asymmetrical composition with the main object away from the center",
+        "diagonal left-to-right flow with clear depth and generous negative space",
+        "tight crop that avoids the generic full laptop-on-desk look",
+        "wide scene with one unusual foreground prop and a blurred secondary device",
+        "top-down layout with separated zones for problem, check, and safe next step",
+    ]
+    props = {
+        "network_wifi_disconnect": [
+            "router light, interrupted Wi-Fi arcs, couch-side laptop, lamp glow",
+            "phone, router, blank sticky notes, fading signal beads",
+            "two-room connection path, soft shadows, disconnected blue segments",
+        ],
+        "network_cannot_connect": [
+            "miniature blocks, broken bridge of dots, laptop-shaped tile, router-shaped tile",
+            "two blank device cards, unfinished cable path, one coral marker",
+            "separated islands on a tabletop map with a gap in the connection route",
+        ],
+        "network_adapter_missing": [
+            "USB network adapter, Ethernet cable connector, parts tray, anti-static mat",
+            "adapter silhouette card, cable loop, small screwdriver, blank checklist",
+            "close-up port, unplugged cable, hardware tray, soft cyan highlight",
+        ],
+        "network_dns": [
+            "translucent nodes, server-block shapes, paused amber routing point",
+            "branching light paths, blank node cards, deep navy background",
+            "network map sculpture, one stopped path, soft glow without text",
+        ],
+    }
+    fallback_props = [
+        "blank checklist cards, shield object, restart arrow shape, notebook",
+        "physical cards, cable, clock, small repair gear, neutral laptop edge",
+        "abstract blocks, safe-step tokens, magnifier, soft device outline",
+    ]
+    accents = ["cyan", "teal", "amber", "coral", "green", "violet", "steel blue"]
+    moods = [
+        "bright natural daylight, calm, reassuring, practical",
+        "warm evening home light with restrained cool technical accents",
+        "clean studio light, quiet, precise, and beginner-friendly",
+        "low-key technical lighting, focused but not alarming",
+    ]
+
+    return {
+        "use_case": _pick(use_cases[role], text, role, "use_case"),
+        "brief": scene_briefs.get(scene, scene_briefs["general"]),
+        "medium": _pick(media[role], text, role, "medium"),
+        "framing": _pick(framings, text, role, "framing"),
+        "props": _pick(props.get(scene, fallback_props), text, role, "props"),
+        "accent": _pick(accents, text, role, "accent"),
+        "mood": _pick(moods, text, role, "mood"),
+        "fingerprint": _visual_fingerprint(text, scene, role),
+    }
+
+
+def _visual_fingerprint(text: str, scene: str, role: str) -> str:
+    digest = hashlib.sha256(f"{scene}|{role}|{text}".encode("utf-8")).hexdigest()[:8]
+    return f"{scene}-{role}-{digest}; use this as a uniqueness cue, not visible text"
+
+
+def _korea_visual_brief(text: str, scene: str, role: str) -> dict[str, str]:
+    scene_briefs = {
+        "airport": "arrival-day movement through airport, rail, bus, luggage, and decision points",
+        "ktx": "intercity rail planning with station, platform, ticket-check, and luggage cues",
+        "esim": "mobile-data setup for a traveler without showing fake app screens",
+        "taxi": "safe pickup and destination confirmation for a visitor in Korea",
+        "map": "route choice and navigation in a Korean city without readable app UI",
+        "transport_card": "transit-card purchase, recharge, and gate-tap flow",
+        "shopping": "everyday local service use such as convenience store, delivery, or payment counter",
+        "general": "practical Korea travel preparation for a first-time visitor",
+    }
+    media = {
+        "hero": [
+            "realistic editorial travel photography with human presence but no readable screens",
+            "cinematic street-level photo with one clear practical action",
+            "top-down travel flat lay with tickets, phone, card, and luggage objects",
+            "wide environmental scene with signage blurred into abstract shapes",
+            "premium 3D editorial scene using realistic travel props",
+        ],
+        "inline": [
+            "clean 3D process diagram with unlabeled cards and route objects",
+            "paper-map style visual flow photographed from above",
+            "object-based checklist scene with three separate practical zones",
+            "soft isometric travel-service diagram rendered as bitmap art",
+            "comparison board using physical props rather than readable text",
+        ],
+    }
+    framings = [
+        "strong foreground object, human/traveler element secondary, generous negative space",
+        "diagonal movement from preparation to action, with clear depth",
+        "top-down layout that separates before, during, and after steps",
+        "tight crop on the useful object rather than a generic skyline or tourist pose",
+        "wide scene that hints at place while keeping the action readable",
+    ]
+    props = {
+        "airport": ["carry-on luggage, transit-card shape, platform gate, abstract route line", "arrival hall floor, suitcase wheel, train/bus choice tokens", "passport cover without details, luggage tag, blank route cards"],
+        "ktx": ["train platform edge, ticket-like blank card, small suitcase, seat/clock symbols", "station bench, rail line diagram made of blank cards, luggage handle", "platform floor markings, suitcase, generic train silhouette"],
+        "esim": ["phone with blank screen, SIM tray pin, passport cover without details, signal token", "travel documents with no readable text, phone, small setup cards", "airport cafe table, blank phone, signal sculpture"],
+        "taxi": ["curbside pickup marker without text, phone blank screen, car door detail, suitcase", "street corner, luggage handle, destination pin object, blank confirmation card", "night curb scene, soft taxi-like car silhouette without logos"],
+        "map": ["folded paper map, subway-exit-like shape with no text, phone blank screen", "walking route tokens, station-stair object, blank direction cards", "city block model, route line, destination pin object"],
+    }
+    fallback_props = [
+        "phone with blank screen, blank checklist cards, luggage, payment-card shape",
+        "route-line tokens, small suitcase, neutral city props, blank cards",
+        "travel-object flat lay with no readable labels",
+    ]
+    accents = ["sky blue", "teal", "signal green", "warm yellow", "coral", "rail blue", "mint"]
+    moods = [
+        "bright natural daylight, practical, clean, and current",
+        "soft evening city light, calm and helpful",
+        "clear indoor travel-service lighting, trustworthy and uncluttered",
+        "fresh morning travel-prep mood with realistic shadows",
+    ]
+    return {
+        "brief": scene_briefs.get(scene, scene_briefs["general"]),
+        "medium": _pick(media[role], text, role, "korea-medium"),
+        "framing": _pick(framings, text, role, "korea-framing"),
+        "props": _pick(props.get(scene, fallback_props), text, role, "korea-props"),
+        "accent": _pick(accents, text, role, "korea-accent"),
+        "mood": _pick(moods, text, role, "korea-mood"),
+        "fingerprint": _visual_fingerprint(text, scene, f"korea-{role}"),
+    }
+
+
+def _pick(options: list[str], text: str, *salt: str) -> str:
+    digest = hashlib.sha256("|".join((*salt, text)).encode("utf-8")).hexdigest()
+    return options[int(digest[:8], 16) % len(options)]
 
 
 def _windows_hero_subject(scene: str) -> str:

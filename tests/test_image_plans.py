@@ -53,13 +53,27 @@ class ImagePlanTests(unittest.TestCase):
             plan = build_article_image_plan(candidate, "Wi-Fi Button Missing on Windows 11")
 
         combined_prompts = " ".join(image.prompt for image in plan.images).lower()
-        self.assertIn("use case: photorealistic home connectivity scene", combined_prompts)
-        self.assertIn("router", combined_prompts)
-        self.assertIn("wi-fi wave", combined_prompts)
+        self.assertIn("visual brief", combined_prompts)
+        self.assertIn("visual fingerprint", combined_prompts)
+        self.assertIn("distinctive props", combined_prompts)
         self.assertIn("composition/framing", combined_prompts)
         self.assertIn("distorted hands", combined_prompts)
         self.assertIn("extra fingers", combined_prompts)
-        self.assertIn("style diversity rule", combined_prompts)
+        self.assertIn("do not reuse the same laptop-on-bright-desk composition", combined_prompts)
+
+    def test_windows_network_subtopics_use_different_image_scenes(self) -> None:
+        cases = {
+            "wi-fi keeps disconnecting on windows 11": "network_wifi_disconnect",
+            "windows cannot connect to this network": "network_cannot_connect",
+            "network adapter missing on windows 11": "network_adapter_missing",
+            "dns server not responding on windows 11": "network_dns",
+        }
+
+        for keyword, expected_scene in cases.items():
+            with self.subTest(keyword=keyword):
+                self.assertEqual(windows_scene(keyword), expected_scene)
+
+        self.assertEqual(len(set(cases.values())), len(cases))
 
     def test_windows_update_subtopics_use_different_image_scenes(self) -> None:
         cases = {
@@ -89,15 +103,14 @@ class ImagePlanTests(unittest.TestCase):
             "Windows Update Error 0x80248007",
         )
 
-        self.assertIn("paused progress", download.images[0].prompt.lower())
-        self.assertIn("storage drive", cleanup.images[0].prompt.lower())
-        self.assertIn("puzzle pieces", error_code.images[0].prompt.lower())
-        self.assertIn("network-and-waiting", download.images[0].prompt.lower())
-        self.assertIn("top-down storage cleanup flat-lay", cleanup.images[0].prompt.lower())
-        self.assertIn("cinematic diagnostic workbench", error_code.images[0].prompt.lower())
-        self.assertIn("timeline-style network troubleshooting", download.images[1].prompt.lower())
-        self.assertIn("storage decision board", cleanup.images[1].prompt.lower())
-        self.assertIn("diagnostic decision tree", error_code.images[1].prompt.lower())
+        self.assertIn("visual fingerprint", download.images[0].prompt.lower())
+        self.assertIn("visual fingerprint", cleanup.images[0].prompt.lower())
+        self.assertIn("visual fingerprint", error_code.images[0].prompt.lower())
+        self.assertIn("update_download-hero", download.images[0].prompt.lower())
+        self.assertIn("update_cleanup-hero", cleanup.images[0].prompt.lower())
+        self.assertIn("update_error_code-hero", error_code.images[0].prompt.lower())
+        self.assertNotEqual(download.images[0].prompt, cleanup.images[0].prompt)
+        self.assertNotEqual(cleanup.images[0].prompt, error_code.images[0].prompt)
 
     def test_windows_image_plan_has_descriptive_alt_and_captions(self) -> None:
         candidate = build_candidate("windows update error 0x80070643", [], "windows_help")
