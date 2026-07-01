@@ -4,7 +4,7 @@
 
 Implemented now.
 
-- Reddit collector
+- Reddit research collector with optional OAuth, public JSON, Google `site:reddit.com` search-intent fallback, and local fallback questions
 - Google suggestion collector
 - Topic scoring
 - English article generation

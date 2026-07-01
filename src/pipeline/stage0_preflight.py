@@ -290,14 +290,14 @@ def check_reddit_collection_settings(site: str | None = None) -> PreflightCheck:
     if getattr(settings, "reddit_data_access_request_submitted_at", ""):
         wait_note = (
             f" Reddit Data Access Request was submitted on {settings.reddit_data_access_request_submitted_at}; "
-            "keep one-post-per-day publishing on fallback signals until approval arrives."
+            "OAuth can be added later after approval."
         )
     return PreflightCheck(
         "reddit_collection",
         "warn",
-        "Reddit OAuth credentials are missing. Public Reddit JSON may return 403, so the pipeline may rely on fallback reader questions. "
-        f"This does not block unattended one-post-per-day publishing.{wait_note} "
-        f"After Reddit approval, create a script app at {REDDIT_APPS_URL}, then add {reddit_oauth_secret_label()} at {GITHUB_SECRETS_URL}.",
+        "Reddit OAuth credentials are not configured, so the default topic discovery path uses Google site:reddit.com searches, "
+        "Google Suggest, and official-source validation. This does not block unattended publishing or cadence review by itself."
+        f"{wait_note} Optional OAuth upgrade: create a script app at {REDDIT_APPS_URL}, then add {reddit_oauth_secret_label()} at {GITHUB_SECRETS_URL}.",
     )
 
 
@@ -815,18 +815,18 @@ def build_setup_actions(checks: list[PreflightCheck]) -> list[dict]:
         if check.name == "reddit_collection":
             actions.append(
                 {
-                    "name": "reddit_oauth",
-                    "label": "Reddit OAuth 연결",
+                    "name": "reddit_oauth_optional",
+                    "label": "Reddit OAuth 선택 보강",
                     "status": check.status,
                     "owner": "user",
-                    "urgency": "before_cadence_increase",
+                    "urgency": "optional_upgrade",
                     "blocks_unattended_publish": check.status == "fail",
-                    "blocks_cadence_increase": True,
+                    "blocks_cadence_increase": check.status == "fail",
                     "message": check.message,
                     "next_step": (
-                        "Reddit 승인 메일 전에는 하루 1개 자동 발행을 fallback + Google/Microsoft 출처로 유지하세요. "
-                        "승인 후 Reddit script app을 만들고 REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET을 GitHub Secrets에 저장한 뒤 "
-                        "Easy PC Fix Reddit OAuth Health workflow를 수동 실행하세요."
+                        "지금은 Google site:reddit.com 검색 기반 리서치로 운영하세요. "
+                        "승인 메일이 오면 Reddit script app을 만들고 REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET을 GitHub Secrets에 저장한 뒤 "
+                        "Easy PC Fix Reddit OAuth Health workflow를 수동 실행하면 됩니다."
                     ),
                     "links": {
                         "reddit_apps": REDDIT_APPS_URL,

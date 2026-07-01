@@ -90,18 +90,24 @@ Use `--generate --limit 2` when you want a stronger sample check that generates 
 python -m src.pipeline.stage0_launch_queue_validate --site easy_pc_fix_guide --generate --limit 2
 ```
 
-## Reddit OAuth Health
+## Reddit Research Mode
 
-Easy PC Fix Guide currently runs in Reddit-deferred mode. It can keep publishing one post per day with fallback reader questions, Google Suggest data, and official Microsoft sources. Reddit OAuth is only required before topic discovery is considered stable enough for future cadence increases.
+Easy PC Fix Guide now treats Reddit OAuth as an optional upgrade. The default zero-cost research path is:
 
-Required GitHub Secrets:
+```text
+Google site:reddit.com searches -> Google Suggest -> official Microsoft validation
+```
+
+If public Reddit JSON returns 403 or Reddit OAuth is not approved yet, the pipeline still creates Reddit-intent signals with `site:reddit.com/r/...` Google search URLs. Publishing quality is guarded by Microsoft official sources and the Hades quality gate, not by Reddit OAuth approval.
+
+Optional GitHub Secrets:
 
 ```text
 REDDIT_CLIENT_ID
 REDDIT_CLIENT_SECRET
 ```
 
-Recommended GitHub Variable:
+Optional GitHub Variable:
 
 ```text
 EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT
@@ -115,14 +121,14 @@ Setup links:
 - Responsible Builder Policy: https://support.reddithelp.com/hc/articles/42728983564564
 - GitHub Actions Secrets: https://github.com/genesishjh-sketch/korea-easy-guide-automation/settings/secrets/actions
 
-Create the Reddit app as `script`, then copy the app client id and secret into the two GitHub Secrets above. If Reddit shows the Responsible Builder Policy/Data API registration message instead of creating the app, submit the Data Access Request first and wait for approval. Before approval arrives, do not keep retrying app creation; keep the blog on one-post-per-day publishing. The health check never prints secret values; it only reports whether OAuth can collect live Reddit signals.
+Create the Reddit app as `script` only if you later want direct OAuth collection. If Reddit shows the Responsible Builder Policy/Data API registration message instead of creating the app, stop retrying and keep using the default Google site-search path. The health check never prints secret values; it only reports whether OAuth can collect live Reddit signals.
 
 Current Reddit Data Access Request status:
 
 ```text
 Submitted: 2026-06-25
-Current mode: deferred; one-post-per-day publishing continues without Reddit OAuth.
-Next step: wait for Reddit approval, then create the script app and store REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET.
+Current mode: search-based Reddit research; publishing continues without Reddit OAuth.
+Next step: no action required now. If Reddit approval arrives later, create the script app and store REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET as an optional upgrade.
 ```
 
 Suggested Reddit app fields:
@@ -145,13 +151,13 @@ EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT = easy-pc-fix-guide/0.1 by posting-automatio
 User action checklist:
 
 ```text
-1. Wait for the Reddit Data Access Request approval email if app creation is still blocked.
+1. Keep the blog running with Google site:reddit.com search-based Reddit research.
 2. Open https://www.reddit.com/prefs/apps.
 3. Click create app or create another app.
 4. Enter name: Easy PC Fix Guide Automation.
 5. Select app type: script.
 6. Enter redirect uri: http://localhost:8080.
-7. If Reddit still blocks creation with the Responsible Builder Policy/Data API message, stop and keep waiting for approval.
+7. If Reddit still blocks creation with the Responsible Builder Policy/Data API message, stop retrying and keep the OAuth upgrade optional.
 8. Before pressing create app, complete the reCAPTCHA "I'm not a robot" check. If Reddit shows `Incorrect response. Try again.`, complete reCAPTCHA again and press create app again.
 9. Copy the short client id under the app name into GitHub Secret REDDIT_CLIENT_ID.
 10. Copy the app secret into GitHub Secret REDDIT_CLIENT_SECRET.
@@ -182,8 +188,8 @@ GitHub Actions health check:
 .github/workflows/easy-pc-reddit-health.yml
 ```
 
-The health check writes `reports/easy_pc_fix_guide-reddit-health.json` and `reports/easy_pc_fix_guide-reddit-health.md`. The JSON file also embeds a `human_summary_markdown` field. Scheduled runs upload both files quietly without Posting Bot noise while Reddit approval is pending; manual workflow runs can still send the same action summary to the Korean Posting Bot with `notify=true`.
-It checks every configured subreddit and reports tested subreddits, matched subreddits, and per-subreddit signal counts so OAuth stability is visible before cadence increases.
+The health check writes `reports/easy_pc_fix_guide-reddit-health.json` and `reports/easy_pc_fix_guide-reddit-health.md`. The JSON file also embeds a `human_summary_markdown` field. Scheduled runs upload both files quietly; manual workflow runs can still send the same action summary to the Korean Posting Bot with `notify=true`.
+It checks every configured subreddit and reports tested subreddits, matched subreddits, and per-subreddit signal counts when OAuth is configured. Missing OAuth is an optional-upgrade warning, not a publishing blocker.
 
 ## Daily Automation
 

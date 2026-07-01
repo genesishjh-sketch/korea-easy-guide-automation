@@ -453,6 +453,7 @@ class WeeklyReporter:
             "live_reddit_signal_count": 0,
             "reddit_oauth_signal_count": 0,
             "reddit_public_json_signal_count": 0,
+            "reddit_google_site_search_signal_count": 0,
             "fallback_reddit_signal_count": 0,
             "google_suggest_signal_count": 0,
             "google_suggest_live_signal_count": 0,
@@ -478,6 +479,7 @@ class WeeklyReporter:
                 "live_reddit_signal_count",
                 "reddit_oauth_signal_count",
                 "reddit_public_json_signal_count",
+                "reddit_google_site_search_signal_count",
                 "fallback_reddit_signal_count",
                 "google_suggest_signal_count",
                 "google_suggest_live_signal_count",
@@ -490,8 +492,10 @@ class WeeklyReporter:
                 reddit_method_counts[method] = reddit_method_counts.get(method, 0) + int(count or 0)
             for method, count in report.get("google_suggest_method_counts", {}).items():
                 google_method_counts[method] = google_method_counts.get(method, 0) + int(count or 0)
-            if int(report.get("fallback_reddit_signal_count", 0) or 0) and not int(
-                report.get("live_reddit_signal_count", 0) or 0
+            if (
+                int(report.get("fallback_reddit_signal_count", 0) or 0)
+                and not int(report.get("live_reddit_signal_count", 0) or 0)
+                and not int(report.get("reddit_google_site_search_signal_count", 0) or 0)
             ):
                 fallback_article_count += 1
                 fallback_articles.append(article.get("title") or article.get("slug") or article.get("article_dir", ""))
@@ -503,6 +507,9 @@ class WeeklyReporter:
                         "status": diagnostics.get("status", "unknown"),
                         "oauth_configured": bool(diagnostics.get("oauth_configured")),
                         "public_json_error_count": int(diagnostics.get("public_json_error_count", 0) or 0),
+                        "google_site_search_signal_count": int(
+                            diagnostics.get("google_site_search_signal_count", 0) or 0
+                        ),
                         "failed_subreddits": [
                             item.get("subreddit", "")
                             for item in diagnostics.get("public_json_failed_subreddits", [])
@@ -649,31 +656,30 @@ class WeeklyReporter:
                 "최근 자동 발행에서 품질검수 실패 후 다른 시드로 재시도했습니다. 실패 시드의 공식 출처, 이미지 계획, beginner-safe 섹션 구성을 보강하세요."
             )
         actions.extend(quality_issue_actions(quality_issues or []))
-        reddit_health_blocks_cadence = bool(reddit_health.get("blocks_cadence_increase"))
+        has_search_based_reddit = bool((signal_quality or {}).get("reddit_google_site_search_signal_count", 0))
+        reddit_health_blocks_cadence = bool(reddit_health.get("blocks_cadence_increase")) and not has_search_based_reddit
         if not reddit_health_blocks_cadence and (signal_quality or {}).get("status") == "fallback_only":
             actions.append(
                 "Reddit 실제 신호 없이 fallback 질문만 사용한 글이 있습니다. 하루 1개 자동 발행은 계속 가능하지만, "
-                "승인 메일 전까지 하루 2~3개 증량은 보류하세요. 승인 후 Reddit OAuth 설정을 추가해 주제 수집 품질을 안정화합니다. "
-                f"Reddit 앱: {REDDIT_APPS_URL} / GitHub Secrets: {GITHUB_SECRETS_URL} "
-                f"({reddit_oauth_secret_label()})"
+                "발행량을 늘리기 전 Google site:reddit.com 검색 신호 또는 OAuth 신호가 research_report에 잡히는지 확인하세요."
             )
         elif not reddit_health_blocks_cadence and (signal_quality or {}).get("reddit_public_json_signal_count", 0) and not (signal_quality or {}).get(
             "reddit_oauth_signal_count", 0
         ):
             actions.append(
                 "Reddit 실제 신호가 public JSON 경로에만 의존하고 있습니다. 하루 1개 자동 발행은 계속 가능하지만, "
-                "403 차단 가능성을 줄이고 발행량을 늘리려면 승인 후 Reddit OAuth 수집을 연결하세요. "
+                "public JSON은 403 차단 가능성이 있으므로 Google site:reddit.com 검색 신호를 함께 유지하세요. OAuth는 선택 보강입니다. "
                 f"Reddit 앱: {REDDIT_APPS_URL} / GitHub Secrets: {GITHUB_SECRETS_URL} "
                 f"({reddit_oauth_secret_label()})"
             )
         if operational_status and not operational_status.get("ready_for_cadence_increase", False) and not reddit_health_blocks_cadence:
             actions.append(
-                "일일 운영 상태 기준으로 아직 발행량 증량 준비가 아닙니다. 하루 1개를 유지하고, 품질 통과와 Reddit OAuth 수집 안정성을 모두 확인한 뒤 증량하세요."
+                "일일 운영 상태 기준으로 아직 발행량 증량 준비가 아닙니다. 하루 1개를 유지하고, 품질 통과와 색인/노출 안정성을 확인한 뒤 증량하세요."
             )
         if reddit_health_blocks_cadence:
             action_required = reddit_health.get("action_required") or "Reddit OAuth 상태를 점검하세요."
             actions.append(
-                f"Reddit OAuth Health가 발행량 증량을 차단 중입니다. 하루 1개 자동 발행은 계속 가능하며, 승인 전에는 대기하세요. {action_required} "
+                f"Reddit OAuth Health가 주의 상태입니다. 자동 발행은 Google site:reddit.com 검색 기반으로 계속 가능하며, OAuth는 선택 보강입니다. {action_required} "
                 f"상태 점수: {reddit_health.get('health_score', 0)}/100."
             )
         actions.append("트래픽과 수익 신호가 보일 때까지 추가 유료 API 비용은 0원 정책을 유지하세요.")
@@ -737,6 +743,7 @@ class WeeklyReporter:
         lines.append(f"- 실제 Reddit 신호 수: {signal_quality.get('live_reddit_signal_count', 0)}")
         lines.append(f"- Reddit OAuth 신호 수: {signal_quality.get('reddit_oauth_signal_count', 0)}")
         lines.append(f"- Reddit public JSON 신호 수: {signal_quality.get('reddit_public_json_signal_count', 0)}")
+        lines.append(f"- Reddit Google 검색 신호 수: {signal_quality.get('reddit_google_site_search_signal_count', 0)}")
         lines.append(f"- Reddit fallback 신호 수: {signal_quality.get('fallback_reddit_signal_count', 0)}")
         lines.append(f"- Google Suggest 신호 수: {signal_quality.get('google_suggest_signal_count', 0)}")
         lines.append(f"- Google Suggest live 신호 수: {signal_quality.get('google_suggest_live_signal_count', 0)}")
@@ -1039,6 +1046,7 @@ class WeeklyReporter:
         lines.append(f"- 수집 신호 상태: {_status_kr(cadence.get('signal_quality_status', 'not_uploaded'))}")
         lines.append(f"- Reddit OAuth 신호 수: {cadence.get('reddit_oauth_signal_count', 0)}")
         lines.append(f"- Reddit public JSON 신호 수: {cadence.get('reddit_public_json_signal_count', 0)}")
+        lines.append(f"- Reddit Google 검색 신호 수: {cadence.get('reddit_google_site_search_signal_count', 0)}")
         lines.append(f"- Reddit fallback 신호 수: {cadence.get('fallback_reddit_signal_count', 0)}")
         lines.append(f"- Reddit Health 상태: {_status_kr(cadence.get('reddit_health_status', 'not_uploaded'))}")
         lines.append(f"- Reddit Health 점수: {cadence.get('reddit_health_score', 0)}/100")

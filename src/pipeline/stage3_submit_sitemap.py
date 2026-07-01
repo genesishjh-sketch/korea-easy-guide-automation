@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 from datetime import datetime
 import json
-import os
 from pathlib import Path
 import urllib.error
 import urllib.request
@@ -14,7 +13,7 @@ from src.reporting.daily_reports import read_daily_success_report
 from src.reporting.search_console import SearchConsoleClient
 
 
-def run(sitemap_url: str | None = None, site: str | None = None) -> Path:
+def run(sitemap_url: str | None = None, site: str | None = None, notify: bool = False) -> Path:
     settings = load_settings(site)
     selected_sitemap = sitemap_url or f"{settings.site_url.rstrip('/')}/sitemap.xml"
     result = SearchConsoleClient(settings).submit_sitemap(selected_sitemap)
@@ -29,13 +28,9 @@ def run(sitemap_url: str | None = None, site: str | None = None) -> Path:
     output_dir.mkdir(parents=True, exist_ok=True)
     output_path = output_dir / f"{settings.site_key}-search-console-sitemap-submit.json"
     output_path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
-    if should_notify_sitemap_submit():
+    if notify:
         NotificationClient(settings).send_required(result["human_summary"])
     return output_path
-
-
-def should_notify_sitemap_submit() -> bool:
-    return not (os.getenv("GITHUB_ACTIONS", "").lower() == "true" and os.getenv("GITHUB_EVENT_NAME") == "schedule")
 
 
 def build_message(site_name: str, result: dict) -> str:
@@ -248,8 +243,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Submit Blogger sitemap to Google Search Console.")
     parser.add_argument("--sitemap-url", help="Defaults to SITE_URL/sitemap.xml")
     parser.add_argument("--site", help="Site profile key, for example: easy_pc_fix_guide")
+    parser.add_argument("--notify", action="store_true", help="Send the sitemap/indexing status to Posting Bot.")
     args = parser.parse_args()
-    path = run(args.sitemap_url, args.site)
+    path = run(args.sitemap_url, args.site, notify=args.notify)
     print(path)
     result = json.loads(path.read_text(encoding="utf-8"))
     if result.get("status") != "submitted":

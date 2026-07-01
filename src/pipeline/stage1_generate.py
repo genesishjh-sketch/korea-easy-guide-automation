@@ -38,15 +38,11 @@ def run(seed: str | None = None, site: str | None = None) -> Path:
     settings = load_settings(site)
     keyword = load_seed(seed, settings)
     LOGGER.info("Collecting signals for keyword: %s", keyword)
-    reddit_public_json_skip_reason = reddit_public_json_skip_reason_for_settings(settings)
-
     reddit = RedditCollector(
         settings.reddit_user_agent,
         client_id=settings.reddit_client_id,
         client_secret=settings.reddit_client_secret,
         subreddits=settings.reddit_subreddits,
-        skip_public_json=bool(reddit_public_json_skip_reason),
-        skip_public_json_reason=reddit_public_json_skip_reason,
     )
     google = GoogleSuggestCollector()
     reddit_signals = reddit.collect(keyword, limit=6)
@@ -102,19 +98,6 @@ def apply_high_quality_korea_post_if_available(output_dir: Path, article, conten
     return SimpleNamespace(**metadata["article"])
 
 
-def reddit_public_json_skip_reason_for_settings(settings) -> str:
-    if settings.content_domain != "windows_help":
-        return ""
-    if settings.reddit_client_id and settings.reddit_client_secret:
-        return ""
-    if not settings.reddit_data_access_request_submitted_at:
-        return ""
-    return (
-        "Reddit Data Access Request approval is pending, so public JSON collection is skipped "
-        "until OAuth credentials are available."
-    )
-
-
 def build_research_report(
     settings,
     keyword: str,
@@ -128,7 +111,7 @@ def build_research_report(
     reddit_method_counts = Counter(
         (signal.metadata or {}).get("collection_method", "unknown")
         for signal in signals
-        if signal.source in {"reddit", "reddit_fallback"}
+        if signal.source in {"reddit", "reddit_search", "reddit_fallback"}
     )
     google_method_counts = Counter(
         (signal.metadata or {}).get("collection_method", "unknown")
@@ -182,6 +165,7 @@ def build_research_report(
         "live_reddit_signal_count": signal_source_counts.get("reddit", 0),
         "reddit_oauth_signal_count": reddit_method_counts.get("oauth", 0),
         "reddit_public_json_signal_count": reddit_method_counts.get("public_json", 0),
+        "reddit_google_site_search_signal_count": reddit_method_counts.get("google_site_search", 0),
         "fallback_reddit_signal_count": signal_source_counts.get("reddit_fallback", 0),
         "google_suggest_signal_count": signal_source_counts.get("google_suggest", 0),
         "google_suggest_live_signal_count": google_method_counts.get("live", 0),
@@ -190,7 +174,8 @@ def build_research_report(
         "reddit_collection_diagnostics": reddit_diagnostics or {},
         "google_suggest_diagnostics": google_diagnostics or {},
         "notes": [
-            "Reddit and Google Suggest are used for topic discovery.",
+            "Reddit OAuth is optional; Reddit intent can come from Google site:reddit.com searches.",
+            "Google Suggest and Reddit search-intent signals are used for topic discovery.",
             "Official/platform sources are used for publishing validation.",
         ],
     }

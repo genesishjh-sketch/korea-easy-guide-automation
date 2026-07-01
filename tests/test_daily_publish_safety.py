@@ -468,12 +468,13 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertIn("공식 출처 문제가 감지", message)
         self.assertIn("주제 일치 문제가 감지", message)
 
-    def test_operational_status_allows_cadence_increase_only_with_oauth_signals(self) -> None:
+    def test_operational_status_allows_cadence_increase_with_oauth_or_search_signals(self) -> None:
         result = daily_draft.build_operational_status(
             {"score": 100, "passed": True, "issues": []},
             {
                 "reddit_oauth_signal_count": 3,
                 "reddit_public_json_signal_count": 0,
+                "reddit_google_site_search_signal_count": 0,
                 "fallback_reddit_signal_count": 0,
             },
         )
@@ -482,12 +483,27 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertEqual(result["collection_status"], "stable_oauth")
         self.assertTrue(result["ready_for_cadence_increase"])
 
+        search_result = daily_draft.build_operational_status(
+            {"score": 100, "passed": True, "issues": []},
+            {
+                "reddit_oauth_signal_count": 0,
+                "reddit_public_json_signal_count": 0,
+                "reddit_google_site_search_signal_count": 6,
+                "fallback_reddit_signal_count": 0,
+            },
+        )
+
+        self.assertTrue(search_result["publish_quality_ok"])
+        self.assertEqual(search_result["collection_status"], "stable_google_site_search")
+        self.assertTrue(search_result["ready_for_cadence_increase"])
+
     def test_operational_status_blocks_cadence_increase_when_quality_has_issues(self) -> None:
         result = daily_draft.build_operational_status(
             {"score": 88, "passed": False, "issues": [{"code": "thin_content"}]},
             {
                 "reddit_oauth_signal_count": 3,
                 "reddit_public_json_signal_count": 0,
+                "reddit_google_site_search_signal_count": 0,
                 "fallback_reddit_signal_count": 0,
             },
         )

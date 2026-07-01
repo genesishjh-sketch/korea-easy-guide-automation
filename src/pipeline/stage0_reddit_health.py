@@ -260,15 +260,15 @@ def reddit_health_metadata(status: str) -> dict:
         },
         "missing_credentials": {
             "collection_status": "missing_credentials",
-            "health_score": 0,
-            "blocks_cadence_increase": True,
-            "status_label": "Reddit OAuth 키 없음",
+            "health_score": 60,
+            "blocks_cadence_increase": False,
+            "status_label": "Reddit OAuth 선택 보강 미설정",
         },
         "approval_pending": {
             "collection_status": "approval_pending",
-            "health_score": 0,
-            "blocks_cadence_increase": True,
-            "status_label": "Reddit 승인 대기",
+            "health_score": 60,
+            "blocks_cadence_increase": False,
+            "status_label": "Reddit OAuth 승인 대기, 검색 기반 운영 가능",
         },
         "missing_user_agent": {
             "collection_status": "missing_user_agent",
@@ -305,22 +305,23 @@ def missing_credentials_guidance(data_access_submitted_at: str = "") -> tuple[st
         return (
             f"Reddit Data Access Request는 {data_access_submitted_at}에 제출 완료했습니다. "
             "승인 전에는 Reddit 앱 생성이 Responsible Builder Policy/Data API 안내에서 막힐 수 있습니다. "
-            "하루 1개 자동 발행은 fallback 질문, Google Suggest, Microsoft 공식 출처로 계속 운영합니다. "
+            "자동 발행은 Google site:reddit.com 검색, Google Suggest, Microsoft 공식 출처로 계속 운영합니다. "
             f"승인 메일을 받은 뒤 {reddit_oauth_secret_label()}을 GitHub Secrets 또는 .env에 설정하세요.",
             [
-                "Reddit 승인 메일을 기다리세요.",
+                "Reddit OAuth는 선택 보강이므로 승인 메일을 기다리면서 자동 발행은 계속 진행하세요.",
                 "승인 메일 전에는 Reddit 앱 생성 버튼을 다시 눌러도 같은 정책 안내에서 막힐 수 있습니다.",
-                "승인 전까지는 하루 1개 자동 발행을 유지하고, 하루 2~3개 증량은 보류하세요.",
-                "승인 후 Reddit 앱을 script 타입으로 만들고 client id와 secret을 확인하세요.",
+                "증량 판단은 OAuth 승인보다 색인/노출/품질/검색 기반 주제 신호를 우선 보세요.",
+                "승인 후 원하면 Reddit 앱을 script 타입으로 만들고 client id와 secret을 확인하세요.",
                 f"GitHub Secrets에 {REDDIT_CLIENT_ID_SECRET}를 추가하세요.",
                 f"GitHub Secrets에 {REDDIT_CLIENT_SECRET_SECRET}을 추가하세요.",
                 "Actions > Easy PC Fix Reddit OAuth Health에서 수동 재실행하세요.",
             ],
         )
     return (
-        f"{reddit_oauth_secret_label()}을 GitHub Secrets 또는 .env에 설정하세요.",
+        f"{reddit_oauth_secret_label()}이 없어도 기본 자동화는 Google site:reddit.com 검색 기반으로 운영됩니다.",
         [
-            "Reddit 앱을 script 타입으로 만들고 client id와 secret을 확인하세요.",
+            "Reddit OAuth는 선택 보강입니다. 당장 설정하지 않아도 자동 발행은 계속할 수 있습니다.",
+            "나중에 Reddit 앱을 script 타입으로 만들고 client id와 secret을 확인하세요.",
             f"GitHub Secrets에 {REDDIT_CLIENT_ID_SECRET}를 추가하세요.",
             f"GitHub Secrets에 {REDDIT_CLIENT_SECRET_SECRET}을 추가하세요.",
             "Actions > Easy PC Fix Reddit OAuth Health에서 수동 재실행하세요.",
@@ -361,7 +362,7 @@ def build_message(result: dict) -> str:
         "oauth_connected": "OAuth 연결 확인",
         "oauth_connected_no_results": "OAuth 연결됨, 결과 없음",
         "missing_credentials": "Reddit OAuth 키 없음",
-        "approval_pending": "Reddit 승인 대기",
+        "approval_pending": "Reddit 승인 대기, 검색 기반 운영 가능",
         "missing_user_agent": "Reddit User-Agent 없음",
         "missing_praw": "PRAW 패키지 없음",
         "oauth_error": "OAuth 오류",
@@ -380,7 +381,7 @@ def build_message(result: dict) -> str:
         f"- 상태 점수: {result.get('health_score', 0)}/100",
         f"- 발행량 증량 차단: {'예' if result.get('blocks_cadence_increase', True) else '아니오'}",
         (
-            "- 하루 1개 자동 발행: 계속 운영 가능"
+            "- 자동 발행: Google site:reddit.com 검색 기반으로 계속 운영 가능"
             if result.get("status") in {"missing_credentials", "approval_pending"}
             else "- 하루 1개 자동 발행: Reddit 상태 기준 차단 없음"
         ),
@@ -542,7 +543,7 @@ def build_markdown_report(result: dict) -> str:
 def should_exit_nonzero(result: dict) -> bool:
     if result.get("status") in {"oauth_connected", "oauth_connected_no_results"}:
         return False
-    if result.get("status") == "approval_pending":
+    if result.get("status") in {"approval_pending", "missing_credentials"}:
         return False
     return True
 

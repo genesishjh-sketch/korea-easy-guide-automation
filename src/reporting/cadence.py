@@ -27,6 +27,7 @@ class CadenceReview:
     signal_quality_status: str
     reddit_oauth_signal_count: int
     reddit_public_json_signal_count: int
+    reddit_google_site_search_signal_count: int
     fallback_reddit_signal_count: int
     reddit_health_status: str
     reddit_health_score: int
@@ -55,12 +56,18 @@ def review_cadence(
     signal_quality_status = signal_quality.get("status", "not_uploaded")
     reddit_oauth_signal_count = int(signal_quality.get("reddit_oauth_signal_count", 0) or 0)
     reddit_public_json_signal_count = int(signal_quality.get("reddit_public_json_signal_count", 0) or 0)
+    reddit_google_site_search_signal_count = int(signal_quality.get("reddit_google_site_search_signal_count", 0) or 0)
     fallback_reddit_signal_count = int(signal_quality.get("fallback_reddit_signal_count", 0) or 0)
     reddit_health_status = reddit_health.get("status", "not_uploaded")
     reddit_health_score = int(reddit_health.get("health_score", 0) or 0)
-    reddit_health_blocks_cadence_increase = bool(reddit_health.get("blocks_cadence_increase", False))
-    has_unstable_reddit_collection = signal_quality_status == "fallback_only" or (
-        reddit_public_json_signal_count > 0 and reddit_oauth_signal_count == 0
+    reddit_health_blocks_cadence_increase = bool(reddit_health.get("blocks_cadence_increase", False)) and not (
+        reddit_google_site_search_signal_count > 0
+    )
+    has_search_based_reddit_discovery = reddit_google_site_search_signal_count > 0
+    has_unstable_reddit_collection = (
+        signal_quality_status == "fallback_only"
+        and not has_search_based_reddit_discovery
+        and reddit_public_json_signal_count == 0
     )
 
     if today < TWO_POST_REVIEW_DATE:
@@ -75,8 +82,8 @@ def review_cadence(
             if signal_quality_status == "fallback_only":
                 reasons.append("최근 글 수집이 Reddit 실제 신호 없이 fallback 질문에 의존했습니다.")
             else:
-                reasons.append("Reddit 실제 신호가 OAuth 없이 public JSON 경로에 의존했습니다.")
-            reasons.append("발행량 확대 전 Reddit OAuth 수집 안정성을 먼저 확인하세요.")
+                reasons.append("Reddit 실제 신호가 부족해 fallback 질문에 의존했습니다.")
+            reasons.append("발행량 확대 전 Google site:reddit.com 검색 신호 또는 OAuth 수집 신호를 확보하세요.")
         action = "하루 1개 유지"
         recommendation = "not_ready"
     elif reddit_health_blocks_cadence_increase:
@@ -91,18 +98,22 @@ def review_cadence(
         if signal_quality_status == "fallback_only":
             reasons.append("최근 글 수집이 Reddit 실제 신호 없이 fallback 질문에 의존했습니다.")
         else:
-            reasons.append("Reddit 실제 신호가 OAuth 없이 public JSON 경로에 의존했습니다.")
-        reasons.append("발행량 확대 전 Reddit OAuth 수집 안정성을 먼저 확인하세요.")
+            reasons.append("Reddit 실제 신호가 부족해 fallback 질문에 의존했습니다.")
+        reasons.append("발행량 확대 전 Google site:reddit.com 검색 신호 또는 OAuth 수집 신호를 확보하세요.")
         action = "하루 1개 유지"
         recommendation = "not_ready"
     elif indexed_pages_estimate >= 50 and published_posts >= 50 and quality_issue_count == 0 and today >= THREE_POST_REVIEW_DATE:
         reasons.append("3개 전환 검토일 이후이고, 공개 글/색인 추정 수가 50개 이상입니다.")
+        if has_search_based_reddit_discovery:
+            reasons.append("Reddit OAuth 없이도 Google site:reddit.com 검색 기반 주제 신호가 있습니다.")
         if recent_impressions > 0:
             reasons.append("Search Console 노출 데이터가 감지되었습니다.")
         action = "하루 3개 전환 검토 가능"
         recommendation = "review_3_posts"
     elif indexed_pages_estimate >= 20 and published_posts >= 20 and quality_issue_count == 0:
         reasons.append("2개 전환 검토일 이후이고, 공개 글/색인 추정 수가 20개 이상입니다.")
+        if has_search_based_reddit_discovery:
+            reasons.append("Reddit OAuth 없이도 Google site:reddit.com 검색 기반 주제 신호가 있습니다.")
         action = "하루 2개 전환 검토 가능"
         recommendation = "review_2_posts"
     else:
@@ -126,6 +137,7 @@ def review_cadence(
         signal_quality_status=signal_quality_status,
         reddit_oauth_signal_count=reddit_oauth_signal_count,
         reddit_public_json_signal_count=reddit_public_json_signal_count,
+        reddit_google_site_search_signal_count=reddit_google_site_search_signal_count,
         fallback_reddit_signal_count=fallback_reddit_signal_count,
         reddit_health_status=reddit_health_status,
         reddit_health_score=reddit_health_score,
@@ -156,6 +168,7 @@ def build_cadence_alert_message(
         f"- 수집 신호 상태: {review.signal_quality_status}",
         f"- Reddit OAuth 신호 수: {review.reddit_oauth_signal_count}",
         f"- Reddit public JSON 신호 수: {review.reddit_public_json_signal_count}",
+        f"- Reddit Google 검색 신호 수: {review.reddit_google_site_search_signal_count}",
         f"- Reddit fallback 신호 수: {review.fallback_reddit_signal_count}",
         f"- Reddit Health 상태: {review.reddit_health_status}",
         f"- Reddit Health 점수: {review.reddit_health_score}/100",
@@ -169,8 +182,8 @@ def build_cadence_alert_message(
             [
                 "",
                 "필요 조치:",
-                "- Reddit 승인 메일 전에는 하루 1개 자동 발행을 유지하고, 앱 생성 재시도와 발행량 증량은 보류하세요.",
-                "- 승인 후 Reddit 앱에서 script app을 만들고 client id/client secret을 확인하세요.",
+                "- Reddit OAuth는 선택 보강입니다. 기본 운영은 Google site:reddit.com 검색 + Google Suggest + 공식 출처 검증으로 진행하세요.",
+                "- Reddit 승인 메일이 오면 script app을 만들고 client id/client secret을 추가해도 됩니다.",
                 f"- Reddit 앱 생성: {REDDIT_APPS_URL}",
                 f"- GitHub Actions Secrets에 {reddit_oauth_secret_label()}을 저장하세요.",
                 f"- GitHub Secrets: {GITHUB_SECRETS_URL}",
@@ -201,10 +214,11 @@ def build_cadence_alert_message(
 def needs_reddit_oauth_action(review: CadenceReview) -> bool:
     if review.reddit_oauth_signal_count > 0:
         return False
+    if review.reddit_google_site_search_signal_count > 0:
+        return False
     if review.reddit_health_blocks_cadence_increase:
         return True
     return (
         review.signal_quality_status == "fallback_only"
-        or review.reddit_public_json_signal_count > 0
         or review.fallback_reddit_signal_count > 0
     )

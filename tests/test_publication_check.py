@@ -48,6 +48,7 @@ class PublicationCheckTests(unittest.TestCase):
                 "easy_pc_fix_guide",
                 today=datetime(2026, 6, 25, 9, 45, tzinfo=ZoneInfo("Asia/Seoul")),
                 after_hour=9,
+                notify=True,
             )
 
         self.assertEqual(result["status"], "published_today")
@@ -79,6 +80,7 @@ class PublicationCheckTests(unittest.TestCase):
                 "easy_pc_fix_guide",
                 today=datetime(2026, 6, 25, 9, 45, tzinfo=ZoneInfo("Asia/Seoul")),
                 after_hour=9,
+                notify=True,
             )
 
         self.assertEqual(result["status"], "published_today_before_cutoff")
@@ -113,6 +115,7 @@ class PublicationCheckTests(unittest.TestCase):
                 "easy_pc_fix_guide",
                 today=datetime(2026, 6, 25, 9, 45, tzinfo=ZoneInfo("Asia/Seoul")),
                 after_hour=9,
+                notify=True,
             )
 
         self.assertEqual(result["status"], "duplicate_today")
@@ -148,6 +151,7 @@ class PublicationCheckTests(unittest.TestCase):
                     "easy_pc_fix_guide",
                     today=datetime(2026, 6, 25, 9, 45, tzinfo=ZoneInfo("Asia/Seoul")),
                     after_hour=9,
+                    notify=True,
                 )
             report_path = Path(tmpdir) / "reports" / "easy_pc_fix_guide-publication-check.json"
             markdown_path = Path(tmpdir) / "reports" / "easy_pc_fix_guide-publication-check.md"
@@ -170,6 +174,7 @@ class PublicationCheckTests(unittest.TestCase):
                     "easy_pc_fix_guide",
                     today=datetime(2026, 6, 25, 9, 45, tzinfo=ZoneInfo("Asia/Seoul")),
                     after_hour=9,
+                    notify=True,
                 )
 
             report_path = Path(self._tmpdir.name) / "reports" / "easy_pc_fix_guide-publication-check.json"
@@ -200,6 +205,7 @@ class PublicationCheckTests(unittest.TestCase):
                     "easy_pc_fix_guide",
                     today=datetime(2026, 6, 25, 9, 45, tzinfo=ZoneInfo("Asia/Seoul")),
                     after_hour=9,
+                    notify=True,
                 )
 
             report_path = Path(self._tmpdir.name) / "reports" / "easy_pc_fix_guide-publication-check.json"

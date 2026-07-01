@@ -1015,6 +1015,7 @@ def build_daily_success_message(result: dict[str, str]) -> str:
             f"- Reddit 실제 신호 수: {reddit_signal_quality.get('live_reddit_signal_count', 0)}",
             f"- Reddit OAuth 신호 수: {reddit_signal_quality.get('reddit_oauth_signal_count', 0)}",
             f"- Reddit public JSON 신호 수: {reddit_signal_quality.get('reddit_public_json_signal_count', 0)}",
+            f"- Reddit Google 검색 신호 수: {reddit_signal_quality.get('reddit_google_site_search_signal_count', 0)}",
             f"- Reddit fallback 신호 수: {reddit_signal_quality.get('fallback_reddit_signal_count', 0)}",
             f"- Google Suggest 신호 수: {google_signal_quality.get('google_suggest_signal_count', 0)}",
             f"- Google Suggest live 신호 수: {google_signal_quality.get('google_suggest_live_signal_count', 0)}",
@@ -1215,17 +1216,19 @@ def build_reddit_signal_quality(research_report: dict) -> dict:
     live_count = int(research_report.get("live_reddit_signal_count", 0) or 0)
     oauth_count = int(research_report.get("reddit_oauth_signal_count", 0) or 0)
     public_json_count = int(research_report.get("reddit_public_json_signal_count", 0) or 0)
+    google_site_search_count = int(research_report.get("reddit_google_site_search_signal_count", 0) or 0)
     fallback_count = int(research_report.get("fallback_reddit_signal_count", 0) or 0)
     method_counts = research_report.get("reddit_collection_method_counts", {}) or {}
     warning = ""
-    if fallback_count and not live_count:
-        warning = "Reddit 실제 신호 없이 fallback 질문만 사용했습니다. 하루 1개 자동 발행은 계속 가능하며, Reddit 승인 후 OAuth를 연결하세요."
+    if fallback_count and not live_count and not google_site_search_count:
+        warning = "Reddit 실제 신호 없이 fallback 질문만 사용했습니다. Google site:reddit.com 검색 신호가 잡히는지 확인하세요."
     elif public_json_count and not oauth_count:
-        warning = "Reddit 실제 신호가 public JSON 경로에만 의존합니다. 하루 1개 자동 발행은 계속 가능하며, 승인 후 Reddit OAuth 수집을 연결하세요."
+        warning = "Reddit 실제 신호가 public JSON 경로에만 의존합니다. Google site:reddit.com 검색 신호를 함께 유지하세요. OAuth는 선택 보강입니다."
     return {
         "live_reddit_signal_count": live_count,
         "reddit_oauth_signal_count": oauth_count,
         "reddit_public_json_signal_count": public_json_count,
+        "reddit_google_site_search_signal_count": google_site_search_count,
         "fallback_reddit_signal_count": fallback_count,
         "reddit_collection_method_counts": method_counts,
         "warning": warning,
@@ -1276,6 +1279,9 @@ def build_operational_status(quality_report: dict, reddit_signal_quality: dict) 
     if reddit_signal_quality.get("reddit_oauth_signal_count", 0) > 0:
         collection_status = "stable_oauth"
         collection_label = "안정: Reddit OAuth 신호 사용"
+    elif reddit_signal_quality.get("reddit_google_site_search_signal_count", 0) > 0:
+        collection_status = "stable_google_site_search"
+        collection_label = "안정: Google site:reddit.com 검색 신호 사용"
     elif reddit_signal_quality.get("reddit_public_json_signal_count", 0) > 0:
         collection_status = "public_json_only"
         collection_label = "주의: Reddit public JSON 의존"
@@ -1285,7 +1291,10 @@ def build_operational_status(quality_report: dict, reddit_signal_quality: dict) 
     else:
         collection_status = "no_reddit_signals"
         collection_label = "주의: Reddit 신호 없음"
-    ready_for_cadence_increase = publish_quality_ok and collection_status == "stable_oauth"
+    ready_for_cadence_increase = publish_quality_ok and collection_status in {
+        "stable_oauth",
+        "stable_google_site_search",
+    }
     if publish_quality_ok and ready_for_cadence_increase:
         status_label = "품질/수집 안정"
     elif publish_quality_ok:

@@ -192,13 +192,11 @@ class SearchConsoleSitemapMessageTests(unittest.TestCase):
         self.assertEqual(payload["daily_publish_context"]["title"], "Wi-Fi Button Missing on Windows 11")
         self.assertEqual(payload["daily_publish_context"]["quality_score"], 100)
 
-    def test_scheduled_run_skips_sitemap_telegram_notification(self) -> None:
+    def test_run_skips_sitemap_telegram_notification_by_default(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir, patch.object(stage3_submit_sitemap, "ROOT_DIR", Path(tmpdir)), patch(
             "src.pipeline.stage3_submit_sitemap.SearchConsoleClient"
         ) as client, patch("src.pipeline.stage3_submit_sitemap.NotificationClient") as notification, patch(
             "src.pipeline.stage3_submit_sitemap.build_url_fetch_diagnostics", return_value={"status": "ok", "checks": []}
-        ), patch.dict(
-            "os.environ", {"GITHUB_ACTIONS": "true", "GITHUB_EVENT_NAME": "schedule"}
         ):
             client.return_value.submit_sitemap.return_value = {
                 "status": "submitted",
@@ -209,6 +207,24 @@ class SearchConsoleSitemapMessageTests(unittest.TestCase):
             stage3_submit_sitemap.run(site="easy_pc_fix_guide")
 
         notification.assert_not_called()
+
+    def test_run_sends_sitemap_telegram_notification_when_requested(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir, patch.object(stage3_submit_sitemap, "ROOT_DIR", Path(tmpdir)), patch(
+            "src.pipeline.stage3_submit_sitemap.SearchConsoleClient"
+        ) as client, patch("src.pipeline.stage3_submit_sitemap.NotificationClient") as notification, patch(
+            "src.pipeline.stage3_submit_sitemap.build_url_fetch_diagnostics", return_value={"status": "ok", "checks": []}
+        ):
+            client.return_value.submit_sitemap.return_value = {
+                "status": "submitted",
+                "site_url": "https://easypcfixguide.blogspot.com/",
+                "sitemap_url": "https://easypcfixguide.blogspot.com/sitemap.xml",
+            }
+
+            stage3_submit_sitemap.run(site="easy_pc_fix_guide", notify=True)
+
+        notification.return_value.send_required.assert_called_once()
+        message = notification.return_value.send_required.call_args.args[0]
+        self.assertIn("Search Console sitemap 제출 결과", message)
 
     def test_daily_publish_status_label_describes_daily_limit_skip(self) -> None:
         self.assertEqual(

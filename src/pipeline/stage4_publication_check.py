@@ -21,7 +21,7 @@ KST = ZoneInfo("Asia/Seoul")
 DEFAULT_GITHUB_REPOSITORY = "genesishjh-sketch/korea-easy-guide-automation"
 
 
-def run(site: str | None = None, today: datetime | None = None, after_hour: int | None = None, notify: bool = True) -> dict:
+def run(site: str | None = None, today: datetime | None = None, after_hour: int | None = None, notify: bool = False) -> dict:
     settings = load_settings(site)
     now = today or datetime.now(tz=KST)
     cutoff = now.replace(hour=after_hour, minute=0, second=0, microsecond=0) if after_hour is not None else None
@@ -585,9 +585,10 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Check whether today's public Blogger post exists.")
     parser.add_argument("--site", help="Site profile key, for example: easy_pc_fix_guide")
     parser.add_argument("--after-hour", type=int, help="Only count posts published at or after this KST hour.")
+    parser.add_argument("--notify", action="store_true", help="Send the publication check result to Posting Bot.")
     parser.add_argument("--no-notify", action="store_true", help="Skip Posting Bot notifications for local smoke checks.")
     args = parser.parse_args()
-    result = run(args.site, after_hour=args.after_hour, notify=not args.no_notify)
+    result = run(args.site, after_hour=args.after_hour, notify=args.notify and not args.no_notify)
     save_result(result)
     print(json.dumps(result, ensure_ascii=False, indent=2, default=str))
     if not is_success_status(result.get("status")):

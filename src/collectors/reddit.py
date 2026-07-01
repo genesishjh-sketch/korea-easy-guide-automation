@@ -42,6 +42,13 @@ WINDOWS_FALLBACK_REDDIT_QUESTIONS = [
 ]
 
 
+SEARCH_INTENT_MODIFIERS = [
+    "question",
+    "problem",
+    "beginner",
+]
+
+
 class RedditCollector:
     def __init__(
         self,
@@ -73,6 +80,7 @@ class RedditCollector:
             "public_json_error_count": 0,
             "public_json_skipped": bool(self.skip_public_json),
             "public_json_skip_reason": self.skip_public_json_reason if self.skip_public_json else "",
+            "google_site_search_signal_count": 0,
             "used_fallback": False,
             "fallback_reason": "",
         }
@@ -131,6 +139,13 @@ class RedditCollector:
             self.diagnostics["public_json_error_count"] = len(self.diagnostics["public_json_failed_subreddits"])
             return sorted(signals, key=lambda item: item.score, reverse=True)
 
+        search_signals = self._google_site_search_signals(query, limit)
+        if search_signals:
+            self.diagnostics["status"] = "google_site_search_ready"
+            self.diagnostics["public_json_error_count"] = len(self.diagnostics["public_json_failed_subreddits"])
+            self.diagnostics["google_site_search_signal_count"] = len(search_signals)
+            return search_signals
+
         query_terms = {part for part in query.lower().split() if len(part) > 2}
         fallback_signals = []
         for question in self._fallback_questions():
@@ -159,11 +174,57 @@ class RedditCollector:
                 self.diagnostics["fallback_reason"] = "Reddit live collection returned no matching signals."
         return sorted(fallback_signals, key=lambda item: item.score, reverse=True)[:limit]
 
+    def _google_site_search_signals(self, query: str, limit: int) -> list[TopicSignal]:
+        signals: list[TopicSignal] = []
+        normalized_query = clean_space(query)
+        if not normalized_query:
+            return signals
+        windows_mode = self._uses_windows_subreddits()
+        subreddits = self.subreddits[: max(1, min(len(self.subreddits), 4))]
+        for subreddit in subreddits:
+            search_query = f'site:reddit.com/r/{subreddit} "{normalized_query}"'
+            url = f"https://www.google.com/search?q={quote_plus(search_query)}"
+            signals.append(
+                TopicSignal(
+                    source="reddit_search",
+                    keyword=query,
+                    title=f"Reddit questions about {normalized_query} in r/{subreddit}",
+                    url=url,
+                    score=6.0,
+                    metadata={
+                        "subreddit": subreddit,
+                        "collection_method": "google_site_search",
+                        "search_query": search_query,
+                    },
+                )
+            )
+        for index, modifier in enumerate(SEARCH_INTENT_MODIFIERS):
+            search_query = f'site:reddit.com "{normalized_query}" {modifier}'
+            if windows_mode:
+                search_query = f'{search_query} windows'
+            signals.append(
+                TopicSignal(
+                    source="reddit_search",
+                    keyword=query,
+                    title=f"Reddit {modifier} searches for {normalized_query}",
+                    url=f"https://www.google.com/search?q={quote_plus(search_query)}",
+                    score=4.0 - (index * 0.25),
+                    metadata={
+                        "collection_method": "google_site_search",
+                        "search_query": search_query,
+                    },
+                )
+            )
+        return signals[:limit]
+
     def _fallback_questions(self) -> list[str]:
-        windows_subreddits = {"windowshelp", "windows11", "techsupport", "pchelp"}
-        if any(subreddit.lower() in windows_subreddits for subreddit in self.subreddits):
+        if self._uses_windows_subreddits():
             return WINDOWS_FALLBACK_REDDIT_QUESTIONS
         return FALLBACK_REDDIT_QUESTIONS
+
+    def _uses_windows_subreddits(self) -> bool:
+        windows_subreddits = {"windowshelp", "windows11", "techsupport", "pchelp"}
+        return any(subreddit.lower() in windows_subreddits for subreddit in self.subreddits)
 
     def _collect_with_praw(self, query: str, limit: int) -> list[TopicSignal]:
         try:

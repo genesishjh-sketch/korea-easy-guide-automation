@@ -1103,10 +1103,9 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         )
 
         joined = "\n".join(actions)
-        self.assertIn("Reddit OAuth 설정", joined)
+        self.assertIn("Google site:reddit.com 검색 신호", joined)
         self.assertIn("fallback 질문만 사용", joined)
-        self.assertIn("https://www.reddit.com/prefs/apps", joined)
-        self.assertIn("REDDIT_CLIENT_ID", joined)
+        self.assertNotIn("https://www.reddit.com/prefs/apps", joined)
 
     def test_next_actions_include_public_json_only_warning(self) -> None:
         settings = load_settings("easy_pc_fix_guide")
@@ -1126,7 +1125,8 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
 
         joined = "\n".join(actions)
         self.assertIn("public JSON", joined)
-        self.assertIn("Reddit OAuth 수집", joined)
+        self.assertIn("Google site:reddit.com 검색 신호", joined)
+        self.assertIn("OAuth는 선택 보강", joined)
         self.assertIn("https://www.reddit.com/prefs/apps", joined)
         self.assertIn("REDDIT_CLIENT_SECRET", joined)
 
@@ -1154,7 +1154,7 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
 
         joined = "\n".join(actions)
         self.assertIn("아직 발행량 증량 준비가 아닙니다", joined)
-        self.assertIn("Reddit OAuth 수집 안정성", joined)
+        self.assertIn("색인/노출 안정성", joined)
 
     def test_next_actions_include_reddit_health_cadence_block(self) -> None:
         settings = load_settings("easy_pc_fix_guide")
@@ -1177,7 +1177,8 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         )
 
         joined = "\n".join(actions)
-        self.assertIn("Reddit OAuth Health가 발행량 증량을 차단 중", joined)
+        self.assertIn("Reddit OAuth Health가 주의 상태", joined)
+        self.assertIn("검색 기반으로 계속 가능", joined)
         self.assertIn("상태 점수: 0/100", joined)
         self.assertIn("REDDIT_CLIENT_ID", joined)
 
@@ -1210,8 +1211,8 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         )
 
         joined = "\n".join(actions)
-        self.assertIn("Reddit OAuth Health가 발행량 증량을 차단 중", joined)
-        self.assertEqual(joined.count("Reddit"), 2)
+        self.assertIn("Reddit OAuth Health가 주의 상태", joined)
+        self.assertIn("OAuth는 선택 보강", joined)
         self.assertNotIn("Reddit 실제 신호 없이 fallback 질문만 사용한 글", joined)
         self.assertNotIn("일일 운영 상태 기준으로 아직 발행량 증량 준비가 아닙니다", joined)
 

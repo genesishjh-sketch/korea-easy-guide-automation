@@ -30,6 +30,7 @@ class CadenceAlertTests(unittest.TestCase):
                 "status": "connected",
                 "reddit_oauth_signal_count": 5,
                 "reddit_public_json_signal_count": 0,
+                "reddit_google_site_search_signal_count": 0,
                 "fallback_reddit_signal_count": 0,
             }
             reporter.return_value._operations_result.return_value = {
@@ -56,7 +57,7 @@ class CadenceAlertTests(unittest.TestCase):
         self.assertTrue(sent)
         notification.return_value.send_required.assert_called_once()
 
-    def test_missing_reddit_oauth_alert_includes_setup_fields(self) -> None:
+    def test_search_based_reddit_discovery_does_not_include_oauth_setup_fields(self) -> None:
         with patch("src.pipeline.stage3_cadence_alert.WeeklyReporter") as reporter, patch(
             "src.pipeline.stage3_cadence_alert.actual_public_post_count", return_value=25
         ), patch("src.pipeline.stage3_cadence_alert.SearchConsoleClient") as search_console, patch(
@@ -65,16 +66,17 @@ class CadenceAlertTests(unittest.TestCase):
             reporter.return_value._collect_articles.return_value = []
             reporter.return_value._quality_issue_count.return_value = 0
             reporter.return_value._signal_quality_result.return_value = {
-                "status": "fallback_only",
+                "status": "connected",
                 "reddit_oauth_signal_count": 0,
                 "reddit_public_json_signal_count": 0,
-                "fallback_reddit_signal_count": 6,
+                "reddit_google_site_search_signal_count": 6,
+                "fallback_reddit_signal_count": 0,
             }
             reporter.return_value._operations_result.return_value = {
                 "reddit_health": {
                     "status": "missing_credentials",
                     "status_label": "Reddit OAuth 키 없음",
-                    "health_score": 0,
+                    "health_score": 60,
                     "blocks_cadence_increase": True,
                     "action_required": "REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET을 GitHub Secrets 또는 .env에 설정하세요.",
                 }
@@ -95,10 +97,9 @@ class CadenceAlertTests(unittest.TestCase):
 
         self.assertTrue(sent)
         message = notification.return_value.send_required.call_args.args[0]
-        self.assertIn("Reddit 앱 입력값:", message)
-        self.assertIn("앱 타입: script", message)
-        self.assertIn("redirect uri: http://localhost:8080", message)
-        self.assertIn("REDDIT_CLIENT_SECRET = Reddit 앱 상세 화면의 secret", message)
+        self.assertIn("Reddit Google 검색 신호 수: 6", message)
+        self.assertNotIn("Reddit 앱 입력값:", message)
+        self.assertNotIn("REDDIT_CLIENT_SECRET = Reddit 앱 상세 화면의 secret", message)
 
     def test_notification_failure_is_not_silenced(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir, patch(
@@ -114,6 +115,7 @@ class CadenceAlertTests(unittest.TestCase):
                 "status": "connected",
                 "reddit_oauth_signal_count": 5,
                 "reddit_public_json_signal_count": 0,
+                "reddit_google_site_search_signal_count": 0,
                 "fallback_reddit_signal_count": 0,
             }
             reporter.return_value._operations_result.return_value = {

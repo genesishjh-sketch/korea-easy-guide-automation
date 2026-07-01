@@ -19,7 +19,7 @@
 - Do not automatically increase cadence. Posting Bot should alert for review first.
 - Two-post review requires roughly 20+ published posts, 20+ Search Console indexed/visible pages, and no quality issues.
 - Three-post review requires roughly 50+ published posts, 50+ Search Console indexed/visible pages, no quality issues, and preferably visible Search Console impression growth.
-- Cadence increase review also requires stable topic discovery. If recent posts are fallback-only or Reddit public JSON-only without OAuth signals, keep one post per day until Reddit OAuth collection is stable.
+- Cadence increase review also requires stable topic discovery. Google `site:reddit.com` search signals, Google Suggest signals, official-source coverage, and Hades quality results are enough for normal operation. Reddit OAuth is optional.
 - Posting Bot sends separate cadence review alerts at 09:30 KST on 2026-07-22 and 2026-08-19.
 
 ## Automation Mode
@@ -29,10 +29,10 @@
 - Manual review is replaced by the automated Hades Engineer quality gate.
 - Posting Bot must report daily success or failure, including title, Blogger status, URL, quality score, and action notes.
 - Validate-only smoke tests must write `daily-validation-success.json` or `daily-validation-failure.json`; they must not overwrite `daily-success.json` or `daily-failure.json`, which are reserved for publish/draft/daily-limit operational results.
-- Reddit OAuth credentials are recommended for stable question discovery. If Reddit public JSON is blocked, the pipeline may use fallback reader questions, and preflight should show a warning rather than hiding the reduced data quality.
-- Research reports and weekly reports must separate Reddit OAuth signals, Reddit public JSON signals, and Reddit fallback signals so collection quality problems are visible.
-- If weekly reports show public JSON signals without OAuth signals, treat it as a stability warning because public Reddit JSON can be blocked with 403.
-- Run `python -m src.pipeline.stage0_reddit_health --site easy_pc_fix_guide --notify` to verify whether Reddit OAuth can collect live Reddit signals and send the result to Posting Bot.
+- Reddit OAuth credentials are optional. If Reddit public JSON is blocked or OAuth is unavailable, the pipeline should use Google `site:reddit.com` search-intent signals before falling back to local reader questions.
+- Research reports and weekly reports must separate Reddit OAuth signals, Reddit public JSON signals, Reddit Google search signals, and Reddit fallback signals so collection quality is visible.
+- If weekly reports show only fallback reader questions and no Google site-search/OAuth/public signals, treat it as a topic-discovery warning.
+- Run `python -m src.pipeline.stage0_reddit_health --site easy_pc_fix_guide --notify` only when you want to check optional Reddit OAuth status and send the result to Posting Bot.
 
 ## Hades Engineer Quality Gate
 

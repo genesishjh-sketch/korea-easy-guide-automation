@@ -245,17 +245,19 @@ class PreflightTests(unittest.TestCase):
         self.assertIn("windows problem", check.message)
         self.assertIn("generic_computer_help_category", check.message)
 
-    def test_reddit_collection_warns_without_oauth_credentials(self) -> None:
+    def test_reddit_collection_warns_without_oauth_but_allows_search_based_operation(self) -> None:
         with patch.object(stage0_preflight, "load_settings") as load_settings:
             load_settings.return_value.reddit_subreddits = ["WindowsHelp", "Windows11"]
             load_settings.return_value.reddit_user_agent = "easy-pc-fix-guide/0.1"
             load_settings.return_value.reddit_client_id = ""
             load_settings.return_value.reddit_client_secret = ""
+            load_settings.return_value.reddit_data_access_request_submitted_at = "2026-06-25"
 
             check = stage0_preflight.check_reddit_collection_settings("easy_pc_fix_guide")
 
         self.assertEqual(check.status, "warn")
-        self.assertIn("Public Reddit JSON may return 403", check.message)
+        self.assertIn("Google site:reddit.com", check.message)
+        self.assertIn("does not block unattended publishing", check.message)
         self.assertIn("https://www.reddit.com/prefs/apps", check.message)
         self.assertIn("/settings/secrets/actions", check.message)
 
@@ -271,7 +273,7 @@ class PreflightTests(unittest.TestCase):
         self.assertEqual(check.status, "pass")
         self.assertIn("Reddit OAuth credentials", check.message)
 
-    def test_setup_actions_classify_reddit_oauth_as_cadence_blocker(self) -> None:
+    def test_setup_actions_classify_reddit_oauth_as_optional_upgrade(self) -> None:
         checks = [
             stage0_preflight.PreflightCheck("reddit_collection", "warn", "Reddit OAuth credentials are missing."),
             stage0_preflight.PreflightCheck("telegram", "pass", "Telegram notifications are configured."),
@@ -280,13 +282,13 @@ class PreflightTests(unittest.TestCase):
         actions = stage0_preflight.build_setup_actions(checks)
         readiness = stage0_preflight.build_readiness_summary(checks, actions)
 
-        self.assertEqual(actions[0]["name"], "reddit_oauth")
+        self.assertEqual(actions[0]["name"], "reddit_oauth_optional")
         self.assertEqual(actions[0]["owner"], "user")
         self.assertFalse(actions[0]["blocks_unattended_publish"])
-        self.assertTrue(actions[0]["blocks_cadence_increase"])
+        self.assertFalse(actions[0]["blocks_cadence_increase"])
         self.assertIn("REDDIT_CLIENT_ID", actions[0]["next_step"])
         self.assertTrue(readiness["ready_for_unattended_publish"])
-        self.assertFalse(readiness["ready_for_cadence_increase"])
+        self.assertTrue(readiness["ready_for_cadence_increase"])
         self.assertEqual(readiness["required_user_action_count"], 1)
 
     def test_setup_actions_classify_telegram_failure_as_unattended_blocker(self) -> None:
@@ -400,16 +402,16 @@ class PreflightTests(unittest.TestCase):
 
         self.assertIn("readiness", payload)
         self.assertIn("setup_actions", payload)
-        self.assertFalse(payload["readiness"]["ready_for_cadence_increase"])
-        self.assertEqual(payload["setup_actions"][0]["name"], "reddit_oauth")
+        self.assertTrue(payload["readiness"]["ready_for_cadence_increase"])
+        self.assertEqual(payload["setup_actions"][0]["name"], "reddit_oauth_optional")
         self.assertIn("user_action_checklist", payload["setup_actions"][0])
         self.assertIn("reddit_data_access_request_guide", payload["setup_actions"][0])
         self.assertIn("앱 타입은 반드시 script를 선택하세요.", "\n".join(payload["setup_actions"][0]["user_action_checklist"]))
         self.assertIn("read-only topic research", "\n".join(payload["setup_actions"][0]["reddit_data_access_request_guide"]))
         self.assertIn("# Preflight Report: Easy PC Fix Guide", markdown)
         self.assertIn("무인 발행 준비: 예", markdown)
-        self.assertIn("발행량 증량 준비: 아니오", markdown)
-        self.assertIn("Reddit OAuth 연결", markdown)
+        self.assertIn("발행량 증량 준비: 예", markdown)
+        self.assertIn("Reddit OAuth 선택 보강", markdown)
         self.assertIn("REDDIT_CLIENT_ID", markdown)
         self.assertIn("reddit_data_access_request", markdown)
         self.assertIn("Data Access Request 입력 가이드", markdown)
