@@ -63,7 +63,7 @@ class GoogleAuthTests(unittest.TestCase):
 
             with patch("src.google_auth.Credentials.from_authorized_user_file", return_value=expired), patch(
                 "src.google_auth.InstalledAppFlow"
-            ) as flow:
+            ) as flow, patch.dict("os.environ", {"GITHUB_ACTIONS": ""}):
                 flow.from_client_secrets_file.return_value.run_local_server.return_value = fresh
                 credentials = get_credentials(settings, [BLOGGER_SCOPE])
 
