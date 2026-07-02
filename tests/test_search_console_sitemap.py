@@ -101,13 +101,23 @@ class SearchConsoleSitemapMessageTests(unittest.TestCase):
         self.assertIn("오류", guidance["summary"])
         self.assertIn("완료되지 않았습니다", guidance["meaning"])
 
-    def test_main_exits_nonzero_when_sitemap_submit_fails(self) -> None:
+    def test_main_accepts_failed_sitemap_submit_by_default(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             report_path = Path(tmpdir) / "sitemap.json"
             report_path.write_text(json.dumps({"status": "error", "error": "permission denied"}), encoding="utf-8")
 
             with patch.object(stage3_submit_sitemap, "run", return_value=report_path), patch(
                 "sys.argv", ["stage3_submit_sitemap"]
+            ):
+                stage3_submit_sitemap.main()
+
+    def test_main_exits_nonzero_when_sitemap_submit_fails_in_strict_mode(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            report_path = Path(tmpdir) / "sitemap.json"
+            report_path.write_text(json.dumps({"status": "error", "error": "permission denied"}), encoding="utf-8")
+
+            with patch.object(stage3_submit_sitemap, "run", return_value=report_path), patch(
+                "sys.argv", ["stage3_submit_sitemap", "--strict"]
             ):
                 with self.assertRaises(SystemExit) as raised:
                     stage3_submit_sitemap.main()

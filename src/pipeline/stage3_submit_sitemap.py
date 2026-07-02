@@ -244,11 +244,12 @@ def main() -> None:
     parser.add_argument("--sitemap-url", help="Defaults to SITE_URL/sitemap.xml")
     parser.add_argument("--site", help="Site profile key, for example: easy_pc_fix_guide")
     parser.add_argument("--notify", action="store_true", help="Send the sitemap/indexing status to Posting Bot.")
+    parser.add_argument("--strict", action="store_true", help="Exit non-zero when sitemap submission fails.")
     args = parser.parse_args()
     path = run(args.sitemap_url, args.site, notify=args.notify)
     print(path)
     result = json.loads(path.read_text(encoding="utf-8"))
-    if result.get("status") != "submitted":
+    if args.strict and result.get("status") != "submitted":
         raise SystemExit(1)
 
 
