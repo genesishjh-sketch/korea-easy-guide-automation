@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from pathlib import Path
+import os
 
+from google.auth.exceptions import RefreshError
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -43,9 +45,22 @@ def get_credentials(settings: Settings, scopes: list[str] | None = None) -> Cred
         credentials = Credentials.from_authorized_user_file(str(token_path), selected_scopes)
 
     if credentials and credentials.expired and credentials.refresh_token and credentials.has_scopes(selected_scopes):
-        credentials.refresh(Request())
+        try:
+            credentials.refresh(Request())
+        except RefreshError as exc:
+            if os.getenv("GITHUB_ACTIONS", "").lower() == "true":
+                raise GoogleCredentialsError(
+                    f"Google OAuth token refresh failed for {token_path.name}. "
+                    "Regenerate the token locally and update the matching GitHub Secret."
+                ) from exc
+            credentials = None
 
     if not credentials or not credentials.valid or not credentials.has_scopes(selected_scopes):
+        if os.getenv("GITHUB_ACTIONS", "").lower() == "true":
+            raise GoogleCredentialsError(
+                f"Google OAuth token is invalid or missing for {token_path.name}. "
+                "Regenerate the token locally and update the matching GitHub Secret."
+            )
         flow = InstalledAppFlow.from_client_secrets_file(str(secret_path), selected_scopes)
         credentials = flow.run_local_server(port=0)
         token_path.parent.mkdir(parents=True, exist_ok=True)
