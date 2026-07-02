@@ -49,7 +49,10 @@ class EnglishArticleGenerator:
         inline_images: list[ImageAsset] | None = None,
     ) -> Article:
         title_keyword = title_case_keyword(candidate.keyword)
-        if candidate.intent == "how-to" or not title_keyword.lower().startswith("how"):
+        title_keyword_lower = title_keyword.lower()
+        if " in korea" in title_keyword_lower:
+            title = f"{title_keyword}: Easy Guide for Foreign Visitors"
+        elif candidate.intent == "how-to" or not title_keyword_lower.startswith("how"):
             title = f"How to Use {title_keyword} in Korea: Easy Guide for Foreign Visitors"
         else:
             title = f"{title_keyword}: Easy Guide for Foreign Visitors"
@@ -108,6 +111,8 @@ class EnglishArticleGenerator:
             return "How to Buy KTX Tickets in Korea as a Foreigner"
         if "t money" in normalized or "t-money" in normalized or "tmoney" in normalized:
             return "How to Use a T-money Card in Korea: Easy Guide for Foreign Visitors"
+        if "olive young" in normalized:
+            return "Olive Young Shopping in Korea for Foreigners: Easy Guide for First-Time Visitors"
         return default_title
 
     def _build_tags(self, candidate: TopicCandidate) -> list[str]:
