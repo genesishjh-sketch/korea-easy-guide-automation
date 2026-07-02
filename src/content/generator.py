@@ -129,7 +129,7 @@ class EnglishArticleGenerator:
             return "KTX tickets in Korea guide for foreign visitors, including booking options, station checks, seat rules, payment issues, and travel-day tips."
         if "naver map" in normalized.lower():
             return "Naver Map in Korea guide for foreign visitors, covering route search, Korean addresses, subway exits, walking directions, and common mistakes."
-        return f"{normalized.title()} in Korea guide for foreign visitors, covering practical steps, payment or app checks, common problems, official links, and safe backup options."
+        return f"{normalized.title()} in Korea guide for visitors, covering practical steps, payment checks, common problems, and safe backup options."
 
     def _intro(self, keyword: str) -> str:
         if self._is_tmoney(keyword):
@@ -180,9 +180,17 @@ class EnglishArticleGenerator:
                 "If you plan to leave Seoul, check local compatibility before assuming the same card behavior everywhere. T-money is widely used, but local transport rules, accepted cards, and refund handling can differ by city or service.",
             ]
         return [
-            f"The most important thing is to check the latest official information before relying on any guide about {keyword}. Korea changes app features, fares, routes, and business rules regularly.",
-            "Foreign visitors should also prepare a working internet connection, a saved Korean address, and a translation app before they need help in a busy station, airport, or store.",
-            "If your plan involves transportation, payment, tickets, or local apps, prepare a backup route before the day you need it. This prevents a small payment issue or language problem from turning into a missed train, late check-in, or expensive taxi ride.",
+            f"The most important thing is to check the latest official information before relying on any guide about {keyword}. Korea changes app features, fares, routes, opening hours, and business rules regularly.",
+            "Foreign visitors should prepare a working internet connection, a saved Korean address, and a translation app before they need help in a busy station, airport, shop, or hotel lobby.",
+            "If your plan involves transportation, payment, tickets, shopping, delivery, or local apps, prepare a backup route or backup payment method before the day you need it.",
+            "Many Korea services work smoothly once they are set up, but the first attempt can be confusing because English labels, foreign cards, passport names, and phone verification do not always behave the same way.",
+            "Treat this guide as a practical checklist rather than a promise that every counter, app screen, or store policy will be identical. Staff, machine types, app versions, and local branches can vary.",
+            "Before you leave your hotel, save the Korean name of the place, the address, the nearest station or landmark, and at least one official page or app link that can confirm current details.",
+            "For anything time-sensitive, such as a train, airport transfer, ticket pickup, reservation, or tax refund, build in extra time. A ten-minute language or payment issue is easier to solve when you are not already late.",
+            "If a foreign card fails, do not keep retrying the same method at a crowded counter. Step aside, check whether another official channel exists, and use cash, another card, or staff support when available.",
+            "Visitors staying more than a few days should also separate one-time setup tasks from daily-use tasks. Installing apps, checking phone verification, saving payment backups, and learning the nearest station exit are best handled before the day becomes busy.",
+            "The safest approach is to make a small first attempt before depending on the service for something important. Buy one item, test one route, check one booking screen, or confirm one counter process first, then use that successful pattern for the rest of the trip.",
+            "When information conflicts, prefer the official website, official app listing, government tourism page, transport operator, or the service counter in front of you. Random screenshots and short social posts can be useful clues, but they should not be the final source for a paid decision.",
         ]
 
     def _steps(self, keyword: str) -> list[str]:
@@ -199,12 +207,16 @@ class EnglishArticleGenerator:
                 "Before your final day, decide whether to use down the balance, keep the card for a future Korea trip, or ask about refund options. Do not leave refund questions until you are already rushing to airport security.",
             ]
         return [
-            f"Decide whether {keyword} is mainly a speed, price, comfort, or convenience problem for your trip.",
-            "Check your destination in Naver Map or KakaoMap instead of relying only on Google Maps.",
-            "Save the Korean name and address of your destination before leaving your hotel or airport.",
-            "Prepare a backup option in case your first choice is unavailable, delayed, or difficult to use.",
-            "Verify prices, schedules, and operating hours on an official website before making final decisions.",
-            "Take screenshots of key information such as route names, booking numbers, addresses, and operating hours. Screenshots are useful when mobile data is weak or an app reloads at the wrong time.",
+            f"Decide whether {keyword} is mainly a speed, price, comfort, safety, or convenience problem for your trip.",
+            "Open the official website or app first, then compare it with a current map result or travel information page.",
+            "Check your destination in Naver Map or KakaoMap instead of relying only on Google Maps for local routing.",
+            "Save the Korean name and address of your destination before leaving your hotel, airport, station, or dorm.",
+            "Confirm whether the service needs a local phone number, passport name, app account, foreign card, Korean card, or cash.",
+            "Prepare a backup option in case your first choice is unavailable, delayed, fully booked, or difficult to use in English.",
+            "Verify prices, schedules, refund rules, and operating hours on an official website before making final decisions.",
+            "Take screenshots of key information such as route names, booking numbers, addresses, store locations, and operating hours.",
+            "If staff support is needed, show one clear screen at a time: the Korean name, the address, the booking number, or the official page. Too many screenshots at once can make the conversation slower.",
+            "After completing the first attempt, note what actually worked: which payment method was accepted, which app screen was useful, which station exit was closest, and whether staff asked for ID or a phone number.",
             "After using the service once, save what worked for your next trip day. Korea travel gets much easier when you reuse a verified route, app setting, or payment method.",
         ]
 
@@ -225,6 +237,9 @@ class EnglishArticleGenerator:
             "Checking only one map app when public transportation routes are involved.",
             "Forgetting that late-night options can be limited outside central Seoul.",
             "Using outdated blog prices without checking an official source.",
+            "Arriving without the Korean address, branch name, or station exit saved on your phone.",
+            "Waiting until a staff member asks for a passport, booking number, or phone number before looking for it.",
+            "Assuming airport counters, downtown branches, and online channels follow exactly the same refund or pickup rules.",
         ]
 
     def _costs_payment(self, keyword: str) -> list[dict[str, str]]:
@@ -242,6 +257,8 @@ class EnglishArticleGenerator:
             {"item": "Foreign cards", "detail": "Some local apps and kiosks may reject certain foreign cards, so keep a backup card or cash."},
             {"item": "Refunds and changes", "detail": "Rules can differ by service, ticket type, provider, and purchase channel."},
             {"item": "Convenience fees", "detail": "Third-party platforms may be easier to use, but compare fees and cancellation terms."},
+            {"item": "Cash backup", "detail": "A small amount of Korean won is useful when machines, counters, or small branches do not handle foreign cards well."},
+            {"item": "Name matching", "detail": "For bookings or refunds, use the same spelling as your passport or account whenever possible."},
         ]
 
     def _tips(self, keyword: str) -> list[dict[str, str]]:
@@ -261,6 +278,9 @@ class EnglishArticleGenerator:
             {"title": "Keep your destination in Korean", "detail": "This helps taxi drivers, hotel staff, and station workers understand where you need to go."},
             {"title": "Carry a payment backup", "detail": "Some foreign cards may fail, so keeping another card or some cash can prevent stress."},
             {"title": "Check official pages", "detail": f"For {keyword}, official sources are safer than old social media posts."},
+            {"title": "Save screenshots", "detail": "Screenshots help when mobile data is slow, an app logs you out, or you need to show staff a booking detail."},
+            {"title": "Avoid the last-minute attempt", "detail": "Try the app, route, ticket, or store process before the exact moment you depend on it."},
+            {"title": "Compare one backup", "detail": "You do not need ten options, but you should know one safe alternative if the first plan fails."},
         ]
 
     def _faq(self, keyword: str) -> list[dict[str, str]]:
@@ -307,6 +327,18 @@ class EnglishArticleGenerator:
             {
                 "question": "Which app should I install first?",
                 "answer": "For most Korea travel situations, Naver Map or KakaoMap and Papago are the most useful starting apps.",
+            },
+            {
+                "question": "What should I do if my foreign card does not work?",
+                "answer": "Try another official channel if available, use a second card or cash, and avoid relying on only one payment method for time-sensitive plans.",
+            },
+            {
+                "question": "Do I need Korean language skills?",
+                "answer": "You do not need fluent Korean, but saving Korean names, addresses, and screenshots makes staff help much easier.",
+            },
+            {
+                "question": "How often should I recheck information?",
+                "answer": "Check once while planning and again shortly before you use the service, especially for prices, opening hours, routes, app rules, and refund conditions.",
             },
         ]
 
@@ -365,4 +397,21 @@ class EnglishArticleGenerator:
                 {"name": "Incheon Airport official website", "url": "https://www.airport.kr/ap_en/index.do"},
                 {"name": "VISITKOREA official travel information", "url": "https://english.visitkorea.or.kr/"},
             ]
-        return OFFICIAL_SOURCE_MAP.get(candidate.category, OFFICIAL_SOURCE_MAP["Transportation"])
+        if "olive young" in keyword:
+            return [
+                {"name": "OLIVE YOUNG Global official website", "url": "https://global.oliveyoung.com/"},
+                {"name": "OLIVE YOUNG Korea official website", "url": "https://www.oliveyoung.co.kr/"},
+                {"name": "Korea Customs Service English website", "url": "https://www.customs.go.kr/english/main.do"},
+                {"name": "VISITKOREA official shopping information", "url": "https://english.visitkorea.or.kr/"},
+                {"name": "Seoul Metropolitan Government official website", "url": "https://english.seoul.go.kr/"},
+                {"name": "NAVER Map Google Play listing", "url": "https://play.google.com/store/apps/details?id=com.nhn.android.nmap"},
+                {"name": "NAVER Map App Store listing", "url": "https://apps.apple.com/us/app/naver-maps-navigation/id311867728"},
+            ]
+        fallback_sources = list(OFFICIAL_SOURCE_MAP.get(candidate.category, OFFICIAL_SOURCE_MAP["Transportation"]))
+        fallback_sources.extend(
+            [
+                {"name": "Seoul Tourism official website", "url": "https://english.visitseoul.net/"},
+                {"name": "Korea Customs Service English website", "url": "https://www.customs.go.kr/english/main.do"},
+            ]
+        )
+        return fallback_sources[:6]
