@@ -87,6 +87,75 @@ class WeeklyQueueTests(unittest.TestCase):
         chooser.assert_not_called()
         self.assertEqual(selected, [queued_candidate])
 
+    def test_three_post_days_use_two_evergreen_and_one_trend_slot(self) -> None:
+        candidates = [
+            {
+                "seed": "how to use naver map in korea",
+                "category": "Apps in Korea",
+                "article_type": "how_to",
+                "slot_strategy": weekly_queue.EVERGREEN_SLOT,
+                "strategy_reason": "evergreen",
+                "quality_precheck": {"status": "ready"},
+                "difference_from_existing": "",
+                "avoid_overlap_with": [],
+                "image_direction": "",
+            },
+            {
+                "seed": "korea esim guide for tourists",
+                "category": "Mobile & Internet",
+                "article_type": "checklist",
+                "slot_strategy": weekly_queue.EVERGREEN_SLOT,
+                "strategy_reason": "evergreen",
+                "quality_precheck": {"status": "ready"},
+                "difference_from_existing": "",
+                "avoid_overlap_with": [],
+                "image_direction": "",
+            },
+            {
+                "seed": "korea rainy season travel tips",
+                "category": "Travel Basics",
+                "article_type": "checklist",
+                "slot_strategy": weekly_queue.TREND_SLOT,
+                "strategy_reason": "seasonal",
+                "quality_precheck": {"status": "ready"},
+                "difference_from_existing": "",
+                "avoid_overlap_with": [],
+                "image_direction": "",
+            },
+        ]
+
+        items = weekly_queue.assign_candidates_to_week(
+            candidates,
+            start_date=date(2026, 7, 6),
+            days=1,
+            posts_per_day=3,
+            site="korea_easy_guide",
+        )
+
+        self.assertEqual([item["slot_strategy"] for item in items], [
+            weekly_queue.EVERGREEN_SLOT,
+            weekly_queue.EVERGREEN_SLOT,
+            weekly_queue.TREND_SLOT,
+        ])
+        self.assertEqual(items[2]["seed"], "korea rainy season travel tips")
+        self.assertFalse(items[2]["strategy_fallback"])
+
+    def test_candidate_from_queue_exposes_strategy_metadata(self) -> None:
+        queue = {"week": "2026-W28", "_path": "/tmp/queue.json"}
+        item = {
+            "date": "2026-07-06",
+            "seed": "windows 11 slow after update",
+            "category": "Beginner PC Tips",
+            "article_type": "beginner_guide",
+            "slot_strategy": weekly_queue.TREND_SLOT,
+            "strategy_reason": "Windows update or recent-issue demand",
+        }
+
+        candidate = weekly_queue.candidate_from_queue_item(queue, item)
+
+        self.assertEqual(candidate["weekly_queue"]["slot_strategy"], weekly_queue.TREND_SLOT)
+        self.assertIn("recent-issue", candidate["weekly_queue"]["strategy_reason"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -25,7 +25,7 @@ WINDOWS_CATEGORY_RULES = [
     ("OneDrive & Account", ["onedrive", "account", "pin", "login", "sign in", "password sign in", "fingerprint", "windows hello"]),
     ("Apps & Settings", ["settings app", "microsoft store", "photos app", "snipping tool", "calculator app", "default apps", "default browser", "uninstall apps", "taskbar", "start menu", "notifications", "clock", "startup apps", "windows explorer"]),
     ("Beginner PC Tips", ["screenshot", "disk space", "storage space", "text bigger", "windows version", "slow after update", "high disk", "high cpu", "high memory", "battery draining", "sleep mode", "wake from sleep", "screen brightness", "display resolution", "night light", "troubleshooter", "activated", "storage space"]),
-    ("Windows Update", ["windows update", "update error", "pending restart", "download stuck", "install error", "cleanup safe", "0x800f0922", "0x80070002", "0x80070005", "0x80070643"]),
+    ("Windows Update", ["windows update", "latest update", "cumulative update", "security update", "after update", "after windows update", "update error", "pending restart", "download stuck", "install error", "failed to install", "cleanup safe", "0x800f0922", "0x80070002", "0x80070005", "0x80070643"]),
     ("Error Codes", ["0x"]),
 ]
 

@@ -3,7 +3,7 @@
   "site_name": "Easy PC Fix Guide",
   "site_url": "https://easypcfixguide.blogspot.com",
   "week": "2026-W28",
-  "created_at": "2026-07-05T14:39:22.156942+09:00",
+  "created_at": "2026-07-05T21:55:10.599934+09:00",
   "start_date": "2026-07-06",
   "end_date": "2026-07-12",
   "days": 7,
@@ -15,35 +15,35 @@
     "published_and_generated_history_checked": true,
     "weekly_selected_topics_checked": true
   },
+  "topic_mix_policy": {
+    "daily_slots": [
+      {
+        "slot_number": 1,
+        "slot_strategy": "evergreen",
+        "purpose": "stable search demand"
+      },
+      {
+        "slot_number": 2,
+        "slot_strategy": "evergreen",
+        "purpose": "stable search demand"
+      },
+      {
+        "slot_number": 3,
+        "slot_strategy": "trend_or_seasonal",
+        "purpose": "seasonal, recent-update, or issue-sensitive demand"
+      }
+    ],
+    "note": "If no safe trend/seasonal candidate passes duplicate and quality checks, the slot falls back to evergreen."
+  },
   "items": [
     {
       "date": "2026-07-06",
       "site": "easy_pc_fix_guide",
-      "seed": "windows 11 slow after update",
-      "topic": "windows 11 slow after update",
-      "category": "Beginner PC Tips",
-      "article_type": "beginner_guide",
-      "intent": "beginner_guide",
-      "difference_from_existing": "Keep this article focused on 'windows 11 slow after update' only; do not reuse the troubleshooting path from 'Windows Update Cleanup Safe for Beginners: Easy Windows Fixes for Beginners'.",
-      "avoid_overlap_with": [
-        "Windows Update Cleanup Safe for Beginners: Easy Windows Fixes for Beginners",
-        "Windows Update Download Stuck At 0: Easy Windows Fixes for Beginners",
-        "Windows Update Error 0X80073712: What It Means and How to Fix It"
-      ],
-      "image_direction": "Create distinct beginner PC help visuals for 'windows 11 slow after update'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
-      "quality_precheck": {
-        "status": "ready",
-        "microsoft_source_count": 6,
-        "direct_microsoft_source_count": 5,
-        "search_result_source_count": 1,
-        "source_count": 6,
-        "issues": []
-      },
-      "status": "scheduled"
-    },
-    {
-      "date": "2026-07-06",
-      "site": "easy_pc_fix_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Windows beginner/search problem",
+      "strategy_fallback": false,
       "seed": "windows startup apps slowing down pc",
       "topic": "windows startup apps slowing down pc",
       "category": "Apps & Settings",
@@ -69,6 +69,11 @@
     {
       "date": "2026-07-06",
       "site": "easy_pc_fix_guide",
+      "slot_number": 2,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Windows beginner/search problem",
+      "strategy_fallback": false,
       "seed": "high disk usage windows 11",
       "topic": "high disk usage windows 11",
       "category": "Beginner PC Tips",
@@ -92,8 +97,43 @@
       "status": "scheduled"
     },
     {
+      "date": "2026-07-06",
+      "site": "easy_pc_fix_guide",
+      "slot_number": 3,
+      "slot_strategy": "trend_or_seasonal",
+      "actual_topic_strategy": "trend_or_seasonal",
+      "strategy_reason": "Windows update or recent-issue demand",
+      "strategy_fallback": false,
+      "seed": "blue screen after windows update",
+      "topic": "blue screen after windows update",
+      "category": "Boot & Recovery",
+      "article_type": "symptom_fix",
+      "intent": "symptom_fix",
+      "difference_from_existing": "Keep this article focused on 'blue screen after windows update' only; do not reuse the troubleshooting path from 'Windows Update Cleanup Safe for Beginners: Easy Windows Fixes for Beginners'.",
+      "avoid_overlap_with": [
+        "Windows Update Cleanup Safe for Beginners: Easy Windows Fixes for Beginners",
+        "Windows Update Download Stuck At 0: Easy Windows Fixes for Beginners",
+        "Windows Update Error 0X80073712: What It Means and How to Fix It"
+      ],
+      "image_direction": "Create distinct beginner PC help visuals for 'blue screen after windows update'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 8,
+        "direct_microsoft_source_count": 7,
+        "search_result_source_count": 1,
+        "source_count": 8,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
       "date": "2026-07-07",
       "site": "easy_pc_fix_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Windows beginner/search problem",
+      "strategy_fallback": false,
       "seed": "how to disable startup apps windows 11",
       "topic": "how to disable startup apps windows 11",
       "category": "Apps & Settings",
@@ -119,6 +159,11 @@
     {
       "date": "2026-07-07",
       "site": "easy_pc_fix_guide",
+      "slot_number": 2,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Windows beginner/search problem",
+      "strategy_fallback": false,
       "seed": "high memory usage windows 11",
       "topic": "high memory usage windows 11",
       "category": "Beginner PC Tips",
@@ -144,23 +189,28 @@
     {
       "date": "2026-07-07",
       "site": "easy_pc_fix_guide",
-      "seed": "second monitor not detected windows 11",
-      "topic": "second monitor not detected windows 11",
-      "category": "Bluetooth & Devices",
+      "slot_number": 3,
+      "slot_strategy": "trend_or_seasonal",
+      "actual_topic_strategy": "trend_or_seasonal",
+      "strategy_reason": "Windows update or recent-issue demand",
+      "strategy_fallback": false,
+      "seed": "windows 11 problems after latest update",
+      "topic": "windows 11 problems after latest update",
+      "category": "Windows Update",
       "article_type": "symptom_fix",
       "intent": "symptom_fix",
-      "difference_from_existing": "Keep this article focused on 'second monitor not detected windows 11' only; do not reuse the troubleshooting path from 'Microsoft Store Apps Not Updating: Easy Windows Fixes for Beginners'.",
+      "difference_from_existing": "Keep this article focused on 'windows 11 problems after latest update' only; do not reuse the troubleshooting path from 'Windows Update Cleanup Safe for Beginners: Easy Windows Fixes for Beginners'.",
       "avoid_overlap_with": [
-        "Microsoft Store Apps Not Updating: Easy Windows Fixes for Beginners",
-        "Microsoft Store Not Opening Windows 11: Easy Windows Fixes for Beginners",
-        "Keyboard Not Typing Windows 11: Easy Windows Fixes for Beginners"
+        "Windows Update Cleanup Safe for Beginners: Easy Windows Fixes for Beginners",
+        "Windows Update Download Stuck At 0: Easy Windows Fixes for Beginners",
+        "Windows Update Error 0X80073712: What It Means and How to Fix It"
       ],
-      "image_direction": "Create distinct beginner PC help visuals for 'second monitor not detected windows 11'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "image_direction": "Create distinct beginner PC help visuals for 'windows 11 problems after latest update'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
       "quality_precheck": {
         "status": "ready",
         "microsoft_source_count": 8,
-        "direct_microsoft_source_count": 8,
-        "search_result_source_count": 0,
+        "direct_microsoft_source_count": 7,
+        "search_result_source_count": 1,
         "source_count": 8,
         "issues": []
       },
@@ -169,6 +219,11 @@
     {
       "date": "2026-07-08",
       "site": "easy_pc_fix_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Windows beginner/search problem",
+      "strategy_fallback": false,
       "seed": "laptop battery draining fast windows 11",
       "topic": "laptop battery draining fast windows 11",
       "category": "Beginner PC Tips",
@@ -194,6 +249,71 @@
     {
       "date": "2026-07-08",
       "site": "easy_pc_fix_guide",
+      "slot_number": 2,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Windows beginner/search problem",
+      "strategy_fallback": false,
+      "seed": "second monitor not detected windows 11",
+      "topic": "second monitor not detected windows 11",
+      "category": "Bluetooth & Devices",
+      "article_type": "symptom_fix",
+      "intent": "symptom_fix",
+      "difference_from_existing": "Keep this article focused on 'second monitor not detected windows 11' only; do not reuse the troubleshooting path from 'Microsoft Store Apps Not Updating: Easy Windows Fixes for Beginners'.",
+      "avoid_overlap_with": [
+        "Microsoft Store Apps Not Updating: Easy Windows Fixes for Beginners",
+        "Microsoft Store Not Opening Windows 11: Easy Windows Fixes for Beginners",
+        "Keyboard Not Typing Windows 11: Easy Windows Fixes for Beginners"
+      ],
+      "image_direction": "Create distinct beginner PC help visuals for 'second monitor not detected windows 11'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 8,
+        "direct_microsoft_source_count": 8,
+        "search_result_source_count": 0,
+        "source_count": 8,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-08",
+      "site": "easy_pc_fix_guide",
+      "slot_number": 3,
+      "slot_strategy": "trend_or_seasonal",
+      "actual_topic_strategy": "trend_or_seasonal",
+      "strategy_reason": "Windows update or recent-issue demand",
+      "strategy_fallback": false,
+      "seed": "windows 11 slow after update",
+      "topic": "windows 11 slow after update",
+      "category": "Beginner PC Tips",
+      "article_type": "beginner_guide",
+      "intent": "beginner_guide",
+      "difference_from_existing": "Keep this article focused on 'windows 11 slow after update' only; do not reuse the troubleshooting path from 'Windows Update Cleanup Safe for Beginners: Easy Windows Fixes for Beginners'.",
+      "avoid_overlap_with": [
+        "Windows Update Cleanup Safe for Beginners: Easy Windows Fixes for Beginners",
+        "Windows Update Download Stuck At 0: Easy Windows Fixes for Beginners",
+        "Windows Update Error 0X80073712: What It Means and How to Fix It"
+      ],
+      "image_direction": "Create distinct beginner PC help visuals for 'windows 11 slow after update'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 6,
+        "direct_microsoft_source_count": 5,
+        "search_result_source_count": 1,
+        "source_count": 6,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-09",
+      "site": "easy_pc_fix_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Windows beginner/search problem",
+      "strategy_fallback": false,
       "seed": "external hard drive not showing windows",
       "topic": "external hard drive not showing windows",
       "category": "Bluetooth & Devices",
@@ -217,8 +337,13 @@
       "status": "scheduled"
     },
     {
-      "date": "2026-07-08",
+      "date": "2026-07-09",
       "site": "easy_pc_fix_guide",
+      "slot_number": 2,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Windows beginner/search problem",
+      "strategy_fallback": false,
       "seed": "windows sleep mode not working",
       "topic": "windows sleep mode not working",
       "category": "Beginner PC Tips",
@@ -244,18 +369,23 @@
     {
       "date": "2026-07-09",
       "site": "easy_pc_fix_guide",
-      "seed": "sd card not showing windows 11",
-      "topic": "sd card not showing windows 11",
-      "category": "Bluetooth & Devices",
+      "slot_number": 3,
+      "slot_strategy": "trend_or_seasonal",
+      "actual_topic_strategy": "trend_or_seasonal",
+      "strategy_reason": "Windows update or recent-issue demand",
+      "strategy_fallback": false,
+      "seed": "windows 11 cumulative update install error",
+      "topic": "windows 11 cumulative update install error",
+      "category": "Windows Update",
       "article_type": "symptom_fix",
       "intent": "symptom_fix",
-      "difference_from_existing": "Keep this article focused on 'sd card not showing windows 11' only; do not reuse the troubleshooting path from 'DNS Server Not Responding on Windows 11: Safe Fixes for Beginners'.",
+      "difference_from_existing": "Keep this article focused on 'windows 11 cumulative update install error' only; do not reuse the troubleshooting path from 'Windows Update Error 0X80073712: What It Means and How to Fix It'.",
       "avoid_overlap_with": [
-        "DNS Server Not Responding on Windows 11: Safe Fixes for Beginners",
-        "Microsoft Store Not Opening Windows 11: Easy Windows Fixes for Beginners",
-        "Keyboard Not Typing Windows 11: Easy Windows Fixes for Beginners"
+        "Windows Update Error 0X80073712: What It Means and How to Fix It",
+        "Windows Update Pending Restart Stuck: Safe Fixes for Beginners",
+        "Wi-Fi Button Missing on Windows 11: Simple Fixes for Beginners"
       ],
-      "image_direction": "Create distinct beginner PC help visuals for 'sd card not showing windows 11'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "image_direction": "Create distinct beginner PC help visuals for 'windows 11 cumulative update install error'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
       "quality_precheck": {
         "status": "ready",
         "microsoft_source_count": 8,
@@ -267,8 +397,13 @@
       "status": "scheduled"
     },
     {
-      "date": "2026-07-09",
+      "date": "2026-07-10",
       "site": "easy_pc_fix_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Windows beginner/search problem",
+      "strategy_fallback": false,
       "seed": "windows won't wake from sleep",
       "topic": "windows won't wake from sleep",
       "category": "Beginner PC Tips",
@@ -292,20 +427,25 @@
       "status": "scheduled"
     },
     {
-      "date": "2026-07-09",
+      "date": "2026-07-10",
       "site": "easy_pc_fix_guide",
-      "seed": "headphones not detected windows 11",
-      "topic": "headphones not detected windows 11",
-      "category": "Sound & Microphone",
+      "slot_number": 2,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Windows beginner/search problem",
+      "strategy_fallback": false,
+      "seed": "sd card not showing windows 11",
+      "topic": "sd card not showing windows 11",
+      "category": "Bluetooth & Devices",
       "article_type": "symptom_fix",
       "intent": "symptom_fix",
-      "difference_from_existing": "Keep this article focused on 'headphones not detected windows 11' only; do not reuse the troubleshooting path from 'Microsoft Store Not Opening Windows 11: Easy Windows Fixes for Beginners'.",
+      "difference_from_existing": "Keep this article focused on 'sd card not showing windows 11' only; do not reuse the troubleshooting path from 'DNS Server Not Responding on Windows 11: Safe Fixes for Beginners'.",
       "avoid_overlap_with": [
+        "DNS Server Not Responding on Windows 11: Safe Fixes for Beginners",
         "Microsoft Store Not Opening Windows 11: Easy Windows Fixes for Beginners",
-        "Keyboard Not Typing Windows 11: Easy Windows Fixes for Beginners",
-        "Photos App Not Opening Windows 11: Easy Windows Fixes for Beginners"
+        "Keyboard Not Typing Windows 11: Easy Windows Fixes for Beginners"
       ],
-      "image_direction": "Create distinct beginner PC help visuals for 'headphones not detected windows 11'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "image_direction": "Create distinct beginner PC help visuals for 'sd card not showing windows 11'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
       "quality_precheck": {
         "status": "ready",
         "microsoft_source_count": 8,
@@ -319,6 +459,41 @@
     {
       "date": "2026-07-10",
       "site": "easy_pc_fix_guide",
+      "slot_number": 3,
+      "slot_strategy": "trend_or_seasonal",
+      "actual_topic_strategy": "trend_or_seasonal",
+      "strategy_reason": "Windows update or recent-issue demand",
+      "strategy_fallback": false,
+      "seed": "windows security update failed to install",
+      "topic": "windows security update failed to install",
+      "category": "Windows Update",
+      "article_type": "symptom_fix",
+      "intent": "symptom_fix",
+      "difference_from_existing": "Keep this article focused on 'windows security update failed to install' only; do not reuse the troubleshooting path from 'Windows Update Error 0X80073712: What It Means and How to Fix It'.",
+      "avoid_overlap_with": [
+        "Windows Update Error 0X80073712: What It Means and How to Fix It",
+        "Windows Update Pending Restart Stuck: Safe Fixes for Beginners",
+        "Wi-Fi Button Missing on Windows 11: Simple Fixes for Beginners"
+      ],
+      "image_direction": "Create distinct beginner PC help visuals for 'windows security update failed to install'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 8,
+        "direct_microsoft_source_count": 7,
+        "search_result_source_count": 1,
+        "source_count": 8,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-11",
+      "site": "easy_pc_fix_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Windows beginner/search problem",
+      "strategy_fallback": false,
       "seed": "screen brightness not changing windows 11",
       "topic": "screen brightness not changing windows 11",
       "category": "Beginner PC Tips",
@@ -342,20 +517,25 @@
       "status": "scheduled"
     },
     {
-      "date": "2026-07-10",
+      "date": "2026-07-11",
       "site": "easy_pc_fix_guide",
-      "seed": "realtek audio not working windows 11",
-      "topic": "realtek audio not working windows 11",
+      "slot_number": 2,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Windows beginner/search problem",
+      "strategy_fallback": false,
+      "seed": "headphones not detected windows 11",
+      "topic": "headphones not detected windows 11",
       "category": "Sound & Microphone",
       "article_type": "symptom_fix",
       "intent": "symptom_fix",
-      "difference_from_existing": "Keep this article focused on 'realtek audio not working windows 11' only; do not reuse the troubleshooting path from 'Photos App Not Opening Windows 11: Easy Windows Fixes for Beginners'.",
+      "difference_from_existing": "Keep this article focused on 'headphones not detected windows 11' only; do not reuse the troubleshooting path from 'Microsoft Store Not Opening Windows 11: Easy Windows Fixes for Beginners'.",
       "avoid_overlap_with": [
-        "Photos App Not Opening Windows 11: Easy Windows Fixes for Beginners",
-        "Wi-Fi Keeps Disconnecting on Windows 11: Safe Fixes for Beginners",
-        "DNS Server Not Responding on Windows 11: Safe Fixes for Beginners"
+        "Microsoft Store Not Opening Windows 11: Easy Windows Fixes for Beginners",
+        "Keyboard Not Typing Windows 11: Easy Windows Fixes for Beginners",
+        "Photos App Not Opening Windows 11: Easy Windows Fixes for Beginners"
       ],
-      "image_direction": "Create distinct beginner PC help visuals for 'realtek audio not working windows 11'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "image_direction": "Create distinct beginner PC help visuals for 'headphones not detected windows 11'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
       "quality_precheck": {
         "status": "ready",
         "microsoft_source_count": 8,
@@ -367,8 +547,43 @@
       "status": "scheduled"
     },
     {
-      "date": "2026-07-10",
+      "date": "2026-07-11",
       "site": "easy_pc_fix_guide",
+      "slot_number": 3,
+      "slot_strategy": "trend_or_seasonal",
+      "actual_topic_strategy": "trend_or_seasonal",
+      "strategy_reason": "Windows update or recent-issue demand",
+      "strategy_fallback": false,
+      "seed": "microsoft store not working after windows update",
+      "topic": "microsoft store not working after windows update",
+      "category": "Apps & Settings",
+      "article_type": "symptom_fix",
+      "intent": "symptom_fix",
+      "difference_from_existing": "Keep this article focused on 'microsoft store not working after windows update' only; do not reuse the troubleshooting path from 'Microsoft Store Apps Not Updating: Easy Windows Fixes for Beginners'.",
+      "avoid_overlap_with": [
+        "Microsoft Store Apps Not Updating: Easy Windows Fixes for Beginners",
+        "Microsoft Store Not Opening Windows 11: Easy Windows Fixes for Beginners",
+        "Microsoft Store Download Stuck: Easy Windows Fixes for Beginners"
+      ],
+      "image_direction": "Create distinct beginner PC help visuals for 'microsoft store not working after windows update'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 8,
+        "direct_microsoft_source_count": 7,
+        "search_result_source_count": 1,
+        "source_count": 8,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-12",
+      "site": "easy_pc_fix_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Windows beginner/search problem",
+      "strategy_fallback": false,
       "seed": "display resolution wrong windows 11",
       "topic": "display resolution wrong windows 11",
       "category": "Beginner PC Tips",
@@ -392,33 +607,43 @@
       "status": "scheduled"
     },
     {
-      "date": "2026-07-11",
+      "date": "2026-07-12",
       "site": "easy_pc_fix_guide",
-      "seed": "onedrive not syncing windows 11",
-      "topic": "onedrive not syncing windows 11",
-      "category": "OneDrive & Account",
+      "slot_number": 2,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Windows beginner/search problem",
+      "strategy_fallback": false,
+      "seed": "realtek audio not working windows 11",
+      "topic": "realtek audio not working windows 11",
+      "category": "Sound & Microphone",
       "article_type": "symptom_fix",
       "intent": "symptom_fix",
-      "difference_from_existing": "Keep this article focused on 'onedrive not syncing windows 11' only; do not reuse the troubleshooting path from 'DNS Server Not Responding on Windows 11: Safe Fixes for Beginners'.",
+      "difference_from_existing": "Keep this article focused on 'realtek audio not working windows 11' only; do not reuse the troubleshooting path from 'Photos App Not Opening Windows 11: Easy Windows Fixes for Beginners'.",
       "avoid_overlap_with": [
-        "DNS Server Not Responding on Windows 11: Safe Fixes for Beginners",
-        "Microsoft Store Not Opening Windows 11: Easy Windows Fixes for Beginners",
-        "Keyboard Not Typing Windows 11: Easy Windows Fixes for Beginners"
+        "Photos App Not Opening Windows 11: Easy Windows Fixes for Beginners",
+        "Wi-Fi Keeps Disconnecting on Windows 11: Safe Fixes for Beginners",
+        "DNS Server Not Responding on Windows 11: Safe Fixes for Beginners"
       ],
-      "image_direction": "Create distinct beginner PC help visuals for 'onedrive not syncing windows 11'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "image_direction": "Create distinct beginner PC help visuals for 'realtek audio not working windows 11'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
       "quality_precheck": {
         "status": "ready",
-        "microsoft_source_count": 6,
-        "direct_microsoft_source_count": 5,
+        "microsoft_source_count": 8,
+        "direct_microsoft_source_count": 7,
         "search_result_source_count": 1,
-        "source_count": 6,
+        "source_count": 8,
         "issues": []
       },
       "status": "scheduled"
     },
     {
-      "date": "2026-07-11",
+      "date": "2026-07-12",
       "site": "easy_pc_fix_guide",
+      "slot_number": 3,
+      "slot_strategy": "trend_or_seasonal",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Windows beginner/search problem",
+      "strategy_fallback": true,
       "seed": "night light not working windows 11",
       "topic": "night light not working windows 11",
       "category": "Beginner PC Tips",
@@ -440,103 +665,7 @@
         "issues": []
       },
       "status": "scheduled"
-    },
-    {
-      "date": "2026-07-11",
-      "site": "easy_pc_fix_guide",
-      "seed": "onedrive sign in problem windows",
-      "topic": "onedrive sign in problem windows",
-      "category": "OneDrive & Account",
-      "article_type": "symptom_fix",
-      "intent": "symptom_fix",
-      "difference_from_existing": "Keep this article focused on 'onedrive sign in problem windows' only; do not reuse the troubleshooting path from 'Microsoft Store Apps Not Updating: Easy Windows Fixes for Beginners'.",
-      "avoid_overlap_with": [
-        "Microsoft Store Apps Not Updating: Easy Windows Fixes for Beginners",
-        "No Internet, Secured on Windows 11: Safe Fixes for Beginners",
-        "Windows Update Download Stuck At 0: Easy Windows Fixes for Beginners"
-      ],
-      "image_direction": "Create distinct beginner PC help visuals for 'onedrive sign in problem windows'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
-      "quality_precheck": {
-        "status": "ready",
-        "microsoft_source_count": 6,
-        "direct_microsoft_source_count": 5,
-        "search_result_source_count": 1,
-        "source_count": 6,
-        "issues": []
-      },
-      "status": "scheduled"
-    },
-    {
-      "date": "2026-07-12",
-      "site": "easy_pc_fix_guide",
-      "seed": "bitlocker recovery key screen what to do",
-      "topic": "bitlocker recovery key screen what to do",
-      "category": "Boot & Recovery",
-      "article_type": "symptom_fix",
-      "intent": "symptom_fix",
-      "difference_from_existing": "New angle with no close published title found.",
-      "avoid_overlap_with": [],
-      "image_direction": "Create distinct beginner PC help visuals for 'bitlocker recovery key screen what to do'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
-      "quality_precheck": {
-        "status": "ready",
-        "microsoft_source_count": 8,
-        "direct_microsoft_source_count": 7,
-        "search_result_source_count": 1,
-        "source_count": 8,
-        "issues": []
-      },
-      "status": "scheduled"
-    },
-    {
-      "date": "2026-07-12",
-      "site": "easy_pc_fix_guide",
-      "seed": "windows pin not working",
-      "topic": "windows pin not working",
-      "category": "OneDrive & Account",
-      "article_type": "symptom_fix",
-      "intent": "symptom_fix",
-      "difference_from_existing": "Keep this article focused on 'windows pin not working' only; do not reuse the troubleshooting path from 'Microsoft Store Not Opening Windows 11: Easy Windows Fixes for Beginners'.",
-      "avoid_overlap_with": [
-        "Microsoft Store Not Opening Windows 11: Easy Windows Fixes for Beginners",
-        "Keyboard Not Typing Windows 11: Easy Windows Fixes for Beginners",
-        "Photos App Not Opening Windows 11: Easy Windows Fixes for Beginners"
-      ],
-      "image_direction": "Create distinct beginner PC help visuals for 'windows pin not working'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
-      "quality_precheck": {
-        "status": "ready",
-        "microsoft_source_count": 8,
-        "direct_microsoft_source_count": 7,
-        "search_result_source_count": 1,
-        "source_count": 8,
-        "issues": []
-      },
-      "status": "scheduled"
-    },
-    {
-      "date": "2026-07-12",
-      "site": "easy_pc_fix_guide",
-      "seed": "blue screen after windows update",
-      "topic": "blue screen after windows update",
-      "category": "Boot & Recovery",
-      "article_type": "symptom_fix",
-      "intent": "symptom_fix",
-      "difference_from_existing": "Keep this article focused on 'blue screen after windows update' only; do not reuse the troubleshooting path from 'Windows Update Cleanup Safe for Beginners: Easy Windows Fixes for Beginners'.",
-      "avoid_overlap_with": [
-        "Windows Update Cleanup Safe for Beginners: Easy Windows Fixes for Beginners",
-        "Windows Update Download Stuck At 0: Easy Windows Fixes for Beginners",
-        "Windows Update Error 0X80073712: What It Means and How to Fix It"
-      ],
-      "image_direction": "Create distinct beginner PC help visuals for 'blue screen after windows update'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
-      "quality_precheck": {
-        "status": "ready",
-        "microsoft_source_count": 8,
-        "direct_microsoft_source_count": 7,
-        "search_result_source_count": 1,
-        "source_count": 8,
-        "issues": []
-      },
-      "status": "scheduled"
     }
   ],
-  "candidate_pool_count": 46
+  "candidate_pool_count": 51
 }

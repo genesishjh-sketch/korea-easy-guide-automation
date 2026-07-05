@@ -2,25 +2,40 @@
 
 ## Cadence
 
-- Publish one new post every day, including weekends.
+- Publish three new posts per blog every day, including weekends, unless the quality gate blocks a candidate.
 - Target public publish time: 09:00 KST.
 - Daily GitHub Actions publishing runs at 09:10 KST with a 09:25 KST backup run.
 - The daily limit guard must stop the backup run from publishing a duplicate post if the primary run already published or found a valid same-day post.
 - Send a Posting Bot daily result report every morning after the daily pipeline finishes.
 - Send a Posting Bot cadence review alert in the weekly report before increasing daily post count.
-- Do not batch-publish multiple new posts on the same day during the early growth phase.
+- Do not imitate low-quality mass publishing. The default operating limit is three posts per blog per day, and weak candidates must be skipped rather than used to fill quota.
 - If the daily post fails quality checks, skip publishing instead of lowering the standard.
+
+## Daily Topic Mix
+
+For each blog, the normal three-post day uses this mix:
+
+- Slot 1: evergreen search demand.
+- Slot 2: evergreen search demand.
+- Slot 3: trend, seasonal, urgent, or recent-issue demand.
+
+Examples:
+
+- Korea Easy Guide evergreen: airport routes, eSIM, maps, KTX, payment, delivery, accommodation.
+- Korea Easy Guide trend/seasonal: rainy season, heatwave, winter snow, Chuseok/Seollal travel, public holiday transport, airport congestion, lost passport or emergency topics.
+- Easy PC Fix Guide evergreen: Windows error codes, Wi-Fi, Microsoft Store, printer, sound, file explorer, beginner settings.
+- Easy PC Fix Guide trend/recent issue: problems after latest Windows update, cumulative update install errors, blue screen after update, Wi-Fi/sound/printer broken after update.
+
+Trend slots still require official-source verification and Hades approval. If no safe trend/seasonal candidate passes duplicate and quality checks, the slot falls back to an evergreen topic.
 
 ## Cadence Review
 
-- Keep one post per day from 2026-06-24 through 2026-07-21.
-- From 2026-07-22, review whether two posts per day is appropriate.
-- From 2026-08-19, review whether three posts per day is appropriate.
-- Do not automatically increase cadence. Posting Bot should alert for review first.
-- Two-post review requires roughly 20+ published posts, 20+ Search Console indexed/visible pages, and no quality issues.
-- Three-post review requires roughly 50+ published posts, 50+ Search Console indexed/visible pages, no quality issues, and preferably visible Search Console impression growth.
+- Current operating cadence is three posts per blog per day.
+- Do not increase beyond three posts per blog per day without a separate review.
+- If Search Console shows crawl/indexing trouble, repeated quality issues, or weak impressions after several weeks, reduce cadence before lowering quality.
+- A higher-cadence review requires roughly 50+ published posts, improving Search Console indexed/visible pages, no unresolved quality issues, and preferably visible impression growth.
 - Cadence increase review also requires stable topic discovery. Google `site:reddit.com` search signals, Google Suggest signals, official-source coverage, and Hades quality results are enough for normal operation. Reddit OAuth is optional.
-- Posting Bot sends separate cadence review alerts at 09:30 KST on 2026-07-22 and 2026-08-19.
+- Posting Bot should alert when cadence, indexing, or quality should be reviewed.
 
 ## Automation Mode
 

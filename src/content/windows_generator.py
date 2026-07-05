@@ -201,7 +201,7 @@ TOPIC_SOURCE_RULES = [
         ],
     ),
     (
-        ("windows update", "update error", "0x"),
+        ("windows update", "latest update", "cumulative update", "security update", "after update", "after windows update", "update error", "failed to install", "0x"),
         [
             {
                 "name": "Microsoft Support: Windows Update troubleshooter",

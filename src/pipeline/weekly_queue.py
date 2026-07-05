@@ -29,6 +29,8 @@ MIN_TITLE_SIMILARITY = 0.72
 MIN_TOPIC_OVERLAP = 0.82
 READY_PRECHECK_STATUSES = {"ready", "not_applicable"}
 BLOCKED_STATUSES = {"published", "skipped", "failed"}
+EVERGREEN_SLOT = "evergreen"
+TREND_SLOT = "trend_or_seasonal"
 
 
 def default_start_date(now: datetime | None = None) -> date:
@@ -91,6 +93,8 @@ def candidate_from_queue_item(queue: dict, item: dict) -> dict:
             "week": queue.get("week"),
             "path": queue.get("_path"),
             "date": item.get("date"),
+            "slot_strategy": item.get("slot_strategy", EVERGREEN_SLOT),
+            "strategy_reason": item.get("strategy_reason", ""),
             "difference_from_existing": item.get("difference_from_existing", ""),
             "avoid_overlap_with": item.get("avoid_overlap_with", []),
             "image_direction": item.get("image_direction", ""),
@@ -131,11 +135,14 @@ def generate_weekly_queue(
             continue
 
         overlaps = closest_topics(seed, existing_titles, limit=3)
+        slot_strategy, strategy_reason = classify_slot_strategy(seed, category, article_type, settings.content_domain)
         candidates.append(
             {
                 "seed": seed,
                 "category": category,
                 "article_type": article_type,
+                "slot_strategy": slot_strategy,
+                "strategy_reason": strategy_reason,
                 "quality_precheck": precheck,
                 "avoid_overlap_with": [item["title"] for item in overlaps],
                 "difference_from_existing": difference_note(seed, overlaps, settings.content_domain),
@@ -162,6 +169,7 @@ def generate_weekly_queue(
             "published_and_generated_history_checked": True,
             "weekly_selected_topics_checked": True,
         },
+        "topic_mix_policy": topic_mix_policy(posts_per_day),
         "items": items,
         "candidate_pool_count": len(candidates),
     }
@@ -182,19 +190,39 @@ def assign_candidates_to_week(
     items: list[dict] = []
     used_indexes: set[int] = set()
     previous_category = ""
-    slots = [start_date + timedelta(days=offset) for offset in range(days) for _ in range(posts_per_day)]
+    slots = [
+        {
+            "date": start_date + timedelta(days=offset),
+            "slot_number": slot_number + 1,
+            "slot_strategy": slot_strategy_for(slot_number, posts_per_day),
+        }
+        for offset in range(days)
+        for slot_number in range(posts_per_day)
+    ]
 
-    for slot_date in slots:
-        candidate_index = next_candidate_index(candidates, used_indexes, previous_category)
+    for slot in slots:
+        candidate_index = next_candidate_index(
+            candidates,
+            used_indexes,
+            previous_category,
+            preferred_strategy=slot["slot_strategy"],
+        )
         if candidate_index is None:
             break
         used_indexes.add(candidate_index)
         candidate = candidates[candidate_index]
         previous_category = candidate["category"]
+        planned_strategy = slot["slot_strategy"]
+        actual_strategy = candidate.get("slot_strategy", EVERGREEN_SLOT)
         items.append(
             {
-                "date": slot_date.isoformat(),
+                "date": slot["date"].isoformat(),
                 "site": site,
+                "slot_number": slot["slot_number"],
+                "slot_strategy": planned_strategy,
+                "actual_topic_strategy": actual_strategy,
+                "strategy_reason": candidate.get("strategy_reason", ""),
+                "strategy_fallback": planned_strategy != actual_strategy,
                 "seed": candidate["seed"],
                 "topic": candidate["seed"],
                 "category": candidate["category"],
@@ -210,7 +238,24 @@ def assign_candidates_to_week(
     return items
 
 
-def next_candidate_index(candidates: list[dict], used_indexes: set[int], previous_category: str) -> int | None:
+def next_candidate_index(
+    candidates: list[dict],
+    used_indexes: set[int],
+    previous_category: str,
+    preferred_strategy: str | None = None,
+) -> int | None:
+    if preferred_strategy:
+        for index, candidate in enumerate(candidates):
+            if (
+                index not in used_indexes
+                and candidate.get("slot_strategy", EVERGREEN_SLOT) == preferred_strategy
+                and candidate["category"] != previous_category
+            ):
+                return index
+        for index, candidate in enumerate(candidates):
+            if index not in used_indexes and candidate.get("slot_strategy", EVERGREEN_SLOT) == preferred_strategy:
+                return index
+
     for index, candidate in enumerate(candidates):
         if index not in used_indexes and candidate["category"] != previous_category:
             return index
@@ -218,6 +263,76 @@ def next_candidate_index(candidates: list[dict], used_indexes: set[int], previou
         if index not in used_indexes:
             return index
     return None
+
+
+def slot_strategy_for(slot_number_zero_based: int, posts_per_day: int) -> str:
+    if posts_per_day >= 3 and slot_number_zero_based == 2:
+        return TREND_SLOT
+    return EVERGREEN_SLOT
+
+
+def topic_mix_policy(posts_per_day: int) -> dict:
+    if posts_per_day >= 3:
+        return {
+            "daily_slots": [
+                {"slot_number": 1, "slot_strategy": EVERGREEN_SLOT, "purpose": "stable search demand"},
+                {"slot_number": 2, "slot_strategy": EVERGREEN_SLOT, "purpose": "stable search demand"},
+                {"slot_number": 3, "slot_strategy": TREND_SLOT, "purpose": "seasonal, recent-update, or issue-sensitive demand"},
+            ],
+            "note": "If no safe trend/seasonal candidate passes duplicate and quality checks, the slot falls back to evergreen.",
+        }
+    return {
+        "daily_slots": [
+            {"slot_number": index + 1, "slot_strategy": EVERGREEN_SLOT, "purpose": "stable search demand"}
+            for index in range(posts_per_day)
+        ],
+        "note": "Trend/seasonal slots start when daily cadence is at least three posts.",
+    }
+
+
+def classify_slot_strategy(seed: str, category: str, article_type: str, content_domain: str) -> tuple[str, str]:
+    text = f"{seed} {category} {article_type}".casefold()
+    if content_domain == "windows_help":
+        trend_tokens = (
+            "after update",
+            "latest",
+            "cumulative update",
+            "security update",
+            "after windows update",
+            "blue screen after",
+            "slow after update",
+            "pending restart",
+            "download stuck",
+            "install error",
+        )
+        if any(token in text for token in trend_tokens):
+            return TREND_SLOT, "Windows update or recent-issue demand"
+        return EVERGREEN_SLOT, "Evergreen Windows beginner/search problem"
+
+    seasonal_tokens = (
+        "season",
+        "rainy season",
+        "heavy rain",
+        "summer",
+        "winter",
+        "spring",
+        "fall",
+        "autumn",
+        "cherry blossom",
+        "foliage",
+        "chuseok",
+        "seollal",
+        "holiday",
+        "public holidays",
+        "night arrival",
+        "late night",
+        "airport pickup",
+        "emergency",
+        "lose passport",
+    )
+    if any(token in text for token in seasonal_tokens):
+        return TREND_SLOT, "Korea seasonal, trip-timing, or urgent travel demand"
+    return EVERGREEN_SLOT, "Evergreen Korea travel/living demand"
 
 
 def save_weekly_queue(queue: dict) -> Path:
@@ -300,12 +415,18 @@ def build_weekly_queue_message(queue: dict) -> str:
         f"- 블로그: {queue.get('site_name')}",
         f"- 기간: {queue.get('start_date')} ~ {queue.get('end_date')}",
         f"- 목표: 하루 {queue.get('posts_per_day')}개, 총 {len(queue.get('items') or [])}개",
+        "- 주제 믹스: 하루 3개 기준 스테디 2개 + 이슈/시즌 1개",
         f"- 중복 검사: 기존 발행/생성 이력 + 이번 주 선택 주제",
         "",
         "발행 예정:",
     ]
     for item in queue.get("items", []):
-        lines.append(f"- {item.get('date')}: {item.get('seed')} ({item.get('category')} / {item.get('article_type')})")
+        strategy = item.get("slot_strategy", EVERGREEN_SLOT)
+        fallback = " fallback" if item.get("strategy_fallback") else ""
+        lines.append(
+            f"- {item.get('date')} #{item.get('slot_number', '-')}: {item.get('seed')} "
+            f"({strategy}{fallback} / {item.get('category')} / {item.get('article_type')})"
+        )
     if not queue.get("items"):
         lines.extend(["", "주의: 조건을 통과한 주제가 없어 이번 주 큐가 비었습니다."])
     return "\n".join(lines)
