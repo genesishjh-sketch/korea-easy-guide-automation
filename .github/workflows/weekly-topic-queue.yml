@@ -1,0 +1,81 @@
+name: Weekly Topic Queue
+
+on:
+  workflow_dispatch:
+    inputs:
+      start_date:
+        description: "Optional queue start date, YYYY-MM-DD"
+        required: false
+      posts_per_day:
+        description: "Planned posts per blog per day"
+        required: false
+        default: "3"
+  schedule:
+    # Sunday 22:00 KST. Creates the Monday-Sunday topic queue before daily publishing starts.
+    - cron: "0 13 * * 0"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: weekly-topic-queue
+  cancel-in-progress: false
+
+jobs:
+  weekly-topic-queue:
+    runs-on: ubuntu-latest
+    env:
+      APP_ENV: production
+      GOOGLE_OAUTH_CLIENT_SECRET_FILE: .credentials/client_secret.json
+      GOOGLE_OAUTH_TOKEN_FILE: .credentials/google_token.json
+      BLOGGER_PUBLISH_MODE: publish
+      GOOGLE_SEARCH_PROVIDER: suggest
+      NOTIFICATION_PROVIDER: ${{ vars.NOTIFICATION_PROVIDER }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      KOREA_EASY_GUIDE_BLOGGER_BLOG_ID: ${{ vars.BLOGGER_BLOG_ID || '288143591612645486' }}
+      KOREA_EASY_GUIDE_SITE_URL: ${{ vars.SITE_URL || 'https://koreaeasyguide.blogspot.com' }}
+      EASY_PC_FIX_GUIDE_BLOGGER_BLOG_ID: ${{ vars.EASY_PC_FIX_GUIDE_BLOGGER_BLOG_ID }}
+      EASY_PC_FIX_GUIDE_SITE_URL: ${{ vars.EASY_PC_FIX_GUIDE_SITE_URL || 'https://easypcfixguide.blogspot.com' }}
+      WEEKLY_QUEUE_POSTS_PER_DAY: ${{ github.event.inputs.posts_per_day || vars.WEEKLY_QUEUE_POSTS_PER_DAY || '3' }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run queue regression tests
+        run: python -m unittest tests.test_weekly_queue tests.test_daily_batch
+      - name: Write Google OAuth files
+        run: |
+          mkdir -p .credentials
+          printf '%s' '${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET_JSON }}' > .credentials/client_secret.json
+          printf '%s' '${{ secrets.GOOGLE_OAUTH_TOKEN_JSON }}' > .credentials/google_token.json
+      - name: Build weekly topic queues
+        run: |
+          START_ARG=""
+          if [ -n "${{ github.event.inputs.start_date }}" ]; then
+            START_ARG="--start-date ${{ github.event.inputs.start_date }}"
+          fi
+          python -m src.pipeline.weekly_queue --site korea_easy_guide --days 7 --posts-per-day "${WEEKLY_QUEUE_POSTS_PER_DAY}" ${START_ARG}
+          python -m src.pipeline.weekly_queue --site easy_pc_fix_guide --days 7 --posts-per-day "${WEEKLY_QUEUE_POSTS_PER_DAY}" ${START_ARG}
+      - name: Commit weekly plans
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/plans/
+          if git diff --cached --quiet; then
+            echo "No weekly plan changes to commit."
+          else
+            git commit -m "Update weekly topic queues"
+            git push
+          fi
+      - name: Upload weekly plans
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: weekly-topic-queue
+          path: |
+            data/plans/
+            reports/
