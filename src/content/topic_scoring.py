@@ -7,7 +7,7 @@ from src.models import TopicCandidate, TopicSignal
 
 
 CATEGORY_RULES = [
-    ("Transportation", ["airport", "seoul", "arex", "train", "bus", "taxi", "ktx", "subway", "t-money"]),
+    ("Transportation", ["airport", "arex", "train", "bus", "taxi", "ktx", "subway", "t-money"]),
     ("Mobile & Internet", ["esim", "sim", "wifi", "data", "roaming"]),
     ("Apps in Korea", ["kakao", "naver", "coupang", "baemin", "yogiyo", "papago"]),
     ("Food & Delivery", ["food", "delivery", "restaurant", "convenience store"]),

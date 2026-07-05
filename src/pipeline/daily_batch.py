@@ -24,6 +24,7 @@ from src.pipeline.daily_draft import save_daily_success_report
 from src.pipeline.daily_draft import seed_quality_precheck
 from src.pipeline.daily_draft import title_matches_existing
 from src.pipeline.daily_draft import used_keywords
+from src.pipeline.weekly_queue import today_queue_candidates
 from src.publishing.blogger import BloggerPublisher
 from src.pipeline.stage1_generate import run as run_stage1
 from src.pipeline.stage4_publication_check import fetch_public_feed
@@ -135,6 +136,11 @@ def select_seed_candidates(
     max_posts: int,
     explicit_seed: str | None = None,
 ) -> list[dict]:
+    if not explicit_seed:
+        queued = today_queue_candidates(site, max_posts=max_posts)
+        if queued:
+            return queued
+
     publish_used = used_keywords(site, include_validation=False)
     generated_used = used_keywords(site, include_validation=True)
     selected: list[dict] = []

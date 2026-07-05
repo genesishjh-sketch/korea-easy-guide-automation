@@ -1,0 +1,461 @@
+{
+  "site": "korea_easy_guide",
+  "site_name": "Korea Easy Guide",
+  "site_url": "https://koreaeasyguide.blogspot.com",
+  "week": "2026-W28",
+  "created_at": "2026-07-05T14:40:50.029369+09:00",
+  "start_date": "2026-07-06",
+  "end_date": "2026-07-12",
+  "days": 7,
+  "posts_per_day": 3,
+  "status": "approved",
+  "duplicate_policy": {
+    "title_similarity_block": 0.72,
+    "topic_overlap_block": 0.82,
+    "published_and_generated_history_checked": true,
+    "weekly_selected_topics_checked": true
+  },
+  "items": [
+    {
+      "date": "2026-07-06",
+      "site": "korea_easy_guide",
+      "seed": "arex airport railroad guide for tourists",
+      "topic": "arex airport railroad guide for tourists",
+      "category": "Transportation",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "Keep this article focused on 'arex airport railroad guide for tourists' only; do not repeat the travel decisions already covered in 'Korea Tax Refund Guide for Tourists: Receipts, Airport Kiosks, Customs Checks, and Common Mistakes'.",
+      "avoid_overlap_with": [
+        "Korea Tax Refund Guide for Tourists: Receipts, Airport Kiosks, Customs Checks, and Common Mistakes",
+        "Korean Convenience Store Food Guide for Foreign Visitors",
+        "How to Get from Incheon Airport to Seoul: Easy Guide for First-Time Visitors"
+      ],
+      "image_direction": "Create distinct Korea travel guide visuals for 'arex airport railroad guide for tourists'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-06",
+      "site": "korea_easy_guide",
+      "seed": "korea luggage storage guide for travelers",
+      "topic": "korea luggage storage guide for travelers",
+      "category": "Travel Basics",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "Keep this article focused on 'korea luggage storage guide for travelers' only; do not repeat the travel decisions already covered in 'Korean Convenience Store Food Guide for Foreign Visitors'.",
+      "avoid_overlap_with": [
+        "Korean Convenience Store Food Guide for Foreign Visitors",
+        "Korea Tax Refund Guide for Tourists: Receipts, Airport Kiosks, Customs Checks, and Common Mistakes",
+        "Olive Young Shopping in Korea for Foreigners: Easy Guide for First-Time Visitors"
+      ],
+      "image_direction": "Create distinct Korea travel guide visuals for 'korea luggage storage guide for travelers'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-06",
+      "site": "korea_easy_guide",
+      "seed": "airport limousine bus korea guide",
+      "topic": "airport limousine bus korea guide",
+      "category": "Transportation",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "Keep this article focused on 'airport limousine bus korea guide' only; do not repeat the travel decisions already covered in 'Korea Tax Refund Guide for Tourists: Receipts, Airport Kiosks, Customs Checks, and Common Mistakes'.",
+      "avoid_overlap_with": [
+        "Korea Tax Refund Guide for Tourists: Receipts, Airport Kiosks, Customs Checks, and Common Mistakes",
+        "How to Buy KTX Tickets in Korea as a Foreigner",
+        "Olive Young Shopping in Korea for Foreigners: Easy Guide for First-Time Visitors"
+      ],
+      "image_direction": "Create distinct Korea travel guide visuals for 'airport limousine bus korea guide'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-07",
+      "site": "korea_easy_guide",
+      "seed": "myeongdong vs hongdae vs gangnam where to stay",
+      "topic": "myeongdong vs hongdae vs gangnam where to stay",
+      "category": "Accommodation",
+      "article_type": "comparison",
+      "intent": "comparison",
+      "difference_from_existing": "Keep this article focused on 'myeongdong vs hongdae vs gangnam where to stay' only; do not repeat the travel decisions already covered in 'Where to Stay in Seoul First Time: Easy Guide for Foreign Visitors'.",
+      "avoid_overlap_with": [
+        "Where to Stay in Seoul First Time: Easy Guide for Foreign Visitors",
+        "Olive Young Shopping in Korea for Foreigners: Easy Guide for First-Time Visitors"
+      ],
+      "image_direction": "Create distinct Korea travel guide visuals for 'myeongdong vs hongdae vs gangnam where to stay'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-07",
+      "site": "korea_easy_guide",
+      "seed": "how to transfer from subway to bus in seoul",
+      "topic": "how to transfer from subway to bus in seoul",
+      "category": "Transportation",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "Keep this article focused on 'how to transfer from subway to bus in seoul' only; do not repeat the travel decisions already covered in 'How to Buy KTX Tickets in Korea as a Foreigner'.",
+      "avoid_overlap_with": [
+        "How to Buy KTX Tickets in Korea as a Foreigner",
+        "How to Get from Incheon Airport to Seoul: Easy Guide for First-Time Visitors",
+        "How to Use Kakao T Taxi in Korea as a Foreigner"
+      ],
+      "image_direction": "Create distinct Korea travel guide visuals for 'how to transfer from subway to bus in seoul'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-07",
+      "site": "korea_easy_guide",
+      "seed": "seoul hotel check in rules for foreigners",
+      "topic": "seoul hotel check in rules for foreigners",
+      "category": "Accommodation",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "Keep this article focused on 'seoul hotel check in rules for foreigners' only; do not repeat the travel decisions already covered in 'How to Buy KTX Tickets in Korea as a Foreigner'.",
+      "avoid_overlap_with": [
+        "How to Buy KTX Tickets in Korea as a Foreigner",
+        "How to Use Kakao T Taxi in Korea as a Foreigner",
+        "How to Use Baemin Food Delivery in Korea as a Foreigner"
+      ],
+      "image_direction": "Create distinct Korea travel guide visuals for 'seoul hotel check in rules for foreigners'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-08",
+      "site": "korea_easy_guide",
+      "seed": "korea intercity bus ticket guide",
+      "topic": "korea intercity bus ticket guide",
+      "category": "Transportation",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "Keep this article focused on 'korea intercity bus ticket guide' only; do not repeat the travel decisions already covered in 'How to Buy KTX Tickets in Korea as a Foreigner'.",
+      "avoid_overlap_with": [
+        "How to Buy KTX Tickets in Korea as a Foreigner",
+        "Korea Tax Refund Guide for Tourists: Receipts, Airport Kiosks, Customs Checks, and Common Mistakes",
+        "Olive Young Shopping in Korea for Foreigners: Easy Guide for First-Time Visitors"
+      ],
+      "image_direction": "Create distinct Korea travel guide visuals for 'korea intercity bus ticket guide'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-08",
+      "site": "korea_easy_guide",
+      "seed": "korea guesthouse etiquette for tourists",
+      "topic": "korea guesthouse etiquette for tourists",
+      "category": "Accommodation",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "Keep this article focused on 'korea guesthouse etiquette for tourists' only; do not repeat the travel decisions already covered in 'Korea eSIM Guide for Tourists: What to Know Before You Arrive'.",
+      "avoid_overlap_with": [
+        "Korea eSIM Guide for Tourists: What to Know Before You Arrive",
+        "WOWPASS Korea for Tourists: Card Setup, Tmoney Top-Up, Refunds, and Better Alternatives",
+        "Korea Tax Refund Guide for Tourists: Receipts, Airport Kiosks, Customs Checks, and Common Mistakes"
+      ],
+      "image_direction": "Create distinct Korea travel guide visuals for 'korea guesthouse etiquette for tourists'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-08",
+      "site": "korea_easy_guide",
+      "seed": "how to book srt train tickets in korea",
+      "topic": "how to book srt train tickets in korea",
+      "category": "Transportation",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "Keep this article focused on 'how to book srt train tickets in korea' only; do not repeat the travel decisions already covered in 'How to Buy KTX Tickets in Korea as a Foreigner'.",
+      "avoid_overlap_with": [
+        "How to Buy KTX Tickets in Korea as a Foreigner",
+        "How to Use Kakao T Taxi in Korea as a Foreigner",
+        "How to Use Baemin Food Delivery in Korea as a Foreigner"
+      ],
+      "image_direction": "Create distinct Korea travel guide visuals for 'how to book srt train tickets in korea'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-09",
+      "site": "korea_easy_guide",
+      "seed": "korea jjimjilbang guide for foreigners",
+      "topic": "korea jjimjilbang guide for foreigners",
+      "category": "Travel Basics",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "Keep this article focused on 'korea jjimjilbang guide for foreigners' only; do not repeat the travel decisions already covered in 'Korea Tax Refund Guide for Tourists: Receipts, Airport Kiosks, Customs Checks, and Common Mistakes'.",
+      "avoid_overlap_with": [
+        "Korea Tax Refund Guide for Tourists: Receipts, Airport Kiosks, Customs Checks, and Common Mistakes",
+        "Olive Young Shopping in Korea for Foreigners: Easy Guide for First-Time Visitors",
+        "How to Use Naver Map for Foreigners in Korea: Easy Guide for Foreign Visitors"
+      ],
+      "image_direction": "Create distinct Korea travel guide visuals for 'korea jjimjilbang guide for foreigners'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-09",
+      "site": "korea_easy_guide",
+      "seed": "korea airport pickup vs taxi vs train",
+      "topic": "korea airport pickup vs taxi vs train",
+      "category": "Transportation",
+      "article_type": "comparison",
+      "intent": "comparison",
+      "difference_from_existing": "Keep this article focused on 'korea airport pickup vs taxi vs train' only; do not repeat the travel decisions already covered in 'Korea Tax Refund Guide for Tourists: Receipts, Airport Kiosks, Customs Checks, and Common Mistakes'.",
+      "avoid_overlap_with": [
+        "Korea Tax Refund Guide for Tourists: Receipts, Airport Kiosks, Customs Checks, and Common Mistakes",
+        "How to Use Kakao T Taxi in Korea as a Foreigner",
+        "Korean Convenience Store Food Guide for Foreign Visitors"
+      ],
+      "image_direction": "Create distinct Korea travel guide visuals for 'korea airport pickup vs taxi vs train'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-09",
+      "site": "korea_easy_guide",
+      "seed": "how to order food in korean restaurants",
+      "topic": "how to order food in korean restaurants",
+      "category": "Food & Delivery",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "Keep this article focused on 'how to order food in korean restaurants' only; do not repeat the travel decisions already covered in 'How to Use Baemin Food Delivery in Korea as a Foreigner'.",
+      "avoid_overlap_with": [
+        "How to Use Baemin Food Delivery in Korea as a Foreigner",
+        "How to Use Kakao T Taxi in Korea as a Foreigner",
+        "How to Buy KTX Tickets in Korea as a Foreigner"
+      ],
+      "image_direction": "Create distinct Korea travel guide visuals for 'how to order food in korean restaurants'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-10",
+      "site": "korea_easy_guide",
+      "seed": "korea duty free shopping guide",
+      "topic": "korea duty free shopping guide",
+      "category": "Travel Basics",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "Keep this article focused on 'korea duty free shopping guide' only; do not repeat the travel decisions already covered in 'Olive Young Shopping in Korea for Foreigners: Easy Guide for First-Time Visitors'.",
+      "avoid_overlap_with": [
+        "Olive Young Shopping in Korea for Foreigners: Easy Guide for First-Time Visitors",
+        "Korea Tax Refund Guide for Tourists: Receipts, Airport Kiosks, Customs Checks, and Common Mistakes",
+        "How to Use Coupang in Korea as a Foreigner: Delivery, Payment, and Setup Guide"
+      ],
+      "image_direction": "Create distinct Korea travel guide visuals for 'korea duty free shopping guide'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-10",
+      "site": "korea_easy_guide",
+      "seed": "how to use kiosks in korea restaurants",
+      "topic": "how to use kiosks in korea restaurants",
+      "category": "Food & Delivery",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "Keep this article focused on 'how to use kiosks in korea restaurants' only; do not repeat the travel decisions already covered in 'How to Buy KTX Tickets in Korea as a Foreigner'.",
+      "avoid_overlap_with": [
+        "How to Buy KTX Tickets in Korea as a Foreigner",
+        "How to Use Kakao T Taxi in Korea as a Foreigner",
+        "How to Use Baemin Food Delivery in Korea as a Foreigner"
+      ],
+      "image_direction": "Create distinct Korea travel guide visuals for 'how to use kiosks in korea restaurants'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-10",
+      "site": "korea_easy_guide",
+      "seed": "how to use naver reservation in korea",
+      "topic": "how to use naver reservation in korea",
+      "category": "Apps in Korea",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "Keep this article focused on 'how to use naver reservation in korea' only; do not repeat the travel decisions already covered in 'How to Use Kakao T Taxi in Korea as a Foreigner'.",
+      "avoid_overlap_with": [
+        "How to Use Kakao T Taxi in Korea as a Foreigner",
+        "How to Use Baemin Food Delivery in Korea as a Foreigner",
+        "How to Use Coupang in Korea as a Foreigner: Delivery, Payment, and Setup Guide"
+      ],
+      "image_direction": "Create distinct Korea travel guide visuals for 'how to use naver reservation in korea'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-11",
+      "site": "korea_easy_guide",
+      "seed": "korea convenience store payment guide",
+      "topic": "korea convenience store payment guide",
+      "category": "Food & Delivery",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "Keep this article focused on 'korea convenience store payment guide' only; do not repeat the travel decisions already covered in 'Korean Convenience Store Food Guide for Foreign Visitors'.",
+      "avoid_overlap_with": [
+        "Korean Convenience Store Food Guide for Foreign Visitors",
+        "How to Use Coupang in Korea as a Foreigner: Delivery, Payment, and Setup Guide",
+        "Korea Tax Refund Guide for Tourists: Receipts, Airport Kiosks, Customs Checks, and Common Mistakes"
+      ],
+      "image_direction": "Create distinct Korea travel guide visuals for 'korea convenience store payment guide'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-11",
+      "site": "korea_easy_guide",
+      "seed": "papago translation app guide for korea",
+      "topic": "papago translation app guide for korea",
+      "category": "Apps in Korea",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "Keep this article focused on 'papago translation app guide for korea' only; do not repeat the travel decisions already covered in 'Korea Tax Refund Guide for Tourists: Receipts, Airport Kiosks, Customs Checks, and Common Mistakes'.",
+      "avoid_overlap_with": [
+        "Korea Tax Refund Guide for Tourists: Receipts, Airport Kiosks, Customs Checks, and Common Mistakes",
+        "Olive Young Shopping in Korea for Foreigners: Easy Guide for First-Time Visitors",
+        "Korea eSIM Guide for Tourists: What to Know Before You Arrive"
+      ],
+      "image_direction": "Create distinct Korea travel guide visuals for 'papago translation app guide for korea'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-11",
+      "site": "korea_easy_guide",
+      "seed": "how to call a taxi without korean phone number",
+      "topic": "how to call a taxi without korean phone number",
+      "category": "Transportation",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "Keep this article focused on 'how to call a taxi without korean phone number' only; do not repeat the travel decisions already covered in 'How to Use Kakao T Taxi in Korea as a Foreigner'.",
+      "avoid_overlap_with": [
+        "How to Use Kakao T Taxi in Korea as a Foreigner",
+        "How to Buy KTX Tickets in Korea as a Foreigner",
+        "How to Use Baemin Food Delivery in Korea as a Foreigner"
+      ],
+      "image_direction": "Create distinct Korea travel guide visuals for 'how to call a taxi without korean phone number'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-12",
+      "site": "korea_easy_guide",
+      "seed": "korea emergency numbers for tourists",
+      "topic": "korea emergency numbers for tourists",
+      "category": "Travel Basics",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "Keep this article focused on 'korea emergency numbers for tourists' only; do not repeat the travel decisions already covered in 'Korean Convenience Store Food Guide for Foreign Visitors'.",
+      "avoid_overlap_with": [
+        "Korean Convenience Store Food Guide for Foreign Visitors",
+        "Korea eSIM Guide for Tourists: What to Know Before You Arrive",
+        "WOWPASS Korea for Tourists: Card Setup, Tmoney Top-Up, Refunds, and Better Alternatives"
+      ],
+      "image_direction": "Create distinct Korea travel guide visuals for 'korea emergency numbers for tourists'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-12",
+      "site": "korea_easy_guide",
+      "seed": "korea trash sorting guide for short stays",
+      "topic": "korea trash sorting guide for short stays",
+      "category": "Accommodation",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "Keep this article focused on 'korea trash sorting guide for short stays' only; do not repeat the travel decisions already covered in 'Korean Convenience Store Food Guide for Foreign Visitors'.",
+      "avoid_overlap_with": [
+        "Korean Convenience Store Food Guide for Foreign Visitors",
+        "Korea eSIM Guide for Tourists: What to Know Before You Arrive",
+        "Korea Tax Refund Guide for Tourists: Receipts, Airport Kiosks, Customs Checks, and Common Mistakes"
+      ],
+      "image_direction": "Create distinct Korea travel guide visuals for 'korea trash sorting guide for short stays'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-12",
+      "site": "korea_easy_guide",
+      "seed": "what to do if you lose passport in korea",
+      "topic": "what to do if you lose passport in korea",
+      "category": "Travel Basics",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "Keep this article focused on 'what to do if you lose passport in korea' only; do not repeat the travel decisions already covered in 'Korea eSIM Guide for Tourists: What to Know Before You Arrive'.",
+      "avoid_overlap_with": [
+        "Korea eSIM Guide for Tourists: What to Know Before You Arrive",
+        "How to Use Kakao T Taxi in Korea as a Foreigner",
+        "How to Use Baemin Food Delivery in Korea as a Foreigner"
+      ],
+      "image_direction": "Create distinct Korea travel guide visuals for 'what to do if you lose passport in korea'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    }
+  ],
+  "candidate_pool_count": 51
+}

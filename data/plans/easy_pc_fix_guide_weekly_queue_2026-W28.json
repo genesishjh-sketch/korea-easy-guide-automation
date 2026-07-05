@@ -1,0 +1,542 @@
+{
+  "site": "easy_pc_fix_guide",
+  "site_name": "Easy PC Fix Guide",
+  "site_url": "https://easypcfixguide.blogspot.com",
+  "week": "2026-W28",
+  "created_at": "2026-07-05T14:39:22.156942+09:00",
+  "start_date": "2026-07-06",
+  "end_date": "2026-07-12",
+  "days": 7,
+  "posts_per_day": 3,
+  "status": "approved",
+  "duplicate_policy": {
+    "title_similarity_block": 0.72,
+    "topic_overlap_block": 0.82,
+    "published_and_generated_history_checked": true,
+    "weekly_selected_topics_checked": true
+  },
+  "items": [
+    {
+      "date": "2026-07-06",
+      "site": "easy_pc_fix_guide",
+      "seed": "windows 11 slow after update",
+      "topic": "windows 11 slow after update",
+      "category": "Beginner PC Tips",
+      "article_type": "beginner_guide",
+      "intent": "beginner_guide",
+      "difference_from_existing": "Keep this article focused on 'windows 11 slow after update' only; do not reuse the troubleshooting path from 'Windows Update Cleanup Safe for Beginners: Easy Windows Fixes for Beginners'.",
+      "avoid_overlap_with": [
+        "Windows Update Cleanup Safe for Beginners: Easy Windows Fixes for Beginners",
+        "Windows Update Download Stuck At 0: Easy Windows Fixes for Beginners",
+        "Windows Update Error 0X80073712: What It Means and How to Fix It"
+      ],
+      "image_direction": "Create distinct beginner PC help visuals for 'windows 11 slow after update'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 6,
+        "direct_microsoft_source_count": 5,
+        "search_result_source_count": 1,
+        "source_count": 6,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-06",
+      "site": "easy_pc_fix_guide",
+      "seed": "windows startup apps slowing down pc",
+      "topic": "windows startup apps slowing down pc",
+      "category": "Apps & Settings",
+      "article_type": "symptom_fix",
+      "intent": "symptom_fix",
+      "difference_from_existing": "Keep this article focused on 'windows startup apps slowing down pc' only; do not reuse the troubleshooting path from 'Windows Update Pending Restart Stuck: Safe Fixes for Beginners'.",
+      "avoid_overlap_with": [
+        "Windows Update Pending Restart Stuck: Safe Fixes for Beginners",
+        "Windows Update Cleanup Safe for Beginners: Easy Windows Fixes for Beginners",
+        "Microsoft Store Apps Not Updating: Easy Windows Fixes for Beginners"
+      ],
+      "image_direction": "Create distinct beginner PC help visuals for 'windows startup apps slowing down pc'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 6,
+        "direct_microsoft_source_count": 5,
+        "search_result_source_count": 1,
+        "source_count": 6,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-06",
+      "site": "easy_pc_fix_guide",
+      "seed": "high disk usage windows 11",
+      "topic": "high disk usage windows 11",
+      "category": "Beginner PC Tips",
+      "article_type": "beginner_guide",
+      "intent": "beginner_guide",
+      "difference_from_existing": "Keep this article focused on 'high disk usage windows 11' only; do not reuse the troubleshooting path from 'Wi-Fi Keeps Disconnecting on Windows 11: Safe Fixes for Beginners'.",
+      "avoid_overlap_with": [
+        "Wi-Fi Keeps Disconnecting on Windows 11: Safe Fixes for Beginners",
+        "Wi-Fi Button Missing on Windows 11: Simple Fixes for Beginners",
+        "Network Adapter Missing on Windows 11: Safe Fixes for Beginners"
+      ],
+      "image_direction": "Create distinct beginner PC help visuals for 'high disk usage windows 11'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 6,
+        "direct_microsoft_source_count": 5,
+        "search_result_source_count": 1,
+        "source_count": 6,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-07",
+      "site": "easy_pc_fix_guide",
+      "seed": "how to disable startup apps windows 11",
+      "topic": "how to disable startup apps windows 11",
+      "category": "Apps & Settings",
+      "article_type": "beginner_guide",
+      "intent": "beginner_guide",
+      "difference_from_existing": "Keep this article focused on 'how to disable startup apps windows 11' only; do not reuse the troubleshooting path from 'Windows Update Download Stuck At 0: Easy Windows Fixes for Beginners'.",
+      "avoid_overlap_with": [
+        "Windows Update Download Stuck At 0: Easy Windows Fixes for Beginners",
+        "Microsoft Store Apps Not Updating: Easy Windows Fixes for Beginners",
+        "Windows Update Error 0X80073712: What It Means and How to Fix It"
+      ],
+      "image_direction": "Create distinct beginner PC help visuals for 'how to disable startup apps windows 11'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 6,
+        "direct_microsoft_source_count": 5,
+        "search_result_source_count": 1,
+        "source_count": 6,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-07",
+      "site": "easy_pc_fix_guide",
+      "seed": "high memory usage windows 11",
+      "topic": "high memory usage windows 11",
+      "category": "Beginner PC Tips",
+      "article_type": "beginner_guide",
+      "intent": "beginner_guide",
+      "difference_from_existing": "Keep this article focused on 'high memory usage windows 11' only; do not reuse the troubleshooting path from 'No Internet, Secured on Windows 11: Safe Fixes for Beginners'.",
+      "avoid_overlap_with": [
+        "No Internet, Secured on Windows 11: Safe Fixes for Beginners",
+        "Microsoft Store Not Opening Windows 11: Easy Windows Fixes for Beginners",
+        "Microsoft Store Apps Not Updating: Easy Windows Fixes for Beginners"
+      ],
+      "image_direction": "Create distinct beginner PC help visuals for 'high memory usage windows 11'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 6,
+        "direct_microsoft_source_count": 5,
+        "search_result_source_count": 1,
+        "source_count": 6,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-07",
+      "site": "easy_pc_fix_guide",
+      "seed": "second monitor not detected windows 11",
+      "topic": "second monitor not detected windows 11",
+      "category": "Bluetooth & Devices",
+      "article_type": "symptom_fix",
+      "intent": "symptom_fix",
+      "difference_from_existing": "Keep this article focused on 'second monitor not detected windows 11' only; do not reuse the troubleshooting path from 'Microsoft Store Apps Not Updating: Easy Windows Fixes for Beginners'.",
+      "avoid_overlap_with": [
+        "Microsoft Store Apps Not Updating: Easy Windows Fixes for Beginners",
+        "Microsoft Store Not Opening Windows 11: Easy Windows Fixes for Beginners",
+        "Keyboard Not Typing Windows 11: Easy Windows Fixes for Beginners"
+      ],
+      "image_direction": "Create distinct beginner PC help visuals for 'second monitor not detected windows 11'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 8,
+        "direct_microsoft_source_count": 8,
+        "search_result_source_count": 0,
+        "source_count": 8,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-08",
+      "site": "easy_pc_fix_guide",
+      "seed": "laptop battery draining fast windows 11",
+      "topic": "laptop battery draining fast windows 11",
+      "category": "Beginner PC Tips",
+      "article_type": "beginner_guide",
+      "intent": "beginner_guide",
+      "difference_from_existing": "Keep this article focused on 'laptop battery draining fast windows 11' only; do not reuse the troubleshooting path from 'Network Adapter Missing on Windows 11: Safe Fixes for Beginners'.",
+      "avoid_overlap_with": [
+        "Network Adapter Missing on Windows 11: Safe Fixes for Beginners",
+        "Photos App Not Opening Windows 11: Easy Windows Fixes for Beginners",
+        "Microsoft Store Apps Not Updating: Easy Windows Fixes for Beginners"
+      ],
+      "image_direction": "Create distinct beginner PC help visuals for 'laptop battery draining fast windows 11'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 6,
+        "direct_microsoft_source_count": 5,
+        "search_result_source_count": 1,
+        "source_count": 6,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-08",
+      "site": "easy_pc_fix_guide",
+      "seed": "external hard drive not showing windows",
+      "topic": "external hard drive not showing windows",
+      "category": "Bluetooth & Devices",
+      "article_type": "symptom_fix",
+      "intent": "symptom_fix",
+      "difference_from_existing": "Keep this article focused on 'external hard drive not showing windows' only; do not reuse the troubleshooting path from 'DNS Server Not Responding on Windows 11: Safe Fixes for Beginners'.",
+      "avoid_overlap_with": [
+        "DNS Server Not Responding on Windows 11: Safe Fixes for Beginners",
+        "Keyboard Not Typing Windows 11: Easy Windows Fixes for Beginners",
+        "Microsoft Store Not Opening Windows 11: Easy Windows Fixes for Beginners"
+      ],
+      "image_direction": "Create distinct beginner PC help visuals for 'external hard drive not showing windows'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 8,
+        "direct_microsoft_source_count": 7,
+        "search_result_source_count": 1,
+        "source_count": 8,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-08",
+      "site": "easy_pc_fix_guide",
+      "seed": "windows sleep mode not working",
+      "topic": "windows sleep mode not working",
+      "category": "Beginner PC Tips",
+      "article_type": "beginner_guide",
+      "intent": "beginner_guide",
+      "difference_from_existing": "Keep this article focused on 'windows sleep mode not working' only; do not reuse the troubleshooting path from 'Windows Update Download Stuck At 0: Easy Windows Fixes for Beginners'.",
+      "avoid_overlap_with": [
+        "Windows Update Download Stuck At 0: Easy Windows Fixes for Beginners",
+        "Microsoft Store Not Opening Windows 11: Easy Windows Fixes for Beginners",
+        "Keyboard Not Typing Windows 11: Easy Windows Fixes for Beginners"
+      ],
+      "image_direction": "Create distinct beginner PC help visuals for 'windows sleep mode not working'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 6,
+        "direct_microsoft_source_count": 5,
+        "search_result_source_count": 1,
+        "source_count": 6,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-09",
+      "site": "easy_pc_fix_guide",
+      "seed": "sd card not showing windows 11",
+      "topic": "sd card not showing windows 11",
+      "category": "Bluetooth & Devices",
+      "article_type": "symptom_fix",
+      "intent": "symptom_fix",
+      "difference_from_existing": "Keep this article focused on 'sd card not showing windows 11' only; do not reuse the troubleshooting path from 'DNS Server Not Responding on Windows 11: Safe Fixes for Beginners'.",
+      "avoid_overlap_with": [
+        "DNS Server Not Responding on Windows 11: Safe Fixes for Beginners",
+        "Microsoft Store Not Opening Windows 11: Easy Windows Fixes for Beginners",
+        "Keyboard Not Typing Windows 11: Easy Windows Fixes for Beginners"
+      ],
+      "image_direction": "Create distinct beginner PC help visuals for 'sd card not showing windows 11'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 8,
+        "direct_microsoft_source_count": 7,
+        "search_result_source_count": 1,
+        "source_count": 8,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-09",
+      "site": "easy_pc_fix_guide",
+      "seed": "windows won't wake from sleep",
+      "topic": "windows won't wake from sleep",
+      "category": "Beginner PC Tips",
+      "article_type": "beginner_guide",
+      "intent": "beginner_guide",
+      "difference_from_existing": "Keep this article focused on 'windows won't wake from sleep' only; do not reuse the troubleshooting path from 'Windows Update Pending Restart Stuck: Safe Fixes for Beginners'.",
+      "avoid_overlap_with": [
+        "Windows Update Pending Restart Stuck: Safe Fixes for Beginners",
+        "Windows Cannot Connect to This Network: Safe Fixes for Beginners",
+        "Windows Update Cleanup Safe for Beginners: Easy Windows Fixes for Beginners"
+      ],
+      "image_direction": "Create distinct beginner PC help visuals for 'windows won't wake from sleep'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 6,
+        "direct_microsoft_source_count": 5,
+        "search_result_source_count": 1,
+        "source_count": 6,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-09",
+      "site": "easy_pc_fix_guide",
+      "seed": "headphones not detected windows 11",
+      "topic": "headphones not detected windows 11",
+      "category": "Sound & Microphone",
+      "article_type": "symptom_fix",
+      "intent": "symptom_fix",
+      "difference_from_existing": "Keep this article focused on 'headphones not detected windows 11' only; do not reuse the troubleshooting path from 'Microsoft Store Not Opening Windows 11: Easy Windows Fixes for Beginners'.",
+      "avoid_overlap_with": [
+        "Microsoft Store Not Opening Windows 11: Easy Windows Fixes for Beginners",
+        "Keyboard Not Typing Windows 11: Easy Windows Fixes for Beginners",
+        "Photos App Not Opening Windows 11: Easy Windows Fixes for Beginners"
+      ],
+      "image_direction": "Create distinct beginner PC help visuals for 'headphones not detected windows 11'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 8,
+        "direct_microsoft_source_count": 7,
+        "search_result_source_count": 1,
+        "source_count": 8,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-10",
+      "site": "easy_pc_fix_guide",
+      "seed": "screen brightness not changing windows 11",
+      "topic": "screen brightness not changing windows 11",
+      "category": "Beginner PC Tips",
+      "article_type": "beginner_guide",
+      "intent": "beginner_guide",
+      "difference_from_existing": "Keep this article focused on 'screen brightness not changing windows 11' only; do not reuse the troubleshooting path from 'DNS Server Not Responding on Windows 11: Safe Fixes for Beginners'.",
+      "avoid_overlap_with": [
+        "DNS Server Not Responding on Windows 11: Safe Fixes for Beginners",
+        "Microsoft Store Apps Not Updating: Easy Windows Fixes for Beginners",
+        "Microsoft Store Not Opening Windows 11: Easy Windows Fixes for Beginners"
+      ],
+      "image_direction": "Create distinct beginner PC help visuals for 'screen brightness not changing windows 11'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 8,
+        "direct_microsoft_source_count": 8,
+        "search_result_source_count": 0,
+        "source_count": 8,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-10",
+      "site": "easy_pc_fix_guide",
+      "seed": "realtek audio not working windows 11",
+      "topic": "realtek audio not working windows 11",
+      "category": "Sound & Microphone",
+      "article_type": "symptom_fix",
+      "intent": "symptom_fix",
+      "difference_from_existing": "Keep this article focused on 'realtek audio not working windows 11' only; do not reuse the troubleshooting path from 'Photos App Not Opening Windows 11: Easy Windows Fixes for Beginners'.",
+      "avoid_overlap_with": [
+        "Photos App Not Opening Windows 11: Easy Windows Fixes for Beginners",
+        "Wi-Fi Keeps Disconnecting on Windows 11: Safe Fixes for Beginners",
+        "DNS Server Not Responding on Windows 11: Safe Fixes for Beginners"
+      ],
+      "image_direction": "Create distinct beginner PC help visuals for 'realtek audio not working windows 11'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 8,
+        "direct_microsoft_source_count": 7,
+        "search_result_source_count": 1,
+        "source_count": 8,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-10",
+      "site": "easy_pc_fix_guide",
+      "seed": "display resolution wrong windows 11",
+      "topic": "display resolution wrong windows 11",
+      "category": "Beginner PC Tips",
+      "article_type": "beginner_guide",
+      "intent": "beginner_guide",
+      "difference_from_existing": "Keep this article focused on 'display resolution wrong windows 11' only; do not reuse the troubleshooting path from 'DNS Server Not Responding on Windows 11: Safe Fixes for Beginners'.",
+      "avoid_overlap_with": [
+        "DNS Server Not Responding on Windows 11: Safe Fixes for Beginners",
+        "Microsoft Store Apps Not Updating: Easy Windows Fixes for Beginners",
+        "Wi-Fi Button Missing on Windows 11: Simple Fixes for Beginners"
+      ],
+      "image_direction": "Create distinct beginner PC help visuals for 'display resolution wrong windows 11'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 8,
+        "direct_microsoft_source_count": 8,
+        "search_result_source_count": 0,
+        "source_count": 8,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-11",
+      "site": "easy_pc_fix_guide",
+      "seed": "onedrive not syncing windows 11",
+      "topic": "onedrive not syncing windows 11",
+      "category": "OneDrive & Account",
+      "article_type": "symptom_fix",
+      "intent": "symptom_fix",
+      "difference_from_existing": "Keep this article focused on 'onedrive not syncing windows 11' only; do not reuse the troubleshooting path from 'DNS Server Not Responding on Windows 11: Safe Fixes for Beginners'.",
+      "avoid_overlap_with": [
+        "DNS Server Not Responding on Windows 11: Safe Fixes for Beginners",
+        "Microsoft Store Not Opening Windows 11: Easy Windows Fixes for Beginners",
+        "Keyboard Not Typing Windows 11: Easy Windows Fixes for Beginners"
+      ],
+      "image_direction": "Create distinct beginner PC help visuals for 'onedrive not syncing windows 11'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 6,
+        "direct_microsoft_source_count": 5,
+        "search_result_source_count": 1,
+        "source_count": 6,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-11",
+      "site": "easy_pc_fix_guide",
+      "seed": "night light not working windows 11",
+      "topic": "night light not working windows 11",
+      "category": "Beginner PC Tips",
+      "article_type": "beginner_guide",
+      "intent": "beginner_guide",
+      "difference_from_existing": "Keep this article focused on 'night light not working windows 11' only; do not reuse the troubleshooting path from 'Photos App Not Opening Windows 11: Easy Windows Fixes for Beginners'.",
+      "avoid_overlap_with": [
+        "Photos App Not Opening Windows 11: Easy Windows Fixes for Beginners",
+        "Microsoft Store Not Opening Windows 11: Easy Windows Fixes for Beginners",
+        "DNS Server Not Responding on Windows 11: Safe Fixes for Beginners"
+      ],
+      "image_direction": "Create distinct beginner PC help visuals for 'night light not working windows 11'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 8,
+        "direct_microsoft_source_count": 8,
+        "search_result_source_count": 0,
+        "source_count": 8,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-11",
+      "site": "easy_pc_fix_guide",
+      "seed": "onedrive sign in problem windows",
+      "topic": "onedrive sign in problem windows",
+      "category": "OneDrive & Account",
+      "article_type": "symptom_fix",
+      "intent": "symptom_fix",
+      "difference_from_existing": "Keep this article focused on 'onedrive sign in problem windows' only; do not reuse the troubleshooting path from 'Microsoft Store Apps Not Updating: Easy Windows Fixes for Beginners'.",
+      "avoid_overlap_with": [
+        "Microsoft Store Apps Not Updating: Easy Windows Fixes for Beginners",
+        "No Internet, Secured on Windows 11: Safe Fixes for Beginners",
+        "Windows Update Download Stuck At 0: Easy Windows Fixes for Beginners"
+      ],
+      "image_direction": "Create distinct beginner PC help visuals for 'onedrive sign in problem windows'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 6,
+        "direct_microsoft_source_count": 5,
+        "search_result_source_count": 1,
+        "source_count": 6,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-12",
+      "site": "easy_pc_fix_guide",
+      "seed": "bitlocker recovery key screen what to do",
+      "topic": "bitlocker recovery key screen what to do",
+      "category": "Boot & Recovery",
+      "article_type": "symptom_fix",
+      "intent": "symptom_fix",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct beginner PC help visuals for 'bitlocker recovery key screen what to do'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 8,
+        "direct_microsoft_source_count": 7,
+        "search_result_source_count": 1,
+        "source_count": 8,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-12",
+      "site": "easy_pc_fix_guide",
+      "seed": "windows pin not working",
+      "topic": "windows pin not working",
+      "category": "OneDrive & Account",
+      "article_type": "symptom_fix",
+      "intent": "symptom_fix",
+      "difference_from_existing": "Keep this article focused on 'windows pin not working' only; do not reuse the troubleshooting path from 'Microsoft Store Not Opening Windows 11: Easy Windows Fixes for Beginners'.",
+      "avoid_overlap_with": [
+        "Microsoft Store Not Opening Windows 11: Easy Windows Fixes for Beginners",
+        "Keyboard Not Typing Windows 11: Easy Windows Fixes for Beginners",
+        "Photos App Not Opening Windows 11: Easy Windows Fixes for Beginners"
+      ],
+      "image_direction": "Create distinct beginner PC help visuals for 'windows pin not working'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 8,
+        "direct_microsoft_source_count": 7,
+        "search_result_source_count": 1,
+        "source_count": 8,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-12",
+      "site": "easy_pc_fix_guide",
+      "seed": "blue screen after windows update",
+      "topic": "blue screen after windows update",
+      "category": "Boot & Recovery",
+      "article_type": "symptom_fix",
+      "intent": "symptom_fix",
+      "difference_from_existing": "Keep this article focused on 'blue screen after windows update' only; do not reuse the troubleshooting path from 'Windows Update Cleanup Safe for Beginners: Easy Windows Fixes for Beginners'.",
+      "avoid_overlap_with": [
+        "Windows Update Cleanup Safe for Beginners: Easy Windows Fixes for Beginners",
+        "Windows Update Download Stuck At 0: Easy Windows Fixes for Beginners",
+        "Windows Update Error 0X80073712: What It Means and How to Fix It"
+      ],
+      "image_direction": "Create distinct beginner PC help visuals for 'blue screen after windows update'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 8,
+        "direct_microsoft_source_count": 7,
+        "search_result_source_count": 1,
+        "source_count": 8,
+        "issues": []
+      },
+      "status": "scheduled"
+    }
+  ],
+  "candidate_pool_count": 46
+}
