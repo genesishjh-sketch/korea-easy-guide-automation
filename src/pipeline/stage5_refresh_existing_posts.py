@@ -2,15 +2,20 @@ from __future__ import annotations
 
 import argparse
 from collections import defaultdict
+from dataclasses import asdict
 from datetime import datetime
 import json
 from pathlib import Path
 import traceback
 
+from bs4 import BeautifulSoup
+
 from src.config import ROOT_DIR
 from src.config import load_settings
+from src.images.ai_plan import build_article_image_plan
 from src.images.ai_library import install_korea_ai_assets
 from src.images.ai_library import install_windows_ai_assets
+from src.models import TopicCandidate
 from src.pipeline.stage1_generate import run as generate_article
 from src.pipeline.stage2_apply_high_quality_posts import run as apply_high_quality_posts
 from src.pipeline.stage2_publish import load_article
@@ -21,6 +26,7 @@ from src.publishing.blogger import BloggerPublisher
 
 REPURPOSED_POSTS = {
     "korea_easy_guide": {
+        "11543349930859767": "korea delivery address format guide",
         "5362386935147860367": "how to call a taxi without korean phone number",
     }
 }
@@ -28,6 +34,21 @@ REPURPOSED_POSTS = {
 REGENERATED_POSTS = {
     "korea_easy_guide": {
         "4739302218146947058": "olive young shopping guide for tourists",
+    }
+}
+
+TITLE_OVERRIDES = {
+    "korea_easy_guide": {
+        "7262135509196999347": "WOWPASS Korea for Tourists: Setup, T-money, Refunds, and Safer Alternatives",
+        "4113221836770530106": "Korea Tax Refund Guide for Tourists: Receipts, Kiosks, and Common Mistakes",
+        "8388328638384244827": "Coupang for Foreigners in Korea: Setup, Payment, Delivery, and Returns",
+        "4739302218146947058": "Olive Young Shopping in Korea for Foreigners: Easy Guide for First-Time Visitors",
+        "6884633981150129574": "Where to Stay in Seoul First Time: Area Guide for Foreign Visitors",
+        "5360897025413624578": "Korean Convenience Store Food Guide for Foreign Visitors",
+        "5362386935147860367": "How to Call a Taxi in Korea Without a Korean Phone Number",
+        "4523612224310826177": "How to Use Baemin Food Delivery in Korea as a Foreigner",
+        "4973057393106068154": "Korea eSIM for Tourists: Which Plan to Buy, Activate, and Troubleshoot",
+        "11543349930859767": "Korea Delivery Address Format Guide for Foreigners",
     }
 }
 
@@ -94,16 +115,68 @@ def prepare_article_dir(article_dir: Path, site: str) -> dict:
     title = str(article.get("title") or article_title(article_dir))
     keyword = str(candidate.get("keyword") or title)
     settings = load_settings(site)
+    topic = TopicCandidate(
+        keyword=keyword,
+        category=str(candidate.get("category") or article.get("category") or ""),
+        intent=str(candidate.get("intent") or ""),
+        score=float(candidate.get("score") or 0),
+        signals=[],
+    )
+    image_plan = build_article_image_plan(topic, title)
+    (article_dir / "image_plan.json").write_text(
+        json.dumps(image_plan.to_dict(), ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
 
     if settings.content_domain == "windows_help":
         scene = install_windows_ai_assets(article_dir, title, keyword)
     else:
         scene = install_korea_ai_assets(article_dir, title, keyword)
 
+    metadata["article"]["image"] = asdict(image_plan.hero_asset(article_dir))
+    metadata["article"]["inline_images"] = [asdict(image) for image in image_plan.inline_assets(article_dir)]
+    (article_dir / "metadata.json").write_text(json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8")
     rebuild_article_html(article_dir, site)
     apply_high_quality_posts(article_dir)
+    ensure_refresh_depth(article_dir, settings.content_domain)
     quality = apply_to_article_dir(article_dir)
     return {"scene": scene, "quality": quality}
+
+
+def ensure_refresh_depth(article_dir: Path, content_domain: str) -> None:
+    html_path = article_dir / "article.html"
+    metadata_path = article_dir / "metadata.json"
+    html = html_path.read_text(encoding="utf-8")
+    word_count = len(BeautifulSoup(html, "html.parser").get_text(" ").split())
+    if word_count >= 1450:
+        return
+
+    metadata = load_json(metadata_path)
+    title = metadata.get("article", {}).get("title") or article_title(article_dir)
+    section = depth_section(title, content_domain)
+    soup = BeautifulSoup(html, "html.parser")
+    article = soup.find("article") or soup
+    article.append(BeautifulSoup(section, "html.parser"))
+    updated = str(soup)
+    html_path.write_text(updated, encoding="utf-8")
+    metadata["article"]["html"] = updated
+    metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def depth_section(title: str, content_domain: str) -> str:
+    if content_domain == "windows_help":
+        return f"""
+<h2>Extra Checks Before You Try Advanced Fixes</h2>
+<p>Before you move past the beginner steps, write down what changed and when the problem started. A Windows issue that began after an update, a new device, a password change, or a network change usually needs a different path than a problem that appeared randomly. Keeping that timeline simple helps you avoid trying unrelated repairs.</p>
+<p>For {title}, do not jump straight to reset, registry changes, forced driver removal, or command-line repair unless the safer checks have clearly failed. Those advanced actions can be useful in the right situation, but they also make it harder for a beginner to know which change actually fixed the problem.</p>
+<p>If the computer contains school, work, tax, travel, or family files, confirm that important files are backed up before trying anything that mentions reset, reinstall, recovery, or cleanup. When in doubt, stop after the safe checks and ask a trusted technician to review the situation.</p>
+"""
+    return f"""
+<h2>Extra Practical Checks Before You Rely on This in Korea</h2>
+<p>Before using this advice during a real trip, confirm the current details from an official source or from the service provider. Korea travel systems can change by airport terminal, station, app version, payment method, holiday schedule, and local branch. A guide is useful for planning, but the final check should happen close to the day you use the service.</p>
+<p>For {title}, keep a simple backup plan: save the Korean address or official page, screenshot the important step, keep a second payment method, and know what you will do if mobile data or app login fails. These small preparations matter most when you are tired, carrying luggage, or trying to move during busy hours.</p>
+<p>If the process involves reservations, tickets, refunds, delivery, transportation, or identity checks, avoid waiting until the last minute. Give yourself enough time to ask staff, use an information desk, try another card, or switch to a simpler option without losing the rest of your schedule.</p>
+"""
 
 
 def update_blogger_post(article_dir: Path, site: str, post_id: str) -> dict:
@@ -205,6 +278,9 @@ def run(sites: list[str] | None = None, dry_run: bool = False) -> Path:
                     continue
 
                 prepared = prepare_article_dir(article_dir, site)
+                title_override = TITLE_OVERRIDES.get(site, {}).get(post_id)
+                if title_override:
+                    apply_title_override(article_dir, title_override)
                 updated = update_blogger_post(article_dir, site, post_id)
                 report["updated"].append(
                     {
@@ -235,6 +311,30 @@ def run(sites: list[str] | None = None, dry_run: bool = False) -> Path:
     path = output_dir / "existing-post-refresh-report.json"
     path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     return path
+
+
+def apply_title_override(article_dir: Path, title: str) -> None:
+    metadata_path = article_dir / "metadata.json"
+    html_path = article_dir / "article.html"
+    metadata = load_json(metadata_path)
+    metadata["article"]["title"] = title
+    metadata["article"]["meta_description"] = build_override_meta_description(title)
+
+    soup = BeautifulSoup(html_path.read_text(encoding="utf-8"), "html.parser")
+    h1 = soup.find("h1")
+    if h1:
+        h1.string = title
+    html = str(soup)
+    html_path.write_text(html, encoding="utf-8")
+    metadata["article"]["html"] = html
+    metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def build_override_meta_description(title: str) -> str:
+    return (
+        f"{title} with practical steps, common mistakes, payment or app checks, official-source reminders, "
+        "and backup options for foreign visitors in Korea."
+    )[:155]
 
 
 def main() -> None:
