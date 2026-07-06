@@ -1198,6 +1198,27 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertEqual(result["seed"], "local smoke")
         self.assertFalse(notification.called)
 
+    def test_validate_mode_without_seed_uses_stable_smoke_seed(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir, patch.object(daily_draft, "ROOT_DIR", Path(tmpdir)), patch.object(
+            daily_draft, "run_stage1"
+        ) as stage1, patch.object(daily_draft, "run_validation") as validation, patch.object(
+            daily_draft, "load_settings"
+        ) as load_settings:
+            article_dir = Path(tmpdir) / "article"
+            article_dir.mkdir()
+            validation_result = article_dir / "validation_result.json"
+            validation_result.write_text(json.dumps({"mode": "validate", "passed": True}), encoding="utf-8")
+            stage1.return_value = article_dir
+            validation.return_value = validation_result
+            load_settings.return_value.site_key = "easy_pc_fix_guide"
+            load_settings.return_value.site_name = "Easy PC Fix Guide"
+            load_settings.return_value.site_url = "https://easypcfixguide.blogspot.com"
+
+            result = daily_draft.run(site="easy_pc_fix_guide", publish_mode="validate", notify=False)
+
+        self.assertEqual(result["seed"], "windows settings app not opening")
+        stage1.assert_called_once_with("windows settings app not opening", "easy_pc_fix_guide")
+
     def test_no_notify_run_skips_failure_notification_for_local_validation(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir, patch.object(daily_draft, "ROOT_DIR", Path(tmpdir)), patch.object(
             daily_draft, "run_stage1", side_effect=ValueError("local failure")

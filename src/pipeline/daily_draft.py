@@ -5,6 +5,7 @@ from datetime import date
 from datetime import datetime
 from difflib import SequenceMatcher
 import json
+import os
 from pathlib import Path
 import re
 import traceback
@@ -30,6 +31,10 @@ from src.utils.reddit_setup import reddit_oauth_secret_label
 
 KST = ZoneInfo("Asia/Seoul")
 MAX_QUALITY_ATTEMPTS = 3
+DEFAULT_VALIDATE_SMOKE_SEEDS = {
+    "easy_pc_fix_guide": "windows settings app not opening",
+    "korea_easy_guide": "incheon airport to seoul",
+}
 TITLE_DUPLICATE_SIMILARITY = 0.9
 TOPIC_TOKEN_DUPLICATE_THRESHOLD = 0.8
 TOPIC_TOKEN_STOPWORDS = {
@@ -95,6 +100,13 @@ def choose_seed(explicit_seed: str | None = None, site: str | None = None) -> st
         if seed.lower() not in used:
             return seed
     return seeds[0]
+
+
+def validate_smoke_seed(site_key: str, explicit_seed: str | None = None) -> str | None:
+    if explicit_seed:
+        return explicit_seed
+    env_seed = os.getenv(f"{site_key.upper()}_VALIDATE_SMOKE_SEED") or os.getenv("VALIDATE_SMOKE_SEED")
+    return env_seed or DEFAULT_VALIDATE_SMOKE_SEEDS.get(site_key)
 
 
 def load_seed_list(site: str | None = None) -> list[str]:
@@ -365,7 +377,7 @@ def run(
                 if notify:
                     notify_daily_completion(result)
                 return result
-        selected_seed = choose_seed(seed, site)
+        selected_seed = choose_seed(validate_smoke_seed(settings.site_key, seed) if publish_mode == "validate" else seed, site)
         skipped_duplicate_seeds: list[str] = []
         skipped_quality_seeds: list[str] = []
         if publish_mode == "publish":
