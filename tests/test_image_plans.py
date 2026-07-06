@@ -7,6 +7,8 @@ import unittest
 from unittest.mock import patch
 
 from src.content.topic_scoring import build_candidate
+from src.images.ai_library import install_korea_ai_assets
+from src.images.ai_library import install_windows_ai_assets
 from src.images.ai_library import windows_scene
 from src.images.ai_plan import build_article_image_plan
 from src.models import TopicSignal
@@ -199,6 +201,18 @@ class ImagePlanTests(unittest.TestCase):
         self.assertIn("google_suggest_diagnostics", research_report)
         self.assertTrue(hero_exists)
         self.assertTrue(inline_exists)
+
+    def test_general_image_scene_is_not_installed_as_publishable_fallback(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            article_dir = Path(tmpdir)
+
+            with self.assertRaises(FileNotFoundError) as korea_raised:
+                install_korea_ai_assets(article_dir, "Generic Korea Help", "generic Korea help")
+            with self.assertRaises(FileNotFoundError) as windows_raised:
+                install_windows_ai_assets(article_dir, "Generic PC Help", "generic PC help")
+
+        self.assertIn("general", str(korea_raised.exception))
+        self.assertIn("general", str(windows_raised.exception))
 
 
 if __name__ == "__main__":

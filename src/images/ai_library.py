@@ -12,13 +12,16 @@ KOREA_AI_ASSET_DIR = ROOT_DIR / "src" / "images" / "ai_assets" / "korea"
 
 def install_windows_ai_assets(article_dir: Path, title: str, keyword: str) -> str:
     scene = windows_scene(f"{keyword} {title}")
+    if scene == "general":
+        raise FileNotFoundError(
+            "Windows topic resolved to the reusable 'general' image scene. "
+            "Generate fresh article-specific Codex images instead of using general fallback assets."
+        )
     source_dir = WINDOWS_AI_ASSET_DIR / scene
     if not source_dir.exists():
-        source_dir = WINDOWS_AI_ASSET_DIR / "general"
-    if not source_dir.exists():
         raise FileNotFoundError(
-            f"Windows AI image library is missing scene '{scene}' and fallback 'general'. "
-            "Generate Codex AI images and save hero.png/inline.png before publishing."
+            f"Windows AI image assets are missing for scene '{scene}'. "
+            "Generate fresh Codex images for this article and save them before publishing; do not reuse general fallback images."
         )
 
     assets_dir = article_dir / "assets"
@@ -33,13 +36,16 @@ def install_windows_ai_assets(article_dir: Path, title: str, keyword: str) -> st
 
 def install_korea_ai_assets(article_dir: Path, title: str, keyword: str) -> str:
     scene = korea_scene(f"{keyword} {title}")
+    if scene == "general":
+        raise FileNotFoundError(
+            "Korea topic resolved to the reusable 'general' image scene. "
+            "Generate fresh article-specific Codex images instead of using general fallback assets."
+        )
     source_dir = KOREA_AI_ASSET_DIR / scene
     if not source_dir.exists():
-        source_dir = KOREA_AI_ASSET_DIR / "general"
-    if not source_dir.exists():
         raise FileNotFoundError(
-            f"Korea AI image library is missing scene '{scene}' and fallback 'general'. "
-            "Generate Codex AI images and save hero.jpg/inline-1.jpg/inline-2.jpg before publishing."
+            f"Korea AI image assets are missing for scene '{scene}'. "
+            "Generate fresh Codex images for this article and save them before publishing; do not reuse general fallback images."
         )
 
     assets_dir = article_dir / "assets"

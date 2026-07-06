@@ -96,8 +96,12 @@ and issue count == 0
 - The preflight check must fail if paid image API keys are wired into unattended workflows.
 - If paid/external image API keys exist only in the local shell, preflight should warn so the operator can confirm they are not used by scheduled publishing.
 - Each generated post must include `image_plan.json`.
-- Codex-generated raster images are the preferred image source.
-- Local SVG assets are allowed as zero-cost fallback assets for unattended automation.
+- Public posts must use fresh article-specific Codex-generated raster images.
+- Reusable library images under `src/images/ai_assets/korea/` or `src/images/ai_assets/windows/` are draft aids only and must not be used for public publishing.
+- Public publishing may only use unique hosted assets under `src/images/ai_assets/hosted/`.
+- Do not reuse an image URL that already appears in a published Blogger post.
+- Do not use `general` fallback images for public posts.
+- Local SVG assets are not allowed for public posts.
 - If required image files are missing, Blogger publishing must stop.
 
 ## Repeat-Until-Quality Rule
@@ -128,4 +132,4 @@ Hard stop:
 
 ## Current Practical Constraint
 
-Under the zero-additional-cost policy, GitHub Actions can run the Python pipeline, but it cannot independently create Codex raster images. The production pipeline therefore creates local SVG fallback assets so unattended runs can still satisfy the image gate. Replace SVG fallback assets with Codex-generated JPG images when visual quality is being upgraded manually or through a Codex-capable automation.
+Under the zero-additional-cost policy, GitHub Actions can run the Python pipeline, but it cannot independently create Codex raster images. Therefore unattended publishing must stop when fresh hosted Codex JPG assets are missing or when a generated post tries to reuse an existing image URL. A Codex-capable automation step must create article-specific JPG assets first, store them under `src/images/ai_assets/hosted/`, and then allow Blogger publishing to continue.

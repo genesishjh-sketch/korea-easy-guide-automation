@@ -8,6 +8,8 @@ from unittest.mock import patch
 
 from src.pipeline.stage2_publish import validate_required_images
 from src.pipeline.stage2_publish import rewrite_local_image_paths
+from src.pipeline.stage2_publish import validate_fresh_public_images
+from src.pipeline.stage2_publish import validate_library_image_is_publishable
 from src.quality.hades import HadesQualityGate
 
 
@@ -94,10 +96,35 @@ class Stage2ImageGateTests(unittest.TestCase):
 
             validate_required_images(article_dir)
 
+    def test_required_images_reject_svg_fallback_assets_for_public_publish(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            article_dir = Path(tmpdir)
+            assets_dir = article_dir / "assets"
+            assets_dir.mkdir()
+            (assets_dir / "ai-hero.svg").write_text("<svg></svg>", encoding="utf-8")
+            (assets_dir / "ai-inline-1.svg").write_text("<svg></svg>", encoding="utf-8")
+            (article_dir / "image_plan.json").write_text(
+                json.dumps(
+                    {
+                        "strict": True,
+                        "images": [
+                            {"url": "assets/ai-hero.svg", "required": True},
+                            {"url": "assets/ai-inline-1.svg", "required": True},
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            with self.assertRaises(ValueError) as raised:
+                validate_required_images(article_dir)
+
+        self.assertIn("not SVG fallback assets", str(raised.exception))
+
     def test_rewrite_local_image_paths_uses_raw_github_url_not_base64(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
-            library_dir = root / "src" / "images" / "ai_assets" / "windows" / "general"
+            library_dir = root / "src" / "images" / "ai_assets" / "hosted"
             library_dir.mkdir(parents=True)
             article_dir = root / "data" / "generated" / "article"
             assets_dir = article_dir / "assets"
@@ -113,9 +140,23 @@ class Stage2ImageGateTests(unittest.TestCase):
             ):
                 rewritten = rewrite_local_image_paths(html, article_dir)
 
-        self.assertIn("https://raw.githubusercontent.com/example/repo/main/src/images/ai_assets/windows/general/hero.jpg", rewritten)
+        self.assertIn("https://raw.githubusercontent.com/example/repo/main/src/images/ai_assets/hosted/hero.jpg", rewritten)
         self.assertNotIn("base64", rewritten)
         self.assertNotIn("data:image", rewritten)
+
+    def test_reusable_image_library_paths_are_blocked_for_public_publish(self) -> None:
+        with self.assertRaises(ValueError) as raised:
+            validate_library_image_is_publishable("src/images/ai_assets/korea/general/hero.jpg")
+
+        self.assertIn("Reusable image library assets cannot be used", str(raised.exception))
+
+    def test_fresh_public_images_block_reused_published_urls(self) -> None:
+        html = '<article><img src="https://raw.example/hosted/fresh.jpg" alt="Fresh image"></article>'
+        with patch("src.pipeline.stage2_publish.public_image_urls", return_value={"https://raw.example/hosted/fresh.jpg"}):
+            with self.assertRaises(ValueError) as raised:
+                validate_fresh_public_images(html, "korea_easy_guide")
+
+        self.assertIn("already used by published posts", str(raised.exception))
 
     def test_hades_blocks_articles_without_image_plan(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

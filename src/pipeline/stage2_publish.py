@@ -7,6 +7,8 @@ import logging
 import mimetypes
 import os
 from pathlib import Path
+import re
+import urllib.request
 
 from bs4 import BeautifulSoup
 
@@ -21,6 +23,11 @@ RAW_IMAGE_BASE_URL = os.getenv(
     "RAW_IMAGE_BASE_URL",
     "https://raw.githubusercontent.com/genesishjh-sketch/korea-easy-guide-automation/main",
 )
+REUSABLE_IMAGE_PATH_PARTS = (
+    "/src/images/ai_assets/korea/",
+    "/src/images/ai_assets/windows/",
+)
+ALLOWED_UNIQUE_IMAGE_PATH_PART = "/src/images/ai_assets/hosted/"
 
 
 def latest_article_dir(site: str | None = None) -> Path:
@@ -45,6 +52,7 @@ def load_article(article_dir: Path, site: str | None = None) -> tuple[str, str, 
     validate_quality(article_dir, site)
     html = (article_dir / "article.html").read_text(encoding="utf-8")
     html = rewrite_local_image_paths(html, article_dir)
+    validate_fresh_public_images(html, site)
     return title, html, labels
 
 
@@ -73,10 +81,14 @@ def validate_required_images(article_dir: Path) -> None:
 
     invalid_urls = []
     missing = []
+    invalid_extensions = []
     for image in required_images:
         url = image.get("url") or f"assets/{image.get('filename', '')}"
         if not url.startswith("assets/"):
             invalid_urls.append(url)
+            continue
+        if Path(url).suffix.lower() == ".svg":
+            invalid_extensions.append(url)
             continue
         if not (article_dir / url).exists():
             missing.append(url)
@@ -84,6 +96,10 @@ def validate_required_images(article_dir: Path) -> None:
     if invalid_urls:
         joined = ", ".join(invalid_urls)
         raise ValueError(f"Required image assets must be local assets/ files: {joined}.")
+
+    if invalid_extensions:
+        joined = ", ".join(invalid_extensions)
+        raise ValueError(f"Public publishing requires fresh raster JPG/PNG/WebP images, not SVG fallback assets: {joined}.")
 
     if missing:
         joined = ", ".join(missing)
@@ -104,7 +120,7 @@ def rewrite_local_image_paths(html: str, article_dir: Path) -> str:
                 img.decompose()
                 continue
             mime_type = mimetypes.guess_type(asset_path.name)[0]
-            if mime_type not in {"image/svg+xml", "image/png", "image/jpeg", "image/webp"}:
+            if mime_type not in {"image/png", "image/jpeg", "image/webp"}:
                 img.decompose()
                 continue
             img["src"] = raw_image_url_for_asset(asset_path)
@@ -120,7 +136,56 @@ def raw_image_url_for_asset(asset_path: Path) -> str:
             "Copy the generated image into the image asset library or provide a stable external image URL."
         )
     relative = library_path.relative_to(ROOT_DIR).as_posix()
+    validate_library_image_is_publishable(relative)
     return f"{RAW_IMAGE_BASE_URL.rstrip('/')}/{relative}"
+
+
+def validate_library_image_is_publishable(relative_path: str) -> None:
+    normalized = f"/{relative_path}"
+    if ALLOWED_UNIQUE_IMAGE_PATH_PART in normalized:
+        return
+    if any(part in normalized for part in REUSABLE_IMAGE_PATH_PARTS):
+        raise ValueError(
+            "Reusable image library assets cannot be used for public publishing: "
+            f"{relative_path}. Generate fresh article-specific Codex images and store them under src/images/ai_assets/hosted/."
+        )
+
+
+def validate_fresh_public_images(html: str, site: str | None = None) -> None:
+    settings = load_settings(site)
+    new_urls = set(image_urls_from_html(html))
+    if not new_urls:
+        raise ValueError("Public publishing requires image URLs after local image rewrite.")
+    used_urls = public_image_urls(settings.site_url)
+    reused = sorted(new_urls & used_urls)
+    if reused:
+        raise ValueError(
+            "Fresh article-specific images are required; these image URLs are already used by published posts: "
+            + ", ".join(reused[:5])
+        )
+
+
+def public_image_urls(site_url: str) -> set[str]:
+    feed_url = f"{site_url.rstrip('/')}/feeds/posts/default?alt=json&max-results=100"
+    try:
+        with urllib.request.urlopen(feed_url, timeout=20) as response:
+            payload = json.load(response)
+    except Exception as exc:
+        raise RuntimeError(f"Could not check published image reuse from Blogger feed: {exc}") from exc
+
+    urls: set[str] = set()
+    for entry in payload.get("feed", {}).get("entry", []):
+        content = entry.get("content", {}).get("$t", "")
+        urls.update(image_urls_from_html(content))
+    return urls
+
+
+def image_urls_from_html(html: str) -> list[str]:
+    soup = BeautifulSoup(html, "html.parser")
+    urls = [img.get("src", "").strip() for img in soup.find_all("img") if img.get("src")]
+    if urls:
+        return urls
+    return [match.group(1).strip() for match in re.finditer(r"<img\b[^>]*\bsrc=[\"']([^\"']+)[\"']", html, flags=re.I)]
 
 
 def find_matching_ai_asset(asset_path: Path) -> Path | None:

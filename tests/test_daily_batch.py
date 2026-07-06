@@ -42,6 +42,8 @@ class DailyBatchSelectionTests(unittest.TestCase):
             "src.pipeline.daily_batch.public_recent_categories", return_value=[]
         ), patch(
             "src.pipeline.daily_batch.seed_quality_precheck", return_value={"status": "ready"}
+        ), patch(
+            "src.pipeline.daily_batch.today_queue_candidates", return_value=[]
         ):
             selected = select_seed_candidates("easy_pc_fix_guide", "windows_help", 3)
 
@@ -106,7 +108,9 @@ class DailyBatchSelectionTests(unittest.TestCase):
             "src.pipeline.daily_batch.used_keywords", return_value=set()
         ), patch("src.pipeline.daily_batch.public_post_titles", return_value=[]), patch(
             "src.pipeline.daily_batch.public_recent_categories", return_value=["Wi-Fi & Internet", "Wi-Fi & Internet"]
-        ), patch("src.pipeline.daily_batch.seed_quality_precheck", return_value={"status": "ready"}):
+        ), patch("src.pipeline.daily_batch.seed_quality_precheck", return_value={"status": "ready"}), patch(
+            "src.pipeline.daily_batch.today_queue_candidates", return_value=[]
+        ):
             selected = select_seed_candidates("easy_pc_fix_guide", "windows_help", 3)
 
         self.assertEqual([item["category"] for item in selected], [
@@ -149,6 +153,8 @@ class DailyBatchSelectionTests(unittest.TestCase):
             "src.pipeline.daily_batch.public_recent_categories", return_value=[]
         ), patch(
             "src.pipeline.daily_batch.seed_quality_precheck", return_value={"status": "not_applicable"}
+        ), patch(
+            "src.pipeline.daily_batch.today_queue_candidates", return_value=[]
         ):
             selected = select_seed_candidates("korea_easy_guide", "korea_travel", 3)
 

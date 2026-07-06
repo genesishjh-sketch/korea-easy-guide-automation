@@ -441,6 +441,10 @@ def is_quality_gate_failure(exc: Exception) -> bool:
             or "image_plan.json is required" in message
             or "Required Codex-generated image assets are missing" in message
             or "At least two required image assets" in message
+            or "Generate fresh article-specific Codex images" in message
+            or "Reusable image library assets cannot be used" in message
+            or "Fresh article-specific images are required" in message
+            or "not SVG fallback assets" in message
         )
     )
 
@@ -754,7 +758,7 @@ def daily_failure_action_items(error: str, mode: str = "draft", site_key: str = 
     if "image" in error_lower or "asset" in error_lower:
         return [
             "이미지 또는 image_plan 문제입니다. assets 폴더와 image_plan.json의 required 파일명을 확인하세요.",
-            "유료 이미지 API 없이 local SVG fallback 또는 Codex 생성 이미지가 들어갔는지 확인하세요.",
+            "공개 발행은 글마다 새로 만든 Codex JPG 이미지를 사용해야 합니다. reused/general/SVG fallback 이미지는 교체하세요.",
         ]
     if "duplicate" in error_lower:
         return [
