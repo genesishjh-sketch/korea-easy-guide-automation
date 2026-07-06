@@ -3,14 +3,19 @@ from __future__ import annotations
 import shutil
 from pathlib import Path
 
+from slugify import slugify
+
 from src.config import ROOT_DIR
 
 
 WINDOWS_AI_ASSET_DIR = ROOT_DIR / "src" / "images" / "ai_assets" / "windows"
 KOREA_AI_ASSET_DIR = ROOT_DIR / "src" / "images" / "ai_assets" / "korea"
+HOSTED_AI_ASSET_DIR = ROOT_DIR / "src" / "images" / "ai_assets" / "hosted"
 
 
 def install_windows_ai_assets(article_dir: Path, title: str, keyword: str) -> str:
+    if install_hosted_topic_assets(article_dir, "pc", keyword):
+        return "hosted_topic"
     scene = windows_scene(f"{keyword} {title}")
     if scene == "general":
         raise FileNotFoundError(
@@ -35,6 +40,8 @@ def install_windows_ai_assets(article_dir: Path, title: str, keyword: str) -> st
 
 
 def install_korea_ai_assets(article_dir: Path, title: str, keyword: str) -> str:
+    if install_hosted_topic_assets(article_dir, "korea", keyword):
+        return "hosted_topic"
     scene = korea_scene(f"{keyword} {title}")
     if scene == "general":
         raise FileNotFoundError(
@@ -70,6 +77,28 @@ def install_korea_ai_assets(article_dir: Path, title: str, keyword: str) -> str:
             continue
         shutil.copy2(source, assets_dir / target_name)
     return scene
+
+
+def install_hosted_topic_assets(article_dir: Path, prefix: str, keyword: str) -> bool:
+    slug = slugify(keyword)
+    candidates = [
+        (
+            HOSTED_AI_ASSET_DIR / f"{prefix}-{slug}-hero.jpg",
+            HOSTED_AI_ASSET_DIR / f"{prefix}-{slug}-inline.jpg",
+        ),
+        (
+            HOSTED_AI_ASSET_DIR / f"{prefix}-{slug}-hero.png",
+            HOSTED_AI_ASSET_DIR / f"{prefix}-{slug}-inline.png",
+        ),
+    ]
+    for hero, inline in candidates:
+        if hero.exists() and inline.exists():
+            assets_dir = article_dir / "assets"
+            assets_dir.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(hero, assets_dir / "ai-hero.jpg")
+            shutil.copy2(inline, assets_dir / "ai-inline-1.jpg")
+            return True
+    return False
 
 
 def windows_scene(text: str) -> str:

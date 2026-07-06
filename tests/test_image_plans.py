@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 from src.content.topic_scoring import build_candidate
 from src.images.ai_library import install_korea_ai_assets
+from src.images.ai_library import install_hosted_topic_assets
 from src.images.ai_library import install_windows_ai_assets
 from src.images.ai_library import windows_scene
 from src.images.ai_plan import build_article_image_plan
@@ -89,6 +90,21 @@ class ImagePlanTests(unittest.TestCase):
                 self.assertEqual(windows_scene(keyword), expected_scene)
 
         self.assertEqual(len(set(cases.values())), len(cases))
+
+    def test_hosted_topic_assets_are_installed_when_available(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            hosted_dir = Path(tmpdir) / "hosted"
+            article_dir = Path(tmpdir) / "article"
+            hosted_dir.mkdir()
+            (hosted_dir / "pc-mouse-cursor-disappears-windows-11-hero.jpg").write_bytes(b"hero")
+            (hosted_dir / "pc-mouse-cursor-disappears-windows-11-inline.jpg").write_bytes(b"inline")
+
+            with patch("src.images.ai_library.HOSTED_AI_ASSET_DIR", hosted_dir):
+                installed = install_hosted_topic_assets(article_dir, "pc", "mouse cursor disappears windows 11")
+
+            self.assertTrue(installed)
+            self.assertEqual((article_dir / "assets" / "ai-hero.jpg").read_bytes(), b"hero")
+            self.assertEqual((article_dir / "assets" / "ai-inline-1.jpg").read_bytes(), b"inline")
 
     def test_windows_update_subtopic_prompts_are_visually_distinct(self) -> None:
         download = build_article_image_plan(
