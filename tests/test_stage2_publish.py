@@ -10,6 +10,7 @@ from src.pipeline.stage2_publish import validate_required_images
 from src.pipeline.stage2_publish import rewrite_local_image_paths
 from src.pipeline.stage2_publish import validate_fresh_public_images
 from src.pipeline.stage2_publish import validate_library_image_is_publishable
+from src.pipeline.stage2_publish import validate_public_image_urls_reachable
 from src.quality.hades import HadesQualityGate
 
 
@@ -157,6 +158,30 @@ class Stage2ImageGateTests(unittest.TestCase):
                 validate_fresh_public_images(html, "korea_easy_guide")
 
         self.assertIn("already used by published posts", str(raised.exception))
+
+    def test_fresh_public_images_block_base64_data_images(self) -> None:
+        html = '<article><img src="data:image/jpeg;base64,AAAA" alt="Embedded image"></article>'
+
+        with self.assertRaises(ValueError) as raised:
+            validate_fresh_public_images(html, "korea_easy_guide")
+
+        self.assertIn("must not embed base64", str(raised.exception))
+
+    def test_public_image_urls_must_be_reachable_before_publish(self) -> None:
+        html = '<article><img src="https://raw.example/missing.jpg" alt="Missing"></article>'
+
+        with patch("src.pipeline.stage2_publish.public_image_url_status", return_value=(404, "text/plain")):
+            with self.assertRaises(ValueError) as raised:
+                validate_public_image_urls_reachable(html)
+
+        self.assertIn("reachable image URLs", str(raised.exception))
+        self.assertIn("missing.jpg", str(raised.exception))
+
+    def test_public_image_urls_accept_reachable_images(self) -> None:
+        html = '<article><img src="https://raw.example/fresh.jpg" alt="Fresh"></article>'
+
+        with patch("src.pipeline.stage2_publish.public_image_url_status", return_value=(200, "image/jpeg")):
+            validate_public_image_urls_reachable(html)
 
     def test_hades_blocks_articles_without_image_plan(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

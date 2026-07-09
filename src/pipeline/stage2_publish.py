@@ -8,6 +8,7 @@ import mimetypes
 import os
 from pathlib import Path
 import re
+import urllib.error
 import urllib.request
 
 from bs4 import BeautifulSoup
@@ -52,6 +53,7 @@ def load_article(article_dir: Path, site: str | None = None) -> tuple[str, str, 
     validate_quality(article_dir, site)
     html = (article_dir / "article.html").read_text(encoding="utf-8")
     html = rewrite_local_image_paths(html, article_dir)
+    validate_public_image_urls_reachable(html)
     validate_fresh_public_images(html, site)
     return title, html, labels
 
@@ -156,6 +158,12 @@ def validate_fresh_public_images(html: str, site: str | None = None) -> None:
     new_urls = set(image_urls_from_html(html))
     if not new_urls:
         raise ValueError("Public publishing requires image URLs after local image rewrite.")
+    embedded = sorted(url for url in new_urls if url.startswith("data:image"))
+    if embedded:
+        raise ValueError(
+            "Public publishing must not embed base64 data:image assets. "
+            "Use article-specific hosted assets under src/images/ai_assets/hosted/ instead."
+        )
     used_urls = public_image_urls(settings.site_url)
     reused = sorted(new_urls & used_urls)
     if reused:
@@ -163,6 +171,43 @@ def validate_fresh_public_images(html: str, site: str | None = None) -> None:
             "Fresh article-specific images are required; these image URLs are already used by published posts: "
             + ", ".join(reused[:5])
         )
+
+
+def validate_public_image_urls_reachable(html: str) -> None:
+    """Fail before publishing if Blogger would receive broken external image URLs."""
+    broken: list[str] = []
+    for url in image_urls_from_html(html):
+        if not url.startswith(("http://", "https://")):
+            continue
+        try:
+            status, content_type = public_image_url_status(url)
+        except Exception as exc:
+            broken.append(f"{url} ({exc})")
+            continue
+        if status >= 400:
+            broken.append(f"{url} (HTTP {status})")
+            continue
+        if content_type and not content_type.lower().startswith("image/"):
+            broken.append(f"{url} ({content_type})")
+    if broken:
+        raise ValueError(
+            "Public publishing requires reachable image URLs before Blogger upload. "
+            "Commit/push hosted image assets or replace the image URLs first: "
+            + "; ".join(broken[:5])
+        )
+
+
+def public_image_url_status(url: str) -> tuple[int, str]:
+    request = urllib.request.Request(url, method="HEAD", headers={"User-Agent": "korea-blog-automation/1.0"})
+    try:
+        with urllib.request.urlopen(request, timeout=15) as response:
+            return response.getcode(), response.headers.get("Content-Type", "")
+    except urllib.error.HTTPError as exc:
+        if exc.code != 405:
+            return exc.code, exc.headers.get("Content-Type", "")
+    request = urllib.request.Request(url, headers={"User-Agent": "korea-blog-automation/1.0"})
+    with urllib.request.urlopen(request, timeout=15) as response:
+        return response.getcode(), response.headers.get("Content-Type", "")
 
 
 def public_image_urls(site_url: str) -> set[str]:
