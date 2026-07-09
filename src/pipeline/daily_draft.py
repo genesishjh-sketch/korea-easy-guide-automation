@@ -454,6 +454,8 @@ def is_quality_gate_failure(exc: Exception) -> bool:
             or "Required Codex-generated image assets are missing" in message
             or "At least two required image assets" in message
             or "Generate fresh article-specific Codex images" in message
+            or "Generate fresh Codex images" in message
+            or "AI image assets are missing for scene" in message
             or "Reusable image library assets cannot be used" in message
             or "Fresh article-specific images are required" in message
             or "not SVG fallback assets" in message

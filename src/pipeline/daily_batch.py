@@ -33,6 +33,7 @@ from zoneinfo import ZoneInfo
 
 
 KST = ZoneInfo("Asia/Seoul")
+MAX_RECOVERY_ATTEMPTS = 3
 
 
 def run(
@@ -54,6 +55,7 @@ def run(
         result["status"] = "skipped_daily_limit"
         result["note"] = "오늘 공개 글 수가 목표 상한에 도달해 추가 발행하지 않았습니다."
         save_batch_report(result)
+        save_recovery_report(build_recovery_report(result))
         if notify:
             notify_batch_completion(result)
         return result
@@ -61,7 +63,7 @@ def run(
     selected = select_seed_candidates(
         site=settings.site_key,
         content_domain=settings.content_domain,
-        max_posts=remaining_slots,
+        max_posts=1 if explicit_seed else recovery_candidate_limit(remaining_slots),
         explicit_seed=explicit_seed,
     )
     result = build_batch_result(settings.site_key, max_posts, existing_today)
@@ -71,20 +73,13 @@ def run(
         if len(result["published"]) >= remaining_slots:
             break
         seed = candidate["seed"]
+        article_dir: Path | None = None
         try:
             article_dir = run_stage1(seed, settings.site_key)
             result_path = run_publish_with_duplicate_guard(article_dir, settings.site_key)
         except Exception as exc:
             if is_quality_gate_failure(exc):
-                result["held"].append(
-                    {
-                        "seed": seed,
-                        "article_type": candidate["article_type"],
-                        "category": candidate["category"],
-                        "reason": "quality_gate_failed",
-                        "error": str(exc),
-                    }
-                )
+                result["held"].append(recover_quality_failure(candidate, exc, article_dir))
                 continue
             save_daily_failure_report(seed, exc, settings.site_key, mode)
             result["failed"].append(
@@ -124,10 +119,16 @@ def run(
 
     result["status"] = "published" if result["published"] else "held_no_publishable_candidates"
     result["created_at"] = datetime.utcnow().isoformat() + "Z"
+    result["post_publish_checks"] = run_post_publish_checks(settings.site_key, result.get("published") or [])
     save_batch_report(result)
+    save_recovery_report(build_recovery_report(result))
     if notify:
         notify_batch_completion(result)
     return result
+
+
+def recovery_candidate_limit(remaining_slots: int) -> int:
+    return max(remaining_slots, remaining_slots * MAX_RECOVERY_ATTEMPTS)
 
 
 def select_seed_candidates(
@@ -185,6 +186,15 @@ def select_seed_candidates(
         selected_categories.add(category)
         if len(selected) >= max_posts:
             break
+    if len(selected) < max_posts:
+        selected_seeds = {item["seed"] for item in selected}
+        for candidate in candidates:
+            if candidate["seed"] in selected_seeds:
+                continue
+            selected.append(candidate)
+            selected_seeds.add(candidate["seed"])
+            if len(selected) >= max_posts:
+                break
     return selected
 
 
@@ -252,12 +262,256 @@ def build_batch_result(site: str, max_posts: int, existing_today: int) -> dict:
     }
 
 
+def recover_quality_failure(candidate: dict, exc: Exception, article_dir: Path | None = None) -> dict:
+    classification = classify_recovery_issue(str(exc), article_dir)
+    return {
+        "seed": candidate.get("seed"),
+        "article_type": candidate.get("article_type"),
+        "category": candidate.get("category"),
+        "reason": "quality_gate_failed",
+        "recovery_status": classification["recovery_status"],
+        "recovery_issue_type": classification["issue_type"],
+        "error": str(exc),
+        "article_dir": str(article_dir) if article_dir else "",
+        "quality_issue_codes": classification["quality_issue_codes"],
+        "attempts": classification["attempts"],
+        "next_action": classification["next_action"],
+    }
+
+
+def classify_recovery_issue(error: str, article_dir: Path | None = None) -> dict:
+    issue_codes = quality_issue_codes(article_dir)
+    text = " ".join([error, " ".join(issue_codes)]).casefold()
+
+    if any(token in text for token in [
+        "required codex-generated image assets are missing",
+        "ai image assets are missing for scene",
+        "image assets are missing for scene",
+        "generate fresh article-specific codex images",
+        "generate fresh codex images",
+        "reusable image library assets",
+        "fresh article-specific images are required",
+        "not svg fallback assets",
+        "data:image",
+        "general fallback",
+        "image_plan",
+        "missing_required_image_assets",
+        "missing_images",
+        "weak_image_plan",
+        "weak_image_alt_text",
+        "weak_image_caption",
+        "unsafe_windows_image_label",
+        "unsafe_windows_image_prompt",
+        "reused_image_url",
+        "svg",
+    ]):
+        return recovery_classification(
+            "image_issue",
+            "codex_image_required",
+            issue_codes,
+            "Codex에서 주제별 새 JPG 이미지를 생성해 hosted assets에 저장한 뒤 Hades 재검수를 실행하세요.",
+            attempts=0,
+        )
+    if any(token in text for token in [
+        "dead_microsoft",
+        "weak_sources",
+        "weak_microsoft_sources",
+        "missing_microsoft_source",
+        "shallow_microsoft_sources",
+        "official_link",
+        "research_report",
+    ]):
+        return recovery_classification(
+            "source_issue",
+            "candidate_replaced",
+            issue_codes,
+            "직접 공식/플랫폼 출처를 보강하고 Hades 재검수를 실행하세요. 자동 배치는 다음 후보로 보정 발행을 시도합니다.",
+        )
+    if any(token in text for token in [
+        "duplicate",
+        "near_duplicate",
+        "title_pattern",
+        "topic_overlap",
+    ]):
+        return recovery_classification(
+            "duplicate_issue",
+            "candidate_replaced",
+            issue_codes,
+            "중복 각도는 발행하지 말고 주간 큐의 다음 비중복 후보로 교체하세요.",
+        )
+    if any(token in text for token in [
+        "topic_alignment",
+        "intent",
+        "category_mismatch",
+    ]):
+        return recovery_classification(
+            "topic_issue",
+            "candidate_replaced",
+            issue_codes,
+            "주제와 본문 각도를 맞추거나 다음 검색 의도 후보로 교체하세요.",
+        )
+    if any(token in text for token in [
+        "oauth",
+        "credentials",
+        "unauthorized",
+        "forbidden",
+        "blogger",
+        "api",
+    ]):
+        return recovery_classification(
+            "auth_or_api_issue",
+            "human_action_required",
+            issue_codes,
+            "Google/Blogger 인증과 API 응답을 확인해야 합니다. 약한 글로 대체하지 마세요.",
+            attempts=0,
+        )
+    return recovery_classification(
+        "content_issue",
+        "candidate_replaced",
+        issue_codes,
+        "본문, FAQ, 내부 링크, 안전 경고를 보강하고 Hades 재검수를 실행하세요. 자동 배치는 다음 후보로 보정 발행을 시도합니다.",
+    )
+
+
+def recovery_classification(
+    issue_type: str,
+    status: str,
+    issue_codes: list[str],
+    next_action: str,
+    attempts: int = MAX_RECOVERY_ATTEMPTS,
+) -> dict:
+    return {
+        "issue_type": issue_type,
+        "recovery_status": status,
+        "quality_issue_codes": issue_codes,
+        "attempts": attempts,
+        "next_action": next_action,
+    }
+
+
+def quality_issue_codes(article_dir: Path | None) -> list[str]:
+    if not article_dir:
+        return []
+    report_path = article_dir / "quality_report.json"
+    if not report_path.exists():
+        return []
+    report = read_json(report_path)
+    return [str(issue.get("code", "")) for issue in report.get("issues", []) if issue.get("code")]
+
+
+def build_recovery_report(result: dict) -> dict:
+    held = result.get("held") or []
+    failed = result.get("failed") or []
+    skipped = result.get("skipped") or []
+    published = result.get("published") or []
+    target = int(result.get("max_posts") or 0)
+    existing_today = int(result.get("existing_today_count") or 0)
+    public_total = existing_today + len(published)
+    missing_count = max(0, target - public_total)
+    issue_counts: dict[str, int] = {}
+    status_counts: dict[str, int] = {}
+    for item in held:
+        issue_type = item.get("recovery_issue_type") or "unknown"
+        status = item.get("recovery_status") or "unknown"
+        issue_counts[issue_type] = issue_counts.get(issue_type, 0) + 1
+        status_counts[status] = status_counts.get(status, 0) + 1
+
+    if missing_count == 0:
+        status = "recovered" if held or failed or skipped else "not_needed"
+    elif status_counts.get("codex_image_required"):
+        status = "codex_image_required"
+    elif failed:
+        status = "recovery_failed"
+    else:
+        status = "partial_recovery" if published else "recovery_failed"
+
+    return {
+        "site": result.get("site"),
+        "checked_at_kst": datetime.now(tz=KST).isoformat(),
+        "target_posts": target,
+        "existing_today_count": existing_today,
+        "published_count": len(published),
+        "public_total_after_batch": public_total,
+        "missing_count": missing_count,
+        "status": status,
+        "issue_counts": issue_counts,
+        "status_counts": status_counts,
+        "published": published,
+        "held": held,
+        "skipped": skipped,
+        "failed": failed,
+        "attempted_candidates": result.get("selected_candidates") or [],
+        "next_actions": recovery_next_actions(status, held, failed, missing_count),
+    }
+
+
+def recovery_next_actions(status: str, held: list[dict], failed: list[dict], missing_count: int) -> list[str]:
+    if status in {"not_needed", "recovered"}:
+        return ["오늘 목표 발행 수가 공개 피드 기준으로 충족됐습니다."]
+    actions = []
+    if missing_count:
+        actions.append(f"아직 {missing_count}개 슬롯이 부족합니다. 약한 글을 발행하지 말고 복구 원인을 먼저 처리하세요.")
+    if any(item.get("recovery_status") == "codex_image_required" for item in held):
+        actions.append("Codex 이미지 복구 필요: 주제별 새 JPG 이미지를 생성하고 hosted assets에 저장한 뒤 재검수/보정 발행하세요.")
+    if any(item.get("recovery_issue_type") == "source_issue" for item in held):
+        actions.append("공식 출처 보강 필요: shortcut/dead/generic 링크를 직접 공식 문서 링크로 교체하세요.")
+    if any(item.get("recovery_issue_type") == "content_issue" for item in held):
+        actions.append("본문 보강 필요: 얇은 섹션, FAQ, 내부 링크, 안전 경고를 보강하세요.")
+    if any(item.get("recovery_issue_type") == "auth_or_api_issue" for item in held) or failed:
+        actions.append("인증/API 실패는 자동 대체 발행으로 해결하지 말고 Google/Blogger 권한과 workflow 로그를 확인하세요.")
+    return actions
+
+
+def save_recovery_report(report: dict) -> Path:
+    output_dir = ROOT_DIR / "reports"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    path = output_dir / f"{report['site']}-daily-recovery-report.json"
+    path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    return path
+
+
 def save_batch_report(result: dict) -> Path:
     output_dir = ROOT_DIR / "reports"
     output_dir.mkdir(parents=True, exist_ok=True)
     path = output_dir / f"{result['site']}-daily-batch-success.json"
     path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
     return path
+
+
+def run_post_publish_checks(site: str, published: list[dict]) -> dict:
+    checks: dict = {"adsense_readiness": {}, "repurpose": []}
+    try:
+        from src.reporting.adsense_readiness import run as run_adsense_readiness
+
+        readiness = run_adsense_readiness(site, notify=False)
+        checks["adsense_readiness"] = {
+            "status": readiness.get("status"),
+            "status_label": readiness.get("status_label"),
+            "posts_needing_fix_count": readiness.get("posts_needing_fix_count"),
+        }
+    except Exception as exc:
+        checks["adsense_readiness"] = {"status": "error", "error": str(exc)}
+
+    if not published:
+        return checks
+    try:
+        from src.pipeline.stage6_repurpose_content import run as run_repurpose
+
+        for item in published:
+            url = item.get("url")
+            if not url:
+                continue
+            manifest = run_repurpose(site, post_url=url)
+            checks["repurpose"].append(
+                {
+                    "title": manifest.get("source_title"),
+                    "url": manifest.get("source_url"),
+                    "output_dir": manifest.get("output_dir"),
+                }
+            )
+    except Exception as exc:
+        checks["repurpose_error"] = str(exc)
+    return checks
 
 
 def notify_batch_completion(result: dict) -> None:
@@ -320,12 +574,14 @@ def build_combined_morning_message(now: datetime | None = None) -> str:
     site_results = [combined_site_result(site_key, target_per_site, now) for site_key in site_keys]
     total_published = sum(len(item.get("posts") or []) for item in site_results)
     total_target = target_per_site * len(site_results)
+    recovery_summary = combined_recovery_summary(site_keys)
 
     lines = [
         "[Posting Bot] 매일 아침 통합 포스팅 결과",
         "",
         f"- 전체 목표: {total_target}개",
         f"- 공개 확인: {total_published}개",
+        f"- 복구: 성공 {recovery_summary['recovered']}개 / 이미지 필요 {recovery_summary['codex_image_required']}개 / 실패 {recovery_summary['failed']}개",
         f"- 상태: {'목표 달성' if total_published >= total_target else '목표 미달 또는 피드 반영 대기'}",
         "",
         "블로그별 결과:",
@@ -337,6 +593,8 @@ def build_combined_morning_message(now: datetime | None = None) -> str:
                 "",
                 f"[{item['site_name']}] {count}/{item['target']}개",
                 f"- 사이트: {item['site_url']}",
+                f"- 애드센스 준비: {readiness_line(item['site'])}",
+                f"- 복구 상태: {recovery_line(item['site'])}",
             ]
         )
         if item.get("error"):
@@ -366,6 +624,43 @@ def build_combined_morning_message(now: datetime | None = None) -> str:
     return "\n".join(lines)
 
 
+def combined_recovery_summary(site_keys: list[str]) -> dict:
+    summary = {"recovered": 0, "codex_image_required": 0, "failed": 0}
+    for site_key in site_keys:
+        report = read_recovery_report(site_key)
+        status = report.get("status")
+        if status == "recovered":
+            summary["recovered"] += int(report.get("published_count") or 0)
+        elif status == "codex_image_required":
+            summary["codex_image_required"] += int(report.get("missing_count") or 1)
+        elif status in {"recovery_failed", "partial_recovery"}:
+            summary["failed"] += int(report.get("missing_count") or 1)
+    return summary
+
+
+def recovery_line(site: str) -> str:
+    report = read_recovery_report(site)
+    if not report:
+        return "미점검"
+    status = report.get("status", "unknown")
+    missing = report.get("missing_count", 0)
+    if status in {"not_needed", "recovered"}:
+        return f"{status} / 부족 {missing}개"
+    actions = report.get("next_actions") or []
+    suffix = f" / {actions[0]}" if actions else ""
+    return f"{status} / 부족 {missing}개{suffix}"
+
+
+def read_recovery_report(site: str) -> dict:
+    path = ROOT_DIR / "reports" / f"{site}-daily-recovery-report.json"
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return {"status": "unreadable"}
+
+
 def combined_site_result(site_key: str, target: int, now: datetime | None = None) -> dict:
     settings = load_settings(site_key)
     try:
@@ -387,6 +682,19 @@ def combined_site_result(site_key: str, target: int, now: datetime | None = None
             "posts": [],
             "error": str(exc),
         }
+
+
+def readiness_line(site: str) -> str:
+    path = ROOT_DIR / "reports" / f"{site}-adsense-readiness-report.json"
+    if not path.exists():
+        return "미점검"
+    try:
+        report = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return "점검 리포트 읽기 실패"
+    label = report.get("status_label") or report.get("status") or "unknown"
+    needs_fix = report.get("posts_needing_fix_count", 0)
+    return f"{label} / 보강 필요 {needs_fix}개"
 
 
 def today_public_posts(site_url: str, now: datetime | None = None) -> list[dict]:

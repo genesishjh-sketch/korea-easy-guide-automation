@@ -8,12 +8,47 @@ from unittest.mock import patch
 from src.content.article_types import infer_article_type
 from src.pipeline import daily_batch
 from src.pipeline.daily_batch import build_combined_morning_message
+from src.pipeline.daily_batch import classify_recovery_issue
 from src.pipeline.daily_batch import notify_batch_completion
+from src.pipeline.daily_batch import recovery_candidate_limit
 from src.pipeline.daily_batch import select_seed_candidates
 from src.pipeline.daily_batch import seed_matches_existing_public_title
 
 
 class DailyBatchSelectionTests(unittest.TestCase):
+    def test_recovery_candidate_limit_allows_replacement_candidates(self) -> None:
+        self.assertEqual(recovery_candidate_limit(1), 3)
+        self.assertEqual(recovery_candidate_limit(3), 9)
+
+    def test_recovery_classifies_reusable_images_as_codex_required(self) -> None:
+        result = classify_recovery_issue(
+            "Reusable image library assets cannot be used for public publishing. Generate fresh article-specific Codex images.",
+            None,
+        )
+
+        self.assertEqual(result["issue_type"], "image_issue")
+        self.assertEqual(result["recovery_status"], "codex_image_required")
+        self.assertIn("Codex", result["next_action"])
+
+    def test_recovery_classifies_missing_scene_images_as_codex_required(self) -> None:
+        result = classify_recovery_issue(
+            "FileNotFoundError: Windows AI image assets are missing for scene 'printer'. "
+            "Generate fresh Codex images for this article and save them before publishing.",
+            None,
+        )
+
+        self.assertEqual(result["issue_type"], "image_issue")
+        self.assertEqual(result["recovery_status"], "codex_image_required")
+
+    def test_recovery_classifies_dead_microsoft_links_as_source_issue(self) -> None:
+        result = classify_recovery_issue(
+            "Hades quality gate failed with score 88/90: dead_microsoft_research_links",
+            None,
+        )
+
+        self.assertEqual(result["issue_type"], "source_issue")
+        self.assertEqual(result["recovery_status"], "candidate_replaced")
+
     def test_windows_article_type_classification_separates_code_symptom_and_beginner(self) -> None:
         self.assertEqual(
             infer_article_type("windows update error 0x80070005", "Windows Update", "windows_help"),
@@ -213,6 +248,7 @@ class DailyBatchSelectionTests(unittest.TestCase):
 
         self.assertIn("전체 목표: 6개", message)
         self.assertIn("공개 확인: 3개", message)
+        self.assertIn("복구: 성공 0개 / 이미지 필요 0개 / 실패 0개", message)
         self.assertIn("[Easy PC Fix Guide] 1/3개", message)
         self.assertIn("[Korea Easy Guide] 2/3개", message)
         self.assertIn("PC One", message)
