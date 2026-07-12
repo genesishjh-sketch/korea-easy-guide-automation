@@ -1,0 +1,503 @@
+{
+  "site": "korea_easy_guide",
+  "site_name": "Korea Easy Guide",
+  "site_url": "https://koreaeasyguide.blogspot.com",
+  "week": "2026-W29",
+  "created_at": "2026-07-12T23:24:14.618552+09:00",
+  "start_date": "2026-07-13",
+  "end_date": "2026-07-19",
+  "days": 7,
+  "posts_per_day": 3,
+  "status": "approved",
+  "duplicate_policy": {
+    "title_similarity_block": 0.72,
+    "topic_overlap_block": 0.82,
+    "published_and_generated_history_checked": true,
+    "weekly_selected_topics_checked": true
+  },
+  "topic_mix_policy": {
+    "daily_slots": [
+      {
+        "slot_number": 1,
+        "slot_strategy": "evergreen",
+        "purpose": "stable search demand"
+      },
+      {
+        "slot_number": 2,
+        "slot_strategy": "evergreen",
+        "purpose": "stable search demand"
+      },
+      {
+        "slot_number": 3,
+        "slot_strategy": "trend_or_seasonal",
+        "purpose": "seasonal, recent-update, or issue-sensitive demand"
+      }
+    ],
+    "note": "If no safe trend/seasonal candidate passes duplicate and quality checks, the slot falls back to evergreen."
+  },
+  "items": [
+    {
+      "date": "2026-07-13",
+      "site": "korea_easy_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Korea travel/living demand",
+      "strategy_fallback": false,
+      "seed": "korea luggage storage guide for travelers",
+      "topic": "korea luggage storage guide for travelers",
+      "category": "Travel Basics",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'korea luggage storage guide for travelers'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-13",
+      "site": "korea_easy_guide",
+      "slot_number": 2,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Korea travel/living demand",
+      "strategy_fallback": false,
+      "seed": "myeongdong vs hongdae vs gangnam where to stay",
+      "topic": "myeongdong vs hongdae vs gangnam where to stay",
+      "category": "Accommodation",
+      "article_type": "comparison",
+      "intent": "comparison",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'myeongdong vs hongdae vs gangnam where to stay'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-13",
+      "site": "korea_easy_guide",
+      "slot_number": 3,
+      "slot_strategy": "trend_or_seasonal",
+      "actual_topic_strategy": "trend_or_seasonal",
+      "strategy_reason": "Korea seasonal, trip-timing, or urgent travel demand",
+      "strategy_fallback": false,
+      "seed": "korea airport pickup vs taxi vs train",
+      "topic": "korea airport pickup vs taxi vs train",
+      "category": "Transportation",
+      "article_type": "comparison",
+      "intent": "comparison",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'korea airport pickup vs taxi vs train'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-14",
+      "site": "korea_easy_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Korea travel/living demand",
+      "strategy_fallback": false,
+      "seed": "seoul hotel check in rules for foreigners",
+      "topic": "seoul hotel check in rules for foreigners",
+      "category": "Accommodation",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'seoul hotel check in rules for foreigners'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-14",
+      "site": "korea_easy_guide",
+      "slot_number": 2,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Korea travel/living demand",
+      "strategy_fallback": false,
+      "seed": "korea jjimjilbang guide for foreigners",
+      "topic": "korea jjimjilbang guide for foreigners",
+      "category": "Travel Basics",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'korea jjimjilbang guide for foreigners'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-14",
+      "site": "korea_easy_guide",
+      "slot_number": 3,
+      "slot_strategy": "trend_or_seasonal",
+      "actual_topic_strategy": "trend_or_seasonal",
+      "strategy_reason": "Korea seasonal, trip-timing, or urgent travel demand",
+      "strategy_fallback": false,
+      "seed": "seoul airport night arrival guide",
+      "topic": "seoul airport night arrival guide",
+      "category": "Transportation",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'seoul airport night arrival guide'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-15",
+      "site": "korea_easy_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Korea travel/living demand",
+      "strategy_fallback": false,
+      "seed": "korea guesthouse etiquette for tourists",
+      "topic": "korea guesthouse etiquette for tourists",
+      "category": "Accommodation",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'korea guesthouse etiquette for tourists'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-15",
+      "site": "korea_easy_guide",
+      "slot_number": 2,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Korea travel/living demand",
+      "strategy_fallback": false,
+      "seed": "how to order food in korean restaurants",
+      "topic": "how to order food in korean restaurants",
+      "category": "Food & Delivery",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'how to order food in korean restaurants'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-15",
+      "site": "korea_easy_guide",
+      "slot_number": 3,
+      "slot_strategy": "trend_or_seasonal",
+      "actual_topic_strategy": "trend_or_seasonal",
+      "strategy_reason": "Korea seasonal, trip-timing, or urgent travel demand",
+      "strategy_fallback": false,
+      "seed": "korea emergency numbers for tourists",
+      "topic": "korea emergency numbers for tourists",
+      "category": "Travel Basics",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'korea emergency numbers for tourists'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-16",
+      "site": "korea_easy_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Korea travel/living demand",
+      "strategy_fallback": false,
+      "seed": "how to use kiosks in korea restaurants",
+      "topic": "how to use kiosks in korea restaurants",
+      "category": "Food & Delivery",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'how to use kiosks in korea restaurants'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-16",
+      "site": "korea_easy_guide",
+      "slot_number": 2,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Korea travel/living demand",
+      "strategy_fallback": false,
+      "seed": "olive young shopping guide for tourists",
+      "topic": "olive young shopping guide for tourists",
+      "category": "Travel Basics",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'olive young shopping guide for tourists'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-16",
+      "site": "korea_easy_guide",
+      "slot_number": 3,
+      "slot_strategy": "trend_or_seasonal",
+      "actual_topic_strategy": "trend_or_seasonal",
+      "strategy_reason": "Korea seasonal, trip-timing, or urgent travel demand",
+      "strategy_fallback": false,
+      "seed": "what to do if you lose passport in korea",
+      "topic": "what to do if you lose passport in korea",
+      "category": "Travel Basics",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'what to do if you lose passport in korea'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-17",
+      "site": "korea_easy_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Korea travel/living demand",
+      "strategy_fallback": false,
+      "seed": "korea convenience store payment guide",
+      "topic": "korea convenience store payment guide",
+      "category": "Food & Delivery",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'korea convenience store payment guide'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-17",
+      "site": "korea_easy_guide",
+      "slot_number": 2,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Korea travel/living demand",
+      "strategy_fallback": false,
+      "seed": "korea duty free shopping guide",
+      "topic": "korea duty free shopping guide",
+      "category": "Travel Basics",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'korea duty free shopping guide'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-17",
+      "site": "korea_easy_guide",
+      "slot_number": 3,
+      "slot_strategy": "trend_or_seasonal",
+      "actual_topic_strategy": "trend_or_seasonal",
+      "strategy_reason": "Korea seasonal, trip-timing, or urgent travel demand",
+      "strategy_fallback": false,
+      "seed": "korea weather and packing guide by season",
+      "topic": "korea weather and packing guide by season",
+      "category": "Travel Basics",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'korea weather and packing guide by season'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-18",
+      "site": "korea_easy_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Korea travel/living demand",
+      "strategy_fallback": false,
+      "seed": "how to use naver reservation in korea",
+      "topic": "how to use naver reservation in korea",
+      "category": "Apps in Korea",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'how to use naver reservation in korea'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-18",
+      "site": "korea_easy_guide",
+      "slot_number": 2,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Korea travel/living demand",
+      "strategy_fallback": false,
+      "seed": "how to call a taxi without korean phone number",
+      "topic": "how to call a taxi without korean phone number",
+      "category": "Transportation",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'how to call a taxi without korean phone number'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-18",
+      "site": "korea_easy_guide",
+      "slot_number": 3,
+      "slot_strategy": "trend_or_seasonal",
+      "actual_topic_strategy": "trend_or_seasonal",
+      "strategy_reason": "Korea seasonal, trip-timing, or urgent travel demand",
+      "strategy_fallback": false,
+      "seed": "korea public holidays travel tips",
+      "topic": "korea public holidays travel tips",
+      "category": "Travel Basics",
+      "article_type": "checklist",
+      "intent": "checklist",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'korea public holidays travel tips'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-19",
+      "site": "korea_easy_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Korea travel/living demand",
+      "strategy_fallback": false,
+      "seed": "papago translation app guide for korea",
+      "topic": "papago translation app guide for korea",
+      "category": "Apps in Korea",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'papago translation app guide for korea'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-19",
+      "site": "korea_easy_guide",
+      "slot_number": 2,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Korea travel/living demand",
+      "strategy_fallback": false,
+      "seed": "korea hospital and pharmacy guide for foreigners",
+      "topic": "korea hospital and pharmacy guide for foreigners",
+      "category": "Travel Basics",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'korea hospital and pharmacy guide for foreigners'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-19",
+      "site": "korea_easy_guide",
+      "slot_number": 3,
+      "slot_strategy": "trend_or_seasonal",
+      "actual_topic_strategy": "trend_or_seasonal",
+      "strategy_reason": "Korea seasonal, trip-timing, or urgent travel demand",
+      "strategy_fallback": false,
+      "seed": "korea working holiday first week checklist",
+      "topic": "korea working holiday first week checklist",
+      "category": "Travel Basics",
+      "article_type": "checklist",
+      "intent": "checklist",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'korea working holiday first week checklist'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    }
+  ],
+  "candidate_pool_count": 74
+}
