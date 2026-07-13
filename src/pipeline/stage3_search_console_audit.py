@@ -39,7 +39,7 @@ def run(site: str | None = None, inspection_count: int = DEFAULT_INSPECTION_COUN
     result["current_live_checks"] = [
         check_live_indexability(item["url"])
         for item in result["url_inspections"]
-        if item.get("page_fetch_state") == "REDIRECT_ERROR"
+        if item.get("status") == "connected" and item.get("url")
     ]
     result["summary"] = summarize_audit(result)
     result["action_items"] = action_items(result)
@@ -62,6 +62,10 @@ def summarize_audit(result: dict) -> dict:
     historical_redirects = [item for item in inspections if item.get("page_fetch_state") == "REDIRECT_ERROR"]
     live_checks = result.get("current_live_checks", [])
     live_failures = [item for item in live_checks if not item.get("ok")]
+    live_by_url = {item.get("url"): item for item in live_checks}
+    resolved_historical_redirects = sum(
+        bool(live_by_url.get(item.get("url"), {}).get("ok")) for item in historical_redirects
+    )
     return {
         "inspected_count": len(inspections),
         "indexed_count": len(indexed),
@@ -71,7 +75,7 @@ def summarize_audit(result: dict) -> dict:
         "sitemap_errors": sitemap_errors,
         "sitemap_warnings": sitemap_warnings,
         "historical_redirect_error_count": len(historical_redirects),
-        "resolved_historical_redirect_count": len(historical_redirects) - len(live_failures),
+        "resolved_historical_redirect_count": resolved_historical_redirects,
         "current_live_indexability_failure_count": len(live_failures),
         "structural_error": bool(errors or sitemap_errors or sitemap_warnings or live_failures),
     }

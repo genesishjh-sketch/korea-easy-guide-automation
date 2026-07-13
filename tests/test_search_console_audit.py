@@ -24,6 +24,7 @@ class SearchConsoleAuditTests(unittest.TestCase):
             "url_inspections": [
                 {
                     "status": "connected",
+                    "url": "https://example.com/post.html",
                     "verdict": "NEUTRAL",
                     "coverage_state": "Discovered - currently not indexed",
                     "page_fetch_state": "PAGE_FETCH_STATE_UNSPECIFIED",
@@ -58,6 +59,7 @@ class SearchConsoleAuditTests(unittest.TestCase):
             "url_inspections": [
                 {
                     "status": "connected",
+                    "url": "https://example.com/post.html",
                     "verdict": "NEUTRAL",
                     "coverage_state": "Redirect error",
                     "page_fetch_state": "REDIRECT_ERROR",
@@ -69,6 +71,26 @@ class SearchConsoleAuditTests(unittest.TestCase):
         self.assertEqual(summary["historical_redirect_error_count"], 1)
         self.assertEqual(summary["resolved_historical_redirect_count"], 1)
         self.assertFalse(summary["structural_error"])
+
+    def test_current_live_failure_blocks_even_without_historical_redirect(self) -> None:
+        result = {
+            "sitemaps": {"status": "connected", "sitemaps": [{"errors": 0, "warnings": 0}]},
+            "url_inspections": [
+                {
+                    "status": "connected",
+                    "url": "https://example.com/new.html",
+                    "verdict": "NEUTRAL",
+                    "coverage_state": "URL is unknown to Google",
+                    "page_fetch_state": "PAGE_FETCH_STATE_UNSPECIFIED",
+                }
+            ],
+            "current_live_checks": [
+                {"url": "https://example.com/new.html", "ok": False, "issues": ["canonical_mismatch"]}
+            ],
+        }
+        summary = summarize_audit(result)
+        self.assertEqual(summary["current_live_indexability_failure_count"], 1)
+        self.assertTrue(summary["structural_error"])
 
 
 if __name__ == "__main__":
