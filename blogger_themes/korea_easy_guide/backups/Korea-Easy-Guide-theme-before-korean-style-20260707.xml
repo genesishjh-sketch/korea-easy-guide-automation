@@ -26,53 +26,47 @@
 
   /* ======= TOKENS ======= */
   :root{
-    --pink:#C94F5D; --pink-deep:#993743; --pink-50:#FFF0F1;
-    --dancheong-red:#C94F5D; --dancheong-blue:#1E6F8C; --celadon:#8FB9A8; --hanji:#FBF7EF; --gold:#C49A47; --inkstone:#1D2630;
-    --band1:#F7E9D6; --band2:#E6F0EA; --band-ink:#18242B; --band-sub:#665141;
-    --blue:#1E6F8C; --navy:#18242B;
-    --bg:#FBF7EF; --surface:#ffffff;
-    --ink:#18242B; --body:#39434A; --muted:#68747A; --faint:#9B9286;
-    --border:#E7DCCB; --line:#DED3C2;
-    --shadow:0 6px 20px rgba(48,38,25,.06); --shadow-lg:0 14px 40px rgba(48,38,25,.13);
-    --radius:12px;
+    --pink:#EC6A8C; --pink-deep:#C84E72; --pink-50:#FDEFF3;
+    --band1:#FBE2DE; --band2:#F8C9C1; --band-ink:#1F2430; --band-sub:#7A3B47;
+    --blue:#6AA6EC; --navy:#243353;
+    --bg:#FFFBFC; --surface:#ffffff;
+    --ink:#1F2430; --body:#3A3742; --muted:#7A7682; --faint:#A89BA1;
+    --border:#EFE2E6; --line:#E7DBDF;
+    --shadow:0 4px 16px rgba(40,30,45,.05); --shadow-lg:0 10px 30px rgba(40,30,45,.10);
+    --radius:16px;
   }
   @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
-    --pink:#E47C84; --pink-deep:#F2A1A7; --pink-50:rgba(228,124,132,.14);
-    --dancheong-red:#E47C84; --dancheong-blue:#7FB7C9; --celadon:#9FC8B8; --hanji:#191815; --gold:#D5B66D; --inkstone:#F4EFE4;
-    --band1:#201B17; --band2:#172126; --band-ink:#F4EFE4; --band-sub:#D6BDA1;
-    --blue:#7FB7C9; --navy:#0F1518;
-    --bg:#151411; --surface:#211F1A;
-    --ink:#F4EFE4; --body:#D8D0C3; --muted:#AAA094; --faint:#82786F;
-    --border:#39342B; --line:#453D33;
+    --pink:#F491AC; --pink-deep:#F07F9D; --pink-50:rgba(244,145,172,.14);
+    --band1:#241A20; --band2:#2A1E26; --band-ink:#F3EEF4; --band-sub:#E6A7B5;
+    --blue:#8FA8CE; --navy:#0F0E13;
+    --bg:#16151A; --surface:#221F29;
+    --ink:#F3EEF4; --body:#D7D0DA; --muted:#A89BA1; --faint:#857C8A;
+    --border:#34303D; --line:#3A3645;
     --shadow:0 4px 16px rgba(0,0,0,.3); --shadow-lg:0 10px 30px rgba(0,0,0,.45);
   }}
   :root[data-theme="dark"]{
-    --pink:#E47C84; --pink-deep:#F2A1A7; --pink-50:rgba(228,124,132,.14);
-    --dancheong-red:#E47C84; --dancheong-blue:#7FB7C9; --celadon:#9FC8B8; --hanji:#191815; --gold:#D5B66D; --inkstone:#F4EFE4;
-    --band1:#201B17; --band2:#172126; --band-ink:#F4EFE4; --band-sub:#D6BDA1;
-    --blue:#7FB7C9; --navy:#0F1518;
-    --bg:#151411; --surface:#211F1A;
-    --ink:#F4EFE4; --body:#D8D0C3; --muted:#AAA094; --faint:#82786F;
-    --border:#39342B; --line:#453D33;
+    --pink:#F491AC; --pink-deep:#F07F9D; --pink-50:rgba(244,145,172,.14);
+    --band1:#241A20; --band2:#2A1E26; --band-ink:#F3EEF4; --band-sub:#E6A7B5;
+    --blue:#8FA8CE; --navy:#0F0E13;
+    --bg:#16151A; --surface:#221F29;
+    --ink:#F3EEF4; --body:#D7D0DA; --muted:#A89BA1; --faint:#857C8A;
+    --border:#34303D; --line:#3A3645;
     --shadow:0 4px 16px rgba(0,0,0,.3); --shadow-lg:0 10px 30px rgba(0,0,0,.45);
   }
 
   /* ======= BASE ======= */
   *{box-sizing:border-box}
-  body{margin:0;background:
-    radial-gradient(circle at 12px 12px, rgba(196,154,71,.08) 1px, transparent 1.2px) 0 0/28px 28px,
-    linear-gradient(180deg,var(--bg),#fffaf1 520px,var(--bg));
-    color:var(--body);font:400 16px/1.75 'Pretendard',-apple-system,sans-serif;-webkit-font-smoothing:antialiased;transition:background .25s,color .25s}
+  body{margin:0;background:var(--bg);color:var(--body);font:400 16px/1.75 'Pretendard',-apple-system,sans-serif;-webkit-font-smoothing:antialiased;transition:background .25s,color .25s}
   a{color:inherit;text-decoration:none}
   img{max-width:100%;display:block}
   h1,h2,h3{font-family:'Pretendard',sans-serif;color:var(--ink);letter-spacing:-.01em}
   .wrap{max-width:1180px;margin:0 auto;padding:0 24px}
 
   /* ======= TOP NAV ======= */
-  .topbar{background:rgba(255,255,255,.92);border-bottom:1px solid var(--border);backdrop-filter:saturate(160%) blur(14px);position:sticky;top:0;z-index:20}
+  .topbar{background:var(--surface);border-bottom:1px solid var(--border)}
   .topbar .wrap{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;gap:16px}
   .brand{display:flex;align-items:center;gap:11px}
-  .brand .tile{width:38px;height:38px;border-radius:11px;background:#fff;border:1px solid #E9D8BF;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(196,154,71,.18);flex-shrink:0}
+  .brand .tile{width:38px;height:38px;border-radius:11px;background:#fff;border:1px solid #F1DBE1;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(236,106,140,.16);flex-shrink:0}
   :root[data-theme="dark"] .brand .tile,:root:not([data-theme="light"]) .brand .tile{background:var(--surface);border-color:var(--line)}
   .brand .name{font:800 19px 'Pretendard',sans-serif;color:var(--ink)}
   .brand .name span{font-weight:500}
@@ -87,16 +81,12 @@
   .hamburger span{height:2px;background:var(--ink);border-radius:2px}
 
   /* ======= HERO BAND ======= */
-  .hero{position:relative;background:
-    linear-gradient(135deg,rgba(196,154,71,.22),transparent 32%),
-    radial-gradient(circle at 84% 18%,rgba(30,111,140,.16),transparent 26%),
-    linear-gradient(180deg,var(--band1),var(--band2));overflow:hidden;border-bottom:1px solid rgba(196,154,71,.2)}
-  .hero:before{content:"";position:absolute;left:0;right:0;top:0;height:7px;background:linear-gradient(90deg,var(--dancheong-red) 0 20%,var(--dancheong-blue) 20% 40%,var(--gold) 40% 60%,var(--celadon) 60% 80%,var(--dancheong-red) 80% 100%)}
-  .hero .wrap{position:relative;padding:58px 24px 68px}
-  .hero .hanok{position:absolute;right:18px;bottom:0;width:430px;height:92%;background:var(--hanok-img) right bottom/contain no-repeat;opacity:.42;pointer-events:none;filter:saturate(.8)}
+  .hero{position:relative;background:linear-gradient(180deg,var(--band1),var(--band2));overflow:hidden}
+  .hero .wrap{position:relative;padding:46px 24px 60px}
+  .hero .hanok{position:absolute;right:18px;bottom:0;width:390px;height:88%;background:var(--hanok-img) right bottom/contain no-repeat;opacity:.5;pointer-events:none}
   .hero .crumb{font:600 12px 'Pretendard',sans-serif;color:var(--band-sub);letter-spacing:.04em}
-  .hero h1{font:800 46px/1.08 'Pretendard',sans-serif;color:var(--band-ink);margin:10px 0 0;max-width:680px}
-  .hero .sub{font:600 15px 'Pretendard',sans-serif;color:var(--band-sub);margin-top:12px;max-width:620px}
+  .hero h1{font:800 42px/1.12 'Pretendard',sans-serif;color:var(--band-ink);margin:10px 0 0}
+  .hero .sub{font:500 15px 'Pretendard',sans-serif;color:var(--band-sub);margin-top:8px}
   @media (max-width:680px){ .hero .hanok{width:230px;opacity:.4} .hero h1{font-size:30px} }
 
   /* ======= LAYOUT ======= */
@@ -107,32 +97,32 @@
   /* ======= CHIPS ======= */
   .chips{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:26px}
   .chip{padding:9px 17px;border-radius:999px;border:1px solid var(--line);color:var(--body);font:600 12px 'Pretendard',sans-serif}
-  .chip.active{background:var(--ink);color:var(--hanji);border-color:var(--ink)}
+  .chip.active{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 
   /* ======= FEATURED ======= */
-  .featured{position:relative;border-radius:16px;overflow:hidden;height:350px;box-shadow:var(--shadow-lg);margin-bottom:34px;display:block;border:1px solid rgba(196,154,71,.28)}
-  .featured .ph{position:absolute;inset:0;background:linear-gradient(135deg,#F0D6B7,#DDEBE4 52%,#E7F0F4)}
-  .featured .ph:after{content:"Korea travel field guide";position:absolute;right:24px;bottom:20px;color:rgba(24,36,43,.42);font:800 24px 'Pretendard',sans-serif}
+  .featured{position:relative;border-radius:18px;overflow:hidden;height:330px;box-shadow:var(--shadow-lg);margin-bottom:34px;display:block}
+  .featured .ph{position:absolute;inset:0;background:linear-gradient(135deg,#FAD0CB,#DCE7F4)}
+  .featured .ph:after{content:"Korea travel guide";position:absolute;right:24px;bottom:20px;color:rgba(31,36,48,.38);font:800 24px 'Pretendard',sans-serif}
   .featured img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
   .featured .scrim{position:absolute;inset:0;background:linear-gradient(90deg,rgba(31,36,48,.66),rgba(31,36,48,0) 62%)}
   .featured .ct{position:absolute;left:38px;bottom:34px;right:38px;max-width:600px}
-  .featured .ft-tag{display:inline-block;padding:6px 13px;border-radius:8px;background:linear-gradient(90deg,var(--dancheong-red),var(--dancheong-blue));color:#fff;font:700 11px 'Pretendard',sans-serif}
+  .featured .ft-tag{display:inline-block;padding:6px 13px;border-radius:8px;background:var(--pink);color:#fff;font:700 11px 'Pretendard',sans-serif}
   .featured h2{font:800 34px/1.16 'Pretendard',sans-serif;color:#fff;margin:12px 0 0}
   .featured .fm{font:600 12px 'Pretendard',sans-serif;color:rgba(255,255,255,.85);margin-top:10px}
 
   /* ======= SECTION TITLE ======= */
   .sec{display:flex;align-items:flex-end;justify-content:space-between;margin:0 0 18px}
   .sec h2{font:800 23px 'Pretendard',sans-serif;color:var(--ink);margin:0}
-  .sec .all{font:700 13px 'Pretendard',sans-serif;color:var(--dancheong-blue)}
+  .sec .all{font:700 13px 'Pretendard',sans-serif;color:var(--pink-deep)}
 
   /* ======= CARDS ======= */
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
   .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);transition:transform .18s,box-shadow .18s,border-color .18s}
-  .card:hover{transform:translateY(-3px);box-shadow:0 16px 34px rgba(30,111,140,.14);border-color:#D5C19B}
+  .card:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(236,106,140,.18)}
   .card:hover .card-t{color:var(--pink-deep)}
-  .thumb{height:168px;position:relative;background:linear-gradient(135deg,#F0D6B7,#E3EFE8);overflow:hidden}
+  .thumb{height:160px;position:relative;background:linear-gradient(135deg,#FAD0CB,#E8F0F9);overflow:hidden}
   .thumb img{width:100%;height:100%;object-fit:cover}
-  .tag{position:absolute;left:12px;top:12px;padding:4px 11px;border-radius:7px;background:rgba(24,36,43,.82);color:#fff;font:700 9px 'Pretendard',sans-serif;letter-spacing:.04em;text-transform:uppercase}
+  .tag{position:absolute;left:12px;top:12px;padding:4px 11px;border-radius:7px;background:rgba(31,36,48,.78);color:#fff;font:700 9px 'Pretendard',sans-serif;letter-spacing:.04em;text-transform:uppercase}
   .card-b{padding:17px 18px 18px}
   .card-t{font:700 17px/1.32 'Pretendard',sans-serif;color:var(--ink);transition:color .15s}
   .card-x{font:400 13px/1.6 'Pretendard',sans-serif;color:var(--muted);margin-top:8px}
@@ -140,14 +130,14 @@
 
   /* ======= SIDEBAR ======= */
   .widget{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow);position:relative;overflow:hidden}
-  .w-title{font:700 11px 'Pretendard',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--dancheong-blue);margin-bottom:14px}
-  .w-about .stripe{position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,var(--dancheong-red),var(--gold),var(--dancheong-blue))}
-  .w-about .tile{width:44px;height:44px;border-radius:13px;background:#fff;border:1px solid #E9D8BF;display:flex;align-items:center;justify-content:center;margin-top:6px}
+  .w-title{font:700 11px 'Pretendard',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--pink-deep);margin-bottom:14px}
+  .w-about .stripe{position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,var(--pink),var(--blue))}
+  .w-about .tile{width:44px;height:44px;border-radius:13px;background:#fff;border:1px solid #F1DBE1;display:flex;align-items:center;justify-content:center;margin-top:6px}
   :root[data-theme="dark"] .w-about .tile,:root:not([data-theme="light"]) .w-about .tile{background:var(--bg)}
   .w-about h3{font:800 16px 'Pretendard',sans-serif;margin:12px 0 0}
   .w-about p{font:400 12.5px/1.65 'Pretendard',sans-serif;color:var(--muted);margin:7px 0 0}
-  .popular .it{display:flex;gap:13px;align-items:flex-start;padding:8px 0}
-  .popular .n{display:inline-block;min-width:30px;flex:0 0 30px;white-space:nowrap;font:800 17px/1.2 'Pretendard',sans-serif;font-variant-numeric:tabular-nums;color:var(--gold);text-align:left}
+  .popular .it{display:flex;gap:12px;align-items:flex-start;padding:7px 0}
+  .popular .n{font:800 17px 'Pretendard',sans-serif;color:#F49DB8}
   .popular .t{font:700 13px/1.35 'Pretendard',sans-serif;color:var(--ink)}
   .cats a{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font:600 13.5px 'Pretendard',sans-serif;color:var(--body)}
   .cats a:last-child{border-bottom:0}
@@ -155,7 +145,7 @@
   .searchw{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 8px 8px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)}
   .searchw input{border:0;background:transparent;outline:none;font:600 13px 'Pretendard',sans-serif;color:var(--ink);width:100%}
   .searchw input::placeholder{color:var(--faint)}
-  .searchw button{width:38px;height:38px;border-radius:11px;background:var(--dancheong-blue);border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .searchw button{width:38px;height:38px;border-radius:11px;background:var(--pink);border:0;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 
   /* ======= POST ======= */
   .postcard{position:relative;margin:-40px auto 0;max-width:820px;background:var(--surface);border-radius:16px;box-shadow:var(--shadow-lg);padding:26px 32px;border:1px solid var(--border)}
@@ -169,17 +159,17 @@
   .post-body p{margin:0 0 18px}
   .post-body h2{font:800 24px/1.3 'Pretendard',sans-serif;color:var(--ink);margin:32px 0 14px}
   .post-body h3{font:800 20px/1.35 'Pretendard',sans-serif;color:var(--ink);margin:26px 0 12px}
-  .post-body a{color:var(--dancheong-blue);text-decoration:underline;text-underline-offset:3px}
+  .post-body a{color:var(--pink-deep);text-decoration:underline;text-underline-offset:3px}
   .post-body img{max-width:100%;height:auto;border-radius:14px;margin:22px 0}
   .post-body table{display:block;width:100%;max-width:100%;overflow-x:auto;border-collapse:collapse}
   .post-body th,.post-body td{min-width:150px;word-break:normal}
   .post-body ul,.post-body ol{padding-left:22px;margin:0 0 18px}
-  .post-body blockquote{margin:24px 0;border-left:4px solid var(--dancheong-red);background:var(--pink-50);border-radius:0 14px 14px 0;padding:16px 20px;font-size:16px}
+  .post-body blockquote{margin:24px 0;border-left:4px solid var(--pink);background:var(--pink-50);border-radius:0 14px 14px 0;padding:16px 20px;font-size:16px}
 
   /* ======= PAGER / FOOTER ======= */
   .pager{display:flex;justify-content:center;gap:12px;margin:34px 0 0}
   .pager a{padding:10px 22px;border-radius:999px;border:1px solid var(--border);background:var(--surface);font:700 13px 'Pretendard',sans-serif;color:var(--body)}
-  .foot{background:linear-gradient(135deg,#18242B,#213D45);color:rgba(255,255,255,.84);border-top:6px solid var(--gold)}
+  .foot{background:var(--navy);color:rgba(255,255,255,.82)}
   :root[data-theme="dark"] .foot,:root:not([data-theme="light"]) .foot{background:#0F0E13}
   .foot .wrap{padding:30px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;font:500 13px 'Pretendard',sans-serif}
   .foot .fb{font:800 18px 'Pretendard',sans-serif;color:#fff}
@@ -197,15 +187,15 @@
 <header class='topbar'>
   <div class='wrap'>
     <a class='brand' expr:href='data:blog.homepageUrl'>
-      <span class='tile'><svg height='23' viewBox='0 0 24 24' width='23'><g transform='rotate(-20 12 12)'><path d='M12,3 A9,9 0 0,1 12,21 A4.5,4.5 0 0,1 12,12 A4.5,4.5 0 0,0 12,3 Z' fill='#C94F5D'/><path d='M12,3 A9,9 0 0,0 12,21 A4.5,4.5 0 0,0 12,12 A4.5,4.5 0 0,1 12,3 Z' fill='#1E6F8C'/><circle cx='12' cy='7.5' fill='#C49A47' r='1.7'/><circle cx='12' cy='16.5' fill='#8FB9A8' r='1.7'/></g></svg></span>
+      <span class='tile'><svg height='23' viewBox='0 0 24 24' width='23'><g transform='rotate(-20 12 12)'><path d='M12,3 A9,9 0 0,1 12,21 A4.5,4.5 0 0,1 12,12 A4.5,4.5 0 0,0 12,3 Z' fill='#EC6A8C'/><path d='M12,3 A9,9 0 0,0 12,21 A4.5,4.5 0 0,0 12,12 A4.5,4.5 0 0,1 12,3 Z' fill='#6AA6EC'/></g></svg></span>
       <span class='name'>Korea<span>EasyGuide</span></span>
     </a>
     <nav class='nav' id='nav'>
-      <a expr:href='data:blog.homepageUrl + &quot;search/label/Korea%20travel&quot;'>Travel</a>
-      <a expr:href='data:blog.homepageUrl + &quot;search/label/Transportation&quot;'>Transport</a>
-      <a expr:href='data:blog.homepageUrl + &quot;search/label/Apps%20in%20Korea&quot;'>Apps</a>
-      <a expr:href='data:blog.homepageUrl + &quot;search/label/Food%20%26%20Delivery&quot;'>Food</a>
-      <a expr:href='data:blog.homepageUrl + &quot;search/label/Shopping&quot;'>Shopping</a>
+      <a expr:href='data:blog.homepageUrl + &quot;search/label/Travel&quot;'>Travel</a>
+      <a expr:href='data:blog.homepageUrl + &quot;search/label/Living&quot;'>Living</a>
+      <a expr:href='data:blog.homepageUrl + &quot;search/label/Transport&quot;'>Transport</a>
+      <a expr:href='data:blog.homepageUrl + &quot;search/label/Food&quot;'>Food</a>
+      <a expr:href='data:blog.homepageUrl + &quot;search/label/Culture&quot;'>Culture</a>
     </nav>
     <div class='tools'>
       <span class='theme-toggle' id='themeToggle' role='button' tabindex='0'>
@@ -228,8 +218,8 @@
       <h1><data:view.search.label/></h1>
     <b:else/>
       <div class='crumb'>Home · Latest Guides</div>
-      <h1>Travel Korea with quiet confidence.</h1>
-      <div class='sub'>한옥 골목부터 공항철도까지, 외국인을 위한 실전 한국 여행·생활 가이드</div>
+      <h1>Korea, made easy.</h1>
+      <div class='sub'>외국인을 위한 한국 생활·여행 가이드</div>
     </b:if>
   </div>
 </section>
@@ -245,11 +235,11 @@
             <b:if cond='data:view.isMultipleItems'>
               <div class='chips'>
                 <a class='chip active' expr:href='data:blog.homepageUrl'>All 전체</a>
-                <a class='chip' expr:href='data:blog.homepageUrl + &quot;search/label/Transportation&quot;'>Transport 교통</a>
-                <a class='chip' expr:href='data:blog.homepageUrl + &quot;search/label/Korea%20travel&quot;'>Travel 여행</a>
-                <a class='chip' expr:href='data:blog.homepageUrl + &quot;search/label/Apps%20in%20Korea&quot;'>Apps 앱</a>
-                <a class='chip' expr:href='data:blog.homepageUrl + &quot;search/label/Food%20%26%20Delivery&quot;'>Food 음식</a>
-                <a class='chip' expr:href='data:blog.homepageUrl + &quot;search/label/Shopping&quot;'>Shopping 쇼핑</a>
+                <a class='chip' expr:href='data:blog.homepageUrl + &quot;search/label/Transport&quot;'>Transport 교통</a>
+                <a class='chip' expr:href='data:blog.homepageUrl + &quot;search/label/Travel&quot;'>Travel 여행</a>
+                <a class='chip' expr:href='data:blog.homepageUrl + &quot;search/label/Food&quot;'>Food 음식</a>
+                <a class='chip' expr:href='data:blog.homepageUrl + &quot;search/label/Culture&quot;'>Culture 문화</a>
+                <a class='chip' expr:href='data:blog.homepageUrl + &quot;search/label/Living&quot;'>Living 생활</a>
               </div>
 
               <b:loop index='i' values='data:posts' var='post'>
@@ -267,7 +257,7 @@
               </b:loop>
 
               <div class='sec'><h2><b:if cond='data:view.isLabelSearch'><data:view.search.label/><b:else/>Latest Guides</b:if></h2></div>
-              <div class='grid' id='latestGrid'>
+              <div class='grid'>
               <b:loop index='i' values='data:posts' var='post'>
                 <b:if cond='not data:view.isHomepage or data:i != 0'>
                   <article class='card'>
@@ -321,40 +311,38 @@
         <b:widget id='HTML2' locked='false' title='' type='HTML' version='2'>
           <b:includable id='main'>
             <form action='/search' class='searchw' method='get'>
-              <input name='q' placeholder='Search Korea guides…' type='text'/>
+              <input name='q' placeholder='Search guides…' type='text'/>
               <button type='submit'><svg height='16' viewBox='0 0 18 18' width='16'><circle cx='8' cy='8' fill='none' r='5.5' stroke='#fff' stroke-width='1.8'/><path d='M12,12 L16,16' stroke='#fff' stroke-linecap='round' stroke-width='1.8'/></svg></button>
             </form>
           </b:includable>
         </b:widget>
         <b:widget id='HTML3' locked='false' title='' type='HTML' version='2'>
           <b:includable id='main'>
-            <div class='w-about'>
+            <div class='widget w-about'>
               <span class='stripe'></span>
-              <span class='tile'><svg height='26' viewBox='0 0 24 24' width='26'><g transform='rotate(-20 12 12)'><path d='M12,3 A9,9 0 0,1 12,21 A4.5,4.5 0 0,1 12,12 A4.5,4.5 0 0,0 12,3 Z' fill='#C94F5D'/><path d='M12,3 A9,9 0 0,0 12,21 A4.5,4.5 0 0,0 12,12 A4.5,4.5 0 0,1 12,3 Z' fill='#1E6F8C'/><circle cx='12' cy='7.5' fill='#C49A47' r='1.7'/><circle cx='12' cy='16.5' fill='#8FB9A8' r='1.7'/></g></svg></span>
-              <h3>Korea field notes</h3>
-              <p>Practical English guides for visitors who need transport, maps, payments, food, shopping, and everyday Korea explained clearly.</p>
+              <span class='tile'><svg height='26' viewBox='0 0 24 24' width='26'><g transform='rotate(-20 12 12)'><path d='M12,3 A9,9 0 0,1 12,21 A4.5,4.5 0 0,1 12,12 A4.5,4.5 0 0,0 12,3 Z' fill='#EC6A8C'/><path d='M12,3 A9,9 0 0,0 12,21 A4.5,4.5 0 0,0 12,12 A4.5,4.5 0 0,1 12,3 Z' fill='#6AA6EC'/></g></svg></span>
+              <h3>About this guide</h3>
+              <p>Simple, trustworthy answers for foreigners living and travelling in Korea — updated every day.</p>
             </div>
           </b:includable>
         </b:widget>
         <b:widget id='PopularPosts1' locked='false' title='Popular guides' type='PopularPosts' version='2'>
           <b:includable id='main'>
-            <div class='w-title'>Popular guides</div>
-            <div class='popular'>
-              <b:loop index='i' values='data:posts' var='post'>
-                <a class='it' expr:href='data:post.url'><span class='n'><b:eval expr='data:i + 1 &lt; 10 ? &quot;0&quot; + (data:i + 1) : (data:i + 1)'/></span><span class='t'><data:post.title/></span></a>
-              </b:loop>
+            <div class='widget'>
+              <div class='w-title'>Popular guides</div>
+              <div class='popular'>
+                <b:loop index='i' values='data:posts' var='post'>
+                  <a class='it' expr:href='data:post.url'><span class='n'><b:eval expr='data:i + 1 &lt; 10 ? &quot;0&quot; + (data:i + 1) : (data:i + 1)'/></span><span class='t'><data:post.title/></span></a>
+                </b:loop>
+              </div>
             </div>
           </b:includable>
         </b:widget>
-        <b:widget id='HTML91' locked='false' title='Main Categories' type='HTML' version='2'>
+        <b:widget id='Label1' locked='false' title='Categories' type='Label' version='2'>
           <b:includable id='main'>
-            <div class='cats'>
-              <div class='w-title'>Main Categories</div>
-              <a expr:href='data:blog.homepageUrl + &quot;search/label/Korea%20travel&quot;'><span>Travel Basics</span><span class='c'>Guides</span></a>
-              <a expr:href='data:blog.homepageUrl + &quot;search/label/Transportation&quot;'><span>Transportation</span><span class='c'>Routes</span></a>
-              <a expr:href='data:blog.homepageUrl + &quot;search/label/Apps%20in%20Korea&quot;'><span>Korean Apps</span><span class='c'>Setup</span></a>
-              <a expr:href='data:blog.homepageUrl + &quot;search/label/Food%20%26%20Delivery&quot;'><span>Food &amp; Delivery</span><span class='c'>Tips</span></a>
-              <a expr:href='data:blog.homepageUrl + &quot;search/label/Shopping&quot;'><span>Shopping &amp; Payments</span><span class='c'>Help</span></a>
+            <div class='widget cats'>
+              <div class='w-title'>Categories</div>
+              <b:loop values='data:labels' var='label'><a expr:href='data:label.url'><span><data:label.name/></span><span class='c'><data:label.count/></span></a></b:loop>
             </div>
           </b:includable>
         </b:widget>
@@ -367,7 +355,7 @@
 <footer class='foot'>
   <div class='wrap'>
     <span class='fb'><data:blog.title/></span>
-    <span>© <data:blog.title/> · Practical Korea travel and daily-life guides.</span>
+    <span>© <data:blog.title/> · Travel and live in Korea, the easy way.</span>
     <span><a expr:href='data:blog.homepageUrl + &quot;p/about.html&quot;'>About</a> · <a expr:href='data:blog.homepageUrl + &quot;p/contact.html&quot;'>Contact</a> · <a expr:href='data:blog.homepageUrl + &quot;p/privacy-policy.html&quot;'>Privacy</a> · <a expr:href='data:blog.homepageUrl + &quot;p/disclaimer.html&quot;'>Disclaimer</a> · <a expr:href='data:blog.homepageUrl + &quot;p/terms.html&quot;'>Terms</a></span>
   </div>
 </footer>
@@ -383,29 +371,6 @@
   if(t){ t.addEventListener('click',toggle); t.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();} }); }
   var h=document.getElementById('hamburger');
   if(h){ h.addEventListener('click',function(){ var n=document.getElementById('nav'); if(n){ n.style.display=(n.style.display==='flex')?'none':'flex'; } }); }
-  var grid=document.getElementById('latestGrid');
-  if(grid && grid.children.length===0 && /^\/($|\?)/.test(location.pathname + location.search)){
-    fetch('/feeds/posts/default?alt=json&max-results=9').then(function(r){return r.json();}).then(function(feed){
-      var posts=((feed.feed||{}).entry||[]).slice(1,9);
-      posts.forEach(function(post){
-        var title=((post.title||{}).$t)||'Korea guide';
-        var url=((post.link||[]).filter(function(l){return l.rel==='alternate';})[0]||{}).href||'#';
-        var label=((post.category||[])[0]||{}).term||'Guide';
-        var date=new Date(((post.published||{}).$t)||Date.now()).toLocaleDateString('en-US',{month:'short',day:'2-digit',year:'numeric'});
-        var html=((post.content||post.summary||{}).$t)||'';
-        var img='';
-        var media=(post.media$thumbnail||{}).url;
-        var match=html.match(/<img[^>]+src=["']([^"']+)["']/i);
-        if(media){ img=media.replace(/\/s72-c\//,'/s640/'); }
-        if(!img && match){ img=match[1]; }
-        var plain=html.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim().slice(0,135);
-        var card=document.createElement('article');
-        card.className='card';
-        card.innerHTML='<a href="'+url+'"><div class="thumb">'+(img?'<img loading="lazy" src="'+img.replace(/"/g,'&quot;')+'" alt="">':'')+'<span class="tag">'+label+'</span></div><div class="card-b"><div class="card-t">'+title+'</div><div class="card-x">'+plain+'</div><div class="card-m">'+date+'</div></div></a>';
-        grid.appendChild(card);
-      });
-    }).catch(function(){});
-  }
 })();
 //]]>
 </script>

@@ -115,7 +115,7 @@
     {% endfor %}
   </ul>
 
-  <h2>Applies to / Risk level / Data loss risk / Estimated time / Last checked</h2>
+  <h2 data-section="safety">Applies to / Risk level / Data loss risk / Estimated time / Last checked</h2>
   <table>
     <tr><th>Item</th><th>Details</th></tr>
     <tr><td>Applies to</td><td>{{ facts.applies_to }}</td></tr>
@@ -130,14 +130,14 @@
   <p>{{ item }}</p>
   {% endfor %}
 
-  <h2>Symptoms</h2>
+  <h2 data-section="symptoms">Symptoms</h2>
   <ul>
     {% for item in symptoms %}
     <li>{{ item }}</li>
     {% endfor %}
   </ul>
 
-  <h2>What This Usually Means</h2>
+  <h2 data-section="diagnosis">What This Usually Means</h2>
   {% for item in meaning %}
   <p>{{ item }}</p>
   {% endfor %}
@@ -156,14 +156,14 @@
     {% endfor %}
   </ul>
 
-  <h2>Try This First</h2>
+  <h2 data-section="steps">Try This First</h2>
   <ol>
     {% for item in try_first %}
     <li>{{ item }}</li>
     {% endfor %}
   </ol>
 
-  <h2>Step-by-Step Fixes</h2>
+  <h2 data-section="steps">Step-by-Step Fixes</h2>
   <ol>
     {% for item in fixes %}
     <li>{{ item }}</li>
@@ -181,7 +181,7 @@
   <p>Write down the exact message you see, when the problem started, your Windows version, the device model if an accessory is involved, and every fix you already tried. This makes it easier for a support person to separate a Windows setting problem from a hardware, driver, account, network, or app problem.</p>
   <p>If the problem comes and goes, also record the pattern. Note whether it happens after sleep mode, restart, an update, connecting a device, moving to another Wi-Fi network, or opening one specific app. Clear notes prevent repeated risky steps and help you stop before changing advanced settings.</p>
 
-  <h2>Advanced Fixes</h2>
+  <h2 data-section="advanced">Advanced Fixes</h2>
   <div class="epfg-post__warning">Back up important files before advanced fixes. Stop if you see missing files, BitLocker recovery, repeated blue screens, or drive errors.</div>
   <ol>
     {% for item in advanced_fixes %}
@@ -189,27 +189,27 @@
     {% endfor %}
   </ol>
 
-  <h2>When to Stop and Get Help</h2>
+  <h2 data-section="stop">When to Stop and Get Help</h2>
   <ul>
     {% for item in stop_help %}
     <li>{{ item }}</li>
     {% endfor %}
   </ul>
 
-  <h2>FAQ</h2>
+  <h2 data-section="faq">FAQ</h2>
   {% for item in faq %}
   <h3>{{ item.question }}</h3>
   <p>{{ item.answer }}</p>
   {% endfor %}
 
-  <h2>Related Guides</h2>
+  <h2 data-section="related_guides">Related Guides</h2>
   <ul>
     {% for item in related_guides %}
     <li><a href="{{ item.url }}" target="_blank" rel="noopener noreferrer">{{ item.title }}</a></li>
     {% endfor %}
   </ul>
 
-  <h2>Sources</h2>
+  <h2 data-section="sources">Sources</h2>
   <p>Use official Microsoft sources to confirm current Windows behavior before trying advanced fixes.</p>
   <ul>
     {% for source in sources %}
@@ -217,6 +217,6 @@
     {% endfor %}
   </ul>
 
-  <h2>Final Summary</h2>
+  <h2 data-section="summary">Final Summary</h2>
   <p>{{ title }} should be handled in a safe order. Start with the simple checks, record what changes after each step, and avoid advanced repair steps unless you understand the risk or are following official Microsoft guidance. If the problem affects important files, work, school, or sign-in access, stop and get help before changing deeper system settings.</p>
 </article>

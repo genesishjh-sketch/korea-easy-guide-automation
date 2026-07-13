@@ -39,7 +39,7 @@ MAX_RECOVERY_ATTEMPTS = 3
 def run(
     site: str | None = None,
     mode: str = "publish",
-    max_posts: int = 3,
+    max_posts: int = 1,
     explicit_seed: str | None = None,
     notify: bool = True,
 ) -> dict:
@@ -569,12 +569,13 @@ def is_scheduled_github_run() -> bool:
 
 
 def build_combined_morning_message(now: datetime | None = None) -> str:
+    selected_now = now or datetime.now(tz=KST)
     target_per_site = int(os.getenv("COMBINED_DAILY_TARGET_PER_SITE", "3"))
     site_keys = ["easy_pc_fix_guide", "korea_easy_guide"]
     site_results = [combined_site_result(site_key, target_per_site, now) for site_key in site_keys]
     total_published = sum(len(item.get("posts") or []) for item in site_results)
     total_target = target_per_site * len(site_results)
-    recovery_summary = combined_recovery_summary(site_keys)
+    recovery_summary = combined_recovery_summary(site_keys, selected_now)
 
     lines = [
         "[Posting Bot] 매일 아침 통합 포스팅 결과",
@@ -594,7 +595,7 @@ def build_combined_morning_message(now: datetime | None = None) -> str:
                 f"[{item['site_name']}] {count}/{item['target']}개",
                 f"- 사이트: {item['site_url']}",
                 f"- 애드센스 준비: {readiness_line(item['site'])}",
-                f"- 복구 상태: {recovery_line(item['site'])}",
+                f"- 복구 상태: {recovery_line(item['site'], selected_now)}",
             ]
         )
         if item.get("error"):
@@ -624,10 +625,10 @@ def build_combined_morning_message(now: datetime | None = None) -> str:
     return "\n".join(lines)
 
 
-def combined_recovery_summary(site_keys: list[str]) -> dict:
+def combined_recovery_summary(site_keys: list[str], now: datetime | None = None) -> dict:
     summary = {"recovered": 0, "codex_image_required": 0, "failed": 0}
     for site_key in site_keys:
-        report = read_recovery_report(site_key)
+        report = read_recovery_report(site_key, now)
         status = report.get("status")
         if status == "recovered":
             summary["recovered"] += int(report.get("published_count") or 0)
@@ -638,8 +639,8 @@ def combined_recovery_summary(site_keys: list[str]) -> dict:
     return summary
 
 
-def recovery_line(site: str) -> str:
-    report = read_recovery_report(site)
+def recovery_line(site: str, now: datetime | None = None) -> str:
+    report = read_recovery_report(site, now)
     if not report:
         return "미점검"
     status = report.get("status", "unknown")
@@ -651,14 +652,24 @@ def recovery_line(site: str) -> str:
     return f"{status} / 부족 {missing}개{suffix}"
 
 
-def read_recovery_report(site: str) -> dict:
+def read_recovery_report(site: str, now: datetime | None = None) -> dict:
     path = ROOT_DIR / "reports" / f"{site}-daily-recovery-report.json"
     if not path.exists():
         return {}
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        report = json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError:
         return {"status": "unreadable"}
+    if now is not None:
+        checked_at = str(report.get("checked_at_kst") or "")
+        try:
+            checked_date = datetime.fromisoformat(checked_at).astimezone(KST).date()
+        except (TypeError, ValueError):
+            return {}
+        selected_date = (now if now.tzinfo else now.replace(tzinfo=KST)).astimezone(KST).date()
+        if checked_date != selected_date:
+            return {}
+    return report
 
 
 def combined_site_result(site_key: str, target: int, now: datetime | None = None) -> dict:
@@ -705,7 +716,7 @@ def today_public_posts(site_url: str, now: datetime | None = None) -> list[dict]
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Publish up to three meaningful daily posts without filling weak slots.")
+    parser = argparse.ArgumentParser(description="Publish the reviewed daily limit without filling weak slots.")
     parser.add_argument("--site", help="Site profile key, for example: easy_pc_fix_guide")
     parser.add_argument("--mode", choices=["publish"], default="publish")
     parser.add_argument("--max-posts", type=int, default=daily_publish_limit_from_env(os.getenv("DAILY_BATCH_MAX_POSTS"), quality_review_enabled=True))

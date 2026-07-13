@@ -9,7 +9,7 @@ on:
       posts_per_day:
         description: "Planned posts per blog per day"
         required: false
-        default: "3"
+        default: "1"
   schedule:
     # Sunday 22:00 KST. Creates the Monday-Sunday topic queue before daily publishing starts.
     - cron: "0 13 * * 0"
@@ -37,7 +37,7 @@ jobs:
       KOREA_EASY_GUIDE_SITE_URL: ${{ vars.SITE_URL || 'https://koreaeasyguide.blogspot.com' }}
       EASY_PC_FIX_GUIDE_BLOGGER_BLOG_ID: ${{ vars.EASY_PC_FIX_GUIDE_BLOGGER_BLOG_ID }}
       EASY_PC_FIX_GUIDE_SITE_URL: ${{ vars.EASY_PC_FIX_GUIDE_SITE_URL || 'https://easypcfixguide.blogspot.com' }}
-      WEEKLY_QUEUE_POSTS_PER_DAY: ${{ github.event.inputs.posts_per_day || vars.WEEKLY_QUEUE_POSTS_PER_DAY || '3' }}
+      WEEKLY_QUEUE_POSTS_PER_DAY: ${{ github.event.inputs.posts_per_day || vars.WEEKLY_QUEUE_POSTS_PER_DAY || '1' }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6

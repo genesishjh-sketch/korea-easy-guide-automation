@@ -7,7 +7,9 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from src.config import ROOT_DIR
+from src.config import load_settings
 from src.content.high_quality_posts import HIGH_QUALITY_POSTS
+from src.content.internal_links import resolve_related_posts
 
 
 def article_dirs(root: Path) -> list[Path]:
@@ -40,11 +42,20 @@ def render_post(article_dir: Path, env: Environment) -> Path | None:
     image_alt = image.get("alt") or post["title"]
 
     inline_images = build_inline_images(article_dir, article, post)
+    candidate = metadata.get("candidate", {}) or {}
+    settings = load_settings("korea_easy_guide")
+    related_guides = resolve_related_posts(
+        settings.site_url,
+        str(candidate.get("keyword") or post["title"]),
+        str(article.get("category") or candidate.get("category") or ""),
+        current_title=post["title"],
+    )
 
     html = env.get_template("high_quality_article.html.j2").render(
         post=post,
         image={"url": image_url, "alt": image_alt},
         inline_images=inline_images,
+        related_guides=related_guides,
     )
 
     article["title"] = post["title"]

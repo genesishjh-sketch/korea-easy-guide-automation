@@ -320,6 +320,9 @@ def check_zero_cost_image_policy() -> PreflightCheck:
         for snippet in [
             "Do not call paid image APIs in the Python pipeline.",
             "codex_generated_no_api",
+            "prompt_policy",
+            "codex_app_automation",
+            "built_in_image_gen",
             "IMAGE_ASSET_MODE",
             "manual_jpg",
             "return \"svg\"",

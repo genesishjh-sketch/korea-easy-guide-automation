@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<!--
+  Easy PC Fix Guide — Blogger Help Center Theme
+  Install: Blogger > Theme > Edit HTML > paste all > Save.
+-->
+<html b:version='2' class='v2' expr:dir='data:blog.languageDirection' lang='en' xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
+<head>
+  <meta charset='UTF-8'/>
+  <meta content='width=device-width, initial-scale=1' name='viewport'/>
+  <meta content='Easy PC Fix Guide explains safe Windows 11 and Windows 10 fixes for beginners, with low-risk steps, official Microsoft sources, and clear stop points.' name='description'/>
+  <meta content='Easy PC Fix Guide explains safe Windows 11 and Windows 10 fixes for beginners, with low-risk steps and official Microsoft sources.' property='og:description'/>
+  <meta content='website' property='og:type'/>
+  <b:include data='blog' name='all-head-content'/>
+  <title><data:blog.pageTitle/></title>
+  <b:skin version='1.1'><![CDATA[
+  :root{
+    --bg:#f5f7fb; --surface:#ffffff; --ink:#111827; --body:#334155; --muted:#64748b;
+    --line:#dbe4ee; --soft:#eef4fb; --blue:#2563eb; --blue-dark:#1e40af;
+    --green:#0f766e; --amber:#b45309; --shadow:0 14px 35px rgba(15,23,42,.08);
+    --radius:12px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--body);font:400 16px/1.72 Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  img{display:block;max-width:100%}
+  .wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+  .topbar{background:#0f172a;color:#e5edf7;border-bottom:1px solid rgba(255,255,255,.08)}
+  .topbar .wrap{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+  .brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:20px}
+  .brand-mark{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#2563eb,#0f766e);display:grid;place-items:center;color:#fff;font-weight:900}
+  .nav{display:flex;gap:22px;align-items:center;font-size:14px;font-weight:700}
+  .nav a{color:#dbeafe}
+  .nav a:hover{color:#fff}
+  .hero{background:linear-gradient(135deg,#0f172a 0%,#172554 54%,#164e63 100%);color:#fff}
+  .hero .wrap{padding:48px 24px 42px;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr);gap:34px;align-items:end}
+  .eyebrow{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#93c5fd}
+  .hero h1{margin:10px 0 12px;font-size:44px;line-height:1.08;color:#fff;letter-spacing:-.01em}
+  .hero p{margin:0;max-width:670px;color:#dbeafe;font-size:17px}
+  .hero-panel{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:var(--radius);padding:18px}
+  .hero-panel strong{display:block;color:#fff;margin-bottom:8px}
+  .hero-panel ul{margin:0;padding-left:18px;color:#dbeafe}
+  .hero-panel li{margin:4px 0}
+  .chips{padding:22px 0 0;display:flex;gap:10px;flex-wrap:wrap}
+  .chip{display:inline-flex;align-items:center;padding:8px 13px;border-radius:999px;background:#fff;border:1px solid var(--line);color:#1e3a8a;font-size:13px;font-weight:700}
+  .crawl-start{padding:24px 0 0}
+  .crawl-start h2{margin:0 0 12px;color:var(--ink);font-size:20px}
+  .crawl-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .crawl-grid a{display:flex;align-items:center;min-height:54px;padding:11px 13px;background:#fff;border:1px solid var(--line);border-radius:10px;color:#17335f;font-size:13px;font-weight:700;line-height:1.35}
+  .crawl-grid a:hover{border-color:#93c5fd;color:#1d4ed8}
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:30px;padding:30px 0 46px}
+  .section-title{display:flex;align-items:flex-end;justify-content:space-between;margin:0 0 16px}
+  .section-title h2{margin:0;color:var(--ink);font-size:24px;line-height:1.2}
+  .section-title span{color:var(--muted);font-size:13px}
+  .post-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+  .thumb{height:178px;background:linear-gradient(135deg,#dbeafe,#ecfeff);overflow:hidden}
+  .thumb img{width:100%;height:100%;object-fit:cover}
+  .thumb-empty{height:100%;display:grid;place-items:center;color:#1e3a8a;font-weight:800}
+  .card-body{padding:18px}
+  .label{display:inline-block;margin-bottom:10px;padding:4px 9px;border-radius:999px;background:#eff6ff;color:#1d4ed8;font-size:11px;font-weight:800;text-transform:uppercase}
+  .card h3{margin:0;color:var(--ink);font-size:19px;line-height:1.32}
+  .excerpt{margin:9px 0 0;color:var(--muted);font-size:14px;line-height:1.55}
+  .meta{margin-top:12px;color:#94a3b8;font-size:12px;font-weight:700}
+  .sidebar{display:flex;flex-direction:column;gap:18px}
+  .widget{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+  .widget h3{margin:0 0 12px;color:var(--ink);font-size:15px;text-transform:uppercase;letter-spacing:.08em}
+  .widget p{margin:0;color:var(--muted);font-size:14px}
+  .quick-list{display:grid;gap:9px}
+  .quick-list a{display:block;padding:11px 12px;border-radius:10px;background:var(--soft);color:#17335f;font-weight:700;font-size:14px}
+  .page-links{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .page-links a{padding:10px;border:1px solid var(--line);border-radius:10px;color:#1e3a8a;font-weight:700;font-size:13px;text-align:center}
+  .search-box{display:flex;gap:8px}
+  .search-box input{min-width:0;flex:1;border:1px solid var(--line);border-radius:10px;padding:11px 12px;font-size:14px}
+  .search-box button{border:0;border-radius:10px;background:var(--blue);color:#fff;font-weight:800;padding:0 14px;cursor:pointer}
+  .post-shell{max-width:920px;margin:30px auto 50px;background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px}
+  .post-shell .post-body{max-width:860px;margin:0 auto}
+  .post-body h1{font-size:34px;line-height:1.18;color:var(--ink);margin:0 0 18px}
+  .post-body h2{font-size:25px;line-height:1.25;color:var(--ink);margin:36px 0 14px;padding-top:8px;border-top:1px solid var(--line)}
+  .post-body h3{font-size:20px;color:var(--ink);margin:22px 0 8px}
+  .post-body p{margin:0 0 18px}
+  .post-body a{color:var(--blue);font-weight:700;border-bottom:1px solid rgba(37,99,235,.28)}
+  .post-body img{border-radius:14px;border:1px solid var(--line);margin:20px 0}
+  .post-body table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:14px 0 24px}
+  .post-body th,.post-body td{padding:13px 15px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+  .post-body th{background:#eff6ff;color:#17335f}
+  .post-body tr:last-child td{border-bottom:0}
+  .post-meta{margin:0 0 18px;color:#64748b;font-size:13px;font-weight:700}
+  .footer{background:#0f172a;color:#cbd5e1;margin-top:20px}
+  .footer .wrap{padding:28px 24px;display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center}
+  .footer strong{display:block;color:#fff;font-size:18px;margin-bottom:4px}
+  .footer-links{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;font-weight:700}
+  .blog-pager{display:flex;justify-content:center;gap:12px;margin:24px 0}
+  .blog-pager a{background:#fff;border:1px solid var(--line);border-radius:999px;padding:10px 16px;font-weight:700;color:#1e3a8a}
+  .quickedit,.widget-item-control,.Attribution,.comments,.comment-footer{display:none!important}
+  @media (max-width:920px){.hero .wrap,.layout{grid-template-columns:1fr}.post-grid{grid-template-columns:1fr}.crawl-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.sidebar{display:grid;grid-template-columns:1fr 1fr}.hero h1{font-size:36px}}
+  @media (max-width:640px){.wrap{padding:0 18px}.topbar .wrap{align-items:flex-start;flex-direction:column;padding:16px 18px}.nav{flex-wrap:wrap;gap:12px}.hero .wrap{padding:34px 18px}.hero h1{font-size:31px}.crawl-grid{grid-template-columns:1fr}.sidebar{display:flex}.post-shell{margin:18px 12px 34px;padding:18px}.footer .wrap{grid-template-columns:1fr}}
+  ]]></b:skin>
+</head>
+<body>
+  <header class='topbar'>
+    <div class='wrap'>
+      <a class='brand' expr:href='data:blog.homepageUrl'>
+        <span class='brand-mark'>PC</span>
+        <span>Easy PC Fix Guide</span>
+      </a>
+      <nav class='nav'>
+        <a expr:href='data:blog.homepageUrl'>Home</a>
+        <a expr:href='data:blog.homepageUrl + &quot;search/label/Windows%2011&quot;'>Windows 11</a>
+        <a expr:href='data:blog.homepageUrl + &quot;search/label/Windows%20Update&quot;'>Update</a>
+        <a expr:href='data:blog.homepageUrl + &quot;search/label/Wi-Fi%20%26%20Internet&quot;'>Wi-Fi</a>
+        <a expr:href='data:blog.homepageUrl + &quot;p/about.html&quot;'>About</a>
+      </nav>
+    </div>
+  </header>
+
+  <b:if cond='data:view.isMultipleItems'>
+    <section class='hero'>
+      <div class='wrap'>
+        <div>
+          <div class='eyebrow'>Beginner Windows Help</div>
+          <h1>Safe PC fixes before risky repair steps.</h1>
+          <p>Plain-English Windows 11 and Windows 10 guides with low-risk checks first, official Microsoft sources, and clear points where beginners should stop.</p>
+          <div class='chips'>
+            <a class='chip' expr:href='data:blog.homepageUrl + &quot;search/label/Windows%2011&quot;'>Windows 11</a>
+            <a class='chip' expr:href='data:blog.homepageUrl + &quot;search/label/Windows%20Update&quot;'>Windows Update</a>
+            <a class='chip' expr:href='data:blog.homepageUrl + &quot;search/label/Apps%20%26%20Settings&quot;'>Apps &amp; Settings</a>
+            <a class='chip' expr:href='data:blog.homepageUrl + &quot;search/label/Bluetooth%20%26%20Devices&quot;'>Devices</a>
+          </div>
+        </div>
+        <div class='hero-panel'>
+          <strong>Every guide prioritizes:</strong>
+          <ul>
+            <li>Low-risk checks before advanced fixes</li>
+            <li>Official Microsoft or device-maker sources</li>
+            <li>Data-loss warnings when needed</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </b:if>
+
+  <b:if cond='data:view.isHomepage'>
+    <nav aria-label='Essential Windows guides' class='wrap crawl-start'>
+      <h2>Essential Windows fixes</h2>
+      <div class='crawl-grid'>
+        <a href='https://easypcfixguide.blogspot.com/2026/07/taskbar-not-working-windows-11-easy.html'>Windows 11 taskbar not working</a>
+        <a href='https://easypcfixguide.blogspot.com/2026/07/printer-says-offline-on-windows-11.html'>Printer shows offline</a>
+        <a href='https://easypcfixguide.blogspot.com/2026/07/how-to-free-up-disk-space-on-windows.html'>Free up disk space safely</a>
+        <a href='https://easypcfixguide.blogspot.com/2026/07/file-explorer-keeps-freezing-on-windows.html'>File Explorer keeps freezing</a>
+        <a href='https://easypcfixguide.blogspot.com/2026/07/no-sound-after-windows-update-try-these.html'>No sound after an update</a>
+        <a href='https://easypcfixguide.blogspot.com/2026/07/ethernet-connected-but-no-internet-on.html'>Ethernet connected, no internet</a>
+      </div>
+    </nav>
+  </b:if>
+
+  <div class='wrap'>
+    <b:section class='blog-main' id='main' showaddelement='false'>
+      <b:widget id='Blog1' locked='true' title='Blog Posts' type='Blog' version='2' visible='true'>
+        <b:widget-settings>
+          <b:widget-setting name='showDateHeader'>false</b:widget-setting>
+          <b:widget-setting name='showShareButtons'>false</b:widget-setting>
+          <b:widget-setting name='showCommentLink'>false</b:widget-setting>
+          <b:widget-setting name='showAuthor'>false</b:widget-setting>
+          <b:widget-setting name='showAuthorProfile'>false</b:widget-setting>
+          <b:widget-setting name='showLabels'>true</b:widget-setting>
+          <b:widget-setting name='showLocation'>false</b:widget-setting>
+          <b:widget-setting name='showTimestamp'>true</b:widget-setting>
+          <b:widget-setting name='showBacklinks'>false</b:widget-setting>
+          <b:widget-setting name='showInlineAds'>false</b:widget-setting>
+          <b:widget-setting name='showReactions'>false</b:widget-setting>
+        </b:widget-settings>
+        <b:includable id='main' var='top'>
+          <b:if cond='data:view.isMultipleItems'>
+            <div class='layout'>
+              <main>
+                <div class='section-title'>
+                  <h2><b:if cond='data:view.isLabelSearch'><data:view.search.label/><b:else/>Latest Windows Guides</b:if></h2>
+                  <span>Updated for beginner-safe troubleshooting</span>
+                </div>
+                <div class='post-grid'>
+                  <b:loop values='data:posts' var='post'>
+                    <article class='card'>
+                      <a expr:href='data:post.url'>
+                        <div class='thumb'>
+                          <b:if cond='data:post.featuredImage'><img expr:src='data:post.featuredImage' loading='lazy'/><b:else/><div class='thumb-empty'>Windows Help</div></b:if>
+                        </div>
+                        <div class='card-body'>
+                          <b:if cond='data:post.labels'><span class='label'><data:post.labels.first.name/></span></b:if>
+                          <h3><data:post.title/></h3>
+                          <div class='excerpt'><data:post.snippets.short/></div>
+                          <div class='meta'><data:post.date/></div>
+                        </div>
+                      </a>
+                    </article>
+                  </b:loop>
+                </div>
+                <div class='blog-pager'>
+                  <b:if cond='data:newerPageUrl'><a expr:href='data:newerPageUrl'>Newer guides</a></b:if>
+                  <b:if cond='data:olderPageUrl'><a expr:href='data:olderPageUrl'>Older guides</a></b:if>
+                </div>
+              </main>
+              <aside class='sidebar'>
+                <div class='widget'>
+                  <h3>Find a fix</h3>
+                  <form action='/search' class='search-box' method='get'>
+                    <input name='q' placeholder='Search Windows errors' type='text'/>
+                    <button type='submit'>Search</button>
+                  </form>
+                </div>
+                <div class='widget'>
+                  <h3>Start here</h3>
+                  <div class='quick-list'>
+                    <a expr:href='data:blog.homepageUrl + &quot;search/label/Windows%20Update&quot;'>Windows Update problems</a>
+                    <a expr:href='data:blog.homepageUrl + &quot;search/label/Wi-Fi%20%26%20Internet&quot;'>Wi-Fi and internet fixes</a>
+                    <a expr:href='data:blog.homepageUrl + &quot;search/label/Apps%20%26%20Settings&quot;'>Apps and settings help</a>
+                    <a expr:href='data:blog.homepageUrl + &quot;search/label/Bluetooth%20%26%20Devices&quot;'>Mouse, keyboard, Bluetooth</a>
+                  </div>
+                </div>
+                <div class='widget'>
+                  <h3>Site pages</h3>
+                  <div class='page-links'>
+                    <a expr:href='data:blog.homepageUrl + &quot;p/about.html&quot;'>About</a>
+                    <a expr:href='data:blog.homepageUrl + &quot;p/contact.html&quot;'>Contact</a>
+                    <a expr:href='data:blog.homepageUrl + &quot;p/privacy-policy.html&quot;'>Privacy</a>
+                    <a expr:href='data:blog.homepageUrl + &quot;p/disclaimer.html&quot;'>Disclaimer</a>
+                    <a expr:href='data:blog.homepageUrl + &quot;p/terms.html&quot;'>Terms</a>
+                  </div>
+                </div>
+              </aside>
+            </div>
+          <b:else/>
+            <b:loop values='data:posts' var='post'>
+              <article class='post-shell'>
+                <div class='post-meta'><data:post.date/> · <b:if cond='data:post.labels'><data:post.labels.first.name/></b:if></div>
+                <div class='post-body'>
+                  <data:post.body/>
+                </div>
+              </article>
+            </b:loop>
+          </b:if>
+        </b:includable>
+      </b:widget>
+    </b:section>
+  </div>
+
+  <script type='text/javascript'>
+  //<![CDATA[
+  (function(){
+    function start(){
+    var section = document.getElementById('main');
+    if (!section || section.querySelector('a[href*=".html"]')) return;
+
+    function text(value){ return value && value.$t ? value.$t : ''; }
+    function link(entry){
+      var links = entry.link || [];
+      for (var i = 0; i < links.length; i++) if (links[i].rel === 'alternate') return links[i].href;
+      return '#';
+    }
+    function imageFrom(html){
+      var match = String(html || '').match(/<img[^>]+src=["']([^"']+)["']/i);
+      return match ? match[1] : '';
+    }
+    function cleanText(html){
+      return String(html || '')
+        .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+        .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+    function labels(entry){
+      return (entry.category || []).map(function(c){ return c.term; });
+    }
+    function dataValue(name){
+      var html = document.documentElement.innerHTML;
+      var patterns = [
+        new RegExp("['\\\"]" + name + "['\\\"]\\s*:\\s*['\\\"]?([0-9]+)", 'i'),
+        new RegExp(name + "\\s*[:=]\\s*['\\\"]?([0-9]+)", 'i')
+      ];
+      for (var i = 0; i < patterns.length; i++) {
+        var match = html.match(patterns[i]);
+        if (match) return match[1];
+      }
+      return '';
+    }
+    function renderList(entries, title){
+      var html = '<div class="layout"><main><div class="section-title"><h2>' + title + '</h2><span>Updated for beginner-safe troubleshooting</span></div><div class="post-grid">';
+      entries.forEach(function(entry){
+        var body = text(entry.content || entry.summary);
+        var img = imageFrom(body);
+        var label = labels(entry)[0] || 'Windows Help';
+        html += '<article class="card"><a href="' + link(entry) + '"><div class="thumb">' + (img ? '<img loading="lazy" src="' + img + '" alt=""/>' : '<div class="thumb-empty">Windows Help</div>') + '</div><div class="card-body"><span class="label">' + label + '</span><h3>' + text(entry.title) + '</h3><div class="excerpt">' + cleanText(body).slice(0,150) + '</div><div class="meta">' + text(entry.published).slice(0,10) + '</div></div></a></article>';
+      });
+      html += '</div></main>' + sidebarHtml() + '</div>';
+      section.innerHTML = html;
+    }
+    function sidebarHtml(){
+      return '<aside class="sidebar"><div class="widget"><h3>Find a fix</h3><form action="/search" class="search-box" method="get"><input name="q" placeholder="Search Windows errors" type="text"/><button type="submit">Search</button></form></div><div class="widget"><h3>Start here</h3><div class="quick-list"><a href="/search/label/Windows%20Update">Windows Update problems</a><a href="/search/label/Wi-Fi%20%26%20Internet">Wi-Fi and internet fixes</a><a href="/search/label/Apps%20%26%20Settings">Apps and settings help</a><a href="/search/label/Bluetooth%20%26%20Devices">Mouse, keyboard, Bluetooth</a></div></div><div class="widget"><h3>Site pages</h3><div class="page-links"><a href="/p/about.html">About</a><a href="/p/contact.html">Contact</a><a href="/p/privacy-policy.html">Privacy</a><a href="/p/disclaimer.html">Disclaimer</a><a href="/p/terms.html">Terms</a></div></div></aside>';
+    }
+    function renderEntry(entry){
+      var body = text(entry.content || entry.summary);
+      var labelList = labels(entry).slice(0,6).map(function(label){ return '<span class="label">' + label + '</span>'; }).join(' ');
+      section.innerHTML = '<article class="post-shell"><div class="post-meta">' + text(entry.published).slice(0,10) + '</div><div class="post-body">' + labelList + body + '</div></article>';
+    }
+    function getJson(url, cb){
+      fetch(url, {credentials:'same-origin'}).then(function(r){ return r.json(); }).then(cb).catch(function(){
+        section.innerHTML = '<article class="post-shell"><div class="post-body"><h1>Guide temporarily unavailable</h1><p>Please refresh this page. The article feed is public, but Blogger did not finish rendering it on this visit.</p></div></article>';
+      });
+    }
+
+    var postId = dataValue('postId');
+    var pageId = dataValue('pageId');
+    if (postId) {
+      getJson('/feeds/posts/default/' + postId + '?alt=json', function(data){ renderEntry(data.entry); });
+    } else if (pageId) {
+      getJson('/feeds/pages/default/' + pageId + '?alt=json', function(data){ renderEntry(data.entry); });
+    } else {
+      getJson('/feeds/posts/default?alt=json&max-results=12', function(data){
+        renderList((data.feed && data.feed.entry) || [], document.body.className.indexOf('item-view') > -1 ? 'Windows Guides' : 'Latest Windows Guides');
+      });
+    }
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', start);
+    } else {
+      setTimeout(start, 0);
+    }
+  })();
+  //]]>
+  </script>
+
+  <footer class='footer'>
+    <div class='wrap'>
+      <div>
+        <strong>Easy PC Fix Guide</strong>
+        <span>Beginner-safe Windows troubleshooting with official-source checks.</span>
+      </div>
+      <div class='footer-links'>
+        <a expr:href='data:blog.homepageUrl + &quot;p/about.html&quot;'>About</a>
+        <a expr:href='data:blog.homepageUrl + &quot;p/contact.html&quot;'>Contact</a>
+        <a expr:href='data:blog.homepageUrl + &quot;p/privacy-policy.html&quot;'>Privacy</a>
+        <a expr:href='data:blog.homepageUrl + &quot;p/terms.html&quot;'>Terms</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

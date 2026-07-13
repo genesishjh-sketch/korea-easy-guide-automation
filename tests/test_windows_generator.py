@@ -5,6 +5,7 @@ from pathlib import Path
 import unittest
 
 from src.content.topic_scoring import infer_category
+from src.content.internal_links import PublishedPost
 from src.content.windows_generator import _fixes
 from src.content.windows_generator import _meaning
 from src.content.windows_generator import _after_each_step
@@ -139,7 +140,7 @@ class WindowsGeneratorSourceTests(unittest.TestCase):
             ]
         )
 
-        self.assertEqual(profile["title"], "Windows Update Pending Restart Stuck: Safe Fixes for Beginners")
+        self.assertEqual(profile["title"], "Windows Update Pending Restart Stuck: Finish the Restart Cycle Safely")
         self.assertIn("Pending restart", combined)
         self.assertIn("Restart now", combined)
         self.assertIn("Windows Update troubleshooter", combined)
@@ -172,9 +173,9 @@ class WindowsGeneratorSourceTests(unittest.TestCase):
 
     def test_specific_printer_topics_preserve_distinctive_seed_intent(self) -> None:
         cases = {
-            "printer driver unavailable windows 11": "Printer Driver Unavailable on Windows 11: Safe Fixes for Beginners",
-            "printer stuck deleting windows 11": "Printer Job Stuck Deleting on Windows 11: Safe Fixes for Beginners",
-            "default printer keeps changing windows": "Default Printer Keeps Changing on Windows: Safe Fixes for Beginners",
+            "printer driver unavailable windows 11": "Printer Driver Unavailable in Windows 11: Check the Driver Source Safely",
+            "printer stuck deleting windows 11": "Printer Job Stuck Deleting in Windows 11? Clear the Blocked Queue",
+            "default printer keeps changing windows": "Default Printer Keeps Changing in Windows: Lock Down the Right Setting",
         }
 
         slugs = set()
@@ -203,12 +204,12 @@ class WindowsGeneratorSourceTests(unittest.TestCase):
 
     def test_network_connection_topics_preserve_distinctive_seed_intent(self) -> None:
         cases = {
-            "wifi keeps disconnecting windows 11": "Wi-Fi Keeps Disconnecting on Windows 11: Safe Fixes for Beginners",
-            "network adapter missing windows 11": "Network Adapter Missing on Windows 11: Safe Fixes for Beginners",
-            "windows cannot connect to this network": "Windows Cannot Connect to This Network: Safe Fixes for Beginners",
-            "no internet secured windows 11": "No Internet, Secured on Windows 11: Safe Fixes for Beginners",
-            "dns server not responding windows 11": "DNS Server Not Responding on Windows 11: Safe Fixes for Beginners",
-            "ethernet connected but no internet windows 11": "Ethernet Connected but No Internet on Windows 11: Safe Fixes for Beginners",
+            "wifi keeps disconnecting windows 11": "Wi-Fi Keeps Disconnecting in Windows 11: Find Where the Connection Breaks",
+            "network adapter missing windows 11": "Network Adapter Missing in Windows 11? Check Device Manager and Updates",
+            "windows cannot connect to this network": "Windows Cannot Connect to This Network: Diagnose the Cause First",
+            "no internet secured windows 11": "No Internet, Secured in Windows 11: Router, Wi-Fi, and PC Checks",
+            "dns server not responding windows 11": "DNS Server Not Responding: Repair the Lookup Path in Windows 11",
+            "ethernet connected but no internet windows 11": "Ethernet Connected but No Internet: Where Windows 11 Can Lose Access",
         }
 
         for seed, expected_title in cases.items():
@@ -231,12 +232,22 @@ class WindowsGeneratorSourceTests(unittest.TestCase):
                     self.assertIn(word.lower(), normalized_combined)
                 self.assertNotEqual(profile["title"], "Wi-Fi Button Missing on Windows 11: Simple Fixes for Beginners")
 
-    def test_related_guides_use_internal_blog_search_links(self) -> None:
-        guides = _related_guides("Apps & Settings", "https://easypcfixguide.blogspot.com")
+    def test_related_guides_use_direct_published_post_links(self) -> None:
+        posts = [
+            PublishedPost(
+                f"Published Windows Guide {index}",
+                f"https://easypcfixguide.blogspot.com/2026/07/published-guide-{index}.html",
+                ("Apps & Settings",),
+                f"2026-07-{index:02d}T00:00:00Z",
+            )
+            for index in range(1, 5)
+        ]
+        guides = _related_guides("Apps & Settings", "https://easypcfixguide.blogspot.com", posts=posts)
 
         self.assertGreaterEqual(len(guides), 3)
         self.assertTrue(all(guide["title"] for guide in guides))
-        self.assertTrue(all(guide["url"].startswith("https://easypcfixguide.blogspot.com/search?q=") for guide in guides))
+        self.assertTrue(all("/2026/07/" in guide["url"] and guide["url"].endswith(".html") for guide in guides))
+        self.assertTrue(all("/search" not in guide["url"] for guide in guides))
 
     def test_related_guides_follow_topic_intent_inside_category(self) -> None:
         cases = {
@@ -250,12 +261,38 @@ class WindowsGeneratorSourceTests(unittest.TestCase):
 
         for (category, keyword), expected_title in cases.items():
             with self.subTest(keyword=keyword):
-                guides = _related_guides(category, "https://easypcfixguide.blogspot.com", keyword)
+                posts = [
+                    PublishedPost(
+                        expected_title,
+                        "https://easypcfixguide.blogspot.com/2026/07/relevant-guide.html",
+                        (category,),
+                        "2026-07-12T00:00:00Z",
+                    ),
+                    PublishedPost(
+                        "Unrelated Windows Clock Guide",
+                        "https://easypcfixguide.blogspot.com/2026/07/windows-clock.html",
+                        ("Beginner PC Tips",),
+                        "2026-07-11T00:00:00Z",
+                    ),
+                    PublishedPost(
+                        "General Windows Version Guide",
+                        "https://easypcfixguide.blogspot.com/2026/07/windows-version.html",
+                        ("Beginner PC Tips",),
+                        "2026-07-10T00:00:00Z",
+                    ),
+                    PublishedPost(
+                        "Windows Help Checklist",
+                        "https://easypcfixguide.blogspot.com/2026/07/help-checklist.html",
+                        (category,),
+                        "2026-07-09T00:00:00Z",
+                    ),
+                ]
+                guides = _related_guides(category, "https://easypcfixguide.blogspot.com", keyword, posts=posts)
                 titles = [guide["title"] for guide in guides]
 
                 self.assertIn(expected_title, titles)
                 self.assertEqual(len(guides), 3)
-                self.assertTrue(all(guide["url"].startswith("https://easypcfixguide.blogspot.com/search?q=") for guide in guides))
+                self.assertTrue(all("/search" not in guide["url"] for guide in guides))
 
     def test_sources_are_unique(self) -> None:
         urls = [source["url"] for source in _sources_for_topic("windows update error 0x800f0922")]

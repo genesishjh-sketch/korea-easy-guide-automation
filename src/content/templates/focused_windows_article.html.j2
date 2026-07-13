@@ -1,0 +1,60 @@
+<style>
+  .epfg-post{--ink:#172033;--muted:#526173;--line:#d9e3ea;--blue:#2563eb;--green:#0f766e;--amber:#b45309;--red:#b91c1c;color:var(--ink);font:17px/1.72 Arial,Helvetica,sans-serif;max-width:860px;margin:0 auto}
+  .epfg-post *{box-sizing:border-box}.epfg-post h1{font-size:34px;line-height:1.18;margin:0 0 18px}.epfg-post h2{font-size:25px;line-height:1.25;margin:38px 0 14px;padding-top:8px;border-top:1px solid var(--line)}.epfg-post h3{font-size:20px;margin:22px 0 8px}.epfg-post p{margin:0 0 18px}
+  .epfg-post a{color:var(--blue);font-weight:700;text-decoration:none;border-bottom:1px solid rgba(37,99,235,.3)}.epfg-post figure{margin:0 0 28px;overflow:hidden;border:1px solid var(--line);border-radius:12px;background:#f8fbfd}.epfg-post img{display:block;width:100%;height:auto}.epfg-post figcaption{padding:10px 14px;color:var(--muted);font-size:14px}
+  .epfg-post__lead{padding:18px 20px;border-left:5px solid var(--blue);background:#eef5ff}.epfg-post__warning{padding:16px 18px;border:1px solid #f1c6c6;border-left:5px solid var(--red);background:#fff5f5;color:#6b1f1f;font-weight:700}
+  .epfg-post table{width:100%;margin:14px 0 26px;border-collapse:collapse;border:1px solid var(--line)}.epfg-post th,.epfg-post td{padding:13px 15px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.epfg-post th{background:#eaf3ff}.epfg-post ol,.epfg-post ul{margin:0 0 24px;padding-left:24px}.epfg-post li{margin:0 0 12px}
+  @media(max-width:640px){.epfg-post{font-size:16px}.epfg-post h1{font-size:29px}.epfg-post h2{font-size:22px}.epfg-post table{display:block;overflow-x:auto}.epfg-post th,.epfg-post td{min-width:170px}}
+</style>
+<article class="epfg-post">
+  <h1>{{ title }}</h1>
+  <figure><img src="{{ images[0].src }}" alt="{{ images[0].alt }}" loading="lazy"></figure>
+  <p class="epfg-post__lead">{{ profile.lead }}</p>
+
+  <h2 data-section="safety">Applies to / Risk level / Data loss risk / Estimated time / Last checked</h2>
+  <table>
+    <tr><th>Item</th><th>Details</th></tr>
+    <tr><td>Applies to</td><td>{{ facts.applies_to }}</td></tr>
+    <tr><td>Risk level</td><td>{{ facts.risk_level }}</td></tr>
+    <tr><td>Data loss risk</td><td>{{ facts.data_loss_risk }}</td></tr>
+    <tr><td>Estimated time</td><td>{{ facts.estimated_time }}</td></tr>
+    <tr><td>Last checked</td><td>{{ last_checked }}</td></tr>
+  </table>
+
+  <h2 data-section="symptoms">{{ profile.symptoms_heading }}</h2>
+  <ul>{% for item in profile.symptoms %}<li>{{ item }}</li>{% endfor %}</ul>
+
+  <h2 data-section="diagnosis">{{ profile.diagnosis_heading }}</h2>
+  {% for paragraph in profile.diagnosis %}<p>{{ paragraph }}</p>{% endfor %}
+
+  <h2 data-section="steps">{{ profile.steps_heading }}</h2>
+  <ol>{% for step in profile.steps %}<li>{{ step }}</li>{% endfor %}</ol>
+
+  <figure><img src="{{ images[1].src }}" alt="{{ images[1].alt }}" loading="lazy"><figcaption>{{ profile.image_caption }}</figcaption></figure>
+
+  <h2 data-section="results">{{ profile.results_heading }}</h2>
+  <table>
+    <tr><th>What you observe</th><th>What it suggests</th></tr>
+    {% for row in profile.results %}<tr><td>{{ row[0] }}</td><td>{{ row[1] }}</td></tr>{% endfor %}
+  </table>
+
+  <h2 data-section="advanced">Advanced Fixes</h2>
+  <p class="epfg-post__warning">Back up important files before advanced fixes. Do not run commands you do not understand. Copy commands only from official Microsoft documentation, and stop if BitLocker, missing files, repeated blue screens, or drive errors appear.</p>
+  <p>{{ profile.advanced_boundary }}</p>
+
+  <h2 data-section="stop">{{ profile.stop_heading }}</h2>
+  <ul>{% for item in profile.stop %}<li>{{ item }}</li>{% endfor %}</ul>
+
+  <h2 data-section="faq">FAQ</h2>
+  {% for item in profile.faq %}<h3>{{ item[0] }}</h3><p>{{ item[1] }}</p>{% endfor %}
+
+  <h2 data-section="related_guides">Related Guides</h2>
+  <ul>{% for link in related_links %}<li><a href="{{ link.url }}">{{ link.title }}</a></li>{% endfor %}</ul>
+
+  <h2 data-section="sources">Sources</h2>
+  <p>Use these official Microsoft pages to confirm current menu names, known issues, and advanced procedures before changing system files, drivers, services, or recovery settings.</p>
+  <ul>{% for link in source_links %}<li><a href="{{ link.url }}" target="_blank" rel="noopener noreferrer">{{ link.title }}</a></li>{% endfor %}</ul>
+
+  <h2 data-section="summary">Final Summary</h2>
+  <p>{{ profile.summary }}</p>
+</article>

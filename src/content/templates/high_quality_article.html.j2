@@ -152,7 +152,7 @@
 
   <p class="keg-post__lead">{{ post.lead }}</p>
 
-  <h2>Quick Answer</h2>
+  <h2 data-section="decision">Quick Answer</h2>
   <table>
     <tr><th>Situation</th><th>Best Choice</th></tr>
     {% for situation, answer in post.quick_answer %}
@@ -160,7 +160,7 @@
     {% endfor %}
   </table>
 
-  <h2>Before You Start</h2>
+  <h2 data-section="orientation">Before You Start</h2>
   {% for paragraph in post.before_start %}
   <p>{{ paragraph }}</p>
   {% endfor %}
@@ -172,7 +172,7 @@
   </figure>
   {% endif %}
 
-  <h2>Step-by-Step Guide</h2>
+  <h2 data-section="steps">Step-by-Step Guide</h2>
   <ol>
     {% for step in post.steps %}
     <li>{{ step }}</li>
@@ -194,7 +194,7 @@
     {% endfor %}
   </table>
 
-  <h2>Common Problems</h2>
+  <h2 data-section="pitfalls">Common Problems</h2>
   <ul>
     {% for problem in post.common_problems %}
     <li>{{ problem }}</li>
@@ -216,13 +216,21 @@
     {% endfor %}
   </table>
 
-  <h2>FAQ</h2>
+  <h2 data-section="faq">FAQ</h2>
   {% for question, answer in post.faq %}
   <h3>{{ question }}</h3>
   <p>{{ answer }}</p>
   {% endfor %}
 
-  <h2>Official Links to Check</h2>
+  <h2 data-section="related_guides">Related Guides</h2>
+  <p>Use these direct links to continue planning the same part of your trip.</p>
+  <ul>
+    {% for item in related_guides %}
+    <li><a href="{{ item.url }}">{{ item.title }}</a></li>
+    {% endfor %}
+  </ul>
+
+  <h2 data-section="sources">Official Links to Check</h2>
   <p>Use these official or platform links to download apps, confirm current rules, and check live service details before you travel.</p>
   <ul class="keg-post__sources">
     {% for name, url in post.sources %}

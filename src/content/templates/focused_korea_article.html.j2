@@ -1,0 +1,52 @@
+<style>
+  .keg-post{--ink:#172033;--muted:#526173;--line:#d9e3ea;--blue:#2563eb;--teal:#0f766e;--amber:#b45309;color:var(--ink);font:17px/1.72 Arial,Helvetica,sans-serif;max-width:860px;margin:0 auto}
+  .keg-post *{box-sizing:border-box}.keg-post h1{font-size:34px;line-height:1.18;margin:0 0 18px}.keg-post h2{font-size:25px;line-height:1.25;margin:38px 0 14px;padding-top:8px;border-top:1px solid var(--line)}
+  .keg-post h3{font-size:20px;line-height:1.35;margin:22px 0 8px}.keg-post p{margin:0 0 18px}.keg-post a{color:var(--blue);font-weight:700;text-decoration:none;border-bottom:1px solid rgba(37,99,235,.3)}
+  .keg-post figure{margin:0 0 28px;overflow:hidden;border:1px solid var(--line);border-radius:14px;background:#f8fbfd}.keg-post img{display:block;width:100%;height:auto}.keg-post figcaption{padding:10px 14px;color:var(--muted);font-size:14px}
+  .keg-post__lead{padding:18px 20px;border-left:5px solid var(--teal);background:#eefaf7}.keg-post__checked{color:var(--muted);font-size:14px}
+  .keg-post table{width:100%;margin:14px 0 26px;border-collapse:collapse;border:1px solid var(--line)}.keg-post th,.keg-post td{padding:13px 15px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.keg-post th{background:#eaf3ff}
+  .keg-post ol,.keg-post ul{margin:0 0 24px;padding-left:24px}.keg-post li{margin:0 0 12px}.keg-post__warning{padding:16px 18px;border-left:5px solid var(--amber);background:#fff8e8}
+  @media(max-width:640px){.keg-post{font-size:16px}.keg-post h1{font-size:29px}.keg-post h2{font-size:22px}.keg-post table{display:block;overflow-x:auto}.keg-post th,.keg-post td{min-width:170px}}
+</style>
+<article class="keg-post">
+  <h1>{{ title }}</h1>
+  <figure><img src="{{ images[0].src }}" alt="{{ images[0].alt }}" loading="lazy"></figure>
+  <p class="keg-post__lead">{{ profile.lead }}</p>
+  <p class="keg-post__checked">Last checked: {{ last_checked }}</p>
+
+  <h2 data-section="decision">{{ profile.decision_heading }}</h2>
+  <table>
+    <tr><th>Situation</th><th>Practical choice</th></tr>
+    {% for row in profile.decisions %}<tr><td>{{ row[0] }}</td><td>{{ row[1] }}</td></tr>{% endfor %}
+  </table>
+
+  <h2 data-section="orientation">{{ profile.overview_heading }}</h2>
+  {% for paragraph in profile.overview %}<p>{{ paragraph }}</p>{% endfor %}
+
+  <h2 data-section="steps">{{ profile.steps_heading }}</h2>
+  <ol>{% for step in profile.steps %}<li>{{ step }}</li>{% endfor %}</ol>
+
+  <figure><img src="{{ images[1].src }}" alt="{{ images[1].alt }}" loading="lazy"><figcaption>{{ profile.image_caption }}</figcaption></figure>
+
+  <h2 data-section="pitfalls">{{ profile.pitfalls_heading }}</h2>
+  <ul>{% for item in profile.pitfalls %}<li>{{ item }}</li>{% endfor %}</ul>
+
+  <h2 data-section="practical_notes">{{ profile.notes_heading }}</h2>
+  <table>
+    <tr><th>Checkpoint</th><th>Why it matters</th></tr>
+    {% for row in profile.notes %}<tr><td>{{ row[0] }}</td><td>{{ row[1] }}</td></tr>{% endfor %}
+  </table>
+
+  <h2 data-section="faq">FAQ</h2>
+  {% for item in profile.faq %}<h3>{{ item[0] }}</h3><p>{{ item[1] }}</p>{% endfor %}
+
+  <h2 data-section="related_guides">Related Guides</h2>
+  <ul>{% for link in related_links %}<li><a href="{{ link.url }}">{{ link.title }}</a></li>{% endfor %}</ul>
+
+  <h2 data-section="sources">Official Links to Check</h2>
+  <p>Rules, app screens, opening hours, eligibility, and service availability can change. Confirm the current details on these official or platform pages.</p>
+  <ul>{% for link in source_links %}<li><a href="{{ link.url }}" target="_blank" rel="noopener noreferrer">{{ link.title }}</a></li>{% endfor %}</ul>
+
+  <h2 data-section="summary">Final Summary</h2>
+  <p>{{ profile.summary }}</p>
+</article>

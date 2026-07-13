@@ -74,6 +74,12 @@ image: "{{ image.url or image.path }}"
 
 {% endfor -%}
 
+## Related Guides
+
+{% for item in related_guides -%}
+- [{{ item.title }}]({{ item.url }})
+{% endfor %}
+
 ## Official Links to Check
 
 Use these official or platform links to download apps, confirm current rules, and check live service details before you travel.

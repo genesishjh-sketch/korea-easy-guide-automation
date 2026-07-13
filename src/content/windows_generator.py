@@ -2,12 +2,13 @@ from __future__ import annotations
 
 from datetime import datetime
 import re
-from urllib.parse import quote_plus
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from slugify import slugify
 
 from src.config import ROOT_DIR, Settings
+from src.content.internal_links import PublishedPost
+from src.content.internal_links import resolve_related_posts
 from src.models import Article, ImageAsset, TopicCandidate
 from src.utils.text import title_case_keyword
 
@@ -415,17 +416,17 @@ def _topic_profile(keyword: str, category: str, site_url: str = "") -> dict:
     elif _is_windows_version_topic(normalized):
         title = "How to Check Your Windows Version: Simple Steps for Beginners"
     elif _is_wifi_disconnect_topic(normalized):
-        title = "Wi-Fi Keeps Disconnecting on Windows 11: Safe Fixes for Beginners"
+        title = "Wi-Fi Keeps Disconnecting in Windows 11: Find Where the Connection Breaks"
     elif _is_network_adapter_topic(normalized):
-        title = "Network Adapter Missing on Windows 11: Safe Fixes for Beginners"
+        title = "Network Adapter Missing in Windows 11? Check Device Manager and Updates"
     elif _is_cannot_connect_topic(normalized):
-        title = "Windows Cannot Connect to This Network: Safe Fixes for Beginners"
+        title = "Windows Cannot Connect to This Network: Diagnose the Cause First"
     elif _is_no_internet_secured_topic(normalized):
-        title = "No Internet, Secured on Windows 11: Safe Fixes for Beginners"
+        title = "No Internet, Secured in Windows 11: Router, Wi-Fi, and PC Checks"
     elif "dns" in normalized:
-        title = "DNS Server Not Responding on Windows 11: Safe Fixes for Beginners"
+        title = "DNS Server Not Responding: Repair the Lookup Path in Windows 11"
     elif "ethernet" in normalized:
-        title = "Ethernet Connected but No Internet on Windows 11: Safe Fixes for Beginners"
+        title = "Ethernet Connected but No Internet: Where Windows 11 Can Lose Access"
     elif "wifi" in normalized or "wi-fi" in normalized:
         title = "Wi-Fi Button Missing on Windows 11: Simple Fixes for Beginners"
     elif "bluetooth" in normalized:
@@ -433,11 +434,11 @@ def _topic_profile(keyword: str, category: str, site_url: str = "") -> dict:
     elif "sound" in normalized or "audio" in normalized:
         title = "No Sound After Windows Update? Try These Easy Steps First"
     elif _is_printer_driver_unavailable_topic(normalized):
-        title = "Printer Driver Unavailable on Windows 11: Safe Fixes for Beginners"
+        title = "Printer Driver Unavailable in Windows 11: Check the Driver Source Safely"
     elif _is_printer_stuck_deleting_topic(normalized):
-        title = "Printer Job Stuck Deleting on Windows 11: Safe Fixes for Beginners"
+        title = "Printer Job Stuck Deleting in Windows 11? Clear the Blocked Queue"
     elif _is_default_printer_changing_topic(normalized):
-        title = "Default Printer Keeps Changing on Windows: Safe Fixes for Beginners"
+        title = "Default Printer Keeps Changing in Windows: Lock Down the Right Setting"
     elif _is_printer_queue_topic(normalized):
         title = "How to Clear the Printer Queue on Windows: Safe Steps for Beginners"
     elif "printer" in normalized:
@@ -447,13 +448,13 @@ def _topic_profile(keyword: str, category: str, site_url: str = "") -> dict:
     elif "file explorer" in normalized:
         title = "File Explorer Keeps Freezing on Windows: Simple Fixes for Beginners"
     elif _is_windows_update_pending_restart_topic(normalized):
-        title = "Windows Update Pending Restart Stuck: Safe Fixes for Beginners"
+        title = "Windows Update Pending Restart Stuck: Finish the Restart Cycle Safely"
     elif "safe mode" in normalized:
         title = "How to Start Windows in Safe Mode: Beginner-Friendly Guide"
     elif "disk space" in normalized:
         title = "How to Free Up Disk Space on Windows: Safe Steps for Beginners"
     else:
-        title = f"{title_keyword}: Easy Windows Fixes for Beginners"
+        title = _intent_title(title_keyword, normalized)
 
     risk = _risk_level(normalized)
     data_loss = "Yes" if risk == "High" or any(term in normalized for term in ["disk", "recovery", "reset"]) else "No"
@@ -491,7 +492,7 @@ def _topic_profile(keyword: str, category: str, site_url: str = "") -> dict:
             "A step mentions reset, recovery, partition, format, Registry, BIOS, or advanced commands and you do not understand the risk.",
         ],
         "faq": _faq(keyword, error),
-        "related_guides": _related_guides(category, site_url, normalized),
+        "related_guides": _related_guides(category, site_url, normalized, current_title=title),
         "sources": _sources_for_topic(normalized),
     }
 
@@ -499,6 +500,20 @@ def _topic_profile(keyword: str, category: str, site_url: str = "") -> dict:
 def _error_code(text: str) -> str | None:
     match = re.search(r"0x[a-f0-9]{8}", text)
     return match.group(0).upper() if match else None
+
+
+def _intent_title(title_keyword: str, normalized: str) -> str:
+    if normalized.startswith("how to "):
+        return title_keyword
+    if " not working" in normalized or " not opening" in normalized:
+        return f"{title_keyword}: Trace the Failure Before You Reset Anything"
+    if " missing" in normalized or " disappeared" in normalized:
+        return f"{title_keyword}: Where to Look Before Reinstalling Drivers"
+    if " stuck" in normalized or " frozen" in normalized or " freezing" in normalized:
+        return f"{title_keyword}: Find the Blocker Step by Step"
+    if "slow" in normalized:
+        return f"{title_keyword}: Measure the Bottleneck Before Changing Settings"
+    return f"{title_keyword}: A Low-Risk Windows Diagnostic Path"
 
 
 def _meta_description(keyword: str, normalized: str, error: str | None) -> str:
@@ -1486,7 +1501,14 @@ def _faq(keyword: str, error: str | None) -> list[dict[str, str]]:
     ]
 
 
-def _related_guides(category: str, site_url: str = "", keyword: str = "") -> list[dict[str, str]]:
+def _related_guides(
+    category: str,
+    site_url: str = "",
+    keyword: str = "",
+    *,
+    current_title: str = "",
+    posts: list[PublishedPost] | None = None,
+) -> list[dict[str, str]]:
     normalized = keyword.casefold()
     topic_mapping = [
         (("onedrive",), ["OneDrive not syncing on Windows", "OneDrive sign-in problems", "How to check Windows date and time"]),
@@ -1506,7 +1528,14 @@ def _related_guides(category: str, site_url: str = "", keyword: str = "") -> lis
     ]
     for markers, titles in topic_mapping:
         if any(marker in normalized for marker in markers):
-            return _related_guide_links(titles, site_url)
+            return _related_guide_links(
+                titles,
+                site_url,
+                category=category,
+                keyword=keyword,
+                current_title=current_title,
+                posts=posts,
+            )
 
     mapping = {
         "Windows Update": ["How to check your Windows version", "How to free up disk space on Windows", "Windows Update stuck at 100%"],
@@ -1516,15 +1545,32 @@ def _related_guides(category: str, site_url: str = "", keyword: str = "") -> lis
         "Printer & Scanner": ["How to clear the printer queue", "Printer not showing in Windows", "Scanner not detected on Windows"],
     }
     titles = mapping.get(category, ["How to start Windows in Safe Mode", "How to check your Windows version", "Beginner PC troubleshooting checklist"])
-    return _related_guide_links(titles, site_url)
+    return _related_guide_links(
+        titles,
+        site_url,
+        category=category,
+        keyword=keyword,
+        current_title=current_title,
+        posts=posts,
+    )
 
 
-def _related_guide_links(titles: list[str], site_url: str = "") -> list[dict[str, str]]:
-    base_url = (site_url or "").rstrip("/")
-    return [
-        {
-            "title": title,
-            "url": f"{base_url}/search?q={quote_plus(title)}" if base_url else f"/search?q={quote_plus(title)}",
-        }
-        for title in titles
-    ]
+def _related_guide_links(
+    titles: list[str],
+    site_url: str = "",
+    *,
+    category: str = "",
+    keyword: str = "",
+    current_title: str = "",
+    posts: list[PublishedPost] | None = None,
+) -> list[dict[str, str]]:
+    if not site_url:
+        return []
+    topic = " ".join([keyword, *titles])
+    return resolve_related_posts(
+        site_url,
+        topic,
+        category,
+        current_title=current_title,
+        posts=posts,
+    )

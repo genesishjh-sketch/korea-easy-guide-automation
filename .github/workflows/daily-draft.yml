@@ -32,7 +32,7 @@ jobs:
       GOOGLE_OAUTH_CLIENT_SECRET_FILE: .credentials/client_secret.json
       GOOGLE_OAUTH_TOKEN_FILE: .credentials/google_token.json
       BLOGGER_PUBLISH_MODE: ${{ github.event_name == 'schedule' && 'publish' || github.event.inputs.mode || 'draft' }}
-      DAILY_BATCH_MAX_POSTS: ${{ vars.KOREA_EASY_GUIDE_DAILY_BATCH_MAX_POSTS || '3' }}
+      DAILY_BATCH_MAX_POSTS: ${{ vars.KOREA_EASY_GUIDE_DAILY_BATCH_MAX_POSTS || '1' }}
       REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
       REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
       REDDIT_USER_AGENT: ${{ vars.REDDIT_USER_AGENT || 'korea-easy-guide/0.1' }}
@@ -67,6 +67,18 @@ jobs:
       - name: Submit sitemap
         if: ${{ success() && env.BLOGGER_PUBLISH_MODE == 'publish' }}
         run: python -m src.pipeline.stage3_submit_sitemap
+      - name: Audit latest URL indexability
+        if: ${{ success() && env.BLOGGER_PUBLISH_MODE == 'publish' }}
+        continue-on-error: true
+        run: python -m src.pipeline.stage3_search_console_audit --site korea_easy_guide --inspection-count 1
+      - name: Build AdSense readiness and repurpose drafts
+        if: ${{ success() && env.BLOGGER_PUBLISH_MODE == 'publish' }}
+        run: |
+          python -m src.pipeline.stage6_adsense_readiness --site korea_easy_guide
+          python -m src.pipeline.stage6_repurpose_content --site korea_easy_guide --latest
+      - name: Check missing publication recovery status
+        if: ${{ !cancelled() && env.BLOGGER_PUBLISH_MODE == 'publish' }}
+        run: python -m src.pipeline.stage4_missing_publish_alert --site korea_easy_guide --site easy_pc_fix_guide --minimum-posts "${DAILY_BATCH_MAX_POSTS}" || true
       - name: Upload generated outputs
         if: ${{ always() }}
         uses: actions/upload-artifact@v6
@@ -74,4 +86,5 @@ jobs:
           name: daily-draft-output
           path: |
             data/generated/
+            data/repurpose/
             reports/

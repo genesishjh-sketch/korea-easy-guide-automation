@@ -7,8 +7,10 @@ from pathlib import Path
 from bs4 import BeautifulSoup
 
 from src.config import ROOT_DIR
+from src.config import load_settings
 from src.content.adsense_rules import META_DESCRIPTION_MAX_CHARS
 from src.content.adsense_rules import META_DESCRIPTION_MIN_CHARS
+from src.content.internal_links import resolve_related_posts
 from src.quality.hades import HadesQualityGate
 from src.sites import SITE_PROFILES
 
@@ -59,7 +61,12 @@ def build_meta_description(title: str, keyword: str, content_domain: str) -> str
     return f"{trimmed}."
 
 
-def ensure_adsense_html(html: str, title: str, content_domain: str) -> tuple[str, bool]:
+def ensure_adsense_html(
+    html: str,
+    title: str,
+    content_domain: str,
+    related_guides: list[dict[str, str]] | None = None,
+) -> tuple[str, bool]:
     soup = BeautifulSoup(html, "html.parser")
     article = soup.find("article") or soup
     changed = False
@@ -74,6 +81,47 @@ def ensure_adsense_html(html: str, title: str, content_domain: str) -> tuple[str
             article.insert(0, h1)
         else:
             article.append(h1)
+        changed = True
+
+    headings = [heading.get_text(" ", strip=True).casefold() for heading in article.find_all("h2")]
+    if related_guides:
+        existing_related = next(
+            (heading for heading in article.find_all("h2") if heading.get_text(" ", strip=True).casefold() == "related guides"),
+            None,
+        )
+        if existing_related:
+            cursor = existing_related.find_next_sibling()
+            while cursor and cursor.name != "h2":
+                next_cursor = cursor.find_next_sibling()
+                cursor.decompose()
+                cursor = next_cursor
+            related_heading = existing_related
+        else:
+            related_heading = soup.new_tag("h2")
+            related_heading.string = "Related Guides"
+            anchor = next(
+                (
+                    heading
+                    for heading in article.find_all("h2")
+                    if heading.get_text(" ", strip=True).casefold() in {"official links to check", "sources"}
+                ),
+                None,
+            )
+            if anchor:
+                anchor.insert_before(related_heading)
+            else:
+                article.append(related_heading)
+        intro = soup.new_tag("p")
+        intro.string = "Continue with these directly related published guides."
+        related_heading.insert_after(intro)
+        link_list = soup.new_tag("ul")
+        for guide in related_guides:
+            item = soup.new_tag("li")
+            link = soup.new_tag("a", href=guide["url"])
+            link.string = guide["title"]
+            item.append(link)
+            link_list.append(item)
+        intro.insert_after(link_list)
         changed = True
 
     headings = [heading.get_text(" ", strip=True).casefold() for heading in article.find_all("h2")]
@@ -108,6 +156,13 @@ def apply_to_article_dir(article_dir: Path, write_quality: bool = True) -> dict:
     content_domain = content_domain_for_site(site_key)
     title = article.get("title") or candidate.get("keyword") or article_dir.name.replace("-", " ").title()
     keyword = candidate.get("keyword") or title
+    settings = load_settings(site_key)
+    related_guides = resolve_related_posts(
+        settings.site_url,
+        str(keyword),
+        str(article.get("category") or candidate.get("category") or ""),
+        current_title=str(title),
+    )
 
     changed = False
     description = str(article.get("meta_description") or "").strip()
@@ -115,7 +170,12 @@ def apply_to_article_dir(article_dir: Path, write_quality: bool = True) -> dict:
         article["meta_description"] = build_meta_description(title, keyword, content_domain)
         changed = True
 
-    html, html_changed = ensure_adsense_html(html_path.read_text(encoding="utf-8"), title, content_domain)
+    html, html_changed = ensure_adsense_html(
+        html_path.read_text(encoding="utf-8"),
+        title,
+        content_domain,
+        related_guides,
+    )
     if html_changed:
         html_path.write_text(html, encoding="utf-8")
         article["html"] = html

@@ -11,8 +11,8 @@ from src.quality.hades import HadesQualityGate
 
 
 class AdsenseRulesTests(unittest.TestCase):
-    def test_daily_limit_defaults_to_quality_review_max_and_clamps_emergency_limit(self) -> None:
-        self.assertEqual(daily_publish_limit_from_env(None, quality_review_enabled=True), 2)
+    def test_daily_limit_defaults_to_stabilization_cadence_and_clamps_emergency_limit(self) -> None:
+        self.assertEqual(daily_publish_limit_from_env(None, quality_review_enabled=True), 1)
         self.assertEqual(daily_publish_limit_from_env(None, quality_review_enabled=False), 1)
         self.assertEqual(daily_publish_limit_from_env("5", quality_review_enabled=True), 3)
 

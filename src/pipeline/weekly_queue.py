@@ -68,7 +68,7 @@ def load_weekly_queue(site: str, selected_date: date | None = None) -> dict | No
     return None
 
 
-def today_queue_candidates(site: str, selected_date: date | None = None, max_posts: int = 3) -> list[dict]:
+def today_queue_candidates(site: str, selected_date: date | None = None, max_posts: int = 1) -> list[dict]:
     target_date = selected_date or datetime.now(tz=KST).date()
     queue = load_weekly_queue(site, target_date)
     if not queue:

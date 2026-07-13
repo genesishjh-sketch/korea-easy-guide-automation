@@ -22,6 +22,8 @@ from src.pipeline.stage2_publish import load_article
 from src.pipeline.stage2_rebuild_article_html import rebuild_article_html
 from src.pipeline.stage5_apply_adsense_rules import apply_to_article_dir
 from src.publishing.blogger import BloggerPublisher
+from src.reporting.adsense_readiness import build_readiness_report
+from src.reporting.adsense_readiness import save_readiness_report
 
 
 REPURPOSED_POSTS = {
@@ -138,45 +140,8 @@ def prepare_article_dir(article_dir: Path, site: str) -> dict:
     (article_dir / "metadata.json").write_text(json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8")
     rebuild_article_html(article_dir, site)
     apply_high_quality_posts(article_dir)
-    ensure_refresh_depth(article_dir, settings.content_domain)
     quality = apply_to_article_dir(article_dir)
     return {"scene": scene, "quality": quality}
-
-
-def ensure_refresh_depth(article_dir: Path, content_domain: str) -> None:
-    html_path = article_dir / "article.html"
-    metadata_path = article_dir / "metadata.json"
-    html = html_path.read_text(encoding="utf-8")
-    word_count = len(BeautifulSoup(html, "html.parser").get_text(" ").split())
-    if word_count >= 1450:
-        return
-
-    metadata = load_json(metadata_path)
-    title = metadata.get("article", {}).get("title") or article_title(article_dir)
-    section = depth_section(title, content_domain)
-    soup = BeautifulSoup(html, "html.parser")
-    article = soup.find("article") or soup
-    article.append(BeautifulSoup(section, "html.parser"))
-    updated = str(soup)
-    html_path.write_text(updated, encoding="utf-8")
-    metadata["article"]["html"] = updated
-    metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8")
-
-
-def depth_section(title: str, content_domain: str) -> str:
-    if content_domain == "windows_help":
-        return f"""
-<h2>Extra Checks Before You Try Advanced Fixes</h2>
-<p>Before you move past the beginner steps, write down what changed and when the problem started. A Windows issue that began after an update, a new device, a password change, or a network change usually needs a different path than a problem that appeared randomly. Keeping that timeline simple helps you avoid trying unrelated repairs.</p>
-<p>For {title}, do not jump straight to reset, registry changes, forced driver removal, or command-line repair unless the safer checks have clearly failed. Those advanced actions can be useful in the right situation, but they also make it harder for a beginner to know which change actually fixed the problem.</p>
-<p>If the computer contains school, work, tax, travel, or family files, confirm that important files are backed up before trying anything that mentions reset, reinstall, recovery, or cleanup. When in doubt, stop after the safe checks and ask a trusted technician to review the situation.</p>
-"""
-    return f"""
-<h2>Extra Practical Checks Before You Rely on This in Korea</h2>
-<p>Before using this advice during a real trip, confirm the current details from an official source or from the service provider. Korea travel systems can change by airport terminal, station, app version, payment method, holiday schedule, and local branch. A guide is useful for planning, but the final check should happen close to the day you use the service.</p>
-<p>For {title}, keep a simple backup plan: save the Korean address or official page, screenshot the important step, keep a second payment method, and know what you will do if mobile data or app login fails. These small preparations matter most when you are tired, carrying luggage, or trying to move during busy hours.</p>
-<p>If the process involves reservations, tickets, refunds, delivery, transportation, or identity checks, avoid waiting until the last minute. Give yourself enough time to ask staff, use an information desk, try another card, or switch to a simpler option without losing the rest of your schedule.</p>
-"""
 
 
 def update_blogger_post(article_dir: Path, site: str, post_id: str) -> dict:
@@ -227,12 +192,16 @@ def live_posts(site: str) -> list[dict]:
     return BloggerPublisher(load_settings(site)).list_live_posts()
 
 
-def run(sites: list[str] | None = None, dry_run: bool = False) -> Path:
+def run(sites: list[str] | None = None, dry_run: bool = False, mode: str = "fix") -> Path | dict:
     selected_sites = sites or ["korea_easy_guide", "easy_pc_fix_guide"]
+    if mode == "audit" or dry_run:
+        return audit_existing_posts(selected_sites)
+
     by_id, by_title = build_article_index()
     report = {
         "created_at": datetime.utcnow().isoformat() + "Z",
         "dry_run": dry_run,
+        "mode": mode,
         "updated": [],
         "failed": [],
         "skipped": [],
@@ -313,6 +282,87 @@ def run(sites: list[str] | None = None, dry_run: bool = False) -> Path:
     return path
 
 
+def audit_existing_posts(sites: list[str]) -> dict:
+    report = {
+        "created_at": datetime.utcnow().isoformat() + "Z",
+        "mode": "audit",
+        "sites": {},
+        "summary": {
+            "total_posts": 0,
+            "no_change": 0,
+            "title_improvement": 0,
+            "internal_links": 0,
+            "image_replace": 0,
+            "body_expand": 0,
+            "duplicate_risk": 0,
+        },
+    }
+    for site in sites:
+        readiness = build_readiness_report(site)
+        save_readiness_report(readiness)
+        duplicate_titles = duplicate_title_map(readiness.get("post_audits") or [])
+        post_audits = []
+        for item in readiness.get("post_audits") or []:
+            classification = item.get("classification", "no_change")
+            if normalize_title_for_audit(item.get("title", "")) in duplicate_titles:
+                classification = "duplicate_risk"
+            post_audits.append({**item, "classification": classification})
+            report["summary"]["total_posts"] += 1
+            if classification in report["summary"]:
+                report["summary"][classification] += 1
+        report["sites"][site] = {
+            "readiness_status": readiness.get("status"),
+            "readiness_label": readiness.get("status_label"),
+            "public_post_count": readiness.get("public_post_count"),
+            "posts_needing_fix_count": sum(1 for item in post_audits if item.get("classification") != "no_change"),
+            "post_audits": post_audits,
+            "action_items": readiness.get("action_items", []),
+        }
+    output_dir = ROOT_DIR / "reports"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    json_path = output_dir / "existing-post-audit-report.json"
+    md_path = output_dir / "existing-post-audit-report.md"
+    json_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+    md_path.write_text(build_existing_post_audit_message(report) + "\n", encoding="utf-8")
+    return report
+
+
+def normalize_title_for_audit(title: str) -> str:
+    return " ".join(title.casefold().strip().split())
+
+
+def duplicate_title_map(post_audits: list[dict]) -> set[str]:
+    counts: dict[str, int] = {}
+    for item in post_audits:
+        key = normalize_title_for_audit(item.get("title", ""))
+        counts[key] = counts.get(key, 0) + 1
+    return {key for key, count in counts.items() if count > 1}
+
+
+def build_existing_post_audit_message(report: dict) -> str:
+    summary = report.get("summary") or {}
+    lines = [
+        "[기존 글 품질 점검]",
+        "",
+        f"- 전체 글: {summary.get('total_posts', 0)}개",
+        f"- 수정 없음: {summary.get('no_change', 0)}개",
+        f"- 제목 개선: {summary.get('title_improvement', 0)}개",
+        f"- 내부 링크 보강: {summary.get('internal_links', 0)}개",
+        f"- 이미지 교체: {summary.get('image_replace', 0)}개",
+        f"- 본문 보강: {summary.get('body_expand', 0)}개",
+        f"- 중복 위험: {summary.get('duplicate_risk', 0)}개",
+    ]
+    for site, site_report in (report.get("sites") or {}).items():
+        lines.extend(["", f"[{site}]", f"- 애드센스 상태: {site_report.get('readiness_label')}"])
+        flagged = [item for item in site_report.get("post_audits", []) if item.get("classification") != "no_change"][:8]
+        if not flagged:
+            lines.append("- 우선 보강 글 없음")
+            continue
+        for item in flagged:
+            lines.append(f"- {item.get('classification')}: {item.get('title')}")
+    return "\n".join(lines)
+
+
 def apply_title_override(article_dir: Path, title: str) -> None:
     metadata_path = article_dir / "metadata.json"
     html_path = article_dir / "article.html"
@@ -341,8 +391,10 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Refresh existing live Blogger posts from upgraded local article templates.")
     parser.add_argument("--site", action="append", choices=["korea_easy_guide", "easy_pc_fix_guide"])
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--mode", choices=["audit", "fix"], default="audit")
     args = parser.parse_args()
-    print(run(args.site, args.dry_run))
+    result = run(args.site, args.dry_run, args.mode)
+    print(json.dumps(result, ensure_ascii=False, indent=2) if isinstance(result, dict) else result)
 
 
 if __name__ == "__main__":

@@ -34,7 +34,7 @@ jobs:
       GOOGLE_OAUTH_CLIENT_SECRET_FILE: .credentials/client_secret.json
       GOOGLE_OAUTH_TOKEN_FILE: .credentials/google_token.json
       BLOGGER_PUBLISH_MODE: ${{ github.event_name == 'schedule' && 'publish' || github.event.inputs.mode || 'validate' }}
-      DAILY_BATCH_MAX_POSTS: ${{ vars.EASY_PC_FIX_GUIDE_DAILY_BATCH_MAX_POSTS || '3' }}
+      DAILY_BATCH_MAX_POSTS: ${{ vars.EASY_PC_FIX_GUIDE_DAILY_BATCH_MAX_POSTS || '1' }}
       REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
       REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
       EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT: ${{ vars.EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT || 'easy-pc-fix-guide/0.1 by posting-automation-alert-bot' }}
@@ -78,6 +78,18 @@ jobs:
       - name: Submit sitemap
         if: ${{ success() && env.BLOGGER_PUBLISH_MODE == 'publish' }}
         run: python -m src.pipeline.stage3_submit_sitemap --site easy_pc_fix_guide
+      - name: Audit latest URL indexability
+        if: ${{ success() && env.BLOGGER_PUBLISH_MODE == 'publish' }}
+        continue-on-error: true
+        run: python -m src.pipeline.stage3_search_console_audit --site easy_pc_fix_guide --inspection-count 1
+      - name: Build AdSense readiness and repurpose drafts
+        if: ${{ success() && env.BLOGGER_PUBLISH_MODE == 'publish' }}
+        run: |
+          python -m src.pipeline.stage6_adsense_readiness --site easy_pc_fix_guide
+          python -m src.pipeline.stage6_repurpose_content --site easy_pc_fix_guide --latest
+      - name: Check missing publication recovery status
+        if: ${{ !cancelled() && env.BLOGGER_PUBLISH_MODE == 'publish' }}
+        run: python -m src.pipeline.stage4_missing_publish_alert --site easy_pc_fix_guide --minimum-posts "${DAILY_BATCH_MAX_POSTS}" || true
       - name: Upload generated outputs
         if: ${{ always() }}
         uses: actions/upload-artifact@v6
@@ -86,3 +98,4 @@ jobs:
           path: |
             data/generated/easy_pc_fix_guide/
             reports/
+            data/repurpose/easy_pc_fix_guide/

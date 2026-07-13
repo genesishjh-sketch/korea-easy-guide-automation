@@ -7,6 +7,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from slugify import slugify
 
 from src.config import ROOT_DIR, Settings
+from src.content.internal_links import resolve_related_posts
 from src.models import Article, ImageAsset, TopicCandidate
 from src.utils.text import title_case_keyword
 
@@ -49,13 +50,7 @@ class EnglishArticleGenerator:
         inline_images: list[ImageAsset] | None = None,
     ) -> Article:
         title_keyword = title_case_keyword(candidate.keyword)
-        title_keyword_lower = title_keyword.lower()
-        if " in korea" in title_keyword_lower:
-            title = f"{title_keyword}: Easy Guide for Foreign Visitors"
-        elif candidate.intent == "how-to" or not title_keyword_lower.startswith("how"):
-            title = f"How to Use {title_keyword} in Korea: Easy Guide for Foreign Visitors"
-        else:
-            title = f"{title_keyword}: Easy Guide for Foreign Visitors"
+        title = self._intent_title(title_keyword, candidate)
 
         title = self._normalize_title(candidate.keyword, title)
         slug = slugify(title)
@@ -63,6 +58,12 @@ class EnglishArticleGenerator:
         meta_description = self._meta_description(candidate.keyword)
         sources = self._sources(candidate)
         inline_images = inline_images or []
+        related_guides = resolve_related_posts(
+            self.settings.site_url,
+            candidate.keyword,
+            candidate.category,
+            current_title=title,
+        )
 
         context = {
             "title": title,
@@ -80,6 +81,7 @@ class EnglishArticleGenerator:
             "mistakes": self._mistakes(candidate.keyword),
             "tips": self._tips(candidate.keyword),
             "faq": self._faq(candidate.keyword),
+            "related_guides": related_guides,
             "sources": sources,
         }
         markdown = self.env.get_template("article.md.j2").render(**context)
@@ -98,6 +100,26 @@ class EnglishArticleGenerator:
             created_at=datetime.utcnow(),
             inline_images=inline_images,
         )
+
+    def _intent_title(self, title_keyword: str, candidate: TopicCandidate) -> str:
+        normalized = title_keyword.casefold()
+        if any(term in normalized for term in (" vs ", " versus ", " compare ")):
+            return f"{title_keyword}: Which Option Fits Your Korea Trip?"
+        if "checklist" in normalized or "before" in normalized:
+            return f"{title_keyword}: A Practical Pre-Trip Checklist"
+        if normalized.startswith(("where ", "best ")):
+            return f"{title_keyword}: How to Choose Without Guessing"
+        if normalized.startswith("how "):
+            return title_keyword
+        if candidate.category == "Transportation":
+            return f"{title_keyword}: Routes, Fares, and Backup Options"
+        if candidate.category == "Apps in Korea":
+            return f"{title_keyword}: Setup, Verification, and a Backup Plan"
+        if candidate.category == "Mobile & Internet":
+            return f"{title_keyword}: Compatibility, Activation, and Troubleshooting"
+        if candidate.category in {"Shopping", "Food & Delivery"}:
+            return f"{title_keyword}: Payment, Language, and Common Mistakes"
+        return f"{title_keyword}: What Foreign Visitors Need to Decide"
 
     def _normalize_title(self, keyword: str, default_title: str) -> str:
         normalized = keyword.lower()

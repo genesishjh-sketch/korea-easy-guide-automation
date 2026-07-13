@@ -1,22 +1,23 @@
-name: Easy PC Fix Weekly Report
+name: Korea Easy Guide Weekly Report
 
 on:
   workflow_dispatch:
   schedule:
-    # 09:40 KST every Monday.
-    - cron: "40 0 * * 1"
+    # 10:10 KST every Monday, after the PC weekly report.
+    - cron: "10 1 * * 1"
 
 jobs:
   weekly-report:
     runs-on: ubuntu-latest
     env:
       APP_ENV: production
-      SITE_KEY: easy_pc_fix_guide
-      EASY_PC_FIX_GUIDE_BLOGGER_BLOG_ID: ${{ vars.EASY_PC_FIX_GUIDE_BLOGGER_BLOG_ID }}
-      EASY_PC_FIX_GUIDE_SITE_URL: ${{ vars.EASY_PC_FIX_GUIDE_SITE_URL || 'https://easypcfixguide.blogspot.com' }}
-      EASY_PC_FIX_GUIDE_SEARCH_CONSOLE_SITE_URL: ${{ vars.EASY_PC_FIX_GUIDE_SEARCH_CONSOLE_SITE_URL || 'https://easypcfixguide.blogspot.com/' }}
-      EASY_PC_FIX_GUIDE_GA4_MEASUREMENT_ID: ${{ vars.EASY_PC_FIX_GUIDE_GA4_MEASUREMENT_ID }}
-      EASY_PC_FIX_GUIDE_GA4_PROPERTY_ID: ${{ vars.EASY_PC_FIX_GUIDE_GA4_PROPERTY_ID }}
+      SITE_KEY: korea_easy_guide
+      SITE_NAME: ${{ vars.SITE_NAME || 'Korea Easy Guide' }}
+      SITE_URL: ${{ vars.SITE_URL || 'https://koreaeasyguide.blogspot.com' }}
+      BLOGGER_BLOG_ID: ${{ vars.BLOGGER_BLOG_ID || '288143591612645486' }}
+      SEARCH_CONSOLE_SITE_URL: ${{ vars.SEARCH_CONSOLE_SITE_URL || 'https://koreaeasyguide.blogspot.com/' }}
+      GA4_MEASUREMENT_ID: ${{ vars.GA4_MEASUREMENT_ID }}
+      GA4_PROPERTY_ID: ${{ vars.GA4_PROPERTY_ID }}
       GOOGLE_OAUTH_CLIENT_SECRET_FILE: .credentials/client_secret.json
       GOOGLE_OAUTH_TOKEN_FILE: .credentials/google_token.json
       NOTIFICATION_PROVIDER: ${{ vars.NOTIFICATION_PROVIDER }}
@@ -24,7 +25,7 @@ jobs:
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
       REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
-      EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT: ${{ vars.EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT || 'easy-pc-fix-guide/0.1 by posting-automation-alert-bot' }}
+      REDDIT_USER_AGENT: ${{ vars.REDDIT_USER_AGENT || 'korea-easy-guide/0.1' }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -41,20 +42,20 @@ jobs:
           printf '%s' '${{ secrets.GOOGLE_OAUTH_TOKEN_ANALYTICS_JSON }}' > .credentials/google_token.analytics.json
       - name: Run Reddit OAuth health check for weekly context
         continue-on-error: true
-        run: python -m src.pipeline.stage0_reddit_health --site easy_pc_fix_guide
+        run: python -m src.pipeline.stage0_reddit_health --site korea_easy_guide
       - name: Audit Search Console indexability
         continue-on-error: true
-        run: python -m src.pipeline.stage3_search_console_audit --site easy_pc_fix_guide --inspection-count 3
+        run: python -m src.pipeline.stage3_search_console_audit --site korea_easy_guide --inspection-count 3
       - name: Generate and send weekly report
-        run: python -m src.pipeline.stage3_weekly_report --site easy_pc_fix_guide
+        run: python -m src.pipeline.stage3_weekly_report --site korea_easy_guide
       - name: Upload weekly report
         if: ${{ always() }}
         uses: actions/upload-artifact@v6
         with:
-          name: easy-pc-fix-weekly-report
+          name: korea-easy-guide-weekly-report
           path: |
-            reports/easy_pc_fix_guide-reddit-health.json
-            reports/easy_pc_fix_guide-reddit-health.md
-            reports/easy_pc_fix_guide-weekly-*
-            reports/easy_pc_fix_guide-weekly-failure.json
-            reports/easy_pc_fix_guide-search-console-audit.json
+            reports/korea_easy_guide-reddit-health.json
+            reports/korea_easy_guide-reddit-health.md
+            reports/korea_easy_guide-weekly-*
+            reports/korea_easy_guide-weekly-failure.json
+            reports/korea_easy_guide-search-console-audit.json

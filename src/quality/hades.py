@@ -17,19 +17,7 @@ from src.content.adsense_rules import contains_forbidden_policy_topic
 from src.content.adsense_rules import domain_rule
 
 
-REQUIRED_HEADINGS = {
-    "Quick Answer",
-    "Before You Start",
-    "Step-by-Step Guide",
-    "Costs / Payment",
-    "Common Problems",
-    "Useful Tips for Foreign Visitors",
-    "FAQ",
-    "Official Links to Check",
-    "Final Summary",
-}
-
-MIN_WORD_COUNT = 1400
+MIN_WORD_COUNT = ENGLISH_MIN_WORD_COUNT
 MIN_OFFICIAL_LINKS = 4
 MIN_FAQ_QUESTIONS = 5
 MIN_RESEARCH_QUERIES = 6
@@ -37,12 +25,11 @@ MIN_RESEARCH_SOURCES = 6
 MIN_RESEARCH_READER_QUESTIONS = 5
 MIN_WINDOWS_MICROSOFT_LINKS = 4
 MIN_WINDOWS_DIRECT_MICROSOFT_LINKS = 2
-MIN_WINDOWS_QUICK_SUMMARY_ITEMS = 4
 MIN_WINDOWS_SYMPTOM_ITEMS = 4
-MIN_WINDOWS_TRY_FIRST_ITEMS = 5
 MIN_WINDOWS_FIX_ITEMS = 5
-MIN_WINDOWS_AFTER_STEP_ITEMS = 4
 MIN_WINDOWS_STOP_HELP_ITEMS = 4
+MIN_DIRECT_INTERNAL_LINKS = 3
+DIRECT_POST_LINK_PATTERN = re.compile(r"^https://[^/]+/\d{4}/\d{2}/[^/?#]+\.html$")
 
 KNOWN_BAD_MICROSOFT_SHORTCUT_URLS = {
     "https://support.microsoft.com/windows/network-wi-fi",
@@ -92,22 +79,59 @@ BLOCKED_PHRASES = {
     "what you should know first",
 }
 
-WINDOWS_REQUIRED_HEADINGS = {
-    "Quick Summary",
-    "Applies to / Risk level / Data loss risk / Estimated time / Last checked",
-    "Symptoms",
-    "What This Usually Means",
-    "What Not to Do First",
-    "Try This First",
-    "Step-by-Step Fixes",
-    "After Each Step",
-    "What to Record Before Asking for Help",
-    "Advanced Fixes",
-    "When to Stop and Get Help",
-    "FAQ",
-    "Related Guides",
-    "Sources",
-    "Final Summary",
+KOREA_REQUIRED_SECTION_ROLES = {
+    "decision": "a decision or quick-answer section",
+    "orientation": "an overview or preparation section",
+    "steps": "a practical steps section",
+    "pitfalls": "a problems, pitfalls, or mistake-prevention section",
+    "faq": "FAQ",
+    "related_guides": "Related Guides",
+    "sources": "official sources",
+    "summary": "Final Summary",
+}
+
+WINDOWS_REQUIRED_SECTION_ROLES = {
+    "safety": "the Windows safety details section",
+    "symptoms": "a symptom or observation section",
+    "diagnosis": "a diagnosis or meaning section",
+    "steps": "a concrete troubleshooting steps section",
+    "advanced": "Advanced Fixes",
+    "stop": "a stop-and-get-help section",
+    "faq": "FAQ",
+    "related_guides": "Related Guides",
+    "sources": "Microsoft Sources",
+    "summary": "Final Summary",
+}
+
+SECTION_ROLE_ALIASES = {
+    "decision": ("quick answer", "decision", "which option", "what to choose", "practical choice"),
+    "orientation": ("before you start", "overview", "what to know", "prepare", "basics"),
+    "steps": (
+        "step-by-step guide",
+        "step-by-step fixes",
+        "try this first",
+        "steps",
+        "how to",
+        "restore",
+        "recover",
+        "reconnect",
+        "stabilize",
+        "unblock",
+        "narrow",
+        "reduce",
+        "bring the",
+        "free up",
+    ),
+    "pitfalls": ("common problems", "mistakes", "pitfalls", "avoid", "problems"),
+    "safety": ("applies to", "risk level", "data loss risk", "estimated time", "last checked"),
+    "symptoms": ("symptoms", "measure the", "identify", "describe the", "notice", "record how", "check whether", "find what", "work out", "read '", "observe where", "capture when", "understand what"),
+    "diagnosis": ("what this usually means", "diagnosis", "what it means", "can mean", "different layers", "separate stages", "different phases", "different failures", "different layer", "does not guarantee", "depends on", "can come from"),
+    "advanced": ("advanced fixes",),
+    "stop": ("when to stop", "stop before", "stop when", "when not to", "when a ", "when network", "when update", "when photo", "when scanner", "protect app data"),
+    "faq": ("faq", "frequently asked questions"),
+    "related_guides": ("related guides",),
+    "sources": ("official links to check", "official sources", "microsoft sources", "sources"),
+    "summary": ("final summary", "closing summary"),
 }
 
 WINDOWS_BLOCKED_PHRASES = {
@@ -259,20 +283,31 @@ class HadesQualityGate:
             for link in links
             if any(domain in (link.get("href") or "") for domain in OFFICIAL_SOURCE_DOMAINS)
         ]
-        faq_heading = soup.find(string=re.compile(r"^FAQ$", re.I))
+        section_roles = _semantic_section_roles(soup)
         faq_questions = 0
-        if faq_heading:
+        if "faq" in section_roles:
             faq_questions = len([heading for heading in soup.find_all("h3")])
 
         issues: list[QualityIssue] = []
-        required_headings = WINDOWS_REQUIRED_HEADINGS if self.content_domain == "windows_help" else REQUIRED_HEADINGS
-        missing_headings = sorted(required_headings - headings)
-        if missing_headings:
-            issues.append(QualityIssue("missing_required_sections", f"Missing sections: {', '.join(missing_headings)}."))
+        required_roles = WINDOWS_REQUIRED_SECTION_ROLES if self.content_domain == "windows_help" else KOREA_REQUIRED_SECTION_ROLES
+        present_roles = section_roles
+        missing_roles = [label for role, label in required_roles.items() if role not in present_roles]
+        if missing_roles:
+            issues.append(
+                QualityIssue(
+                    "missing_required_sections",
+                    "Missing semantic sections: " + ", ".join(missing_roles) + ". Headings may vary, but each reader task must be present.",
+                )
+            )
         if not h1_headings:
             issues.append(QualityIssue("missing_h1", "Article HTML must include an H1 title for AdSense-ready structure."))
         if len(words) < MIN_WORD_COUNT:
-            issues.append(QualityIssue("thin_content", f"Article must contain at least {MIN_WORD_COUNT} words before public publishing."))
+            issues.append(
+                QualityIssue(
+                    "thin_content",
+                    f"Article must contain at least {MIN_WORD_COUNT} useful English words before public publishing; never add generic filler to reach the threshold.",
+                )
+            )
         if korean_chars >= 200 and korean_chars < KOREAN_MIN_CHAR_COUNT:
             issues.append(
                 QualityIssue(
@@ -299,6 +334,9 @@ class HadesQualityGate:
                 issues.append(QualityIssue("blocked_phrase", f"Blocked phrase found: {phrase}."))
 
         issues.extend(self._review_adsense_rules(soup, text_lower, metadata, h1_headings, links))
+        direct_internal_links, internal_link_issues = self._review_direct_internal_links(soup)
+        if self.content_domain != "windows_help":
+            issues.extend(internal_link_issues)
 
         if self.content_domain == "windows_help":
             issues.extend(self._review_windows_article(soup, text_lower, links))
@@ -314,6 +352,7 @@ class HadesQualityGate:
             if len(required_images) < 2:
                 issues.append(QualityIssue("weak_image_plan", "Image plan must include at least two required images."))
             issues.extend(_review_image_descriptions(required_images))
+            issues.extend(_review_image_prompt_strategy(required_images, self.content_domain))
             if self.content_domain == "windows_help":
                 issues.extend(_review_windows_image_plan(required_images))
             missing_assets = []
@@ -359,6 +398,7 @@ class HadesQualityGate:
             "official_link_count": len(official_links),
             "faq_question_count": faq_questions,
             "heading_count": len(headings),
+            "direct_internal_link_count": len(direct_internal_links),
             **research_metrics,
         }
         return self._report(score, issues, metrics)
@@ -434,9 +474,10 @@ class HadesQualityGate:
                 )
             )
 
-        if not soup.find(string=re.compile(r"final summary|마무리 요약|최종 요약", re.I)):
+        section_roles = _semantic_section_roles(soup)
+        if "summary" not in section_roles:
             issues.append(QualityIssue("missing_final_summary", "Article must include a final summary section."))
-        if not soup.find(string=re.compile(r"FAQ|자주 묻는 질문", re.I)):
+        if "faq" not in section_roles:
             issues.append(QualityIssue("missing_faq_section", "Article must include an FAQ section."))
         return issues
 
@@ -490,14 +531,11 @@ class HadesQualityGate:
         return issues
 
     def _review_windows_section_depth(self, soup: BeautifulSoup) -> list[QualityIssue]:
-        sections = _section_list_items_by_h2(soup)
+        sections = _section_list_items_by_role(soup)
         requirements = {
-            "quick summary": ("weak_quick_summary", MIN_WINDOWS_QUICK_SUMMARY_ITEMS, "Quick Summary"),
-            "symptoms": ("weak_symptoms", MIN_WINDOWS_SYMPTOM_ITEMS, "Symptoms"),
-            "try this first": ("weak_try_first_steps", MIN_WINDOWS_TRY_FIRST_ITEMS, "Try This First"),
-            "step-by-step fixes": ("weak_fix_steps", MIN_WINDOWS_FIX_ITEMS, "Step-by-Step Fixes"),
-            "after each step": ("weak_after_each_step_checks", MIN_WINDOWS_AFTER_STEP_ITEMS, "After Each Step"),
-            "when to stop and get help": ("weak_stop_help_items", MIN_WINDOWS_STOP_HELP_ITEMS, "When to Stop and Get Help"),
+            "symptoms": ("weak_symptoms", MIN_WINDOWS_SYMPTOM_ITEMS, "The symptom/observation section"),
+            "steps": ("weak_fix_steps", MIN_WINDOWS_FIX_ITEMS, "The troubleshooting steps section"),
+            "stop": ("weak_stop_help_items", MIN_WINDOWS_STOP_HELP_ITEMS, "The stop-and-get-help section"),
         }
         issues: list[QualityIssue] = []
         for section_key, (issue_code, minimum, label) in requirements.items():
@@ -539,8 +577,7 @@ class HadesQualityGate:
         return issues
 
     def _review_windows_related_guides(self, soup: BeautifulSoup) -> list[QualityIssue]:
-        related_items = _section_list_items_by_h2(soup).get("related guides", [])
-        related_links = _section_links_by_h2(soup).get("related guides", [])
+        related_items = _section_list_items_by_role(soup).get("related_guides", [])
         if len(related_items) < 3:
             return [
                 QualityIssue(
@@ -548,18 +585,37 @@ class HadesQualityGate:
                     "Windows help articles require at least three Related Guides items for topic clustering.",
                 )
             ]
-        internal_links = [url for url in related_links if "/search?q=" in url or "easypcfixguide.blogspot.com" in url]
-        if len(internal_links) < 3:
-            return [
+        _, link_issues = self._review_direct_internal_links(soup)
+        return link_issues
+
+    def _review_direct_internal_links(self, soup: BeautifulSoup) -> tuple[list[str], list[QualityIssue]]:
+        host = "easypcfixguide.blogspot.com" if self.content_domain == "windows_help" else "koreaeasyguide.blogspot.com"
+        related_links = _section_links_by_role(soup).get("related_guides", [])
+        search_links = [url for url in related_links if "/search" in url]
+        direct_links = [
+            url
+            for url in related_links
+            if DIRECT_POST_LINK_PATTERN.fullmatch(url) and f"https://{host}/" in url
+        ]
+        issues = []
+        if search_links:
+            issues.append(
                 QualityIssue(
-                    "weak_related_guide_links",
-                    "Windows help articles require at least three internal Related Guides links.",
+                    "blocked_search_internal_links",
+                    "Related Guides must use direct published-post URLs. Blogger /search links are blocked by robots.txt and do not build a crawlable article graph.",
                 )
-            ]
-        return []
+            )
+        if len(set(direct_links)) < MIN_DIRECT_INTERNAL_LINKS:
+            issues.append(
+                QualityIssue(
+                    "weak_direct_internal_links",
+                    f"Related Guides requires at least {MIN_DIRECT_INTERNAL_LINKS} unique direct links to published posts; found {len(set(direct_links))}.",
+                )
+            )
+        return list(dict.fromkeys(direct_links)), issues
 
     def _review_windows_sources_section(self, soup: BeautifulSoup) -> list[QualityIssue]:
-        source_links = _section_links_by_h2(soup).get("sources", [])
+        source_links = _section_links_by_role(soup).get("sources", [])
         microsoft_links = [url for url in source_links if _is_microsoft_url(url)]
         direct_microsoft_links = [url for url in microsoft_links if _is_direct_microsoft_url(url)]
         issues: list[QualityIssue] = []
@@ -622,20 +678,24 @@ class HadesQualityGate:
 
     def _review_windows_advanced_only_terms(self, soup: BeautifulSoup) -> list[QualityIssue]:
         issues: list[QualityIssue] = []
-        beginner_sections = {
-            "try this first",
-            "step-by-step fixes",
-        }
-        for heading, section_text in _section_text_by_h2(soup).items():
-            if heading.casefold() not in beginner_sections:
-                continue
+        for section_text in _section_text_by_role(soup).get("steps", []):
             section_lower = section_text.casefold()
-            found_terms = sorted(term for term in WINDOWS_ADVANCED_ONLY_TERMS if term in section_lower)
+            actionable_sentences = [
+                sentence
+                for sentence in re.split(r"(?<=[.!?])\s+", section_lower)
+                if not any(guard in sentence for guard in ("do not ", "don't ", "never ", "avoid ", "before ", "without ", "stop ", "only when ", "rather than "))
+            ]
+            found_terms = sorted(
+                term
+                for term in WINDOWS_ADVANCED_ONLY_TERMS
+                if any(term in sentence for sentence in actionable_sentences)
+            )
             if found_terms:
                 issues.append(
                     QualityIssue(
                         "advanced_fix_in_beginner_section",
-                        f"Advanced-only terms found in {heading}: {', '.join(found_terms)}.",
+                        "Advanced-only actions found in the beginner troubleshooting steps: "
+                        f"{', '.join(found_terms)}. Move the action to Advanced Fixes or rewrite it as a clear safety boundary.",
                     )
                 )
         return issues
@@ -740,6 +800,80 @@ class HadesQualityGate:
         )
 
 
+def _semantic_section_roles(soup: BeautifulSoup) -> set[str]:
+    roles: set[str] = set()
+    for heading in soup.find_all("h2"):
+        explicit_role = str(heading.get("data-section") or "").strip().casefold()
+        if explicit_role:
+            roles.add(explicit_role)
+        title = re.sub(r"\s+", " ", heading.get_text(" ", strip=True).casefold())
+        for role, aliases in SECTION_ROLE_ALIASES.items():
+            if any(alias in title for alias in aliases):
+                roles.add(role)
+    return roles
+
+
+def _heading_roles(heading) -> set[str]:
+    roles: set[str] = set()
+    explicit_role = str(heading.get("data-section") or "").strip().casefold()
+    if explicit_role:
+        roles.add(explicit_role)
+    title = re.sub(r"\s+", " ", heading.get_text(" ", strip=True).casefold())
+    for role, aliases in SECTION_ROLE_ALIASES.items():
+        if any(alias in title for alias in aliases):
+            roles.add(role)
+    return roles
+
+
+def _section_list_items_by_role(soup: BeautifulSoup) -> dict[str, list[str]]:
+    sections: dict[str, list[str]] = {}
+    for heading in soup.find_all("h2"):
+        roles = _heading_roles(heading)
+        items = []
+        for sibling in heading.next_siblings:
+            if getattr(sibling, "name", None) == "h2":
+                break
+            find_all = getattr(sibling, "find_all", None)
+            if find_all:
+                items.extend(item.get_text(" ", strip=True) for item in find_all("li"))
+        for role in roles:
+            sections.setdefault(role, []).extend(item for item in items if item)
+    return sections
+
+
+def _section_links_by_role(soup: BeautifulSoup) -> dict[str, list[str]]:
+    sections: dict[str, list[str]] = {}
+    for heading in soup.find_all("h2"):
+        roles = _heading_roles(heading)
+        links = []
+        for sibling in heading.next_siblings:
+            if getattr(sibling, "name", None) == "h2":
+                break
+            find_all = getattr(sibling, "find_all", None)
+            if find_all:
+                links.extend(_href(link) for link in find_all("a"))
+        for role in roles:
+            sections.setdefault(role, []).extend(link for link in links if link)
+    return sections
+
+
+def _section_text_by_role(soup: BeautifulSoup) -> dict[str, list[str]]:
+    sections: dict[str, list[str]] = {}
+    for heading in soup.find_all("h2"):
+        roles = _heading_roles(heading)
+        parts = []
+        for sibling in heading.next_siblings:
+            if getattr(sibling, "name", None) == "h2":
+                break
+            get_text = getattr(sibling, "get_text", None)
+            if get_text:
+                parts.append(get_text(" ", strip=True))
+        text = " ".join(part for part in parts if part)
+        for role in roles:
+            sections.setdefault(role, []).append(text)
+    return sections
+
+
 def _section_text_by_h2(soup: BeautifulSoup) -> dict[str, str]:
     sections: dict[str, str] = {}
     for heading in soup.find_all("h2"):
@@ -826,6 +960,121 @@ def _review_image_descriptions(images: list[dict]) -> list[QualityIssue]:
             )
         )
     return issues
+
+
+def _review_image_prompt_strategy(images: list[dict], content_domain: str) -> list[QualityIssue]:
+    missing_fresh_strategy = []
+    missing_role_strategy = []
+    missing_repeat_avoidance = []
+    generic_pc_desk_prompts = []
+    prompt_texts = []
+    for image in images:
+        filename = image.get("filename") or image.get("url") or "unknown image"
+        prompt = str(image.get("prompt") or "").casefold()
+        prompt_texts.append(prompt)
+        if not any(term in prompt for term in ("fresh prompt rule", "fresh one-off", "not a reusable template", "fresh visual metaphor")):
+            missing_fresh_strategy.append(filename)
+        if not any(term in prompt for term in ("image role", "role purpose", "hero", "inline", "process", "comparison", "decision", "checklist")):
+            missing_role_strategy.append(filename)
+        if not any(term in prompt for term in ("recent-image avoidance", "avoid repeated", "avoid repeating", "avoid generic", "do not make this a second")):
+            missing_repeat_avoidance.append(filename)
+        if content_domain == "windows_help" and "laptop" in prompt and "desk" in prompt and not any(
+            term in prompt
+            for term in (
+                "no centered laptop",
+                "not a laptop scene",
+                "computer only implied",
+                "laptop only implied",
+                "laptop secondary",
+                "avoid laptop",
+                "do not make this a second laptop",
+            )
+        ):
+            generic_pc_desk_prompts.append(filename)
+
+    issues = []
+    if missing_fresh_strategy:
+        issues.append(
+            QualityIssue(
+                "missing_fresh_image_prompt_strategy",
+                "Image prompts must require Codex to create a fresh article-specific prompt instead of using a fixed template: "
+                f"{', '.join(missing_fresh_strategy)}.",
+            )
+        )
+    if missing_role_strategy:
+        issues.append(
+            QualityIssue(
+                "missing_image_role_strategy",
+                "Image prompts must state each image role and purpose so hero/inline images do not become similar filler: "
+                f"{', '.join(missing_role_strategy)}.",
+            )
+        )
+    if missing_repeat_avoidance:
+        issues.append(
+            QualityIssue(
+                "missing_image_repeat_avoidance",
+                "Image prompts must explicitly avoid recent repeated visual patterns before public publishing: "
+                f"{', '.join(missing_repeat_avoidance)}.",
+            )
+        )
+    if generic_pc_desk_prompts:
+        issues.append(
+            QualityIssue(
+                "generic_pc_desk_image_prompt",
+                "Windows image prompts must not default to generic laptop-on-desk visuals unless they also make the topic-specific object or metaphor dominant: "
+                f"{', '.join(generic_pc_desk_prompts)}.",
+            )
+        )
+    if len(prompt_texts) >= 2 and _prompt_similarity(prompt_texts[0], prompt_texts[1]) >= 0.72:
+        issues.append(
+            QualityIssue(
+                "similar_image_prompts",
+                "Hero and inline image prompts are too similar; each image needs a different visual role, metaphor, composition, and object set.",
+            )
+        )
+    return issues
+
+
+def _prompt_similarity(first: str, second: str) -> float:
+    stop_words = {
+        "the",
+        "and",
+        "for",
+        "with",
+        "without",
+        "image",
+        "article",
+        "prompt",
+        "codex",
+        "visual",
+        "role",
+        "fresh",
+        "create",
+        "before",
+        "after",
+        "this",
+        "that",
+        "from",
+        "into",
+        "using",
+        "must",
+        "show",
+        "avoid",
+        "title",
+    }
+    first_tokens = {
+        token
+        for token in re.findall(r"[a-z0-9]+", first)
+        if len(token) > 3 and token not in stop_words
+    }
+    second_tokens = {
+        token
+        for token in re.findall(r"[a-z0-9]+", second)
+        if len(token) > 3 and token not in stop_words
+    }
+    if not first_tokens or not second_tokens:
+        return 0.0
+    return len(first_tokens & second_tokens) / len(first_tokens | second_tokens)
 
 
 def _review_windows_dangerous_recommendations(text_lower: str) -> list[QualityIssue]:

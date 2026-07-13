@@ -48,6 +48,15 @@ After API credentials are authorized, the project can also submit the sitemap:
 python -m src.pipeline.stage3_submit_sitemap
 ```
 
+Audit the submitted sitemap, representative URL inspection states, current live indexability, and 90-day search performance:
+
+```bash
+python -m src.pipeline.stage3_search_console_audit --site korea_easy_guide --inspection-count 3
+python -m src.pipeline.stage3_search_console_audit --site easy_pc_fix_guide --inspection-count 3
+```
+
+The audit distinguishes a historical Search Console redirect record from a redirect that can still be reproduced on the public URL.
+
 Note: Google does not provide a general public API for requesting indexing of ordinary blog posts. URL Inspection can be done in Search Console UI.
 
 ## GA4 Setup

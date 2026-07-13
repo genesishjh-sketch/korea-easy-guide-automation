@@ -16,6 +16,12 @@ from bs4 import BeautifulSoup
 from src.config import ROOT_DIR, load_settings
 from src.publishing.blogger import BloggerCredentialsError, BloggerPublisher
 from src.quality.hades import HadesQualityGate
+from src.quality.originality import MAX_BODY_SIMILARITY
+from src.quality.originality import MAX_REPEATED_TITLE_ENDING
+from src.quality.originality import REWRITE_BODY_SIMILARITY
+from src.quality.originality import closest_match
+from src.quality.originality import generic_title_ending
+from src.quality.originality import repeated_title_ending_count
 
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
@@ -211,18 +217,70 @@ def public_image_url_status(url: str) -> tuple[int, str]:
 
 
 def public_image_urls(site_url: str) -> set[str]:
-    feed_url = f"{site_url.rstrip('/')}/feeds/posts/default?alt=json&max-results=100"
-    try:
-        with urllib.request.urlopen(feed_url, timeout=20) as response:
-            payload = json.load(response)
-    except Exception as exc:
-        raise RuntimeError(f"Could not check published image reuse from Blogger feed: {exc}") from exc
+    payload = public_feed_payload(site_url)
 
     urls: set[str] = set()
     for entry in payload.get("feed", {}).get("entry", []):
         content = entry.get("content", {}).get("$t", "")
         urls.update(image_urls_from_html(content))
     return urls
+
+
+def public_feed_payload(site_url: str) -> dict:
+    feed_url = f"{site_url.rstrip('/')}/feeds/posts/default?alt=json&max-results=100"
+    try:
+        with urllib.request.urlopen(feed_url, timeout=20) as response:
+            return json.load(response)
+    except Exception as exc:
+        raise RuntimeError(f"Could not check the published Blogger feed: {exc}") from exc
+
+
+def public_posts(site_url: str) -> list[dict[str, str]]:
+    payload = public_feed_payload(site_url)
+    posts = []
+    for entry in payload.get("feed", {}).get("entry", []):
+        url = next(
+            (link.get("href", "") for link in entry.get("link", []) if link.get("rel") == "alternate"),
+            "",
+        )
+        posts.append(
+            {
+                "title": entry.get("title", {}).get("$t", ""),
+                "url": url,
+                "content_html": (entry.get("content") or entry.get("summary") or {}).get("$t", ""),
+            }
+        )
+    return posts
+
+
+def validate_live_originality(
+    title: str,
+    html: str,
+    site: str | None = None,
+    *,
+    exclude_url: str = "",
+) -> None:
+    settings = load_settings(site)
+    posts = [post for post in public_posts(settings.site_url) if post.get("url", "").rstrip("/") != exclude_url.rstrip("/")]
+    match = closest_match(html, posts)
+    if match and match.similarity >= MAX_BODY_SIMILARITY:
+        raise ValueError(
+            "Hades originality gate failed: article body is too similar to an existing post "
+            f"({match.similarity:.1%}, {match.title}, {match.url}). Rewrite the topic-specific structure and guidance before publishing."
+        )
+    if match and match.similarity >= REWRITE_BODY_SIMILARITY:
+        raise ValueError(
+            "Hades originality rewrite gate failed: article body is approaching an existing post "
+            f"({match.similarity:.1%}, {match.title}, {match.url}). Restructure the article around its unique reader decision before publishing."
+        )
+
+    ending = generic_title_ending(title)
+    repeated = repeated_title_ending_count(title, [str(post.get("title") or "") for post in posts])
+    if ending and repeated >= MAX_REPEATED_TITLE_ENDING:
+        raise ValueError(
+            "Hades title-pattern gate failed: "
+            f"the ending '{ending}' already appears in {repeated} published titles. Use a title shaped around this article's actual decision or symptom."
+        )
 
 
 def image_urls_from_html(html: str) -> list[str]:
@@ -276,6 +334,7 @@ def run(article_dir: Path | None, mode: str | None, site: str | None = None) -> 
     draft = publish_mode != "publish"
 
     title, html, labels = load_article(selected_dir, site)
+    validate_live_originality(title, html, site)
     publisher = BloggerPublisher(settings)
     LOGGER.info("Publishing to Blogger blog_id=%s draft=%s title=%s", settings.blogger_blog_id, draft, title)
     result = publisher.publish(title=title, html=html, labels=labels, draft=draft)

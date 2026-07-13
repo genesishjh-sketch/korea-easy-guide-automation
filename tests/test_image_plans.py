@@ -57,11 +57,35 @@ class ImagePlanTests(unittest.TestCase):
         combined_prompts = " ".join(image.prompt for image in plan.images).lower()
         self.assertIn("visual brief", combined_prompts)
         self.assertIn("fresh prompt rule", combined_prompts)
-        self.assertIn("distinctive props", combined_prompts)
-        self.assertIn("composition/framing", combined_prompts)
+        self.assertIn("codex image generation brief", combined_prompts)
+        self.assertIn("fresh visual metaphor", combined_prompts)
+        self.assertIn("recent-image avoidance", combined_prompts)
+        self.assertIn("role purpose", combined_prompts)
+        self.assertIn("key objects or scene cues", combined_prompts)
+        self.assertIn("composition:", combined_prompts)
         self.assertIn("distorted hands", combined_prompts)
         self.assertIn("extra fingers", combined_prompts)
-        self.assertIn("do not reuse the same laptop-on-bright-desk composition", combined_prompts)
+        self.assertIn("avoid laptop centered on a bright desk", combined_prompts)
+
+    def test_image_plan_declares_codex_app_prompt_policy(self) -> None:
+        candidate = build_candidate("scanner not detected windows 11", [], "windows_help")
+
+        plan = build_article_image_plan(candidate, "Scanner Not Detected Windows 11")
+
+        self.assertEqual(plan.prompt_policy["generation_owner"], "codex_app_automation")
+        self.assertEqual(plan.prompt_policy["tool"], "built_in_image_gen")
+        self.assertIn("Do not call OpenAI Images API", plan.prompt_policy["api_cost_policy"])
+        self.assertIn("fresh one-off image prompt", plan.prompt_policy["prompt_method"])
+        self.assertIn("Hero and inline images", plan.prompt_policy["diversity_rule"])
+
+    def test_hero_and_inline_prompts_use_different_visual_metaphors(self) -> None:
+        candidate = build_candidate("scanner not detected windows 11", [], "windows_help")
+
+        plan = build_article_image_plan(candidate, "Scanner Not Detected Windows 11")
+
+        hero_metaphor = plan.images[0].prompt.split("Fresh visual metaphor: ", 1)[1].split(". Subject", 1)[0]
+        inline_metaphor = plan.images[1].prompt.split("Fresh visual metaphor: ", 1)[1].split(". Subject", 1)[0]
+        self.assertNotEqual(hero_metaphor, inline_metaphor)
 
     def test_windows_network_subtopics_use_different_image_scenes(self) -> None:
         cases = {

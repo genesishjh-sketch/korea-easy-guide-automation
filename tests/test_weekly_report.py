@@ -1262,7 +1262,7 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
 
         joined = "\n".join(actions)
         self.assertIn("Related Guides 내부 링크 문제", joined)
-        self.assertIn("블로그 내부 검색 링크 3개 이상", joined)
+        self.assertIn("실제로 공개된 관련 글의 직접 URL을 3개 이상", joined)
         self.assertIn("이미지 문제가 감지", joined)
         self.assertIn("hero/inline 이미지 2개", joined)
         self.assertIn("alt/caption", joined)

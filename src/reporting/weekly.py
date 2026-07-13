@@ -214,6 +214,9 @@ class WeeklyReporter:
             ),
             "publication_check": publication_check,
             "sitemap_submit": sitemap_submit,
+            "search_console_audit": self._read_report(
+                report_dir / f"{self.settings.site_key}-search-console-audit.json"
+            ),
         }
 
     def _publication_check_needs_public_feed_refresh(
@@ -637,8 +640,8 @@ class WeeklyReporter:
                 "Search Console sitemap 제출 리포트가 주간 workflow 환경에 보존되지 않았습니다. "
                 "Daily Publish artifact에서 search-console-sitemap-submit.json을 확인하거나 sitemap 제출 workflow를 수동 재실행하세요."
             )
-        if len(static_pages) < 4:
-            actions.append("필수 고정 페이지 4개(About, Contact, Privacy Policy, Disclaimer)를 모두 발행하세요.")
+        if len(static_pages) < 5:
+            actions.append("필수 고정 페이지 5개(About, Contact, Privacy Policy, Disclaimer, Terms)를 모두 발행하세요.")
         if not articles and not has_public_article:
             actions.append("최소 1개의 글 초안을 생성하세요.")
         if articles and not has_local_live_article and has_public_article:
@@ -828,6 +831,7 @@ class WeeklyReporter:
         reddit_health = operations.get("reddit_health", {})
         publication_check = operations.get("publication_check", {})
         sitemap_submit = operations.get("sitemap_submit", {})
+        search_console_audit = operations.get("search_console_audit", {})
         lines.append(f"- 최근 일일 성공 리포트: {_status_kr(daily_success.get('status', 'not_uploaded'))}")
         if daily_success_context.get("status") != "not_uploaded":
             lines.append(f"  - 리포트 구분: {daily_success_context.get('label')}")
@@ -1034,6 +1038,21 @@ class WeeklyReporter:
                 lines.append(f"  - URL 검사 대상: {indexing_guidance.get('url_inspection_target')}")
         if sitemap_submit.get("error"):
             lines.append(f"  - 오류: {sitemap_submit.get('error')}")
+        audit_summary = search_console_audit.get("summary") or {}
+        if audit_summary:
+            lines.append("- URL 검사 자동 점검:")
+            lines.append(f"  - 검사 URL: {audit_summary.get('inspected_count', 0)}개")
+            lines.append(f"  - 색인 확인: {audit_summary.get('indexed_count', 0)}개")
+            lines.append(f"  - 미색인: {audit_summary.get('not_indexed_count', 0)}개")
+            lines.append(
+                f"  - 현재 구조 오류: {'있음' if audit_summary.get('structural_error') else '없음'}"
+            )
+            historical = audit_summary.get("historical_redirect_error_count", 0)
+            resolved = audit_summary.get("resolved_historical_redirect_count", 0)
+            if historical:
+                lines.append(f"  - 과거 Redirect error: {historical}개 / 현재 정상 재검증: {resolved}개")
+            for item in search_console_audit.get("action_items", [])[:3]:
+                lines.append(f"  - 조치: {item}")
 
         lines.extend(["", "## 발행량 전환 검토", ""])
         cadence = report.get("cadence_review", {})

@@ -341,6 +341,61 @@ class Stage2ImageGateTests(unittest.TestCase):
         self.assertNotIn("unsafe_windows_image_label", issue_codes)
         self.assertNotIn("unsafe_windows_image_prompt", issue_codes)
 
+    def test_hades_blocks_template_style_image_prompts(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            article_dir = Path(tmpdir)
+            assets_dir = article_dir / "assets"
+            assets_dir.mkdir()
+            (assets_dir / "ai-hero.jpg").write_bytes(b"hero")
+            (assets_dir / "ai-inline-1.jpg").write_bytes(b"inline")
+            template_prompt = (
+                "Create a beginner Windows help image of a laptop on a desk. "
+                "Do not show fake Windows UI, readable error codes, readable letters or numbers, "
+                "command prompts, registry editors, logos, or text overlays."
+            )
+            (article_dir / "image_plan.json").write_text(
+                json.dumps(
+                    {
+                        "strict": True,
+                        "images": [
+                            {
+                                "url": "assets/ai-hero.jpg",
+                                "filename": "ai-hero.jpg",
+                                "required": True,
+                                "alt": "Beginner friendly Windows scanner troubleshooting visual",
+                                "caption": "A calm visual for checking scanner troubleshooting safely.",
+                                "prompt": template_prompt,
+                            },
+                            {
+                                "url": "assets/ai-inline-1.jpg",
+                                "filename": "ai-inline-1.jpg",
+                                "required": True,
+                                "alt": "Safe Windows scanner troubleshooting checklist visual",
+                                "caption": "Use the safe checklist before advanced Windows repair steps.",
+                                "prompt": template_prompt,
+                            },
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            html = """
+            <article>
+              <h2>Quick Summary</h2>
+              <img src="assets/ai-hero.jpg" alt="Beginner friendly Windows scanner troubleshooting visual">
+              <img src="assets/ai-inline-1.jpg" alt="Safe Windows scanner troubleshooting checklist visual">
+            </article>
+            """
+
+            report = HadesQualityGate("windows_help").review_html(html, article_dir, {"article": {}})
+
+        issue_codes = {issue.code for issue in report.issues}
+        self.assertIn("missing_fresh_image_prompt_strategy", issue_codes)
+        self.assertIn("missing_image_role_strategy", issue_codes)
+        self.assertIn("missing_image_repeat_avoidance", issue_codes)
+        self.assertIn("generic_pc_desk_image_prompt", issue_codes)
+        self.assertIn("similar_image_prompts", issue_codes)
+
     def test_hades_blocks_dangerous_windows_tool_recommendations(self) -> None:
         gate = HadesQualityGate("windows_help")
         text = (

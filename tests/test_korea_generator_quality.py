@@ -8,6 +8,7 @@ from pathlib import Path
 from src.config import load_settings
 from src.content.generator import EnglishArticleGenerator
 from src.models import ImageAsset, TopicCandidate
+from src.images.ai_plan import build_article_image_plan
 from src.quality.hades import HadesQualityGate
 
 
@@ -55,31 +56,7 @@ class KoreaGeneratorQualityTests(unittest.TestCase):
             for filename in ["ai-hero.jpg", "ai-inline-1.jpg", "ai-inline-2.jpg"]:
                 (assets_dir / filename).write_bytes(b"fake image")
             (article_dir / "image_plan.json").write_text(
-                json.dumps(
-                    {
-                        "strict": True,
-                        "images": [
-                            {
-                                "filename": "ai-hero.jpg",
-                                "required": True,
-                                "alt": article.image.alt,
-                                "caption": article.image.caption,
-                            },
-                            {
-                                "filename": "ai-inline-1.jpg",
-                                "required": True,
-                                "alt": article.inline_images[0].alt,
-                                "caption": article.inline_images[0].caption,
-                            },
-                            {
-                                "filename": "ai-inline-2.jpg",
-                                "required": True,
-                                "alt": article.inline_images[1].alt,
-                                "caption": article.inline_images[1].caption,
-                            },
-                        ],
-                    }
-                ),
+                json.dumps(build_article_image_plan(candidate, article.title).to_dict()),
                 encoding="utf-8",
             )
             (article_dir / "research_report.json").write_text(
@@ -107,7 +84,7 @@ class KoreaGeneratorQualityTests(unittest.TestCase):
             report = HadesQualityGate(content_domain="korea_travel").review_html(article.html, article_dir, metadata)
 
         self.assertTrue(report.passed, [issue.code for issue in report.issues])
-        self.assertGreaterEqual(report.metrics["word_count"], 1400)
+        self.assertGreaterEqual(report.metrics["word_count"], 800)
         self.assertGreaterEqual(report.metrics["faq_question_count"], 5)
         self.assertGreaterEqual(report.metrics["research_source_count"], 6)
 

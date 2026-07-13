@@ -156,7 +156,8 @@ def contains_forbidden_policy_topic(text_lower: str) -> list[str]:
 
 
 def daily_publish_limit_from_env(value: str | None, quality_review_enabled: bool = True) -> int:
-    default_limit = MAX_DAILY_PUBLISH_LIMIT if quality_review_enabled else DEFAULT_DAILY_PUBLISH_LIMIT
+    # Stabilization always defaults to one. Higher limits must be explicit after a cadence review.
+    default_limit = DEFAULT_DAILY_PUBLISH_LIMIT
     if not value:
         return default_limit
     try:

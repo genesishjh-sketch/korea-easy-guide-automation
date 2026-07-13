@@ -4,16 +4,20 @@ This project should publish posts at or above the strengthened T-money article q
 
 ## Minimum Public-Post Standard
 
-- 1,400+ English words.
+- 800+ useful English words. Most posts should naturally land around 900-1,600 words; depth follows the reader's problem, not a quota.
 - Clear practical intent for foreign visitors in Korea.
 - Specific topic depth, not generic Korea travel filler.
 - Two required images:
-  - preferred: `assets/ai-hero.jpg` and `assets/ai-inline-1.jpg`
-  - zero-cost CI fallback: `assets/ai-hero.svg` and `assets/ai-inline-1.svg`
+  - `assets/ai-hero.jpg` and `assets/ai-inline-1.jpg`
+  - both must be fresh, article-specific Codex raster images with different reader-useful roles
 - Four or more official/platform links in the article.
 - App/service articles must include direct app-store, official service, booking, or operator links that help the reader take action.
 - Five or more FAQ questions.
 - No placeholder phrases, AI refusal phrases, or generic old-template section names.
+- No repeated filler used to meet a word-count target.
+- No candidate with 7-word-shingle body similarity at or above 0.45 to a live post.
+- Rewrite candidates at similarity 0.35 or above before publishing.
+- Headings and order should fit the topic; fixed visible outlines are not a quality signal.
 
 ## Required Research Before Writing
 
@@ -57,7 +61,7 @@ Use several search angles before writing:
 
 ## Article Depth Requirements
 
-A public post should answer:
+A public post should answer the relevant questions below, without forcing irrelevant sections:
 
 - What the service/item is.
 - Who should use it.
@@ -70,11 +74,26 @@ A public post should answer:
 - Official links to verify current details.
 - Related app, booking, or service links where they improve reader convenience.
 
+For Windows articles, replace travel-specific components with symptom boundaries, diagnosis, reversible checks, result interpretation, advanced-risk boundaries, and clear stop/get-help conditions.
+
 ## Hades Gate
 
 The Hades Engineer quality gate is the hard blocker. If Hades fails, do not publish.
 
 The automation may improve and retry up to three times. If the post still fails, keep the output for inspection and skip that day rather than publishing weak content.
+
+## Indexable Site Standard
+
+Content quality and crawlability are checked separately. A strong article is not considered operationally complete unless:
+
+- the post URL returns HTTP 200 to a Googlebot user agent;
+- the canonical URL exactly matches the final public URL;
+- robots metadata does not contain `noindex`;
+- the homepage exposes direct post links without requiring JavaScript;
+- the canonical sitemap has no current errors or warnings;
+- internal links point to direct `.html` articles rather than Blogger search-result pages.
+
+Historical Search Console exclusions remain in reports until Google recrawls. They are not treated as current site defects when the live indexability check passes.
 
 ## Easy PC Fix Guide Rules
 

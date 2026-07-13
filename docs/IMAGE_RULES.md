@@ -82,5 +82,5 @@ Avoid: fake official UI, QR codes, barcodes, clutter, cartoon/vector art, dark c
 sips -s format jpeg -s formatOptions 78 -z 675 1200 source.png --out ai-hero.jpg
 ```
 
-5. Reference it in article HTML as `assets/ai-hero.jpg` / `assets/ai-inline-1.jpg`, or as `assets/ai-hero.svg` / `assets/ai-inline-1.svg` when using the zero-cost local fallback.
+5. Reference it in article HTML as `assets/ai-hero.jpg` / `assets/ai-inline-1.jpg`. SVG and reusable fallback art may be used for local drafts only and must never reach public publishing.
 6. Use `stage2_refresh_post` to update the existing Blogger post.

@@ -4,10 +4,15 @@ from __future__ import annotations
 def quality_issue_actions(quality_issues: list[dict]) -> list[str]:
     codes = {issue.get("code", "") for issue in quality_issues}
     actions = []
-    if {"weak_related_guides", "weak_related_guide_links"} & codes:
+    if {
+        "weak_related_guides",
+        "weak_related_guide_links",
+        "weak_direct_internal_links",
+        "blocked_search_internal_links",
+    } & codes:
         actions.append(
-            "품질검수에서 Related Guides 내부 링크 문제가 감지되었습니다. Windows 글 템플릿과 related_guides 생성기가 "
-            "블로그 내부 검색 링크 3개 이상을 출력하는지 확인하세요."
+            "품질검수에서 Related Guides 내부 링크 문제가 감지되었습니다. /search 링크는 제거하고, "
+            "실제로 공개된 관련 글의 직접 URL을 3개 이상 연결하세요."
         )
     if {
         "missing_required_image_assets",

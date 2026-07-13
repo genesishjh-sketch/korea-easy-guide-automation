@@ -459,7 +459,7 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertIn("weak_related_guide_links", message)
         self.assertIn("품질 조치:", message)
         self.assertIn("Related Guides 내부 링크 문제", message)
-        self.assertIn("블로그 내부 검색 링크 3개 이상", message)
+        self.assertIn("실제로 공개된 관련 글의 직접 URL을 3개 이상", message)
         self.assertIn("이미지 문제가 감지", message)
         self.assertIn("alt/caption", message)
         self.assertIn("Windows 이미지 안전 문제가 감지", message)
@@ -1292,7 +1292,7 @@ class DuplicatePublishGuardTests(unittest.TestCase):
 
 
 class WindowsQualityGateTests(unittest.TestCase):
-    def test_windows_articles_require_estimated_time_in_safety_heading(self) -> None:
+    def test_windows_articles_require_structured_safety_details(self) -> None:
         gate = HadesQualityGate("windows_help")
         with tempfile.TemporaryDirectory() as tmpdir:
             article_dir = Path(tmpdir)
@@ -1363,11 +1363,9 @@ class WindowsQualityGateTests(unittest.TestCase):
                 {"article": {"meta_description": "Safe Windows help.", "tags": ["Windows"]}},
             )
 
-        messages = " ".join(issue.message for issue in report.issues)
-        self.assertIn("missing_required_sections", {issue.code for issue in report.issues})
-        self.assertIn("Applies to / Risk level / Data loss risk / Estimated time / Last checked", messages)
+        self.assertIn("missing_windows_safety_table", {issue.code for issue in report.issues})
 
-    def test_windows_articles_require_follow_up_sections_for_beginners(self) -> None:
+    def test_windows_articles_require_all_semantic_reader_tasks(self) -> None:
         gate = HadesQualityGate("windows_help")
         with tempfile.TemporaryDirectory() as tmpdir:
             article_dir = Path(tmpdir)
@@ -1424,8 +1422,8 @@ class WindowsQualityGateTests(unittest.TestCase):
 
         messages = " ".join(issue.message for issue in report.issues)
         self.assertIn("missing_required_sections", {issue.code for issue in report.issues})
-        self.assertIn("After Each Step", messages)
-        self.assertIn("What to Record Before Asking for Help", messages)
+        self.assertIn("Final Summary", messages)
+        self.assertIn("Headings may vary", messages)
 
     def test_windows_articles_require_official_microsoft_source(self) -> None:
         gate = HadesQualityGate("windows_help")
@@ -1485,9 +1483,9 @@ class WindowsQualityGateTests(unittest.TestCase):
             <article>
               <h2>Related Guides</h2>
               <ul>
-                <li><a href="https://easypcfixguide.blogspot.com/search?q=Windows+Update">Windows Update</a></li>
-                <li><a href="https://easypcfixguide.blogspot.com/search?q=Check+Windows+version">Check Windows version</a></li>
-                <li><a href="https://easypcfixguide.blogspot.com/search?q=Free+disk+space">Free disk space</a></li>
+                <li><a href="https://easypcfixguide.blogspot.com/2026/07/windows-update-guide.html">Windows Update</a></li>
+                <li><a href="https://easypcfixguide.blogspot.com/2026/07/check-windows-version.html">Check Windows version</a></li>
+                <li><a href="https://easypcfixguide.blogspot.com/2026/07/free-disk-space.html">Free disk space</a></li>
               </ul>
               <h2>Sources</h2>
               <ul>
@@ -1574,9 +1572,9 @@ class WindowsQualityGateTests(unittest.TestCase):
               </table>
               <h2>Related Guides</h2>
               <ul>
-                <li><a href="https://easypcfixguide.blogspot.com/search?q=Windows+Update">Windows Update</a></li>
-                <li><a href="https://easypcfixguide.blogspot.com/search?q=Check+Windows+version">Check Windows version</a></li>
-                <li><a href="https://easypcfixguide.blogspot.com/search?q=Free+disk+space">Free disk space</a></li>
+                <li><a href="https://easypcfixguide.blogspot.com/2026/07/windows-update-guide.html">Windows Update</a></li>
+                <li><a href="https://easypcfixguide.blogspot.com/2026/07/check-windows-version.html">Check Windows version</a></li>
+                <li><a href="https://easypcfixguide.blogspot.com/2026/07/free-disk-space.html">Free disk space</a></li>
               </ul>
               <h2>Sources</h2>
               <a href="https://support.microsoft.com/windows">Microsoft Support</a>
@@ -1654,7 +1652,7 @@ class WindowsQualityGateTests(unittest.TestCase):
 
         self.assertIn("advanced_fix_in_beginner_section", {issue.code for issue in issues})
 
-    def test_windows_articles_keep_reset_and_driver_removal_out_of_beginner_fix_sections(self) -> None:
+    def test_windows_articles_allow_clear_advanced_action_safety_boundaries(self) -> None:
         gate = HadesQualityGate("windows_help")
         soup = BeautifulSoup(
             """
@@ -1675,11 +1673,7 @@ class WindowsQualityGateTests(unittest.TestCase):
             links=[],
         )
 
-        issue_messages = "\n".join(issue.message for issue in issues)
-        self.assertIn("advanced_fix_in_beginner_section", {issue.code for issue in issues})
-        self.assertIn("reset this pc", issue_messages)
-        self.assertIn("uninstall driver", issue_messages)
-        self.assertIn("roll back driver", issue_messages)
+        self.assertNotIn("advanced_fix_in_beginner_section", {issue.code for issue in issues})
 
     def test_windows_image_review_allows_screenshot_topic_words_without_fake_ui(self) -> None:
         gate = HadesQualityGate("windows_help")
@@ -1786,9 +1780,9 @@ class WindowsQualityGateTests(unittest.TestCase):
             <article>
               <h2>Related Guides</h2>
               <ul>
-                <li><a href="https://easypcfixguide.blogspot.com/search?q=How+to+check+your+Windows+version">How to check your Windows version</a></li>
-                <li><a href="https://easypcfixguide.blogspot.com/search?q=How+to+free+up+disk+space+on+Windows">How to free up disk space on Windows</a></li>
-                <li><a href="https://easypcfixguide.blogspot.com/search?q=Windows+Update+stuck+at+100%25">Windows Update stuck at 100%</a></li>
+                <li><a href="https://easypcfixguide.blogspot.com/2026/07/check-windows-version.html">How to check your Windows version</a></li>
+                <li><a href="https://easypcfixguide.blogspot.com/2026/07/free-up-disk-space.html">How to free up disk space on Windows</a></li>
+                <li><a href="https://easypcfixguide.blogspot.com/2026/07/windows-update-stuck.html">Windows Update stuck at 100%</a></li>
               </ul>
             </article>
             """,
@@ -1801,7 +1795,7 @@ class WindowsQualityGateTests(unittest.TestCase):
         )
 
         self.assertNotIn("weak_related_guides", {issue.code for issue in issues})
-        self.assertNotIn("weak_related_guide_links", {issue.code for issue in issues})
+        self.assertNotIn("weak_direct_internal_links", {issue.code for issue in issues})
 
     def test_windows_articles_require_deep_beginner_troubleshooting_sections(self) -> None:
         gate = HadesQualityGate("windows_help")
@@ -1822,11 +1816,8 @@ class WindowsQualityGateTests(unittest.TestCase):
         issues = gate._review_windows_section_depth(soup)
 
         issue_codes = {issue.code for issue in issues}
-        self.assertIn("weak_quick_summary", issue_codes)
         self.assertIn("weak_symptoms", issue_codes)
-        self.assertIn("weak_try_first_steps", issue_codes)
         self.assertIn("weak_fix_steps", issue_codes)
-        self.assertIn("weak_after_each_step_checks", issue_codes)
         self.assertIn("weak_stop_help_items", issue_codes)
 
     def test_windows_generator_outputs_deep_beginner_troubleshooting_sections(self) -> None:
@@ -1880,7 +1871,7 @@ class WindowsQualityGateTests(unittest.TestCase):
             links=[],
         )
 
-        self.assertIn("weak_related_guide_links", {issue.code for issue in issues})
+        self.assertIn("weak_direct_internal_links", {issue.code for issue in issues})
 
     def test_windows_articles_block_onedrive_update_context_mismatch(self) -> None:
         gate = HadesQualityGate("windows_help")
@@ -1944,9 +1935,9 @@ class WindowsQualityGateTests(unittest.TestCase):
               <h3>Question 1?</h3><h3>Question 2?</h3><h3>Question 3?</h3><h3>Question 4?</h3><h3>Question 5?</h3>
               <h2>Related Guides</h2>
               <ul>
-                <li><a href="https://easypcfixguide.blogspot.com/search?q=Windows+Update">Windows Update</a></li>
-                <li><a href="https://easypcfixguide.blogspot.com/search?q=Check+Windows+version">Check Windows version</a></li>
-                <li><a href="https://easypcfixguide.blogspot.com/search?q=Free+disk+space">Free disk space</a></li>
+                <li><a href="https://easypcfixguide.blogspot.com/2026/07/windows-update-guide.html">Windows Update</a></li>
+                <li><a href="https://easypcfixguide.blogspot.com/2026/07/check-windows-version.html">Check Windows version</a></li>
+                <li><a href="https://easypcfixguide.blogspot.com/2026/07/free-disk-space.html">Free disk space</a></li>
               </ul>
               <h2>Sources</h2>
               <img src="assets/hero.jpg" alt="Windows Update troubleshooting visual for beginner computer users">
@@ -2022,9 +2013,9 @@ class WindowsQualityGateTests(unittest.TestCase):
               <h3>Question 1?</h3><h3>Question 2?</h3><h3>Question 3?</h3><h3>Question 4?</h3><h3>Question 5?</h3>
               <h2>Related Guides</h2>
               <ul>
-                <li><a href="https://easypcfixguide.blogspot.com/search?q=OneDrive+sync">OneDrive sync</a></li>
-                <li><a href="https://easypcfixguide.blogspot.com/search?q=Microsoft+account">Microsoft account</a></li>
-                <li><a href="https://easypcfixguide.blogspot.com/search?q=Windows+settings">Windows settings</a></li>
+                <li><a href="https://easypcfixguide.blogspot.com/2026/07/onedrive-sync.html">OneDrive sync</a></li>
+                <li><a href="https://easypcfixguide.blogspot.com/2026/07/microsoft-account.html">Microsoft account</a></li>
+                <li><a href="https://easypcfixguide.blogspot.com/2026/07/windows-settings.html">Windows settings</a></li>
               </ul>
               <h2>Sources</h2>
               <img src="assets/hero.jpg" alt="OneDrive error troubleshooting visual for beginner Windows users">

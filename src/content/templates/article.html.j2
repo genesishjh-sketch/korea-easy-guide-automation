@@ -172,7 +172,7 @@
 
   <p class="keg-post__lead">{{ intro }}</p>
 
-  <h2>Quick Answer</h2>
+  <h2 data-section="decision">Quick Answer</h2>
   <table>
     <tr><th>Situation</th><th>Best Choice</th></tr>
     {% for row in quick_answer %}
@@ -180,7 +180,7 @@
     {% endfor %}
   </table>
 
-  <h2>Before You Start</h2>
+  <h2 data-section="orientation">Before You Start</h2>
   {% for paragraph in basics %}
   <p>{{ paragraph }}</p>
   {% endfor %}
@@ -194,7 +194,7 @@
   </figure>
   {% endif %}
 
-  <h2>Step-by-Step Guide</h2>
+  <h2 data-section="steps">Step-by-Step Guide</h2>
   <ol>
     {% for step in steps %}
     <li>{{ step }}</li>
@@ -218,7 +218,7 @@
     {% endfor %}
   </table>
 
-  <h2>Common Problems</h2>
+  <h2 data-section="pitfalls">Common Problems</h2>
   <ul>
     {% for mistake in mistakes %}
     <li>{{ mistake }}</li>
@@ -242,13 +242,21 @@
     {% endfor %}
   </table>
 
-  <h2>FAQ</h2>
+  <h2 data-section="faq">FAQ</h2>
   {% for item in faq %}
   <h3>{{ item.question }}</h3>
   <p>{{ item.answer }}</p>
   {% endfor %}
 
-  <h2>Official Links to Check</h2>
+  <h2 data-section="related_guides">Related Guides</h2>
+  <p>Continue with these closely related guides. Each link goes directly to a published article rather than a search-results page.</p>
+  <ul>
+    {% for item in related_guides %}
+    <li><a href="{{ item.url }}">{{ item.title }}</a></li>
+    {% endfor %}
+  </ul>
+
+  <h2 data-section="sources">Official Links to Check</h2>
   <p>Use these official or platform links to download apps, confirm current rules, and check live service details before you travel.</p>
   <ul class="keg-post__sources">
     {% for source in sources %}
@@ -256,6 +264,6 @@
     {% endfor %}
   </ul>
 
-  <h2>Final Summary</h2>
+  <h2 data-section="summary">Final Summary</h2>
   <p>{{ title }} is easiest when you check the official information first, prepare a backup payment or route, and save the key details before you need them. Use this guide as a practical starting point, then confirm current rules, prices, app features, and operating hours through the official links above before making travel decisions.</p>
 </article>

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+import json
 from pathlib import Path
 import tempfile
 import unittest
@@ -52,7 +53,41 @@ class MissingPublishAlertTests(unittest.TestCase):
         message = notification.return_value.send_required.call_args.args[0]
         self.assertIn("발행 누락 경고", message)
         self.assertIn("Easy PC Fix Guide", message)
-        self.assertIn("publish workflow를 수동 실행", message)
+        self.assertIn("누락은 알림으로 끝내지 말고 복구 대상으로 처리", message)
+        self.assertIn("Hades 품질검수", message)
+
+    def test_missing_message_includes_recovery_report_status(self) -> None:
+        today = datetime(2026, 7, 2, 14, 0, tzinfo=ZoneInfo("Asia/Seoul"))
+        reports = Path(self._tmpdir.name) / "reports"
+        reports.mkdir(parents=True)
+        (reports / "easy_pc_fix_guide-daily-recovery-report.json").write_text(
+            json.dumps(
+                {
+                    "status": "codex_image_required",
+                    "target_posts": 3,
+                    "public_total_after_batch": 1,
+                    "missing_count": 2,
+                    "next_actions": ["Codex 이미지 복구 필요: 새 JPG 이미지를 생성하세요."],
+                },
+                ensure_ascii=False,
+            ),
+            encoding="utf-8",
+        )
+        old_post = {
+            "title": "Yesterday post",
+            "url": "https://example.blogspot.com/yesterday.html",
+            "published_kst": datetime(2026, 7, 1, 14, 0, tzinfo=ZoneInfo("Asia/Seoul")),
+        }
+
+        with patch.object(stage4_missing_publish_alert, "fetch_public_feed", return_value={}), patch.object(
+            stage4_missing_publish_alert, "parse_posts", return_value=[old_post]
+        ), patch("src.pipeline.stage4_missing_publish_alert.NotificationClient") as notification:
+            stage4_missing_publish_alert.run(["easy_pc_fix_guide"], today=today)
+
+        message = notification.return_value.send_required.call_args.args[0]
+        self.assertIn("복구 상태: codex_image_required", message)
+        self.assertIn("복구 후 공개 수: 1/3", message)
+        self.assertIn("Codex 이미지 복구 필요", message)
 
     def test_run_reports_feed_errors_as_attention_needed(self) -> None:
         today = datetime(2026, 7, 2, 14, 0, tzinfo=ZoneInfo("Asia/Seoul"))

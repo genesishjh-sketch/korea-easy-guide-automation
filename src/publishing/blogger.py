@@ -73,10 +73,10 @@ class BloggerPublisher:
             request = service.posts().list_next(request, response)
         return count
 
-    def list_live_posts(self) -> list[dict[str, Any]]:
+    def list_live_posts(self, fetch_bodies: bool = False) -> list[dict[str, Any]]:
         service = self._service()
         posts: list[dict[str, Any]] = []
-        request = service.posts().list(blogId=self.blog_id, fetchBodies=False, status=["LIVE"], maxResults=500)
+        request = service.posts().list(blogId=self.blog_id, fetchBodies=fetch_bodies, status=["LIVE"], maxResults=500)
         while request is not None:
             response = request.execute()
             posts.extend(response.get("items", []))

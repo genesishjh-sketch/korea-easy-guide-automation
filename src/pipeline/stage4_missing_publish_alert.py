@@ -41,6 +41,7 @@ def run(
 
 def site_result(site_key: str, minimum_posts: int, now: datetime) -> dict:
     settings = load_settings(site_key)
+    recovery = load_recovery_report(settings.site_key)
     try:
         posts = parse_posts(fetch_public_feed(settings.site_url))
         today_posts = [post for post in posts if post["published_kst"].date() == now.date()]
@@ -66,6 +67,7 @@ def site_result(site_key: str, minimum_posts: int, now: datetime) -> dict:
             }
             if posts
             else {},
+            "recovery": recovery,
         }
     except Exception as exc:
         return {
@@ -76,6 +78,7 @@ def site_result(site_key: str, minimum_posts: int, now: datetime) -> dict:
             "today_post_count": 0,
             "minimum_posts": minimum_posts,
             "error": str(exc),
+            "recovery": recovery,
         }
 
 
@@ -85,6 +88,16 @@ def save_result(result: dict) -> Path:
     path = output_dir / "daily-missing-publish-alert.json"
     path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
     return path
+
+
+def load_recovery_report(site_key: str) -> dict:
+    path = ROOT_DIR / "reports" / f"{site_key}-daily-recovery-report.json"
+    if not path.exists():
+        return {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return {"status": "unreadable", "path": str(path)}
 
 
 def build_message(result: dict) -> str:
@@ -113,13 +126,28 @@ def build_message(result: dict) -> str:
             lines.append(f"  최신 공개 글: {latest.get('published_kst')} / {latest.get('title')}")
         if item.get("error"):
             lines.append(f"  오류: {item.get('error')}")
+        recovery = item.get("recovery") or {}
+        if recovery:
+            lines.extend(
+                [
+                    f"  복구 상태: {recovery.get('status', 'unknown')}",
+                    f"  복구 후 공개 수: {recovery.get('public_total_after_batch', 'n/a')}/{recovery.get('target_posts', 'n/a')}",
+                ]
+            )
+            if recovery.get("next_actions"):
+                lines.append("  복구 조치:")
+                for action in recovery.get("next_actions", [])[:3]:
+                    lines.append(f"  - {action}")
     lines.extend(
         [
             "",
             "다음 조치:",
-            "- Daily Publish workflow 실행 여부와 실패 step을 확인하세요.",
+            "- 누락은 알림으로 끝내지 말고 복구 대상으로 처리하세요.",
+            "- Daily Publish workflow 실행 여부와 실패 step을 확인하고, latest daily batch / quality_report / image_plan / research_report를 확인하세요.",
+            "- 원인이 이미지/출처/본문/중복/주제 문제인지 먼저 분류하세요.",
+            "- 원인을 고친 뒤 Hades 품질검수를 다시 실행하고, 점수 90 이상 및 이슈 0개일 때 같은 날 보정 발행하세요.",
             "- Search Console/sitemap 실패는 발행 실패로 보지 말고, Blogger 공개 피드에 오늘 글이 있는지 먼저 확인하세요.",
-            "- 오늘 글이 0개면 publish workflow를 수동 실행해 누락분을 채우세요.",
+            "- 3회 보강 또는 3개 후보가 모두 실패하면 약한 글을 올리지 말고 복구 실패 사유만 보고하세요.",
         ]
     )
     return "\n".join(lines)

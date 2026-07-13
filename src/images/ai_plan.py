@@ -29,12 +29,14 @@ class ArticleImagePlan:
     strict: bool
     notes: list[str]
     images: list[PlannedImage]
+    prompt_policy: dict[str, str]
 
     def to_dict(self) -> dict:
         return {
             "mode": self.mode,
             "strict": self.strict,
             "notes": self.notes,
+            "prompt_policy": self.prompt_policy,
             "images": [asdict(image) | {"url": image.url} for image in self.images],
         }
 
@@ -70,20 +72,33 @@ def build_article_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
     hero_brief = _korea_visual_brief(f"{candidate.keyword} {title}", scene, "hero")
     inline_brief = _korea_visual_brief(f"{candidate.keyword} {title}", scene, "inline")
 
+    hero_concept = _korea_image_concept(candidate.keyword, title, scene, "hero")
+    inline_concept = _korea_image_concept(
+        candidate.keyword,
+        title,
+        scene,
+        "inline",
+        avoid_metaphor=hero_concept["metaphor"],
+    )
+
     hero = PlannedImage(
         role="hero",
         filename=f"ai-hero.{extension}",
         alt=f"{title} visual guide for foreign visitors in Korea",
         caption="A practical visual guide for planning this part of your Korea trip.",
-        prompt=(
-            f"Create a 16:9 hero image for an English Korea travel guide article titled '{title}'. "
-            f"Main subject: {visual_subject}. Audience: foreign tourists, exchange students, and long-stay visitors. "
-            f"Visual brief: {hero_brief['brief']}. Composition/framing: {hero_brief['framing']}. "
-            f"Material/camera direction: {hero_brief['medium']}. Distinctive props: {hero_brief['props']}. "
-            f"Lighting/mood: {hero_brief['mood']}. Accent color: {hero_brief['accent']}. "
-            "Fresh prompt rule: this is a creative brief, not a reusable prompt; write a new one-off image prompt for this article. "
-            "No text overlays, no readable app screens, no logos, no fake brand marks, no private information, no watermark. "
-            "Avoid repeating the same traveler-with-phone composition across nearby Korea posts."
+        prompt=_compose_codex_image_prompt(
+            domain="Korea travel guide",
+            title=title,
+            keyword=candidate.keyword,
+            role="hero",
+            reader_intent="help foreign tourists, exchange students, and long-stay visitors make a practical decision in Korea",
+            concept=hero_concept,
+            subject=visual_subject,
+            brief=hero_brief,
+            avoid=(
+                "No text overlays, no readable app screens, no logos, no fake brand marks, no private information, no watermark. "
+                "Avoid repeating traveler-with-phone, skyline-only, airport-luggage-only, and generic cafe-table compositions unless the article specifically needs them."
+            ),
         ),
     )
     inline_checklist = PlannedImage(
@@ -91,13 +106,19 @@ def build_article_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
         filename=f"ai-inline-1.{extension}",
         alt=f"Visual checklist for {candidate.keyword} in Korea",
         caption="Use the visual checklist to avoid common mistakes before relying on the service.",
-        prompt=(
-            f"Create a premium 16:9 illustrated checklist for a Korea travel guide about '{candidate.keyword}'. "
-            f"Show the key process visually: {_inline_subject(scene)}. Visual brief: {inline_brief['brief']}. "
-            f"Composition/framing: {inline_brief['framing']}. Material/camera direction: {inline_brief['medium']}. "
-            f"Distinctive props: {inline_brief['props']}. Accent color: {inline_brief['accent']}. "
-            "Fresh prompt rule: create a new visual idea for this article instead of reusing a previous prompt, camera setup, or prop layout. "
-            "No readable text, no Korean letters, no logos, no fake app UI, no private information, and no watermarks."
+        prompt=_compose_codex_image_prompt(
+            domain="Korea travel guide",
+            title=title,
+            keyword=candidate.keyword,
+            role="inline",
+            reader_intent="support the article body with a useful process, comparison, warning, or checklist visual",
+            concept=inline_concept,
+            subject=_inline_subject(scene),
+            brief=inline_brief,
+            avoid=(
+                "No readable text, no Korean letters, no logos, no fake app UI, no private information, and no watermarks. "
+                "Do not make this look like a second version of the hero image."
+            ),
         ),
     )
 
@@ -111,8 +132,11 @@ def build_article_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
             "Only add a third or fourth image when it has a distinct role such as comparison, map flow, warning, or cost decision.",
             "Do not add multiple similar lifestyle/photos just to increase image count.",
             "Publishing should stop when required image files are missing.",
+            "Codex app automation must generate these images with the built-in image_gen tool, copy them into article assets, copy hosted versions into src/images/ai_assets/hosted/, commit/push hosted files, then publish.",
+            "Image prompts must be created as fresh article-specific art direction. Do not paste a fixed prompt formula into image_gen.",
         ],
         images=[hero, inline_checklist],
+        prompt_policy=_prompt_policy("korea_travel"),
     )
 
 
@@ -123,25 +147,34 @@ def build_windows_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
     hero_brief = _windows_visual_brief(text, topic_scene, "hero")
     inline_brief = _windows_visual_brief(text, topic_scene, "inline")
     palette = _windows_palette(topic_scene)
+    hero_concept = _windows_image_concept(candidate.keyword, title, topic_scene, "hero")
+    inline_concept = _windows_image_concept(
+        candidate.keyword,
+        title,
+        topic_scene,
+        "inline",
+        avoid_metaphor=hero_concept["metaphor"],
+    )
     hero = PlannedImage(
         role="hero",
         filename=f"ai-hero.{extension}",
         alt=f"{title} beginner-friendly Windows help visual",
         caption="A realistic beginner-friendly visual for solving this Windows problem safely.",
-        prompt=(
-            f"Use case: {hero_brief['use_case']}. "
-            f"Create a realistic 16:9 hero image for an English beginner computer help article titled '{title}'. "
-            f"Primary request: help a non-technical reader understand a safe first-step fix for {candidate.keyword}. "
-            f"Visual brief: {hero_brief['brief']}. "
-            f"Composition/framing: {hero_brief['framing']}. "
-            f"Material/camera direction: {hero_brief['medium']}. "
-            f"Distinctive props: {hero_brief['props']}. "
-            f"Lighting/mood: {hero_brief['mood']}. Color palette: {palette}; accent color: {hero_brief['accent']}. "
-            "Fresh prompt rule: this is a creative brief, not a reusable prompt; write a new one-off image prompt for this article. "
-            "Do not show real Microsoft logos, fake Windows UI, readable error codes, readable letters or numbers, brand marks, "
-            "private information, warning screens, command prompts, registry editors, or text overlays. "
-            "Avoid fake support documents, fake screenshots, scary alert dialogs, distorted hands, extra fingers, watermarks, and generic stock-photo office scenes. "
-            "Do not reuse the same laptop-on-bright-desk composition from nearby posts."
+        prompt=_compose_codex_image_prompt(
+            domain="beginner Windows help",
+            title=title,
+            keyword=candidate.keyword,
+            role="hero",
+            reader_intent="help a non-technical reader understand the problem situation before trying safe fixes",
+            concept=hero_concept,
+            subject=hero_brief["brief"],
+            brief=hero_brief | {"palette": palette},
+            avoid=(
+                "Do not show real Microsoft logos, fake Windows UI, readable error codes, readable letters or numbers, brand marks, "
+                "private information, warning screens, command prompts, registry editors, or text overlays. "
+                "Avoid fake support documents, fake screenshots, scary alert dialogs, distorted hands, extra fingers, watermarks, "
+                "generic stock-photo office scenes, and the repeated laptop-centered desk composition."
+            ),
         ),
     )
     inline = PlannedImage(
@@ -149,17 +182,20 @@ def build_windows_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
         filename=f"ai-inline-1.{extension}",
         alt=f"Safe step-by-step troubleshooting setup for {candidate.keyword}",
         caption="Work through the safe checks first before trying advanced repair steps.",
-        prompt=(
-            f"Use case: {inline_brief['use_case']}. "
-            f"Create a clean 16:9 in-article illustration for a beginner Windows troubleshooting guide about '{candidate.keyword}'. "
-            f"Primary request: visually support the step-by-step safe checks before advanced fixes. Visual brief: {inline_brief['brief']}. "
-            f"Composition/framing: {inline_brief['framing']}. "
-            f"Material/camera direction: {inline_brief['medium']}. "
-            f"Distinctive props: {inline_brief['props']}. "
-            "Fresh prompt rule: create a new visual idea for this article instead of reusing a previous prompt, camera setup, or prop layout. "
-            f"Color palette: {palette}; accent color: {inline_brief['accent']}. "
-            "No real or fake operating-system screens, Microsoft logos, readable UI text, error codes, scary warning overlays, "
-            "command prompts, registry editors, fake official documentation, watermarks, or brand marks."
+        prompt=_compose_codex_image_prompt(
+            domain="beginner Windows help",
+            title=title,
+            keyword=candidate.keyword,
+            role="inline",
+            reader_intent="show a distinct safe process, checklist, decision flow, or cause-and-fix relationship inside the article",
+            concept=inline_concept,
+            subject=inline_brief["brief"],
+            brief=inline_brief | {"palette": palette},
+            avoid=(
+                "No real or fake operating-system screens, Microsoft logos, readable UI text, error codes, scary warning overlays, "
+                "command prompts, registry editors, fake official documentation, watermarks, or brand marks. "
+                "Do not make this a second laptop-on-desk image."
+            ),
         ),
     )
     return ArticleImagePlan(
@@ -175,9 +211,287 @@ def build_windows_image_plan(candidate: TopicCandidate, title: str) -> ArticleIm
             "The saved image plan is only a creative brief; Codex image generation must use a fresh article-specific prompt instead of pasting a fixed formula.",
             "Do not add extra images unless each image has a distinct role such as hero, troubleshooting flow, warning, or decision checklist.",
             "Publishing should stop when required image files are missing.",
+            "Codex app automation must use the built-in image_gen tool for missing images; GitHub Actions alone must not try to call paid image APIs.",
+            "Before calling image_gen, Codex must adapt this brief into a one-off prompt based on the article title, reader intent, recent image history, and the image role.",
         ],
         images=[hero, inline],
+        prompt_policy=_prompt_policy("windows_help"),
     )
+
+
+def _prompt_policy(content_domain: str) -> dict[str, str]:
+    if content_domain == "windows_help":
+        return {
+            "generation_owner": "codex_app_automation",
+            "tool": "built_in_image_gen",
+            "api_cost_policy": "Do not call OpenAI Images API or external paid image APIs.",
+            "prompt_method": (
+                "Treat each saved prompt as an art-direction brief. Before generating, Codex must write a fresh one-off image prompt "
+                "for the exact article, image role, reader intent, and recent visual history."
+            ),
+            "diversity_rule": (
+                "Recent laptop-on-desk or generic office visuals are not acceptable unless the topic specifically requires that exact object. "
+                "Hero and inline images must use different visual metaphors, camera angles, props, and composition."
+            ),
+            "quality_loop": (
+                "If the image looks generic, repeated, off-topic, text-heavy, or too similar to recent posts, discard it and regenerate before publishing."
+            ),
+        }
+    return {
+        "generation_owner": "codex_app_automation",
+        "tool": "built_in_image_gen",
+        "api_cost_policy": "Do not call OpenAI Images API or external paid image APIs.",
+        "prompt_method": (
+            "Treat each saved prompt as an art-direction brief. Before generating, Codex must write a fresh one-off image prompt "
+            "for the article, travel task, image role, and recent visual history."
+        ),
+        "diversity_rule": (
+            "Do not repeat traveler-with-phone, luggage-at-airport, generic cafe-table, or skyline-only visuals across nearby Korea posts. "
+            "Hero and inline images must have different purposes and compositions."
+        ),
+        "quality_loop": (
+            "If the image is generic, repeated, tourist-stock-like, text-heavy, or not useful for the article, discard it and regenerate before publishing."
+        ),
+    }
+
+
+def _compose_codex_image_prompt(
+    *,
+    domain: str,
+    title: str,
+    keyword: str,
+    role: str,
+    reader_intent: str,
+    concept: dict[str, str],
+    subject: str,
+    brief: dict[str, str],
+    avoid: str,
+) -> str:
+    palette = brief.get("palette") or f"{brief.get('accent', 'muted accent')} with clean neutrals"
+    return (
+        "Codex image generation brief. Fresh prompt rule: do not treat this as a reusable template; create a fresh one-off prompt before generating. "
+        f"Domain: {domain}. Article title: '{title}'. Search intent / reader need: {reader_intent}. "
+        f"Image role: {role}. Role purpose: {concept['purpose']}. "
+        f"Visual brief: {subject}. Fresh visual metaphor: {concept['metaphor']}. Subject to visualize: {subject}. "
+        f"Use case: {brief.get('use_case', concept['medium_family'])}. Medium/style: {concept['medium_family']}; {brief.get('medium', '')}. "
+        f"Composition: {concept['composition']}; {brief.get('framing', '')}. "
+        f"Key objects or scene cues: {concept['objects']}; {brief.get('props', '')}. "
+        f"Lighting/mood: {brief.get('mood', 'calm, practical, trustworthy')}. Color palette: {palette}. "
+        f"Recent-image avoidance: {concept['avoid_recent']}. "
+        f"Quality bar: the result must be clearly article-specific for '{keyword}', not a generic stock image, and not a variation of the other image in this post. "
+        f"Constraints: {avoid}"
+    )
+
+
+def _windows_image_concept(
+    keyword: str,
+    title: str,
+    scene: str,
+    role: str,
+    avoid_metaphor: str | None = None,
+) -> dict[str, str]:
+    text = f"{keyword} {title}"
+    role_purpose = {
+        "hero": "show the real-world problem context or a clear visual metaphor for why the issue happens",
+        "inline": "explain the safe order of checks, decision path, or cause-and-fix relationship without using screenshots",
+    }
+    metaphor_options = {
+        "network_wifi_disconnect": [
+            "an interrupted signal path as physical beads between rooms",
+            "a fading bridge of light from router to device",
+            "a broken route line across a home floor plan model",
+        ],
+        "network_cannot_connect": [
+            "two device islands separated by an unfinished cable bridge",
+            "a blocked path made of small matte tiles and connection dots",
+            "a route map where the final connection segment is missing",
+        ],
+        "network_adapter_missing": [
+            "a missing adapter-shaped space in a hardware tray",
+            "a close inspection of ports and cable ends without any screen",
+            "a tidy parts layout showing what Windows cannot see physically",
+        ],
+        "network_dns": [
+            "a paused route through abstract server blocks",
+            "a branching path where one node stops the lookup flow",
+            "transparent network nodes with one amber unresolved point",
+        ],
+        "network": [
+            "home internet as a visible route between router, room, and device",
+            "connection quality as a simple physical signal path",
+            "safe restart order shown as object stages",
+        ],
+        "printer": [
+            "a paper path and cable-check story centered on the printer or scanner",
+            "a close-up peripheral connection scene where the accessory is the hero",
+            "a blank test page and device connection flow, not a laptop scene",
+        ],
+        "audio": [
+            "sound waves as physical rings around headphones or microphone",
+            "a quiet audio-check setup with volume represented by objects",
+            "input and output paths shown as separated sound tokens",
+        ],
+        "device": [
+            "pairing distance and connection state shown with small device tokens",
+            "an accessory setup path with missing connection cue",
+            "device discovery as a clean object-based inspection scene",
+        ],
+        "files": [
+            "lost file search as a tabletop folder trail",
+            "folder organization as stacked cards and a magnifier",
+            "search indexing as a route through blank document tiles",
+        ],
+        "account": [
+            "privacy-safe sync as cloud-shaped objects and shield tokens",
+            "account connection as locked and unlocked blank cards",
+            "sign-in flow as a calm checkpoint sequence without screens",
+        ],
+        "recovery": [
+            "backup-first repair as drive, shield, and safe-step ladder",
+            "startup recovery as a protected path with warning boundaries",
+            "safe repair order as physical checkpoints",
+        ],
+        "update_download": [
+            "paused download as a waiting path of blocks and a clock",
+            "network and update progress represented by objects, not UI",
+            "a stalled transfer line with safe restart cues",
+        ],
+        "update_cleanup": [
+            "storage cleanup as sorting useful and removable blocks",
+            "safe cleanup decision as containers and backup token",
+            "disk space as a physical shelf being organized",
+        ],
+        "update_error_code": [
+            "error diagnosis as a puzzle table without readable codes",
+            "update failure as a calm investigation scene with magnifier and shield",
+            "unknown error as a locked path through diagnostic blocks",
+        ],
+        "update_restart": [
+            "pending restart as clock, power-cycle tokens, and waiting zone",
+            "restart sequence as circular objects in a safe order",
+            "patient reboot flow without screens or progress bars",
+        ],
+        "update": [
+            "update safety as shield, repair tokens, and timeline blocks",
+            "system maintenance as a neat inspection board",
+            "safe update flow using abstract objects",
+        ],
+        "general": [
+            "safe troubleshooting as a non-screen object story",
+            "beginner repair order as physical checkpoints",
+            "cause and next step shown as a simple visual metaphor",
+        ],
+    }
+    medium_options = [
+        "editorial object photography",
+        "premium 3D educational scene",
+        "macro hardware detail photo",
+        "paper-and-object process visual",
+        "soft isometric bitmap illustration",
+        "low-key diagnostic tabletop photography",
+    ]
+    composition_options = [
+        "no centered laptop; make the topic-specific object or metaphor the dominant subject",
+        "top-down three-zone layout for problem, safe check, and next step",
+        "tight macro crop with the computer only implied or secondary",
+        "diagonal cause-to-fix path with clear negative space",
+        "asymmetrical layout with foreground object and background context",
+    ]
+    object_options = {
+        "hero": [
+            "one topic-specific main object, one safety cue, one blank note or card",
+            "physical objects that explain the issue without readable text",
+            "a real accessory, cable, router, folder, clock, shield, or storage prop based on the topic",
+        ],
+        "inline": [
+            "three distinct unlabeled checkpoints, arrows made from objects, and a safety marker",
+            "blank checklist cards, cause token, safe-action token, and stop/help token",
+            "a small process map built from physical props, no screenshots",
+        ],
+    }
+    metaphors = metaphor_options.get(scene, metaphor_options["general"])
+    selected_metaphor = _pick(metaphors, text, role, "metaphor")
+    if avoid_metaphor and len(metaphors) > 1 and selected_metaphor == avoid_metaphor:
+        selected_metaphor = _pick([metaphor for metaphor in metaphors if metaphor != avoid_metaphor], text, role, "metaphor-alt")
+
+    return {
+        "purpose": role_purpose[role],
+        "metaphor": selected_metaphor,
+        "medium_family": _pick(medium_options, text, role, "medium-family"),
+        "composition": _pick(composition_options, text, role, "composition"),
+        "objects": _pick(object_options[role], text, role, "objects"),
+        "avoid_recent": (
+            "avoid laptop centered on a bright desk, repeated laptop+coffee setups, generic home-office stock scenes, "
+            "and using the same camera angle as the other image"
+        ),
+    }
+
+
+def _korea_image_concept(
+    keyword: str,
+    title: str,
+    scene: str,
+    role: str,
+    avoid_metaphor: str | None = None,
+) -> dict[str, str]:
+    text = f"{keyword} {title}"
+    role_purpose = {
+        "hero": "show the travel situation or decision moment the reader recognizes before taking action",
+        "inline": "explain a process, comparison, mistake prevention, payment step, route choice, or preparation checklist",
+    }
+    metaphor_options = {
+        "airport": ["arrival decision point between train, bus, and taxi", "luggage movement from gate to city route", "airport-to-city route as objects on a table"],
+        "ktx": ["station-to-seat boarding flow", "ticket check and platform decision without readable text", "intercity rail timing as luggage, clock, and platform cues"],
+        "esim": ["mobile connection readiness after landing", "phone setup as signal tokens and travel documents", "data access before maps and taxi use"],
+        "taxi": ["safe pickup confirmation at curbside", "destination and vehicle matching without app UI", "night pickup safety with luggage and route tokens"],
+        "map": ["route choice between walking, subway, and bus", "station exit orientation without readable signs", "city block route model"],
+        "transport_card": ["buy, recharge, tap flow", "fare card as object sequence", "gate and convenience-store preparation"],
+        "shopping": ["local service use through payment, pickup, and receipt objects", "delivery or shopping flow as household objects", "foreigner-friendly everyday errand checklist"],
+        "general": ["Korea travel preparation as practical objects", "decision flow for a visitor in Korea", "mistake prevention before using a local service"],
+    }
+    medium_options = [
+        "realistic editorial travel photography",
+        "premium 3D travel-service diagram",
+        "object-based flat lay with Korean travel props",
+        "street-level environmental photography",
+        "paper-map style bitmap illustration",
+        "clean comparison-board visual made from physical objects",
+    ]
+    composition_options = [
+        "avoid generic tourist pose; make the practical action or object dominant",
+        "top-down process layout with before, during, and backup zones",
+        "street-level crop focused on the action rather than skyline",
+        "diagonal route or decision path with clear depth",
+        "tight crop on payment, ticket, card, luggage, route, or service object",
+    ]
+    object_options = {
+        "hero": [
+            "one practical travel object, one place cue, one decision cue, no readable labels",
+            "luggage/card/ticket/phone object chosen only if it fits the topic",
+            "a recognizable service situation without logos or readable screens",
+        ],
+        "inline": [
+            "three unlabeled step zones, backup option object, and mistake-prevention cue",
+            "comparison tokens for option A, option B, and when to avoid each",
+            "blank checklist cards, route line, payment/card object, and warning marker",
+        ],
+    }
+    metaphors = metaphor_options.get(scene, metaphor_options["general"])
+    selected_metaphor = _pick(metaphors, text, role, "korea-metaphor")
+    if avoid_metaphor and len(metaphors) > 1 and selected_metaphor == avoid_metaphor:
+        selected_metaphor = _pick([metaphor for metaphor in metaphors if metaphor != avoid_metaphor], text, role, "korea-metaphor-alt")
+
+    return {
+        "purpose": role_purpose[role],
+        "metaphor": selected_metaphor,
+        "medium_family": _pick(medium_options, text, role, "korea-medium-family"),
+        "composition": _pick(composition_options, text, role, "korea-composition"),
+        "objects": _pick(object_options[role], text, role, "korea-objects"),
+        "avoid_recent": (
+            "avoid repeated traveler holding phone, luggage-only airport shots, generic Seoul skyline, cafe-table phone setup, "
+            "and using the same scene as the other image"
+        ),
+    }
 
 
 def _asset_from_plan(image: PlannedImage, article_dir: Path | None) -> ImageAsset:
