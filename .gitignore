@@ -5,5 +5,9 @@ __pycache__/
 *.pyc
 data/raw/
 data/generated/
+data/archive/
+data/backups/
+data/previews/
+data/repurpose/
 reports/
 logs/
