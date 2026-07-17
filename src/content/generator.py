@@ -135,6 +135,8 @@ class EnglishArticleGenerator:
             return "How to Use a T-money Card in Korea: Easy Guide for Foreign Visitors"
         if "olive young" in normalized:
             return "Olive Young Shopping in Korea for Foreigners: Easy Guide for First-Time Visitors"
+        if self._is_hospital_pharmacy(keyword):
+            return "Korea Hospital and Pharmacy Guide for Foreigners: Clinics, ER, Prescriptions, and Insurance"
         return default_title
 
     def _build_tags(self, candidate: TopicCandidate) -> list[str]:
@@ -147,6 +149,8 @@ class EnglishArticleGenerator:
     def _meta_description(self, keyword: str) -> str:
         if self._is_tmoney(keyword):
             return "T-money card in Korea guide for visitors, covering where to buy it, how to recharge, subway and bus use, balance checks, refunds, and common mistakes."
+        if self._is_hospital_pharmacy(keyword):
+            return "Korea hospital and pharmacy guide for foreign visitors, covering clinics, ER visits, prescriptions, insurance paperwork, medication rules, and language help."
         normalized = keyword.strip()
         if "kakao taxi" in normalized.lower():
             return "Kakao T Taxi in Korea guide for foreigners, including setup, destination search, pickup points, payment backups, and common taxi app problems."
@@ -165,6 +169,13 @@ class EnglishArticleGenerator:
                 "It works like a rechargeable transportation card for subways, buses, and many everyday travel moments, "
                 "but foreign visitors often get confused about where to buy it, how to recharge it, and when it is better than paying by single ticket. "
                 "This guide explains the practical flow from airport arrival to your first subway or bus ride, with the common mistakes that usually cause delays."
+            )
+        if self._is_hospital_pharmacy(keyword):
+            return (
+                "Getting medical help in Korea is usually manageable for foreign visitors, but the first decision matters: a neighborhood clinic, "
+                "a hospital emergency room, a pharmacy, or a multilingual help line each solves a different problem. This guide is not medical advice. "
+                "It explains the practical visitor workflow: when to seek urgent help, what documents to bring, how prescriptions usually move from doctor to pharmacy, "
+                "what to ask for insurance claims, and how to avoid language or medication-rule surprises."
             )
         return (
             f"If you are visiting Korea for the first time, {keyword} can be confusing because local apps, "
@@ -188,6 +199,14 @@ class EnglishArticleGenerator:
                 {"situation": "Hotel is near a bus stop", "choice": "Airport Limousine Bus"},
                 {"situation": "Late-night arrival or heavy luggage", "choice": "Taxi or private transfer"},
             ]
+        if self._is_hospital_pharmacy(keyword):
+            return [
+                {"situation": "Severe symptoms, injury, chest pain, breathing trouble, or major allergic reaction", "choice": "Call 119 or go to an emergency room immediately"},
+                {"situation": "Fever, stomach issue, skin problem, eye problem, UTI concern, or non-emergency illness", "choice": "Start with a nearby clinic during opening hours"},
+                {"situation": "Minor OTC question such as cold medicine or digestive medicine", "choice": "Ask a pharmacy, but expect prescription-only limits for some medicines"},
+                {"situation": "Need English help finding care", "choice": "Use the 1330 Korea Travel Helpline or a hospital international clinic desk"},
+                {"situation": "Need reimbursement later", "choice": "Ask for receipts, diagnosis/treatment documents, and prescription records before leaving"},
+            ]
         return [
             {"situation": "First-time visitor", "choice": "Choose the simplest option with English support"},
             {"situation": "Budget traveler", "choice": "Compare public options before paying for convenience"},
@@ -205,6 +224,19 @@ class EnglishArticleGenerator:
                 "The biggest practical advantage is not only price. It is speed. You avoid buying a single-use subway ticket for every ride, and you can move between subway and bus routes with less friction when your balance is enough.",
                 "If you are traveling as a family or group, each person should normally carry their own card. One card per traveler keeps fare calculation and transfers simple and avoids gate errors when several people try to pass with one card.",
                 "If you plan to leave Seoul, check local compatibility before assuming the same card behavior everywhere. T-money is widely used, but local transport rules, accepted cards, and refund handling can differ by city or service.",
+            ]
+        if self._is_hospital_pharmacy(keyword):
+            return [
+                "For a true emergency in Korea, call 119 for ambulance or fire/emergency help. Do not spend time comparing clinics if symptoms are severe, sudden, or dangerous.",
+                "For non-emergency illness, a local clinic is often the practical first stop. Clinics are usually more focused and less expensive than a large hospital ER, but English ability varies by neighborhood and specialty.",
+                "A pharmacy can help with some over-the-counter medicines, but it is not a substitute for diagnosis. Antibiotics, many eye drops, stronger pain medicine, and condition-specific treatment may require a doctor visit and a prescription.",
+                "Bring your passport or alien registration card if you have one, your travel insurance details, a payment card plus cash backup, and a list of allergies, current medicines, and medical conditions.",
+                "Korean hospitals and clinics may ask you to pay first, then claim reimbursement from your insurer later. Before you leave, ask what documents your insurer needs: receipt, itemized bill, diagnosis note, prescription, or medical certificate.",
+                "If you need English support, search for international clinics, university hospitals, or medical tourism help desks, but verify operating hours and appointment requirements before you travel across town.",
+                "Pharmacy hours vary. Late-night and holiday pharmacy access can be limited, so use official tourism help lines, local map apps, or hotel staff to confirm which pharmacy is actually open.",
+                "Do not assume medicine names from home match Korean products. Save the generic ingredient name and dosage in English, and show original packaging when asking a pharmacist or doctor.",
+                "Some medications that are normal in your country may be restricted or controlled in Korea. For controlled substances or large quantities, check official customs or embassy guidance before arrival.",
+                "For routine symptoms, prepare simple Korean phrases or translated notes: symptom, start time, allergies, pregnancy status if relevant, current medication, and whether you need paperwork for insurance.",
             ]
         return [
             f"The most important thing is to check the latest official information before relying on any guide about {keyword}. Korea changes app features, fares, routes, opening hours, and business rules regularly.",
@@ -233,6 +265,19 @@ class EnglishArticleGenerator:
                 "Keep the card separate from other transit, hotel, and contactless bank cards when tapping. Multiple cards near the reader can cause an error or failed tap.",
                 "Before your final day, decide whether to use down the balance, keep the card for a future Korea trip, or ask about refund options. Do not leave refund questions until you are already rushing to airport security.",
             ]
+        if self._is_hospital_pharmacy(keyword):
+            return [
+                "Decide whether this is urgent. If symptoms are severe, sudden, or risky, call 119 or go to an emergency room instead of searching for a cheaper clinic.",
+                "For non-urgent care, search Naver Map or KakaoMap for the relevant clinic type near your hotel, such as internal medicine, ENT, dermatology, ophthalmology, or dentistry.",
+                "Check opening hours, lunch break, last reception time, and reviews that mention English support. Call ahead or ask hotel staff to confirm if the visit is time-sensitive.",
+                "Prepare one screen with your symptom summary, one screen with allergies and medicines, and one screen with your passport name and insurance contact. Keep it simple for reception staff.",
+                "At reception, ask whether they can treat foreign visitors, whether payment is due before or after treatment, and whether they can issue insurance documents in English or Korean.",
+                "After seeing the doctor, check whether you received a prescription paper or electronic prescription instruction. Many visitors pay the clinic first, then take the prescription to a nearby pharmacy.",
+                "At the pharmacy, show the prescription, confirm how many days of medicine you are receiving, and ask how often to take each packet. Use a translation app, but do not guess dosage.",
+                "Before leaving the pharmacy, request receipts and keep the medicine packaging. Photograph the packets only for your own records; do not rely on social media advice for dosing.",
+                "If symptoms worsen, the medicine causes an allergic reaction, or the instructions are unclear, seek professional help again rather than trying random alternatives.",
+                "For insurance, organize documents immediately: clinic receipt, pharmacy receipt, diagnosis or treatment note if issued, prescription copy, passport page, and payment card record.",
+            ]
         return [
             f"Decide whether {keyword} is mainly a speed, price, comfort, safety, or convenience problem for your trip.",
             "Open the official website or app first, then compare it with a current map result or travel information page.",
@@ -259,6 +304,17 @@ class EnglishArticleGenerator:
                 "Treating mobile T-money information as universal. Some mobile options depend on phone type, local setup, Korean payment methods, or app availability.",
                 "Assuming airport, subway station, and convenience store staff all handle refunds or balance questions in the same way.",
             ]
+        if self._is_hospital_pharmacy(keyword):
+            return [
+                "Going to a pharmacy when the symptom needs a doctor, prescription, test, or emergency care.",
+                "Choosing a large emergency room for a routine problem during normal clinic hours, then being surprised by cost or waiting time.",
+                "Leaving without receipts, prescription copies, or diagnosis documents needed for a travel insurance claim.",
+                "Showing only a brand-name medicine from home instead of the generic ingredient and dosage.",
+                "Assuming every clinic has English-speaking staff or accepts the same payment methods.",
+                "Ignoring lunch breaks, last reception times, weekends, and public holidays when clinics and pharmacies may close early.",
+                "Bringing controlled medication into Korea without checking official rules before travel.",
+                "Guessing dosage from a medicine packet when the instructions are unclear.",
+            ]
         return [
             "Assuming every Korean app accepts foreign cards or foreign phone numbers.",
             "Checking only one map app when public transportation routes are involved.",
@@ -278,6 +334,15 @@ class EnglishArticleGenerator:
                 {"item": "Refunds", "detail": "Refund rules may depend on remaining balance, card type, and sales location. Ask staff before assuming it is refundable."},
                 {"item": "Single-use tickets", "detail": "Single-use subway tickets can work for one ride, but they add extra steps and are less convenient for repeated travel."},
                 {"item": "Tourist cards", "detail": "Korea Tour Card, WOWPASS, and NAMANE may add travel or payment features, but compare fees, reload methods, and actual benefits."},
+            ]
+        if self._is_hospital_pharmacy(keyword):
+            return [
+                {"item": "Clinic visit", "detail": "Usually paid on-site. Cost depends on specialty, tests, insurance status, and whether documents are issued."},
+                {"item": "Emergency room", "detail": "Use for urgent problems, but expect higher costs and longer waits than a routine clinic."},
+                {"item": "Prescription medicine", "detail": "Often paid separately at the pharmacy after the clinic visit. Keep both clinic and pharmacy receipts."},
+                {"item": "Travel insurance claim", "detail": "Ask your insurer what proof is required before you leave Korea, because missing documents are hard to recover later."},
+                {"item": "Translation or international desk help", "detail": "Large hospitals may offer language support, but private interpretation or medical-tour services can add fees."},
+                {"item": "Medication brought from home", "detail": "Keep medicine in original packaging with prescription or doctor letter, and verify controlled-substance rules before travel."},
             ]
         return [
             {"item": "Official price or fare", "detail": "Check the latest fare on an official website or app before making a final decision."},
@@ -299,6 +364,16 @@ class EnglishArticleGenerator:
                 {"title": "Write down 티머니", "detail": "Showing the Korean word helps at small counters when staff are busy or English support is limited."},
                 {"title": "Do not overbuy balance", "detail": "Recharge in stages unless you already know you will use public transport heavily."},
                 {"title": "Keep it after the trip", "detail": "If you expect to return to Korea, keeping the card can be easier than handling a small refund."},
+            ]
+        if self._is_hospital_pharmacy(keyword):
+            return [
+                {"title": "Save emergency numbers", "detail": "Keep 119 for emergencies and 1330 for tourist help in your offline notes before you need them."},
+                {"title": "Write symptoms plainly", "detail": "Use short phrases with start time, location of pain, fever, allergy, and current medicine."},
+                {"title": "Use clinics for routine care", "detail": "For non-emergency issues, a nearby specialty clinic may be faster and simpler than a big hospital."},
+                {"title": "Keep every receipt", "detail": "Clinic and pharmacy payments may be separate, and insurers often want both."},
+                {"title": "Ask about documents early", "detail": "If you need a diagnosis note or English paperwork, ask before payment is completed."},
+                {"title": "Check medicine legality before flying", "detail": "For controlled substances or larger supplies, official customs or embassy guidance matters more than forum advice."},
+                {"title": "Use hotel staff carefully", "detail": "They can help call a clinic or confirm address, but they cannot judge whether symptoms are urgent."},
             ]
         return [
             {"title": "Use Korean map apps", "detail": "Naver Map and KakaoMap usually provide better local transit information."},
@@ -342,6 +417,37 @@ class EnglishArticleGenerator:
                     "answer": "Some taxis and selected stores may accept it, but do not rely on it as your only payment method. Keep a regular payment card or cash backup.",
                 },
             ]
+        if self._is_hospital_pharmacy(keyword):
+            return [
+                {
+                    "question": "Should I go to a hospital, clinic, or pharmacy in Korea?",
+                    "answer": "Use 119 or an emergency room for urgent or severe symptoms. For non-emergency illness, a local clinic is often the practical first stop. Use a pharmacy for minor OTC questions or after receiving a prescription.",
+                },
+                {
+                    "question": "Can foreign tourists see a doctor in Korea without national insurance?",
+                    "answer": "Yes, but you should expect to pay on-site and claim from travel insurance later if covered. Ask for receipts and treatment documents before leaving.",
+                },
+                {
+                    "question": "Do Korean pharmacies sell antibiotics without a prescription?",
+                    "answer": "Do not expect prescription medicines such as antibiotics to be available over the counter. See a doctor when diagnosis or prescription treatment may be needed.",
+                },
+                {
+                    "question": "What documents should I bring to a Korean clinic?",
+                    "answer": "Bring your passport, insurance details, payment method, allergy list, current medication list, and a short symptom note. Long-term residents should also bring their alien registration card if relevant.",
+                },
+                {
+                    "question": "How do I find English-speaking medical help in Seoul?",
+                    "answer": "Check official tourism medical pages, large hospital international clinics, 1330 tourist help, or your embassy's medical assistance page. Confirm hours before going.",
+                },
+                {
+                    "question": "Can I bring my prescription medicine into Korea?",
+                    "answer": "Many personal medicines are possible in limited amounts, but controlled substances and large quantities need extra caution. Keep original packaging and prescriptions, and check official guidance before travel.",
+                },
+                {
+                    "question": "What should I do if I do not understand the medicine instructions?",
+                    "answer": "Ask the pharmacist or clinic to explain again, use a translation app for support, and seek professional clarification before taking medicine if dosing is unclear.",
+                },
+            ]
         return [
             {
                 "question": f"Is {keyword} easy for foreigners?",
@@ -372,6 +478,10 @@ class EnglishArticleGenerator:
     def _is_tmoney(self, keyword: str) -> bool:
         normalized = keyword.lower()
         return "t money" in normalized or "t-money" in normalized or "tmoney" in normalized
+
+    def _is_hospital_pharmacy(self, keyword: str) -> bool:
+        normalized = keyword.lower()
+        return "hospital" in normalized and "pharmacy" in normalized
 
     def _sources(self, candidate: TopicCandidate) -> list[dict[str, str]]:
         keyword = candidate.keyword.lower()
@@ -433,6 +543,15 @@ class EnglishArticleGenerator:
                 {"name": "Seoul Metropolitan Government official website", "url": "https://english.seoul.go.kr/"},
                 {"name": "NAVER Map Google Play listing", "url": "https://play.google.com/store/apps/details?id=com.nhn.android.nmap"},
                 {"name": "NAVER Map App Store listing", "url": "https://apps.apple.com/us/app/naver-maps-navigation/id311867728"},
+            ]
+        if self._is_hospital_pharmacy(candidate.keyword):
+            return [
+                {"name": "VISITKOREA pharmacy guide and 1330 help", "url": "https://english.visitkorea.or.kr/svc/contents/contentsView.do?dataSetId=131&menuSn=923&vcontsId=217224"},
+                {"name": "Seoul Metropolitan Government official website", "url": "https://english.seoul.go.kr/"},
+                {"name": "Korea Customs Service English website", "url": "https://www.customs.go.kr/english/main.do"},
+                {"name": "NAVER Map Google Play listing", "url": "https://play.google.com/store/apps/details?id=com.nhn.android.nmap"},
+                {"name": "NAVER Map App Store listing", "url": "https://apps.apple.com/us/app/naver-maps-navigation/id311867728"},
+                {"name": "Papago Google Play listing", "url": "https://play.google.com/store/apps/details?id=com.naver.labs.translator"},
             ]
         fallback_sources = list(OFFICIAL_SOURCE_MAP.get(candidate.category, OFFICIAL_SOURCE_MAP["Transportation"]))
         fallback_sources.extend(
