@@ -1,0 +1,213 @@
+{
+  "site": "easy_pc_fix_guide",
+  "site_name": "Easy PC Fix Guide",
+  "site_url": "https://easypcfixguide.blogspot.com",
+  "week": "2026-W30",
+  "created_at": "2026-07-19T23:21:39.652292+09:00",
+  "start_date": "2026-07-20",
+  "end_date": "2026-07-26",
+  "days": 7,
+  "posts_per_day": 1,
+  "status": "approved",
+  "duplicate_policy": {
+    "title_similarity_block": 0.72,
+    "topic_overlap_block": 0.82,
+    "published_and_generated_history_checked": true,
+    "weekly_selected_topics_checked": true
+  },
+  "topic_mix_policy": {
+    "daily_slots": [
+      {
+        "slot_number": 1,
+        "slot_strategy": "evergreen",
+        "purpose": "stable search demand"
+      }
+    ],
+    "note": "Trend/seasonal slots start when daily cadence is at least three posts."
+  },
+  "items": [
+    {
+      "date": "2026-07-20",
+      "site": "easy_pc_fix_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Windows beginner/search problem",
+      "strategy_fallback": false,
+      "seed": "camera not working windows 11",
+      "topic": "camera not working windows 11",
+      "category": "Bluetooth & Devices",
+      "article_type": "symptom_fix",
+      "intent": "symptom_fix",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct beginner PC help visuals for 'camera not working windows 11'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 8,
+        "direct_microsoft_source_count": 7,
+        "search_result_source_count": 1,
+        "source_count": 8,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-21",
+      "site": "easy_pc_fix_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Windows beginner/search problem",
+      "strategy_fallback": false,
+      "seed": "printer stuck deleting windows 11",
+      "topic": "printer stuck deleting windows 11",
+      "category": "Printer & Scanner",
+      "article_type": "symptom_fix",
+      "intent": "symptom_fix",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct beginner PC help visuals for 'printer stuck deleting windows 11'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 8,
+        "direct_microsoft_source_count": 7,
+        "search_result_source_count": 1,
+        "source_count": 8,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-22",
+      "site": "easy_pc_fix_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Windows beginner/search problem",
+      "strategy_fallback": false,
+      "seed": "printer driver unavailable windows 11",
+      "topic": "printer driver unavailable windows 11",
+      "category": "Bluetooth & Devices",
+      "article_type": "symptom_fix",
+      "intent": "symptom_fix",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct beginner PC help visuals for 'printer driver unavailable windows 11'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 8,
+        "direct_microsoft_source_count": 7,
+        "search_result_source_count": 1,
+        "source_count": 8,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-23",
+      "site": "easy_pc_fix_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Windows beginner/search problem",
+      "strategy_fallback": false,
+      "seed": "scanner not detected windows 11",
+      "topic": "scanner not detected windows 11",
+      "category": "Printer & Scanner",
+      "article_type": "symptom_fix",
+      "intent": "symptom_fix",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct beginner PC help visuals for 'scanner not detected windows 11'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 8,
+        "direct_microsoft_source_count": 7,
+        "search_result_source_count": 1,
+        "source_count": 8,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-24",
+      "site": "easy_pc_fix_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Windows beginner/search problem",
+      "strategy_fallback": false,
+      "seed": "snipping tool not working windows 11",
+      "topic": "snipping tool not working windows 11",
+      "category": "Apps & Settings",
+      "article_type": "symptom_fix",
+      "intent": "symptom_fix",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct beginner PC help visuals for 'snipping tool not working windows 11'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 8,
+        "direct_microsoft_source_count": 8,
+        "search_result_source_count": 0,
+        "source_count": 8,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-25",
+      "site": "easy_pc_fix_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Windows beginner/search problem",
+      "strategy_fallback": false,
+      "seed": "default printer keeps changing windows",
+      "topic": "default printer keeps changing windows",
+      "category": "Printer & Scanner",
+      "article_type": "symptom_fix",
+      "intent": "symptom_fix",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct beginner PC help visuals for 'default printer keeps changing windows'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 8,
+        "direct_microsoft_source_count": 7,
+        "search_result_source_count": 1,
+        "source_count": 8,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-26",
+      "site": "easy_pc_fix_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Windows beginner/search problem",
+      "strategy_fallback": false,
+      "seed": "bluetooth headphones connected but no sound windows",
+      "topic": "bluetooth headphones connected but no sound windows",
+      "category": "Bluetooth & Devices",
+      "article_type": "symptom_fix",
+      "intent": "symptom_fix",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct beginner PC help visuals for 'bluetooth headphones connected but no sound windows'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 8,
+        "direct_microsoft_source_count": 7,
+        "search_result_source_count": 1,
+        "source_count": 8,
+        "issues": []
+      },
+      "status": "scheduled"
+    }
+  ],
+  "candidate_pool_count": 27
+}

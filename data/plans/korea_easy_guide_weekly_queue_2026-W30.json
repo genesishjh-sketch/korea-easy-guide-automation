@@ -1,0 +1,185 @@
+{
+  "site": "korea_easy_guide",
+  "site_name": "Korea Easy Guide",
+  "site_url": "https://koreaeasyguide.blogspot.com",
+  "week": "2026-W30",
+  "created_at": "2026-07-19T23:21:38.667376+09:00",
+  "start_date": "2026-07-20",
+  "end_date": "2026-07-26",
+  "days": 7,
+  "posts_per_day": 1,
+  "status": "approved",
+  "duplicate_policy": {
+    "title_similarity_block": 0.72,
+    "topic_overlap_block": 0.82,
+    "published_and_generated_history_checked": true,
+    "weekly_selected_topics_checked": true
+  },
+  "topic_mix_policy": {
+    "daily_slots": [
+      {
+        "slot_number": 1,
+        "slot_strategy": "evergreen",
+        "purpose": "stable search demand"
+      }
+    ],
+    "note": "Trend/seasonal slots start when daily cadence is at least three posts."
+  },
+  "items": [
+    {
+      "date": "2026-07-20",
+      "site": "korea_easy_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Korea travel/living demand",
+      "strategy_fallback": false,
+      "seed": "korea cafe etiquette for tourists",
+      "topic": "korea cafe etiquette for tourists",
+      "category": "Travel Basics",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'korea cafe etiquette for tourists'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-21",
+      "site": "korea_easy_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Korea travel/living demand",
+      "strategy_fallback": false,
+      "seed": "how to use kiosks in korea restaurants",
+      "topic": "how to use kiosks in korea restaurants",
+      "category": "Food & Delivery",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'how to use kiosks in korea restaurants'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-22",
+      "site": "korea_easy_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Korea travel/living demand",
+      "strategy_fallback": false,
+      "seed": "olive young shopping guide for tourists",
+      "topic": "olive young shopping guide for tourists",
+      "category": "Travel Basics",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'olive young shopping guide for tourists'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-23",
+      "site": "korea_easy_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Korea travel/living demand",
+      "strategy_fallback": false,
+      "seed": "korea convenience store payment guide",
+      "topic": "korea convenience store payment guide",
+      "category": "Food & Delivery",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'korea convenience store payment guide'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-24",
+      "site": "korea_easy_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Korea travel/living demand",
+      "strategy_fallback": false,
+      "seed": "korea duty free shopping guide",
+      "topic": "korea duty free shopping guide",
+      "category": "Travel Basics",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'korea duty free shopping guide'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-25",
+      "site": "korea_easy_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Korea travel/living demand",
+      "strategy_fallback": false,
+      "seed": "how to use naver reservation in korea",
+      "topic": "how to use naver reservation in korea",
+      "category": "Apps in Korea",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'how to use naver reservation in korea'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-26",
+      "site": "korea_easy_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Korea travel/living demand",
+      "strategy_fallback": false,
+      "seed": "how to call a taxi without korean phone number",
+      "topic": "how to call a taxi without korean phone number",
+      "category": "Transportation",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'how to call a taxi without korean phone number'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    }
+  ],
+  "candidate_pool_count": 74
+}
