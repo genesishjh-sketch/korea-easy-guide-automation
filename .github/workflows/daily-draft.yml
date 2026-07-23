@@ -56,6 +56,7 @@ jobs:
           printf '%s' '${{ secrets.GOOGLE_OAUTH_TOKEN_JSON }}' > .credentials/google_token.json
           printf '%s' '${{ secrets.GOOGLE_OAUTH_TOKEN_SEARCH_CONSOLE_JSON }}' > .credentials/google_token.search-console.json
       - name: Run daily draft pipeline
+        id: publish_pipeline
         run: |
           if [ -n "${{ github.event.inputs.seed }}" ]; then
             python -m src.pipeline.daily_draft --mode "${BLOGGER_PUBLISH_MODE}" --seed "${{ github.event.inputs.seed }}"
@@ -65,14 +66,13 @@ jobs:
             python -m src.pipeline.daily_draft --mode "${BLOGGER_PUBLISH_MODE}"
           fi
       - name: Submit sitemap
-        if: ${{ success() && env.BLOGGER_PUBLISH_MODE == 'publish' }}
-        run: python -m src.pipeline.stage3_submit_sitemap
+        if: ${{ success() && steps.publish_pipeline.outputs.new_publication == 'true' }}
+        run: python -m src.pipeline.stage3_submit_sitemap --strict
       - name: Audit latest URL indexability
-        if: ${{ success() && env.BLOGGER_PUBLISH_MODE == 'publish' }}
-        continue-on-error: true
-        run: python -m src.pipeline.stage3_search_console_audit --site korea_easy_guide --inspection-count 1
+        if: ${{ success() && steps.publish_pipeline.outputs.new_publication == 'true' }}
+        run: python -m src.pipeline.stage3_search_console_audit --site korea_easy_guide --inspection-count 5 --strict
       - name: Build AdSense readiness and repurpose drafts
-        if: ${{ success() && env.BLOGGER_PUBLISH_MODE == 'publish' }}
+        if: ${{ success() && steps.publish_pipeline.outputs.new_publication == 'true' }}
         run: |
           python -m src.pipeline.stage6_adsense_readiness --site korea_easy_guide
           python -m src.pipeline.stage6_repurpose_content --site korea_easy_guide --latest

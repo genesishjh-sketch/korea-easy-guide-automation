@@ -63,7 +63,11 @@ class ContentUnit:
     keep: bool = False
 
 
-def run(sites: list[str] | None = None, apply: bool = False) -> Path:
+def run(
+    sites: list[str] | None = None,
+    apply: bool = False,
+    post_ids: set[str] | None = None,
+) -> Path:
     selected_sites = sites or ["korea_easy_guide", "easy_pc_fix_guide"]
     stamp = datetime.now(tz=KST).strftime("%Y%m%d-%H%M%S")
     output_dir = ROOT_DIR / "data" / "previews" / "deduplicated_live_posts" / stamp
@@ -87,7 +91,7 @@ def run(sites: list[str] | None = None, apply: bool = False) -> Path:
         )
         site_preview = output_dir / site
         site_preview.mkdir(parents=True, exist_ok=True)
-        rewritten = build_rewrites(site, posts)
+        rewritten = limit_rewrites_to_post_ids(posts, build_rewrites(site, posts), post_ids)
         similarities = body_similarities(rewritten)
         site_report = {"backup": str(backup_dir / f"{site}.json"), "updated": [], "held": [], "unchanged": []}
 
@@ -130,6 +134,23 @@ def run(sites: list[str] | None = None, apply: bool = False) -> Path:
     output = ROOT_DIR / "reports" / "live-post-deduplication-report.json"
     output.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
     return output
+
+
+def limit_rewrites_to_post_ids(
+    posts: list[dict],
+    rewritten: dict[str, str],
+    post_ids: set[str] | None,
+) -> dict[str, str]:
+    if not post_ids:
+        return rewritten
+    return {
+        str(post.get("id") or ""): (
+            rewritten[str(post.get("id") or "")]
+            if str(post.get("id") or "") in post_ids
+            else str(post.get("content") or "")
+        )
+        for post in posts
+    }
 
 
 def build_rewrites(site: str, posts: list[dict]) -> dict[str, str]:
@@ -329,8 +350,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Remove repeated filler from live Blogger posts without weakening required sections.")
     parser.add_argument("--site", action="append", choices=["korea_easy_guide", "easy_pc_fix_guide"])
     parser.add_argument("--apply", action="store_true")
+    parser.add_argument("--post-id", action="append", default=[], help="Limit changes to one or more Blogger post IDs.")
     args = parser.parse_args()
-    print(run(args.site, args.apply))
+    print(run(args.site, args.apply, set(args.post_id) or None))
 
 
 if __name__ == "__main__":

@@ -113,8 +113,9 @@ class WorkflowSafetyTests(unittest.TestCase):
         workflow = (ROOT_DIR / ".github" / "workflows" / "easy-pc-daily.yml").read_text(encoding="utf-8")
 
         self.assertIn("- name: Submit sitemap", workflow)
-        self.assertIn("success() && env.BLOGGER_PUBLISH_MODE == 'publish'", workflow)
-        self.assertNotIn("always() && env.BLOGGER_PUBLISH_MODE == 'publish'", workflow)
+        self.assertIn("steps.publish_pipeline.outputs.new_publication == 'true'", workflow)
+        self.assertIn("stage3_submit_sitemap --site easy_pc_fix_guide --strict", workflow)
+        self.assertIn("stage3_search_console_audit --site easy_pc_fix_guide --inspection-count 5 --strict", workflow)
 
     def test_easy_pc_daily_has_backup_schedule_after_primary_publish(self) -> None:
         workflow = (ROOT_DIR / ".github" / "workflows" / "easy-pc-daily.yml").read_text(encoding="utf-8")

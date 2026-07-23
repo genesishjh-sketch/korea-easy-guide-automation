@@ -35,6 +35,30 @@ class StaticPagesDesignTests(unittest.TestCase):
             with self.subTest(path=path):
                 ET.parse(path)
 
+    def test_blogger_themes_use_dynamic_descriptions_and_article_markup(self) -> None:
+        for relative_path in [
+            "blogger_themes/korea_easy_guide/Korea-Easy-Guide-theme.xml",
+            "blogger_themes/easy_pc_fix_guide/Easy-PC-Fix-Guide-theme.xml",
+        ]:
+            theme = (ROOT_DIR / relative_path).read_text(encoding="utf-8")
+            with self.subTest(path=relative_path):
+                self.assertIn("data:blog.metaDescription", theme)
+                self.assertIn("itemtype='https://schema.org/Article'", theme)
+                self.assertIn("itemprop='headline'", theme)
+                self.assertIn("itemprop='articleBody'", theme)
+                self.assertNotIn("property='og:type'", theme)
+
+    def test_easy_pc_theme_renders_blog_widget_without_feed_fallback(self) -> None:
+        theme_path = ROOT_DIR / "blogger_themes" / "easy_pc_fix_guide" / "Easy-PC-Fix-Guide-theme.xml"
+        theme = theme_path.read_text(encoding="utf-8")
+
+        self.assertIn("<b:includable id='main'>", theme)
+        self.assertNotIn("<b:includable id='main' var='top'>", theme)
+        self.assertIn("<b:section class='blog-main' id='main' showaddelement='true'>", theme)
+        self.assertNotIn("<b:section class='blog-main' id='main' showaddelement='false'>", theme)
+        self.assertNotIn("fetch('/feeds/posts/default", theme)
+        self.assertNotIn("renderEntry", theme)
+
     def test_korea_popular_guide_numbers_do_not_wrap(self) -> None:
         theme_path = ROOT_DIR / "blogger_themes" / "korea_easy_guide" / "Korea-Easy-Guide-theme.xml"
         theme = theme_path.read_text(encoding="utf-8")

@@ -8,10 +8,10 @@
 <head>
   <meta charset='UTF-8'/>
   <meta content='width=device-width, initial-scale=1' name='viewport'/>
-  <meta content='Easy PC Fix Guide explains safe Windows 11 and Windows 10 fixes for beginners, with low-risk steps, official Microsoft sources, and clear stop points.' name='description'/>
-  <meta content='Easy PC Fix Guide explains safe Windows 11 and Windows 10 fixes for beginners, with low-risk steps and official Microsoft sources.' property='og:description'/>
-  <meta content='website' property='og:type'/>
   <b:include data='blog' name='all-head-content'/>
+  <b:if cond='data:blog.metaDescription'>
+    <meta expr:content='data:blog.metaDescription' name='description'/>
+  </b:if>
   <title><data:blog.pageTitle/></title>
   <b:skin version='1.1'><![CDATA[
   :root{
@@ -155,25 +155,13 @@
   </b:if>
 
   <div class='wrap'>
-    <b:section class='blog-main' id='main' showaddelement='false'>
-      <b:widget id='Blog1' locked='true' title='Blog Posts' type='Blog' version='2' visible='true'>
-        <b:widget-settings>
-          <b:widget-setting name='showDateHeader'>false</b:widget-setting>
-          <b:widget-setting name='showShareButtons'>false</b:widget-setting>
-          <b:widget-setting name='showCommentLink'>false</b:widget-setting>
-          <b:widget-setting name='showAuthor'>false</b:widget-setting>
-          <b:widget-setting name='showAuthorProfile'>false</b:widget-setting>
-          <b:widget-setting name='showLabels'>true</b:widget-setting>
-          <b:widget-setting name='showLocation'>false</b:widget-setting>
-          <b:widget-setting name='showTimestamp'>true</b:widget-setting>
-          <b:widget-setting name='showBacklinks'>false</b:widget-setting>
-          <b:widget-setting name='showInlineAds'>false</b:widget-setting>
-          <b:widget-setting name='showReactions'>false</b:widget-setting>
-        </b:widget-settings>
-        <b:includable id='main' var='top'>
+    <main class='main'>
+    <b:section class='blog-main' id='main' showaddelement='true'>
+      <b:widget id='Blog2' locked='true' title='Blog Posts' type='Blog' version='2'>
+        <b:includable id='main'>
           <b:if cond='data:view.isMultipleItems'>
             <div class='layout'>
-              <main>
+              <div class='content'>
                 <div class='section-title'>
                   <h2><b:if cond='data:view.isLabelSearch'><data:view.search.label/><b:else/>Latest Windows Guides</b:if></h2>
                   <span>Updated for beginner-safe troubleshooting</span>
@@ -199,7 +187,7 @@
                   <b:if cond='data:newerPageUrl'><a expr:href='data:newerPageUrl'>Newer guides</a></b:if>
                   <b:if cond='data:olderPageUrl'><a expr:href='data:olderPageUrl'>Older guides</a></b:if>
                 </div>
-              </main>
+              </div>
               <aside class='sidebar'>
                 <div class='widget'>
                   <h3>Find a fix</h3>
@@ -231,9 +219,11 @@
             </div>
           <b:else/>
             <b:loop values='data:posts' var='post'>
-              <article class='post-shell'>
+              <article class='post-shell' itemscope='' itemtype='https://schema.org/Article'>
+                <meta expr:content='data:post.title' itemprop='headline'/>
+                <link expr:href='data:post.url' itemprop='mainEntityOfPage'/>
                 <div class='post-meta'><data:post.date/> · <b:if cond='data:post.labels'><data:post.labels.first.name/></b:if></div>
-                <div class='post-body'>
+                <div class='post-body' itemprop='articleBody'>
                   <data:post.body/>
                 </div>
               </article>
@@ -242,93 +232,8 @@
         </b:includable>
       </b:widget>
     </b:section>
+    </main>
   </div>
-
-  <script type='text/javascript'>
-  //<![CDATA[
-  (function(){
-    function start(){
-    var section = document.getElementById('main');
-    if (!section || section.querySelector('a[href*=".html"]')) return;
-
-    function text(value){ return value && value.$t ? value.$t : ''; }
-    function link(entry){
-      var links = entry.link || [];
-      for (var i = 0; i < links.length; i++) if (links[i].rel === 'alternate') return links[i].href;
-      return '#';
-    }
-    function imageFrom(html){
-      var match = String(html || '').match(/<img[^>]+src=["']([^"']+)["']/i);
-      return match ? match[1] : '';
-    }
-    function cleanText(html){
-      return String(html || '')
-        .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-        .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-        .replace(/<[^>]+>/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
-    }
-    function labels(entry){
-      return (entry.category || []).map(function(c){ return c.term; });
-    }
-    function dataValue(name){
-      var html = document.documentElement.innerHTML;
-      var patterns = [
-        new RegExp("['\\\"]" + name + "['\\\"]\\s*:\\s*['\\\"]?([0-9]+)", 'i'),
-        new RegExp(name + "\\s*[:=]\\s*['\\\"]?([0-9]+)", 'i')
-      ];
-      for (var i = 0; i < patterns.length; i++) {
-        var match = html.match(patterns[i]);
-        if (match) return match[1];
-      }
-      return '';
-    }
-    function renderList(entries, title){
-      var html = '<div class="layout"><main><div class="section-title"><h2>' + title + '</h2><span>Updated for beginner-safe troubleshooting</span></div><div class="post-grid">';
-      entries.forEach(function(entry){
-        var body = text(entry.content || entry.summary);
-        var img = imageFrom(body);
-        var label = labels(entry)[0] || 'Windows Help';
-        html += '<article class="card"><a href="' + link(entry) + '"><div class="thumb">' + (img ? '<img loading="lazy" src="' + img + '" alt=""/>' : '<div class="thumb-empty">Windows Help</div>') + '</div><div class="card-body"><span class="label">' + label + '</span><h3>' + text(entry.title) + '</h3><div class="excerpt">' + cleanText(body).slice(0,150) + '</div><div class="meta">' + text(entry.published).slice(0,10) + '</div></div></a></article>';
-      });
-      html += '</div></main>' + sidebarHtml() + '</div>';
-      section.innerHTML = html;
-    }
-    function sidebarHtml(){
-      return '<aside class="sidebar"><div class="widget"><h3>Find a fix</h3><form action="/search" class="search-box" method="get"><input name="q" placeholder="Search Windows errors" type="text"/><button type="submit">Search</button></form></div><div class="widget"><h3>Start here</h3><div class="quick-list"><a href="/search/label/Windows%20Update">Windows Update problems</a><a href="/search/label/Wi-Fi%20%26%20Internet">Wi-Fi and internet fixes</a><a href="/search/label/Apps%20%26%20Settings">Apps and settings help</a><a href="/search/label/Bluetooth%20%26%20Devices">Mouse, keyboard, Bluetooth</a></div></div><div class="widget"><h3>Site pages</h3><div class="page-links"><a href="/p/about.html">About</a><a href="/p/contact.html">Contact</a><a href="/p/privacy-policy.html">Privacy</a><a href="/p/disclaimer.html">Disclaimer</a><a href="/p/terms.html">Terms</a></div></div></aside>';
-    }
-    function renderEntry(entry){
-      var body = text(entry.content || entry.summary);
-      var labelList = labels(entry).slice(0,6).map(function(label){ return '<span class="label">' + label + '</span>'; }).join(' ');
-      section.innerHTML = '<article class="post-shell"><div class="post-meta">' + text(entry.published).slice(0,10) + '</div><div class="post-body">' + labelList + body + '</div></article>';
-    }
-    function getJson(url, cb){
-      fetch(url, {credentials:'same-origin'}).then(function(r){ return r.json(); }).then(cb).catch(function(){
-        section.innerHTML = '<article class="post-shell"><div class="post-body"><h1>Guide temporarily unavailable</h1><p>Please refresh this page. The article feed is public, but Blogger did not finish rendering it on this visit.</p></div></article>';
-      });
-    }
-
-    var postId = dataValue('postId');
-    var pageId = dataValue('pageId');
-    if (postId) {
-      getJson('/feeds/posts/default/' + postId + '?alt=json', function(data){ renderEntry(data.entry); });
-    } else if (pageId) {
-      getJson('/feeds/pages/default/' + pageId + '?alt=json', function(data){ renderEntry(data.entry); });
-    } else {
-      getJson('/feeds/posts/default?alt=json&max-results=12', function(data){
-        renderList((data.feed && data.feed.entry) || [], document.body.className.indexOf('item-view') > -1 ? 'Windows Guides' : 'Latest Windows Guides');
-      });
-    }
-    }
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', start);
-    } else {
-      setTimeout(start, 0);
-    }
-  })();
-  //]]>
-  </script>
 
   <footer class='footer'>
     <div class='wrap'>

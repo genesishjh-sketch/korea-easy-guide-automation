@@ -44,8 +44,7 @@ jobs:
         continue-on-error: true
         run: python -m src.pipeline.stage0_reddit_health --site korea_easy_guide
       - name: Audit Search Console indexability
-        continue-on-error: true
-        run: python -m src.pipeline.stage3_search_console_audit --site korea_easy_guide --inspection-count 3
+        run: python -m src.pipeline.stage3_search_console_audit --site korea_easy_guide --inspection-count 0 --strict
       - name: Generate and send weekly report
         run: python -m src.pipeline.stage3_weekly_report --site korea_easy_guide
       - name: Upload weekly report
@@ -59,3 +58,4 @@ jobs:
             reports/korea_easy_guide-weekly-*
             reports/korea_easy_guide-weekly-failure.json
             reports/korea_easy_guide-search-console-audit.json
+            reports/search-console-audit-history/korea_easy_guide/

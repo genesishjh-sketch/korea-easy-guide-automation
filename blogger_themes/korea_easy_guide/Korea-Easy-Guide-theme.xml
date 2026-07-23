@@ -15,10 +15,10 @@
   <meta content='width=device-width, initial-scale=1' name='viewport'/>
   <link href='https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css' rel='stylesheet'/>
   <b:include data='blog' name='all-head-content'/>
+  <b:if cond='data:blog.metaDescription'>
+    <meta expr:content='data:blog.metaDescription' name='description'/>
+  </b:if>
   <title><data:blog.pageTitle/></title>
-  <meta content='Korea Easy Guide helps foreign visitors understand Korea travel, transport, apps, food, shopping, payments, and everyday living with practical English guides.' name='description'/>
-  <meta content='Korea Easy Guide helps foreign visitors understand Korea travel, transport, apps, food, shopping, payments, and everyday living.' property='og:description'/>
-  <meta content='website' property='og:type'/>
 
   <b:skin version='1.1'><![CDATA[
   /* ======= 한옥 이미지 URL — 여기만 본인 주소로 교체 ======= */
@@ -294,7 +294,9 @@
 
             <b:else/>
               <b:loop values='data:posts' var='post'>
-                <div class='postcard'>
+                <article class='postcard' itemscope='' itemtype='https://schema.org/Article'>
+                  <meta expr:content='data:post.title' itemprop='headline'/>
+                  <link expr:href='data:post.url' itemprop='mainEntityOfPage'/>
                   <div class='head'>
                     <div class='meta'><data:post.date/> · <data:post.timestamp/></div>
                   </div>
@@ -303,9 +305,9 @@
                       <b:loop values='data:post.labels' var='label'><a expr:href='data:label.url'><data:label.name/></a></b:loop>
                     </div>
                   </b:if>
-                </div>
-                <article class='post-body'>
-                  <data:post.body/>
+                  <div class='post-body' itemprop='articleBody'>
+                    <data:post.body/>
+                  </div>
                 </article>
                 <b:include data='post' name='comments'/>
               </b:loop>

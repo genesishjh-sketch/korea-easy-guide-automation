@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import unittest
+from unittest.mock import Mock
+from unittest.mock import patch
 
+from src.pipeline.stage3_search_console_audit import check_live_indexability
 from src.pipeline.stage3_search_console_audit import action_items
 from src.pipeline.stage3_search_console_audit import has_live_fetch_failure
 from src.pipeline.stage3_search_console_audit import is_indexed
@@ -91,6 +94,43 @@ class SearchConsoleAuditTests(unittest.TestCase):
         summary = summarize_audit(result)
         self.assertEqual(summary["current_live_indexability_failure_count"], 1)
         self.assertTrue(summary["structural_error"])
+
+    def test_raw_html_without_article_body_is_a_structural_failure(self) -> None:
+        response = Mock(
+            status_code=200,
+            url="https://example.com/post.html",
+            history=[],
+            text=(
+                "<html><head><link rel='canonical' href='https://example.com/post.html'></head>"
+                "<body><script>fetch('/feeds/posts/default/123?alt=json')</script></body></html>"
+            ),
+        )
+        with patch("src.pipeline.stage3_search_console_audit.requests.get", return_value=response):
+            check = check_live_indexability("https://example.com/post.html")
+
+        self.assertFalse(check["ok"])
+        self.assertIn("missing_article_body", check["issues"])
+        self.assertIn("javascript_dependent_content", check["issues"])
+        self.assertEqual(check["raw_html_word_count"], 0)
+
+    def test_server_rendered_article_passes_content_checks(self) -> None:
+        body = " ".join(["safe"] * 220)
+        response = Mock(
+            status_code=200,
+            url="https://example.com/post.html",
+            history=[],
+            text=(
+                "<html><head><link rel='canonical' href='https://example.com/post.html'></head><body>"
+                "<article itemscope itemtype='https://schema.org/Article'>"
+                f"<div itemprop='articleBody'><h1>Title</h1><p>{body}</p></div></article></body></html>"
+            ),
+        )
+        with patch("src.pipeline.stage3_search_console_audit.requests.get", return_value=response):
+            check = check_live_indexability("https://example.com/post.html")
+
+        self.assertTrue(check["ok"])
+        self.assertEqual(check["h1_count"], 1)
+        self.assertGreaterEqual(check["raw_html_word_count"], 200)
 
 
 if __name__ == "__main__":

@@ -29,6 +29,7 @@ from src.publishing.blogger import BloggerPublisher
 from src.pipeline.stage1_generate import run as run_stage1
 from src.pipeline.stage4_publication_check import fetch_public_feed
 from src.pipeline.stage4_publication_check import parse_posts
+from src.pipeline.publication_gate import write_github_publication_output
 from zoneinfo import ZoneInfo
 
 
@@ -724,6 +725,7 @@ def main() -> None:
     parser.add_argument("--no-notify", action="store_true")
     args = parser.parse_args()
     result = run(args.site, args.mode, args.max_posts, args.seed, notify=not args.no_notify)
+    write_github_publication_output(result)
     print(json.dumps(result, ensure_ascii=False, indent=2))
 
 

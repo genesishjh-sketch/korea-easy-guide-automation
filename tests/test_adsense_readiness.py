@@ -40,6 +40,10 @@ def rich_html(image: str = "https://example.com/image.jpg") -> str:
 
 
 class AdsenseReadinessTests(unittest.TestCase):
+    def test_similarity_thresholds_flag_repetitive_template_content_early(self) -> None:
+        self.assertLessEqual(adsense_readiness.REWRITE_BODY_SIMILARITY, 0.25)
+        self.assertLessEqual(adsense_readiness.MAX_BODY_SIMILARITY, 0.32)
+
     def test_similarity_warning_requires_duplicate_risk_rewrite(self) -> None:
         self.assertEqual(
             adsense_readiness.classify_post_issues(["content_similarity_warning"]),

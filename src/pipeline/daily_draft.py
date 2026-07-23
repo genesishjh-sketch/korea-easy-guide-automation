@@ -22,6 +22,7 @@ from src.pipeline.stage4_publication_check import fetch_public_feed
 from src.pipeline.stage4_publication_check import parse_posts
 from src.pipeline.stage1_generate import run as run_stage1
 from src.pipeline.stage2_publish import run as run_stage2
+from src.pipeline.publication_gate import write_github_publication_output
 from src.quality.action_guidance import quality_issue_actions
 from src.quality.hades import HadesQualityGate
 from src.utils.reddit_setup import GITHUB_SECRETS_URL
@@ -1352,6 +1353,7 @@ def main() -> None:
     parser.add_argument("--no-notify", action="store_true", help="Skip Posting Bot notifications for local smoke checks.")
     args = parser.parse_args()
     result = run(args.seed, args.site, args.mode, notify=not args.no_notify)
+    write_github_publication_output(result)
     print(json.dumps(result, ensure_ascii=False, indent=2))
 
 
