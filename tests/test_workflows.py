@@ -60,8 +60,26 @@ class WorkflowSafetyTests(unittest.TestCase):
         self.assertIn("env.BLOGGER_PUBLISH_MODE == 'publish'", korea_workflow)
         self.assertIn("python -m src.pipeline.daily_batch --mode publish", korea_workflow)
         self.assertIn("DAILY_BATCH_MAX_POSTS", korea_workflow)
+        self.assertIn(
+            "python -m src.pipeline.stage4_missing_publish_alert --site korea_easy_guide",
+            korea_workflow,
+        )
+        publication_count_line = next(
+            line
+            for line in korea_workflow.splitlines()
+            if "python -m src.pipeline.stage4_missing_publish_alert" in line
+        )
+        self.assertNotIn("|| true", publication_count_line)
+        self.assertNotIn("--site easy_pc_fix_guide", publication_count_line)
         self.assertIn('cron: "10 0 * * *"', easy_pc_workflow)
         self.assertIn('cron: "25 0 * * *"', easy_pc_workflow)
+        easy_pc_publication_count_line = next(
+            line
+            for line in easy_pc_workflow.splitlines()
+            if "python -m src.pipeline.stage4_missing_publish_alert" in line
+        )
+        self.assertNotIn("|| true", easy_pc_publication_count_line)
+        self.assertIn("--site easy_pc_fix_guide", easy_pc_publication_count_line)
 
     def test_legacy_korea_cadence_alert_is_manual_only_while_easy_pc_is_scheduled(self) -> None:
         korea_workflow = (ROOT_DIR / ".github" / "workflows" / "cadence-alert.yml").read_text(encoding="utf-8")

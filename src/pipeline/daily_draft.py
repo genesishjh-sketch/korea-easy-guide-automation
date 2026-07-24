@@ -13,6 +13,7 @@ from zoneinfo import ZoneInfo
 
 from src.config import ROOT_DIR
 from src.config import load_settings
+from src.content.adsense_rules import daily_publish_limit_from_env
 from src.content.topic_scoring import infer_category
 from src.content.windows_generator import _sources_for_topic as windows_sources_for_topic
 from src.notifications.telegram import NotificationClient
@@ -39,6 +40,8 @@ DEFAULT_VALIDATE_SMOKE_SEEDS = {
 TITLE_DUPLICATE_SIMILARITY = 0.9
 TOPIC_TOKEN_DUPLICATE_THRESHOLD = 0.8
 TOPIC_TOKEN_STOPWORDS = {
+    "10",
+    "11",
     "a",
     "an",
     "and",
@@ -360,11 +363,15 @@ def run(
             if notify:
                 notify_seed_plan(seed_plan, site)
             return result
-        if publish_mode == "publish" and seed is None:
-            existing_today = find_public_post_published_today(settings.site_url)
-            if existing_today:
+        if publish_mode == "publish":
+            daily_limit = daily_publish_limit_from_env(
+                os.getenv("DAILY_BATCH_MAX_POSTS"),
+                quality_review_enabled=True,
+            )
+            existing_today = public_posts_published_today(settings.site_url)
+            if len(existing_today) >= daily_limit:
                 result = {
-                    "seed": "",
+                    "seed": seed or "",
                     "article_dir": "",
                     "publish_result": "",
                     "site": settings.site_key,
@@ -372,7 +379,9 @@ def run(
                     "skipped_duplicate_seeds": [],
                     "skipped_quality_seeds": [],
                     "daily_limit_skipped": True,
-                    "existing_post": existing_today,
+                    "daily_limit": daily_limit,
+                    "existing_today_count": len(existing_today),
+                    "existing_post": existing_today[0],
                 }
                 save_daily_success_report(result)
                 if notify:
@@ -575,12 +584,18 @@ def find_public_post(site_url: str, slug: str = "", title: str = "") -> dict | N
 
 
 def find_public_post_published_today(site_url: str, now: datetime | None = None) -> dict | None:
+    posts = public_posts_published_today(site_url, now)
+    return posts[0] if posts else None
+
+
+def public_posts_published_today(site_url: str, now: datetime | None = None) -> list[dict]:
     selected_now = now or datetime.now(tz=KST)
     posts = parse_posts(fetch_public_feed(site_url))
-    for post in posts:
-        if post["published_kst"].date() == selected_now.date():
-            return duplicate_post_payload(post)
-    return None
+    return [
+        duplicate_post_payload(post)
+        for post in posts
+        if post["published_kst"].date() == selected_now.date()
+    ]
 
 
 def public_url_matches_slug(url: str, slug: str) -> bool:
@@ -611,10 +626,25 @@ def title_matches_existing(normalized_title: str, existing_title: str) -> bool:
         return True
     if not normalized_existing:
         return False
+    if title_subject_matches(normalized_title, normalized_existing):
+        return True
     if topic_tokens_match(normalized_title, normalized_existing):
         return True
     similarity = SequenceMatcher(None, normalized_title, normalized_existing).ratio()
     return similarity >= TITLE_DUPLICATE_SIMILARITY
+
+
+def title_subject_matches(candidate_text: str, existing_text: str) -> bool:
+    candidate_tokens = title_subject_tokens(candidate_text)
+    existing_tokens = title_subject_tokens(existing_text)
+    if candidate_tokens != existing_tokens:
+        return False
+    return len(candidate_tokens) >= 3 or any(token.startswith("0x") for token in candidate_tokens)
+
+
+def title_subject_tokens(value: str) -> set[str]:
+    subject = re.split(r"[:?—–|]", value, maxsplit=1)[0]
+    return meaningful_topic_tokens(subject)
 
 
 def topic_tokens_match(candidate_text: str, existing_text: str) -> bool:

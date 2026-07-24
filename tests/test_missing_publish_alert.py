@@ -56,6 +56,76 @@ class MissingPublishAlertTests(unittest.TestCase):
         self.assertIn("누락은 알림으로 끝내지 말고 복구 대상으로 처리", message)
         self.assertIn("Hades 품질검수", message)
 
+    def test_run_reports_duplicate_today_when_count_exceeds_daily_target(self) -> None:
+        today = datetime(2026, 7, 2, 14, 0, tzinfo=ZoneInfo("Asia/Seoul"))
+        posts = [
+            {
+                "title": f"Today post {index}",
+                "url": f"https://example.blogspot.com/today-{index}.html",
+                "published_kst": today,
+            }
+            for index in range(2)
+        ]
+
+        with patch.object(
+            stage4_missing_publish_alert,
+            "fetch_public_feed",
+            return_value={},
+        ), patch.object(
+            stage4_missing_publish_alert,
+            "parse_posts",
+            return_value=posts,
+        ), patch(
+            "src.pipeline.stage4_missing_publish_alert.NotificationClient"
+        ) as notification:
+            result = stage4_missing_publish_alert.run(
+                ["korea_easy_guide"],
+                minimum_posts=1,
+                today=today,
+            )
+
+        self.assertEqual(result["status"], "duplicate_publication")
+        self.assertEqual(result["duplicate_sites"][0]["status"], "duplicate_today")
+        self.assertEqual(result["missing_sites"], [])
+        notification.return_value.send_required.assert_called_once()
+        message = notification.return_value.send_required.call_args.args[0]
+        self.assertIn("중복 발행 경고", message)
+        self.assertIn("추가 발행을 즉시 중지", message)
+        self.assertIn("자동 삭제하지 말고", message)
+
+    def test_run_reports_mixed_missing_and_duplicate_counts(self) -> None:
+        today = datetime(2026, 7, 2, 14, 0, tzinfo=ZoneInfo("Asia/Seoul"))
+        duplicate_posts = [
+            {
+                "title": f"Today post {index}",
+                "url": f"https://example.blogspot.com/today-{index}.html",
+                "published_kst": today,
+            }
+            for index in range(2)
+        ]
+
+        with patch.object(
+            stage4_missing_publish_alert,
+            "fetch_public_feed",
+            return_value={},
+        ), patch.object(
+            stage4_missing_publish_alert,
+            "parse_posts",
+            side_effect=[duplicate_posts, []],
+        ), patch(
+            "src.pipeline.stage4_missing_publish_alert.NotificationClient"
+        ):
+            result = stage4_missing_publish_alert.run(
+                ["korea_easy_guide", "easy_pc_fix_guide"],
+                minimum_posts=1,
+                today=today,
+            )
+
+        self.assertEqual(result["status"], "publication_count_anomaly")
+        self.assertEqual(len(result["duplicate_sites"]), 1)
+        self.assertEqual(len(result["missing_sites"]), 1)
+        self.assertIn("발행 수량 경고", result["human_summary"])
+
     def test_missing_message_includes_recovery_report_status(self) -> None:
         today = datetime(2026, 7, 2, 14, 0, tzinfo=ZoneInfo("Asia/Seoul"))
         reports = Path(self._tmpdir.name) / "reports"

@@ -1,12 +1,18 @@
 from __future__ import annotations
 
 from datetime import date
+import time
 from typing import Any
 
 from googleapiclient.discovery import build
 
 from src.config import Settings
 from src.google_auth import SEARCH_CONSOLE_SUBMIT_SCOPE, get_credentials
+
+
+URL_INSPECTION_ATTEMPTS = 3
+URL_INSPECTION_RETRY_SECONDS = 2
+TRANSIENT_INSPECTION_STATUSES = {429, 500, 502, 503, 504}
 
 
 class SearchConsoleClient:
@@ -137,24 +143,38 @@ class SearchConsoleClient:
             service = build("searchconsole", "v1", credentials=credentials)
             results = []
             for inspected_url in inspected_urls:
-                try:
-                    response = (
-                        service.urlInspection()
-                        .index()
-                        .inspect(
-                            body={
-                                "inspectionUrl": inspected_url,
-                                "siteUrl": self.site_url,
-                                "languageCode": "en-US",
+                for attempt in range(URL_INSPECTION_ATTEMPTS):
+                    try:
+                        response = (
+                            service.urlInspection()
+                            .index()
+                            .inspect(
+                                body={
+                                    "inspectionUrl": inspected_url,
+                                    "siteUrl": self.site_url,
+                                    "languageCode": "en-US",
+                                }
+                            )
+                            .execute()
+                        )
+                        results.append(parse_index_inspection(inspected_url, response))
+                        break
+                    except Exception as exc:
+                        if (
+                            attempt < URL_INSPECTION_ATTEMPTS - 1
+                            and is_transient_inspection_error(exc)
+                        ):
+                            time.sleep(URL_INSPECTION_RETRY_SECONDS)
+                            continue
+                        results.append(
+                            {
+                                "status": "error",
+                                "site_url": self.site_url,
+                                "url": inspected_url,
+                                "error": str(exc),
                             }
                         )
-                        .execute()
-                    )
-                    results.append(parse_index_inspection(inspected_url, response))
-                except Exception as exc:
-                    results.append(
-                        {"status": "error", "site_url": self.site_url, "url": inspected_url, "error": str(exc)}
-                    )
+                        break
             return results
         except Exception as exc:
             return [
@@ -229,6 +249,40 @@ def parse_index_inspection(inspected_url: str, response: dict[str, Any]) -> dict
         "referring_urls": index_status.get("referringUrls", []),
         "sitemap": index_status.get("sitemap", []),
     }
+
+
+def is_transient_inspection_error(exc: Exception) -> bool:
+    if isinstance(exc, (TimeoutError, ConnectionError, OSError)):
+        return True
+    response = getattr(exc, "resp", None)
+    status = getattr(response, "status", None)
+    if status in TRANSIENT_INSPECTION_STATUSES:
+        return True
+    message = str(exc).casefold()
+    return any(
+        marker in message
+        for marker in (
+            "http error 429",
+            "httperror 429",
+            "http error 500",
+            "httperror 500",
+            "http error 502",
+            "httperror 502",
+            "http error 503",
+            "httperror 503",
+            "http error 504",
+            "httperror 504",
+            "internal error encountered",
+            "backend error",
+            "service unavailable",
+            "timed out",
+            "timeout",
+            "temporary failure",
+            "connection reset",
+            "connection aborted",
+            "name or service not known",
+        )
+    )
 
 
 def _weighted_ctr(rows: list[dict]) -> float:

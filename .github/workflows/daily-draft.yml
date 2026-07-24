@@ -76,9 +76,9 @@ jobs:
         run: |
           python -m src.pipeline.stage6_adsense_readiness --site korea_easy_guide
           python -m src.pipeline.stage6_repurpose_content --site korea_easy_guide --latest
-      - name: Check missing publication recovery status
+      - name: Check daily publication count
         if: ${{ !cancelled() && env.BLOGGER_PUBLISH_MODE == 'publish' }}
-        run: python -m src.pipeline.stage4_missing_publish_alert --site korea_easy_guide --site easy_pc_fix_guide --minimum-posts "${DAILY_BATCH_MAX_POSTS}" || true
+        run: python -m src.pipeline.stage4_missing_publish_alert --site korea_easy_guide --minimum-posts "${DAILY_BATCH_MAX_POSTS}"
       - name: Upload generated outputs
         if: ${{ always() }}
         uses: actions/upload-artifact@v6

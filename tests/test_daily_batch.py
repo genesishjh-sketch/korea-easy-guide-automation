@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 from datetime import datetime
+import json
+from pathlib import Path
+import tempfile
 from zoneinfo import ZoneInfo
 import unittest
 from unittest.mock import patch
 
 from src.content.article_types import infer_article_type
 from src.pipeline import daily_batch
+from src.pipeline.daily_batch import build_published_item
 from src.pipeline.daily_batch import build_combined_morning_message
 from src.pipeline.daily_batch import classify_recovery_issue
 from src.pipeline.daily_batch import notify_batch_completion
@@ -16,6 +20,45 @@ from src.pipeline.daily_batch import seed_matches_existing_public_title
 
 
 class DailyBatchSelectionTests(unittest.TestCase):
+    def test_published_item_preserves_blogger_live_evidence_for_publication_gate(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            article_dir = Path(tmpdir)
+            (article_dir / "metadata.json").write_text(
+                json.dumps({"article": {"title": "Verified post"}}),
+                encoding="utf-8",
+            )
+            (article_dir / "quality_report.json").write_text(
+                json.dumps({"score": 100, "metrics": {}}),
+                encoding="utf-8",
+            )
+            publish_result = article_dir / "blogger_publish_result.json"
+            publish_result.write_text(
+                json.dumps(
+                    {
+                        "draft": False,
+                        "skipped": False,
+                        "blogger": {
+                            "status": "LIVE",
+                            "url": "https://example.com/verified.html",
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            item = build_published_item(
+                {
+                    "seed": "verified seed",
+                    "article_dir": str(article_dir),
+                    "publish_result": str(publish_result),
+                },
+                {},
+            )
+
+        self.assertEqual(item["blogger_status"], "LIVE")
+        self.assertFalse(item["draft"])
+        self.assertFalse(item["skipped"])
+
     def test_recovery_candidate_limit_allows_replacement_candidates(self) -> None:
         self.assertEqual(recovery_candidate_limit(1), 3)
         self.assertEqual(recovery_candidate_limit(3), 9)

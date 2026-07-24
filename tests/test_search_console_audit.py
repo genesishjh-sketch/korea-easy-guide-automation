@@ -9,6 +9,8 @@ from src.pipeline.stage3_search_console_audit import action_items
 from src.pipeline.stage3_search_console_audit import has_live_fetch_failure
 from src.pipeline.stage3_search_console_audit import is_indexed
 from src.pipeline.stage3_search_console_audit import summarize_audit
+from src.reporting.search_console import SearchConsoleClient
+from src.reporting.search_console import is_transient_inspection_error
 
 
 class SearchConsoleAuditTests(unittest.TestCase):
@@ -131,6 +133,60 @@ class SearchConsoleAuditTests(unittest.TestCase):
         self.assertTrue(check["ok"])
         self.assertEqual(check["h1_count"], 1)
         self.assertGreaterEqual(check["raw_html_word_count"], 200)
+
+    def test_transient_url_inspection_error_is_retried(self) -> None:
+        settings = Mock(
+            search_console_site_url="https://example.com/",
+            site_url="https://example.com",
+        )
+        transient = RuntimeError("HttpError 500: Internal error encountered.")
+        response = {
+            "inspectionResult": {
+                "indexStatusResult": {
+                    "verdict": "PASS",
+                    "coverageState": "Submitted and indexed",
+                }
+            }
+        }
+        request = Mock()
+        request.execute.side_effect = [transient, response]
+        service = Mock()
+        service.urlInspection.return_value.index.return_value.inspect.return_value = request
+
+        with patch(
+            "src.reporting.search_console.get_credentials",
+        ), patch(
+            "src.reporting.search_console.build",
+            return_value=service,
+        ), patch(
+            "src.reporting.search_console.time.sleep",
+        ) as sleep:
+            result = SearchConsoleClient(settings).inspect_urls(
+                ["https://example.com/post.html"]
+            )
+
+        self.assertEqual(result[0]["status"], "connected")
+        self.assertEqual(result[0]["verdict"], "PASS")
+        self.assertEqual(request.execute.call_count, 2)
+        sleep.assert_called_once()
+
+    def test_nontransient_url_inspection_error_is_not_retried(self) -> None:
+        self.assertTrue(
+            is_transient_inspection_error(
+                RuntimeError("HttpError 500: Internal error encountered.")
+            )
+        )
+        self.assertFalse(
+            is_transient_inspection_error(
+                RuntimeError("HttpError 403: permission denied")
+            )
+        )
+        self.assertTrue(is_transient_inspection_error(TimeoutError("timed out")))
+        self.assertTrue(
+            is_transient_inspection_error(
+                ConnectionError("connection reset by peer")
+            )
+        )
 
 
 if __name__ == "__main__":

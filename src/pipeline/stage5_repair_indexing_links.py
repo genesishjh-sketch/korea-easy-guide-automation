@@ -22,6 +22,31 @@ LINK_OVERRIDES = {
     "https://koreaeasyguide.blogspot.com/2026/07/how-to-order-food-in-korean-restaurants.html": (
         "https://koreaeasyguide.blogspot.com/2026/06/how-to-use-baemin-food-delivery-in.html"
     ),
+    "https://easypcfixguide.blogspot.com/2026/07/windows-update-stuck-at-100-easy.html": (
+        "https://easypcfixguide.blogspot.com/2026/06/windows-update-download-stuck-at-0-easy.html"
+    ),
+}
+ORPHAN_SOURCE_OVERRIDES = {
+    "https://koreaeasyguide.blogspot.com/2026/07/korea-mobile-payment-options-for.html": (
+        "https://koreaeasyguide.blogspot.com/2026/07/korea-cash-vs-card-guide-for-tourists.html"
+    ),
+    "https://easypcfixguide.blogspot.com/2026/07/microsoft-store-not-opening-windows-11_01240372287.html": (
+        "https://easypcfixguide.blogspot.com/2026/07/microsoft-store-apps-not-updating-easy.html"
+    ),
+    "https://easypcfixguide.blogspot.com/2026/07/network-adapter-missing-in-windows-11.html": (
+        "https://easypcfixguide.blogspot.com/2026/06/wi-fi-button-missing-on-windows-11.html"
+    ),
+    "https://easypcfixguide.blogspot.com/2026/07/windows-11-slow-after-update-measure.html": (
+        "https://easypcfixguide.blogspot.com/2026/06/windows-update-pending-restart-stuck.html"
+    ),
+}
+DISCOVERY_SOURCE_OVERRIDES = {
+    "https://easypcfixguide.blogspot.com/2026/07/windows-11-slow-after-update-measure.html": (
+        "https://easypcfixguide.blogspot.com/2026/06/windows-update-pending-restart-stuck.html"
+    ),
+    "https://easypcfixguide.blogspot.com/2026/07/camera-not-working-in-windows-11-fix.html": (
+        "https://easypcfixguide.blogspot.com/2026/07/scanner-not-detected-windows-11-easy.html"
+    ),
 }
 STOPWORDS = {
     "a",
@@ -134,6 +159,7 @@ def build_repairs(posts: list[dict], site_url: str) -> tuple[dict[str, str], dic
             }
         )
 
+    discovery_additions = ensure_discovery_links(transformed, posts, live_urls)
     final_incoming = incoming_counts(posts, transformed, live_urls, site_url)
     remaining_orphans = [
         {"title": live_urls[url].get("title"), "url": live_urls[url].get("url")}
@@ -146,6 +172,7 @@ def build_repairs(posts: list[dict], site_url: str) -> tuple[dict[str, str], dic
         "broken_link_replacements": replacements,
         "unresolved_broken_links": unresolved,
         "orphan_link_additions": additions,
+        "discovery_link_additions": discovery_additions,
         "remaining_orphans": remaining_orphans,
     }
 
@@ -224,6 +251,20 @@ def best_replacement(anchor: str, broken_url: str, posts: list[dict], current_ur
 
 def choose_orphan_source(orphan: dict, posts: list[dict], addition_counts: Counter[str]) -> dict | None:
     orphan_id = str(orphan.get("id") or "")
+    override_url = ORPHAN_SOURCE_OVERRIDES.get(normalize_url(str(orphan.get("url") or "")))
+    if override_url:
+        override = next(
+            (
+                post
+                for post in posts
+                if normalize_url(str(post.get("url") or "")) == normalize_url(override_url)
+                and str(post.get("id") or "") != orphan_id
+                and addition_counts[str(post.get("id") or "")] < MAX_ORPHAN_LINKS_PER_SOURCE
+            ),
+            None,
+        )
+        if override:
+            return override
     orphan_text = " ".join([str(orphan.get("title") or ""), " ".join(orphan.get("labels") or [])])
     ranked = []
     for post in posts:
@@ -234,6 +275,39 @@ def choose_orphan_source(orphan: dict, posts: list[dict], addition_counts: Count
         ranked.append((semantic_score(orphan_text, source_text), str(post.get("published") or ""), post))
     _, _, selected = max(ranked, default=(0.0, "", None), key=lambda item: (item[0], item[1]))
     return selected
+
+
+def ensure_discovery_links(
+    transformed: dict[str, str],
+    posts: list[dict],
+    live_urls: dict[str, dict],
+) -> list[dict]:
+    additions: list[dict] = []
+    for target_url, source_url in DISCOVERY_SOURCE_OVERRIDES.items():
+        target = live_urls.get(normalize_url(target_url))
+        source = live_urls.get(normalize_url(source_url))
+        if not target or not source:
+            continue
+        source_id = str(source.get("id") or "")
+        old_html = transformed[source_id]
+        new_html = add_related_link(
+            old_html,
+            str(target.get("title") or ""),
+            str(target.get("url") or ""),
+        )
+        if new_html == old_html:
+            continue
+        transformed[source_id] = new_html
+        additions.append(
+            {
+                "source_id": source_id,
+                "source_title": source.get("title"),
+                "source_url": source.get("url"),
+                "target_title": target.get("title"),
+                "target_url": target.get("url"),
+            }
+        )
+    return additions
 
 
 def semantic_score(first: str, second: str) -> float:

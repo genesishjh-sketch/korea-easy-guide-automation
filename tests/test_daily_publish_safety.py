@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 import json
+import os
 from pathlib import Path
 import tempfile
 from types import SimpleNamespace
@@ -198,7 +199,7 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         }
 
         with tempfile.TemporaryDirectory() as tmpdir, patch.object(daily_draft, "ROOT_DIR", Path(tmpdir)), patch.object(
-            daily_draft, "find_public_post_published_today", return_value=existing_post
+            daily_draft, "public_posts_published_today", return_value=[existing_post]
         ), patch.object(daily_draft, "run_stage1") as stage1, patch.object(
             daily_draft, "run_publish_with_seed_fallback"
         ) as publish, patch.object(
@@ -223,7 +224,7 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             report_dir = Path(tmpdir) / "reports"
             with patch.object(daily_draft, "ROOT_DIR", Path(tmpdir)), patch.object(
-                daily_draft, "find_public_post_published_today", side_effect=RuntimeError("feed unavailable")
+                daily_draft, "public_posts_published_today", side_effect=RuntimeError("feed unavailable")
             ), patch.object(daily_draft, "notify_daily_failure") as notify:
                 with self.assertRaises(RuntimeError):
                     daily_draft.run(site="easy_pc_fix_guide", publish_mode="publish")
@@ -239,27 +240,74 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertIn("[Posting Bot] 일일 포스팅 실패", payload["human_summary"])
         self.assertIn("같은 seed로 validate mode를 먼저 재실행", "\n".join(payload["action_items"]))
 
-    def test_explicit_publish_seed_does_not_use_daily_limit_guard(self) -> None:
-        with tempfile.TemporaryDirectory() as tmpdir:
-            article_dir = Path(tmpdir) / "article"
-            article_dir.mkdir()
-            result_path = article_dir / "blogger_publish_result.json"
+    def test_explicit_publish_seed_still_uses_daily_limit_guard(self) -> None:
+        existing_post = {
+            "title": "Already Published Today",
+            "url": "https://example.com/already-published.html",
+            "published_kst": "2026-07-25T09:10:00+09:00",
+        }
+        with patch.object(
+            daily_draft,
+            "public_posts_published_today",
+            return_value=[existing_post],
+        ) as daily_guard, patch.object(
+            daily_draft,
+            "run_publish_with_seed_fallback",
+        ) as publish, patch.object(
+            daily_draft,
+            "save_daily_success_report",
+        ), patch.object(
+            daily_draft,
+            "notify_daily_completion",
+        ):
+            result = daily_draft.run(
+                seed="manual seed",
+                site="easy_pc_fix_guide",
+                publish_mode="publish",
+            )
 
-            with patch.object(daily_draft, "find_public_post_published_today") as daily_guard, patch.object(
-                daily_draft,
-                "run_publish_with_seed_fallback",
-                return_value=("manual seed", article_dir, result_path, [], []),
-            ), patch.object(daily_draft, "save_daily_success_report"), patch.object(
-                daily_draft, "notify_daily_completion"
-            ):
-                result = daily_draft.run(
-                    seed="manual seed",
-                    site="easy_pc_fix_guide",
-                    publish_mode="publish",
-                )
-
-        daily_guard.assert_not_called()
+        daily_guard.assert_called_once()
+        publish.assert_not_called()
         self.assertEqual(result["seed"], "manual seed")
+        self.assertTrue(result["daily_limit_skipped"])
+        self.assertEqual(result["existing_post"], existing_post)
+
+    def test_explicit_publish_seed_respects_configured_daily_limit_above_one(self) -> None:
+        existing_post = {
+            "title": "First Post Today",
+            "url": "https://example.com/first.html",
+            "published_kst": "2026-07-25T09:10:00+09:00",
+        }
+        article_dir = Path("/tmp/manual-second-post")
+        result_path = article_dir / "blogger_publish_result.json"
+        with patch.dict(
+            os.environ,
+            {"DAILY_BATCH_MAX_POSTS": "2"},
+        ), patch.object(
+            daily_draft,
+            "public_posts_published_today",
+            return_value=[existing_post],
+        ) as daily_guard, patch.object(
+            daily_draft,
+            "run_publish_with_seed_fallback",
+            return_value=("second manual seed", article_dir, result_path, [], []),
+        ) as publish, patch.object(
+            daily_draft,
+            "save_daily_success_report",
+        ), patch.object(
+            daily_draft,
+            "notify_daily_completion",
+        ):
+            result = daily_draft.run(
+                seed="second manual seed",
+                site="easy_pc_fix_guide",
+                publish_mode="publish",
+            )
+
+        daily_guard.assert_called_once()
+        publish.assert_called_once()
+        self.assertFalse(result.get("daily_limit_skipped", False))
+        self.assertEqual(result["seed"], "second manual seed")
 
     def test_daily_success_message_includes_quality_metrics(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -892,6 +940,57 @@ class DuplicatePublishGuardTests(unittest.TestCase):
             )
         )
 
+    def test_title_subject_match_blocks_same_problem_with_a_different_article_angle(self) -> None:
+        duplicate_pairs = [
+            (
+                "Network Adapter Missing in Windows 11? Check Device Manager and Updates",
+                "Network Adapter Missing on Windows 11: What to Check First",
+            ),
+            (
+                "DNS Server Not Responding: Repair the Lookup Path",
+                "DNS Server Not Responding on Windows 11: Causes and Fixes",
+            ),
+            (
+                "Windows Update Error 0x80073712: What It Means Before You Repair Components",
+                "Windows Update Error 0x80073712: What It Means and How to Fix It",
+            ),
+            (
+                "Ethernet Connected but No Internet: Where Windows Can Lose Access",
+                "Ethernet Connected but No Internet on Windows 11: Find the Break",
+            ),
+            (
+                "Mouse Cursor Disappears in Windows 11: Low-Risk Checks",
+                "Mouse Cursor Disappears Windows 11: Easy Fixes",
+            ),
+            (
+                "Microsoft Store Not Opening Windows 11: Trace the Failure Before You Reset Anything",
+                "Microsoft Store Not Opening Windows 11: Easy Fixes",
+            ),
+        ]
+
+        for candidate, existing in duplicate_pairs:
+            with self.subTest(candidate=candidate):
+                self.assertTrue(
+                    daily_draft.title_matches_existing(
+                        daily_draft.normalize_match_text(candidate),
+                        existing,
+                    )
+                )
+
+    def test_title_subject_match_keeps_distinct_failure_states_separate(self) -> None:
+        self.assertFalse(
+            daily_draft.title_subject_matches(
+                daily_draft.normalize_match_text("Microsoft Store Apps Not Updating: Safe Checks"),
+                daily_draft.normalize_match_text("Microsoft Store Not Opening: Easy Fixes"),
+            )
+        )
+        self.assertFalse(
+            daily_draft.title_subject_matches(
+                daily_draft.normalize_match_text("No Sound After Windows Update: Safe Checks"),
+                daily_draft.normalize_match_text("Windows 11 Slow After Update: Measure the Bottleneck"),
+            )
+        )
+
     def test_publish_mode_tries_next_seed_when_first_seed_is_duplicate(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
@@ -927,7 +1026,7 @@ class DuplicatePublishGuardTests(unittest.TestCase):
             ), patch.object(daily_draft, "run_stage1", side_effect=fake_stage1), patch.object(
                 daily_draft, "run_publish_with_duplicate_guard", side_effect=fake_publish
             ), patch.object(
-                daily_draft, "find_public_post_published_today", return_value=None
+                daily_draft, "public_posts_published_today", return_value=[]
             ), patch.object(
                 daily_draft, "ROOT_DIR", root
             ), patch.object(
@@ -967,7 +1066,7 @@ class DuplicatePublishGuardTests(unittest.TestCase):
             ), patch.object(daily_draft, "run_stage1", side_effect=fake_stage1), patch.object(
                 daily_draft, "run_publish_with_duplicate_guard", side_effect=fake_publish
             ), patch.object(
-                daily_draft, "find_public_post_published_today", return_value=None
+                daily_draft, "public_posts_published_today", return_value=[]
             ), patch.object(
                 daily_draft, "ROOT_DIR", root
             ), patch.object(

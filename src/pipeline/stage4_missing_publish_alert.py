@@ -28,10 +28,32 @@ def run(
     result = {
         "checked_at_kst": now.isoformat(),
         "minimum_posts": minimum_posts,
+        "expected_posts": minimum_posts,
         "sites": [site_result(site, minimum_posts, now) for site in selected_sites],
     }
-    result["missing_sites"] = [item for item in result["sites"] if item.get("status") != "ok"]
-    result["status"] = "missing_publication" if result["missing_sites"] else "ok"
+    result["missing_sites"] = [
+        item
+        for item in result["sites"]
+        if item.get("status") in {"missing_today", "feed_error"}
+    ]
+    result["duplicate_sites"] = [
+        item
+        for item in result["sites"]
+        if item.get("status") == "duplicate_today"
+    ]
+    result["attention_sites"] = [
+        item
+        for item in result["sites"]
+        if item.get("status") != "ok"
+    ]
+    if result["missing_sites"] and result["duplicate_sites"]:
+        result["status"] = "publication_count_anomaly"
+    elif result["duplicate_sites"]:
+        result["status"] = "duplicate_publication"
+    elif result["missing_sites"]:
+        result["status"] = "missing_publication"
+    else:
+        result["status"] = "ok"
     result["human_summary"] = build_message(result)
     save_result(result)
     if notify and result["status"] != "ok":
@@ -45,13 +67,20 @@ def site_result(site_key: str, minimum_posts: int, now: datetime) -> dict:
     try:
         posts = parse_posts(fetch_public_feed(settings.site_url))
         today_posts = [post for post in posts if post["published_kst"].date() == now.date()]
+        if len(today_posts) < minimum_posts:
+            status = "missing_today"
+        elif len(today_posts) > minimum_posts:
+            status = "duplicate_today"
+        else:
+            status = "ok"
         return {
             "site": settings.site_key,
             "site_name": settings.site_name,
             "site_url": settings.site_url,
-            "status": "ok" if len(today_posts) >= minimum_posts else "missing_today",
+            "status": status,
             "today_post_count": len(today_posts),
             "minimum_posts": minimum_posts,
+            "expected_posts": minimum_posts,
             "today_posts": [
                 {
                     "title": post["title"],
@@ -101,20 +130,29 @@ def load_recovery_report(site_key: str) -> dict:
 
 
 def build_message(result: dict) -> str:
-    missing = result.get("missing_sites") or []
+    attention = result.get("attention_sites")
+    if attention is None:
+        attention = result.get("missing_sites") or []
+    statuses = {item.get("status") for item in attention}
+    if statuses == {"duplicate_today"}:
+        title = "[Posting Bot] 중복 발행 경고"
+    elif "duplicate_today" in statuses:
+        title = "[Posting Bot] 발행 수량 경고"
+    else:
+        title = "[Posting Bot] 발행 누락 경고"
     lines = [
-        "[Posting Bot] 발행 누락 경고",
+        title,
         "",
         f"- 확인 시각: {result.get('checked_at_kst')}",
-        f"- 기준: 블로그별 오늘 공개 글 {result.get('minimum_posts')}개 이상",
-        f"- 상태: {'정상' if not missing else '조치 필요'}",
+        f"- 기준: 블로그별 오늘 공개 글 정확히 {result.get('expected_posts', result.get('minimum_posts'))}개",
+        f"- 상태: {'정상' if not attention else '조치 필요'}",
     ]
-    if not missing:
-        lines.append("- 모든 블로그에서 오늘 공개 글이 확인됐습니다.")
+    if not attention:
+        lines.append("- 모든 블로그에서 오늘 목표 수와 일치하는 공개 글이 확인됐습니다.")
         return "\n".join(lines)
 
-    lines.extend(["", "누락/오류 블로그:"])
-    for item in missing:
+    lines.extend(["", "발행 수량 이상/오류 블로그:"])
+    for item in attention:
         lines.extend(
             [
                 f"- {item.get('site_name')}: {item.get('today_post_count', 0)}/{item.get('minimum_posts')}개, 상태 {item.get('status')}",
@@ -138,6 +176,18 @@ def build_message(result: dict) -> str:
                 lines.append("  복구 조치:")
                 for action in recovery.get("next_actions", [])[:3]:
                     lines.append(f"  - {action}")
+    if "duplicate_today" in statuses:
+        lines.extend(
+            [
+                "",
+                "중복 발행 조치:",
+                "- 추가 발행을 즉시 중지하고 오늘 공개된 글의 주제·검색 의도·URL을 비교하세요.",
+                "- 중복 글을 자동 삭제하지 말고, 색인 상태와 본문 차이를 확인한 뒤 통합·리디렉션 여부를 결정하세요.",
+                "- 수동 seed 실행과 primary/backup 실행에서 일일 발행 상한이 모두 적용됐는지 확인하세요.",
+            ]
+        )
+    if statuses == {"duplicate_today"}:
+        return "\n".join(lines)
     lines.extend(
         [
             "",
@@ -154,7 +204,9 @@ def build_message(result: dict) -> str:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Alert when today's Blogger publications are missing.")
+    parser = argparse.ArgumentParser(
+        description="Alert when today's Blogger publication count is missing or duplicated."
+    )
     parser.add_argument("--site", action="append", help="Site profile key. Repeat to check multiple sites.")
     parser.add_argument("--minimum-posts", type=int, default=1)
     parser.add_argument("--no-notify", action="store_true")
