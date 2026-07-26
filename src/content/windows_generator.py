@@ -23,6 +23,35 @@ MICROSOFT_SOURCES = [
 
 TOPIC_SOURCE_RULES = [
     (
+        ("bluetooth headphones", "bluetooth audio", "connected but no sound"),
+        [
+            {
+                "name": "Microsoft Support: Fix Bluetooth connected but no sound",
+                "url": "https://support.microsoft.com/en-us/windows/hardware/bluetooth/fix-bluetooth-connected-but-no-sound-issue-on-windows",
+            },
+            {
+                "name": "Microsoft Support: Fix sound or audio problems in Windows",
+                "url": "https://support.microsoft.com/en-us/windows/hardware/audio/fix-sound-or-audio-problems-in-windows",
+            },
+            {
+                "name": "Microsoft Support: Fix audio issues when no sound plays",
+                "url": "https://support.microsoft.com/en-us/windows/hardware/audio/fix-audio-issues-when-no-sound-plays-from-speakers-or-headphones-in-windows",
+            },
+            {
+                "name": "Microsoft Support: Missing or undetected audio output device",
+                "url": "https://support.microsoft.com/en-us/windows/hardware/audio/fix-missing-or-undetected-audio-output-device-in-windows",
+            },
+            {
+                "name": "Microsoft Support: Fix Bluetooth problems in Windows",
+                "url": "https://support.microsoft.com/en-us/windows/hardware/bluetooth/fix-bluetooth-problems-in-windows",
+            },
+            {
+                "name": "Microsoft Support: Troubleshoot Bluetooth not connecting",
+                "url": "https://support.microsoft.com/en-us/windows/hardware/bluetooth/troubleshoot-bluetooth-not-connecting-in-windows",
+            },
+        ],
+    ),
+    (
         ("slow after update", "startup apps", "high disk", "high cpu", "high memory", "battery draining", "sleep mode", "wake from sleep"),
         [
             {
@@ -430,7 +459,10 @@ def _topic_profile(keyword: str, category: str, site_url: str = "") -> dict:
     elif "wifi" in normalized or "wi-fi" in normalized:
         title = "Wi-Fi Button Missing on Windows 11: Simple Fixes for Beginners"
     elif "bluetooth" in normalized:
-        title = "Bluetooth Not Working on Windows: Beginner-Friendly Fixes"
+        if _is_bluetooth_audio_topic(normalized):
+            title = "Bluetooth Headphones Connected but No Sound in Windows: Fix the Output Path Safely"
+        else:
+            title = "Bluetooth Not Working on Windows: Beginner-Friendly Fixes"
     elif "sound" in normalized or "audio" in normalized:
         title = "No Sound After Windows Update? Try These Easy Steps First"
     elif _is_printer_driver_unavailable_topic(normalized):
@@ -523,6 +555,8 @@ def _meta_description(keyword: str, normalized: str, error: str | None) -> str:
         return f"{keyword.title()} guide for Windows users, covering safe network checks, router basics, driver cautions, official sources, and next steps."
     if "printer" in normalized:
         return f"{keyword.title()} guide for Windows users, covering queue checks, printer settings, driver cautions, official sources, and safe next steps."
+    if _is_bluetooth_audio_topic(normalized):
+        return "Bluetooth headphones connected but silent? Check Windows output, volume, app mixer, reconnect steps, and official Bluetooth/audio fixes safely."
     if "bluetooth" in normalized:
         return f"{keyword.title()} guide for Windows users, covering device checks, Bluetooth settings, driver cautions, official sources, and safe fixes."
     if "sound" in normalized or "audio" in normalized or "microphone" in normalized:
@@ -683,6 +717,10 @@ def _is_no_internet_secured_topic(text: str) -> bool:
     return "no internet secured" in text or "no internet, secured" in text
 
 
+def _is_bluetooth_audio_topic(text: str) -> bool:
+    return "bluetooth" in text and any(term in text for term in ("headphones", "earbuds", "speaker", "audio", "sound"))
+
+
 def _is_network_connection_topic(text: str) -> bool:
     return any(
         predicate(text)
@@ -752,6 +790,15 @@ def _quick_summary(keyword: str, error: str | None) -> list[str]:
             "Use restart, adapter, router, Windows network settings, and official support steps before advanced repair.",
             "Test after each change with a simple website, not only the Windows network icon.",
             "If you need internet immediately, use a temporary trusted network, Ethernet, or phone hotspot while you troubleshoot.",
+        ]
+    if _is_bluetooth_audio_topic(normalized):
+        return [
+            "Bluetooth headphones can show as connected even when Windows is sending sound to another output device.",
+            "Start with the output picker, volume, app volume, and the official Bluetooth/audio troubleshooters before touching drivers.",
+            "If the headphones do not appear as an output device, treat that differently from a simple muted-volume problem.",
+            "Do not install random driver tools, audio boosters, codec packs, or unknown repair utilities.",
+            "Test one app and one pair of headphones at a time so you know whether the problem is Windows, the app, or the headset.",
+            "Use Microsoft audio and Bluetooth guidance first, then use the PC or headset maker's official driver page only if needed.",
         ]
     if _is_specific_printer_topic(normalized):
         focus = _printer_focus(normalized)
@@ -836,6 +883,14 @@ def _before_start(text: str, error: str | None) -> list[str]:
                 "For Wi-Fi problems, first separate the PC from the network. If phones and other laptops also cannot connect, the router or internet service may be the real problem, not Windows.",
                 "If Ethernet works but Wi-Fi does not, the issue is more likely related to the wireless adapter, airplane mode, power saving, or the wireless driver.",
                 "If you need internet immediately, use a temporary safe workaround such as Ethernet, phone hotspot, or another trusted network while you complete the checks.",
+            ]
+        )
+    elif _is_bluetooth_audio_topic(text):
+        base.extend(
+            [
+                "For Bluetooth headphones with no sound, separate three cases before changing settings: the headset is not selected as output, it is selected but muted, or it is connected in Bluetooth settings but missing from sound output.",
+                "Keep a wired speaker, built-in laptop speaker, or another known-good output available for comparison. That tells you whether Windows audio works at all.",
+                "Charge the headset and keep it near the PC while testing. Low battery, multipoint pairing, or a headset still connected to a phone can make Windows look broken when the headset is the blocker.",
             ]
         )
     elif _is_specific_printer_topic(text):
@@ -952,6 +1007,15 @@ def _symptoms(text: str, error: str | None) -> list[str]:
             "The PC cannot see nearby wireless networks.",
             "Ethernet may still work, but wireless networks do not appear.",
             "The issue may start after an update, restart, sleep mode, or driver change.",
+        ]
+    if _is_bluetooth_audio_topic(text):
+        return [
+            "The Bluetooth headphones say Connected, but music or video is silent.",
+            "The headset appears under Bluetooth devices but not under System > Sound > Output.",
+            "Sound plays through laptop speakers instead of the Bluetooth headphones.",
+            "Only one app is silent while system sounds or another app still works.",
+            "The issue may appear after sleep mode, reconnecting the headset, a Windows update, or pairing the headset with a phone.",
+            "The microphone or hands-free mode may work while normal stereo playback is missing or quiet.",
         ]
     if "bluetooth" in text:
         return [
@@ -1080,6 +1144,13 @@ def _meaning(text: str, error: str | None) -> list[str]:
             "It can also happen when airplane mode, power saving, or a temporary driver state hides wireless options.",
             "Because Wi-Fi drivers affect internet access, avoid random driver installers and use official sources only.",
         ]
+    if _is_bluetooth_audio_topic(text):
+        return [
+            "Bluetooth connection and audio output are two separate layers. A headset can be paired and connected while Windows still sends sound to the wrong output.",
+            "If the headset is missing from Sound output, Windows may not be seeing it as an audio playback device yet. Reconnecting, re-pairing, or checking the Bluetooth/audio troubleshooters is safer than changing drivers first.",
+            "If the headset is selected but silent, the cause is more likely volume, app volume, audio format, enhancements, or the headset being connected to another device.",
+            "Because Bluetooth audio uses both Bluetooth and audio components, avoid broad driver-cleanup tools. Use Windows Update and official device-maker pages only when a driver step is truly needed.",
+        ]
     if "bluetooth" in text:
         return [
             "Windows may not detect the Bluetooth adapter, the device may need pairing again, or a driver may need attention.",
@@ -1171,6 +1242,16 @@ def _try_first(text: str) -> list[str]:
         ]
     if "wifi" in text or "wi-fi" in text:
         return ["Restart the PC and router.", "Turn airplane mode off.", "Open Settings > Network & internet and check whether Wi-Fi appears.", *base]
+    if _is_bluetooth_audio_topic(text):
+        return [
+            "Turn the headphones off and on, then reconnect them from Settings > Bluetooth & devices.",
+            "Select the speaker icon in the taskbar and choose the Bluetooth headphones as the output device.",
+            "Open Settings > System > Sound and confirm the headphones are selected under Output.",
+            "Raise the Windows volume, the app volume, and the physical headset volume if it has separate buttons.",
+            "Close one media app and test another simple source, such as a browser video or local audio file.",
+            "Disconnect the headphones from phones, tablets, or another PC while testing Windows.",
+            *base,
+        ]
     if "bluetooth" in text:
         return [
             "Restart the PC and the Bluetooth device.",
@@ -1293,6 +1374,17 @@ def _fixes(text: str, error: str | None) -> list[str]:
             "If your laptop has a physical wireless switch or keyboard shortcut, make sure it was not turned off accidentally.",
             "If other devices also cannot connect to Wi-Fi, troubleshoot the router or internet service first.",
         ]
+    if _is_bluetooth_audio_topic(text):
+        return [
+            "Open Settings > System > Sound. Under Output, select the Bluetooth headphones and make sure the volume is not muted.",
+            "Use the taskbar sound output picker to switch away from the headphones, then back to them, and test again.",
+            "Open Volume mixer and confirm the affected app is not muted or turned down separately.",
+            "Run the automated Bluetooth troubleshooter or Get Help flow that Microsoft provides for Bluetooth audio problems.",
+            "If the headphones are missing from Output, remove the Bluetooth device only if you know how to pair it again, then add it again from Bluetooth & devices.",
+            "If Microsoft's Bluetooth-audio guidance offers an audio format step for your connected device, use the listed format path and avoid random codec packs.",
+            "Check Windows Update and the PC or headset maker's official support page only after output, volume, app, reconnect, and troubleshooter checks fail.",
+            "If another headset works on this PC, or this headset works on a phone, write that down before asking for help because it narrows the cause.",
+        ]
     if "bluetooth" in text:
         return [
             "Open Settings > Bluetooth & devices and confirm Bluetooth is available.",
@@ -1408,6 +1500,14 @@ def _after_each_step(text: str) -> list[str]:
                 "If you temporarily use a phone hotspot, remember that it may use mobile data. Switch back to your normal network after testing.",
             ]
         )
+    elif _is_bluetooth_audio_topic(text):
+        checks.extend(
+            [
+                "After each Bluetooth-audio step, test the same short audio clip and check the selected output again.",
+                "If sound works in one app but not another, stop changing Bluetooth settings and check that app's volume or audio output setting.",
+                "If the headset disappears from Output after sleep or reconnecting, record that pattern before trying driver changes.",
+            ]
+        )
     elif "bluetooth" in text:
         checks.extend(
             [
@@ -1475,6 +1575,18 @@ def _advanced_fixes(text: str, risk: str) -> list[str]:
 
 
 def _faq(keyword: str, error: str | None) -> list[dict[str, str]]:
+    if _is_bluetooth_audio_topic(keyword.lower()):
+        return [
+            {"question": "Why do my Bluetooth headphones say connected but have no sound?", "answer": "Windows can connect to the headset for Bluetooth while still sending audio to another output, muting the app, or failing to expose the headset as a playback device."},
+            {"question": "What should I check first?", "answer": "Check the taskbar output picker, Settings > System > Sound > Output, Windows volume, app volume, and whether the headset is still connected to another phone or PC."},
+            {"question": "Should I remove and pair the headphones again?", "answer": "Only do that after basic output and volume checks, and only if you know how to put the headphones back into pairing mode."},
+            {"question": "Is it safe to use a driver updater for Bluetooth audio?", "answer": "No. Use Windows Update, your PC maker, or the headset maker's official support page instead of random driver tools."},
+            {"question": "Why do the laptop speakers work but Bluetooth is silent?", "answer": "That usually means Windows audio itself works, but the Bluetooth output path, headset connection, app output, or device profile needs attention."},
+            {"question": "What if the headphones do not appear under Output?", "answer": "Treat that as a detection problem. Reconnect the headset, run Microsoft Bluetooth guidance, remove and re-add the device if you can pair it again, then check official drivers only if needed."},
+            {"question": "Can changing audio format help?", "answer": "Microsoft lists an audio-format check for connected Bluetooth audio devices. Use that official path only when the device is connected and the option appears."},
+            {"question": "Does this apply to Windows 10 and Windows 11?", "answer": "Yes, the general output, volume, Bluetooth, and driver-safety logic applies to both, but menu names can differ."},
+            {"question": "When should I stop?", "answer": "Stop if the PC has repeated blue screens, BitLocker prompts, missing files, a managed work/school policy, or if a step asks you to uninstall drivers and you are not sure how to recover."},
+        ]
     if _is_windows_version_topic(keyword.lower()):
         return [
             {"question": "What is the fastest way to check my Windows version?", "answer": "Open Settings > System > About and read the Windows specifications section."},
