@@ -1,0 +1,185 @@
+{
+  "site": "korea_easy_guide",
+  "site_name": "Korea Easy Guide",
+  "site_url": "https://koreaeasyguide.blogspot.com",
+  "week": "2026-W31",
+  "created_at": "2026-07-26T23:26:00.062368+09:00",
+  "start_date": "2026-07-27",
+  "end_date": "2026-08-02",
+  "days": 7,
+  "posts_per_day": 1,
+  "status": "approved",
+  "duplicate_policy": {
+    "title_similarity_block": 0.72,
+    "topic_overlap_block": 0.82,
+    "published_and_generated_history_checked": true,
+    "weekly_selected_topics_checked": true
+  },
+  "topic_mix_policy": {
+    "daily_slots": [
+      {
+        "slot_number": 1,
+        "slot_strategy": "evergreen",
+        "purpose": "stable search demand"
+      }
+    ],
+    "note": "Trend/seasonal slots start when daily cadence is at least three posts."
+  },
+  "items": [
+    {
+      "date": "2026-07-27",
+      "site": "korea_easy_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Korea travel/living demand",
+      "strategy_fallback": false,
+      "seed": "kakao map vs naver map for foreigners",
+      "topic": "kakao map vs naver map for foreigners",
+      "category": "Apps in Korea",
+      "article_type": "comparison",
+      "intent": "comparison",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'kakao map vs naver map for foreigners'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-28",
+      "site": "korea_easy_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Korea travel/living demand",
+      "strategy_fallback": false,
+      "seed": "how to call a taxi without korean phone number",
+      "topic": "how to call a taxi without korean phone number",
+      "category": "Transportation",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'how to call a taxi without korean phone number'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-29",
+      "site": "korea_easy_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Korea travel/living demand",
+      "strategy_fallback": false,
+      "seed": "korea hospital and pharmacy guide for foreigners",
+      "topic": "korea hospital and pharmacy guide for foreigners",
+      "category": "Travel Basics",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'korea hospital and pharmacy guide for foreigners'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-30",
+      "site": "korea_easy_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Korea travel/living demand",
+      "strategy_fallback": false,
+      "seed": "korea trash sorting guide for short stays",
+      "topic": "korea trash sorting guide for short stays",
+      "category": "Accommodation",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'korea trash sorting guide for short stays'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-31",
+      "site": "korea_easy_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Korea travel/living demand",
+      "strategy_fallback": false,
+      "seed": "korea cash vs card guide for tourists",
+      "topic": "korea cash vs card guide for tourists",
+      "category": "Travel Basics",
+      "article_type": "comparison",
+      "intent": "comparison",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'korea cash vs card guide for tourists'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-08-01",
+      "site": "korea_easy_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Korea travel/living demand",
+      "strategy_fallback": false,
+      "seed": "how to use coupang eats as a foreigner",
+      "topic": "how to use coupang eats as a foreigner",
+      "category": "Apps in Korea",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'how to use coupang eats as a foreigner'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-08-02",
+      "site": "korea_easy_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Korea travel/living demand",
+      "strategy_fallback": false,
+      "seed": "korea atm withdrawal guide for foreigners",
+      "topic": "korea atm withdrawal guide for foreigners",
+      "category": "Travel Basics",
+      "article_type": "how_to",
+      "intent": "how_to",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct Korea travel guide visuals for 'korea atm withdrawal guide for foreigners'. Use topic-specific locations, tools, signs, tickets, or app-like abstract scenes; avoid repeating the same cover composition across transportation, shopping, and apps.",
+      "quality_precheck": {
+        "status": "not_applicable",
+        "issues": []
+      },
+      "status": "scheduled"
+    }
+  ],
+  "candidate_pool_count": 74
+}

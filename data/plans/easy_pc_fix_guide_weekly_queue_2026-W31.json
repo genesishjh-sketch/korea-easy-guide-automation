@@ -1,0 +1,213 @@
+{
+  "site": "easy_pc_fix_guide",
+  "site_name": "Easy PC Fix Guide",
+  "site_url": "https://easypcfixguide.blogspot.com",
+  "week": "2026-W31",
+  "created_at": "2026-07-26T23:26:01.410109+09:00",
+  "start_date": "2026-07-27",
+  "end_date": "2026-08-02",
+  "days": 7,
+  "posts_per_day": 1,
+  "status": "approved",
+  "duplicate_policy": {
+    "title_similarity_block": 0.72,
+    "topic_overlap_block": 0.82,
+    "published_and_generated_history_checked": true,
+    "weekly_selected_topics_checked": true
+  },
+  "topic_mix_policy": {
+    "daily_slots": [
+      {
+        "slot_number": 1,
+        "slot_strategy": "evergreen",
+        "purpose": "stable search demand"
+      }
+    ],
+    "note": "Trend/seasonal slots start when daily cadence is at least three posts."
+  },
+  "items": [
+    {
+      "date": "2026-07-27",
+      "site": "easy_pc_fix_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Windows beginner/search problem",
+      "strategy_fallback": false,
+      "seed": "windows update cleanup safe for beginners",
+      "topic": "windows update cleanup safe for beginners",
+      "category": "Windows Update",
+      "article_type": "beginner_guide",
+      "intent": "beginner_guide",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct beginner PC help visuals for 'windows update cleanup safe for beginners'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 8,
+        "direct_microsoft_source_count": 7,
+        "search_result_source_count": 1,
+        "source_count": 8,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-28",
+      "site": "easy_pc_fix_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Windows beginner/search problem",
+      "strategy_fallback": false,
+      "seed": "microsoft store not opening windows 11",
+      "topic": "microsoft store not opening windows 11",
+      "category": "Apps & Settings",
+      "article_type": "symptom_fix",
+      "intent": "symptom_fix",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct beginner PC help visuals for 'microsoft store not opening windows 11'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 8,
+        "direct_microsoft_source_count": 7,
+        "search_result_source_count": 1,
+        "source_count": 8,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-29",
+      "site": "easy_pc_fix_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Windows beginner/search problem",
+      "strategy_fallback": false,
+      "seed": "high disk usage windows 11",
+      "topic": "high disk usage windows 11",
+      "category": "Beginner PC Tips",
+      "article_type": "beginner_guide",
+      "intent": "beginner_guide",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct beginner PC help visuals for 'high disk usage windows 11'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 6,
+        "direct_microsoft_source_count": 5,
+        "search_result_source_count": 1,
+        "source_count": 6,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-30",
+      "site": "easy_pc_fix_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Windows beginner/search problem",
+      "strategy_fallback": false,
+      "seed": "microsoft store apps not updating",
+      "topic": "microsoft store apps not updating",
+      "category": "Apps & Settings",
+      "article_type": "symptom_fix",
+      "intent": "symptom_fix",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct beginner PC help visuals for 'microsoft store apps not updating'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 8,
+        "direct_microsoft_source_count": 7,
+        "search_result_source_count": 1,
+        "source_count": 8,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-07-31",
+      "site": "easy_pc_fix_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Windows beginner/search problem",
+      "strategy_fallback": false,
+      "seed": "high memory usage windows 11",
+      "topic": "high memory usage windows 11",
+      "category": "Beginner PC Tips",
+      "article_type": "beginner_guide",
+      "intent": "beginner_guide",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct beginner PC help visuals for 'high memory usage windows 11'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 6,
+        "direct_microsoft_source_count": 5,
+        "search_result_source_count": 1,
+        "source_count": 6,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-08-01",
+      "site": "easy_pc_fix_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Windows beginner/search problem",
+      "strategy_fallback": false,
+      "seed": "photos app not opening windows 11",
+      "topic": "photos app not opening windows 11",
+      "category": "Apps & Settings",
+      "article_type": "symptom_fix",
+      "intent": "symptom_fix",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct beginner PC help visuals for 'photos app not opening windows 11'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 8,
+        "direct_microsoft_source_count": 7,
+        "search_result_source_count": 1,
+        "source_count": 8,
+        "issues": []
+      },
+      "status": "scheduled"
+    },
+    {
+      "date": "2026-08-02",
+      "site": "easy_pc_fix_guide",
+      "slot_number": 1,
+      "slot_strategy": "evergreen",
+      "actual_topic_strategy": "evergreen",
+      "strategy_reason": "Evergreen Windows beginner/search problem",
+      "strategy_fallback": false,
+      "seed": "laptop battery draining fast windows 11",
+      "topic": "laptop battery draining fast windows 11",
+      "category": "Beginner PC Tips",
+      "article_type": "beginner_guide",
+      "intent": "beginner_guide",
+      "difference_from_existing": "New angle with no close published title found.",
+      "avoid_overlap_with": [],
+      "image_direction": "Create distinct beginner PC help visuals for 'laptop battery draining fast windows 11'. Use a different scene, composition, color mood, and troubleshooting object than recent posts; avoid repeating generic laptop-on-desk or Wi-Fi router imagery.",
+      "quality_precheck": {
+        "status": "ready",
+        "microsoft_source_count": 6,
+        "direct_microsoft_source_count": 5,
+        "search_result_source_count": 1,
+        "source_count": 6,
+        "issues": []
+      },
+      "status": "scheduled"
+    }
+  ],
+  "candidate_pool_count": 73
+}
