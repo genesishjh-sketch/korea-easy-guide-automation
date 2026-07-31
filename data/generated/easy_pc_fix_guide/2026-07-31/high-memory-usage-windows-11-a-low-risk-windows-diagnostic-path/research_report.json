@@ -1,0 +1,90 @@
+{
+  "site": "easy_pc_fix_guide",
+  "content_domain": "windows_help",
+  "seed_keyword": "high memory usage windows 11",
+  "topic": "High Memory Usage in Windows 11: Find the Cause Before You Close Anything",
+  "queries": [
+    "high memory usage Windows 11 Microsoft Support",
+    "Windows 11 Task Manager memory usage safe troubleshooting",
+    "site:learn.microsoft.com Sysinternals RAMMap memory allocation",
+    "site:support.microsoft.com configure startup applications Windows 11",
+    "site:support.microsoft.com clean boot Windows 11 background conflict",
+    "Windows 11 25H2 release health memory performance July 2026",
+    "Windows message center performance Windows 11 July 2026",
+    "Windows Memory Diagnostic Microsoft Support",
+    "high memory usage Windows 11 nothing running",
+    "high memory usage Windows 11 process not showing in Task Manager"
+  ],
+  "reader_questions": [
+    "Is 80% or 90% memory usage automatically bad in Windows 11?",
+    "How can a beginner identify which app is using memory without ending system processes?",
+    "Why can Task Manager show high memory when no large app is open?",
+    "Should I use a RAM cleaner or random repair utility?",
+    "When should I test startup apps or use a clean boot?",
+    "When is Windows Memory Diagnostic appropriate?",
+    "Will adding RAM help, or is an app or driver leaking memory?"
+  ],
+  "sources": [
+    {
+      "name": "Microsoft Support: Tips to improve PC performance in Windows",
+      "url": "https://support.microsoft.com/en-us/windows/experience/performance-optimization/tips-to-improve-pc-performance-in-windows",
+      "type": "official"
+    },
+    {
+      "name": "Microsoft Support: Configure startup applications in Windows",
+      "url": "https://support.microsoft.com/en-us/windows/experience/startup-boot/configure-startup-applications-in-windows",
+      "type": "official"
+    },
+    {
+      "name": "Microsoft Support: How to perform a clean boot in Windows",
+      "url": "https://support.microsoft.com/en-us/windows/experience/startup-boot/how-to-perform-a-clean-boot-in-windows",
+      "type": "official"
+    },
+    {
+      "name": "Microsoft Learn: RAMMap",
+      "url": "https://learn.microsoft.com/en-us/sysinternals/downloads/rammap",
+      "type": "official"
+    },
+    {
+      "name": "Microsoft Support: All about computer memory",
+      "url": "https://support.microsoft.com/en-us/windows/experience/compatibility/all-about-computer-memory",
+      "type": "official"
+    },
+    {
+      "name": "Windows release health",
+      "url": "https://learn.microsoft.com/en-us/windows/release-health/",
+      "type": "official"
+    },
+    {
+      "name": "Windows message center",
+      "url": "https://learn.microsoft.com/en-us/windows/release-health/windows-message-center",
+      "type": "official"
+    },
+    {
+      "name": "Windows 11, version 25H2 known issues and notifications",
+      "url": "https://learn.microsoft.com/en-us/windows/release-health/status-windows-11-25H2",
+      "type": "official"
+    },
+    {
+      "name": "Microsoft Support: Windows Memory Diagnostic guidance",
+      "url": "https://support.microsoft.com/en-us/windows/experience/performance-optimization/how-to-fix-error-0xa-irql-not-less-or-equal",
+      "type": "official"
+    }
+  ],
+  "notes": [
+    "Microsoft Support explains that RAM holds active apps and files for faster access; installed capacity and workload both affect the displayed percentage.",
+    "Microsoft startup-app guidance supports disabling a recognized optional startup app through Settings or Task Manager and restoring it when needed.",
+    "Microsoft's clean-boot procedure is an advanced isolation method, requires administrator access, can temporarily remove functionality, and warns against changing advanced boot options without guidance.",
+    "RAMMap is an official Sysinternals analysis tool that separates process, cache, kernel, driver, and physical allocation views; it is not presented as a one-click repair.",
+    "The current Windows release health and public Windows message center were opened before writing. No broad July 2026 advisory was found that makes all high memory usage a known Windows 11 defect.",
+    "The Windows 11 25H2 and 24H2 release-health pages listed a resolved July 2026 performance issue limited to some Dell devices with a specific Intel driver; the article explicitly prevents readers from generalizing that issue to unrelated PCs.",
+    "Microsoft's Memory Diagnostic guidance requires a restart and is relevant when memory symptoms accompany crashes, blue screens, or other hardware signs, not merely a high percentage.",
+    "The article blocks RAM cleaners, random driver updaters, unknown repair software, unverified community commands, and beginner use of Registry, BIOS, or command-line repair steps."
+  ],
+  "google_suggest_signal_count": 8,
+  "reddit_signal_count": 0,
+  "observed_question_count": 0,
+  "first_party_query_count": 0,
+  "demand_evidence_note": "This is a validated SHADOW-mode legacy queue topic. QUERY_PLAN and SEARCH_SUGGESTION items were used only for phrasing and did not support demand or READY status.",
+  "source_access_note": "All listed sources were opened during the run. The authenticated Microsoft 365 admin-center Message Center route was not used as factual evidence; the public Windows message center and release-health pages were used instead."
+}

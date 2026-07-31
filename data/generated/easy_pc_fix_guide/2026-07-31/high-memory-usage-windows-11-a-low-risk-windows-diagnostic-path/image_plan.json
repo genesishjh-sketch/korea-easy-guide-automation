@@ -1,0 +1,45 @@
+{
+  "mode": "codex_generated_no_api",
+  "strict": true,
+  "notes": [
+    "Do not call paid image APIs in the Python pipeline.",
+    "Use Codex-generated JPG assets from src/images/ai_assets/windows.",
+    "Do not use SVG fallback for Windows help public posts.",
+    "Do not generate fake Windows UI or readable error screens.",
+    "Vary visual concepts across posts: change medium, camera angle, props, composition, and dominant accent color by article type.",
+    "Hero and inline images must have different roles and should not look like two versions of the same template.",
+    "The saved image plan is only a creative brief; Codex image generation must use a fresh article-specific prompt instead of pasting a fixed formula.",
+    "Do not add extra images unless each image has a distinct role such as hero, troubleshooting flow, warning, or decision checklist.",
+    "Publishing should stop when required image files are missing.",
+    "Codex app automation must use the built-in image_gen tool for missing images; GitHub Actions alone must not try to call paid image APIs.",
+    "Before calling image_gen, Codex must adapt this brief into a one-off prompt based on the article title, reader intent, recent image history, and the image role."
+  ],
+  "prompt_policy": {
+    "generation_owner": "codex_app_automation",
+    "tool": "built_in_image_gen",
+    "api_cost_policy": "Do not call OpenAI Images API or external paid image APIs.",
+    "prompt_method": "Treat each saved prompt as an art-direction brief. Before generating, Codex must write a fresh one-off image prompt for the exact article, image role, reader intent, and recent visual history.",
+    "diversity_rule": "Recent laptop-on-desk or generic office visuals are not acceptable unless the topic specifically requires that exact object. Hero and inline images must use different visual metaphors, camera angles, props, and composition.",
+    "quality_loop": "If the image looks generic, repeated, off-topic, text-heavy, or too similar to recent posts, discard it and regenerate before publishing."
+  },
+  "images": [
+    {
+      "role": "hero",
+      "filename": "ai-hero.jpg",
+      "alt": "An abstract tray of memory blocks with one growing group under a magnifying glass",
+      "caption": "High memory is a clue: measure the whole pattern, then identify the group that keeps growing.",
+      "prompt": "Codex image generation brief. Fresh prompt rule: do not treat this as a reusable template; create a fresh one-off prompt before generating. Domain: beginner Windows help. Article title: 'High Memory Usage Windows 11: A Low-Risk Windows Diagnostic Path'. Search intent / reader need: help a non-technical reader understand the problem situation before trying safe fixes. Image role: hero. Role purpose: show the real-world problem context or a clear visual metaphor for why the issue happens. Visual brief: beginner computer help with safe, calm troubleshooting cues. Fresh visual metaphor: cause and next step shown as a simple visual metaphor. Subject to visualize: beginner computer help with safe, calm troubleshooting cues. Use case: scientific-educational. Medium/style: paper-and-object process visual; miniature tabletop model made from matte paper and soft plastic. Composition: asymmetrical layout with foreground object and background context; diagonal left-to-right flow with clear depth and generous negative space. Key objects or scene cues: a real accessory, cable, router, folder, clock, shield, or storage prop based on the topic; physical cards, cable, clock, small repair gear, neutral laptop edge. Lighting/mood: warm evening home light with restrained cool technical accents. Color palette: clean whites, soft blue-green accents, graphite, and calm neutral tones. Recent-image avoidance: avoid laptop centered on a bright desk, repeated laptop+coffee setups, generic home-office stock scenes, and using the same camera angle as the other image. Quality bar: the result must be clearly article-specific for 'high memory usage windows 11', not a generic stock image, and not a variation of the other image in this post. Constraints: Do not show real Microsoft logos, fake Windows UI, readable error codes, readable letters or numbers, brand marks, private information, warning screens, command prompts, registry editors, or text overlays. Avoid fake support documents, fake screenshots, scary alert dialogs, distorted hands, extra fingers, watermarks, generic stock-photo office scenes, and the repeated laptop-centered desk composition.",
+      "required": true,
+      "url": "assets/ai-hero.jpg"
+    },
+    {
+      "role": "inline",
+      "filename": "ai-inline-1.jpg",
+      "alt": "A three-stage physical troubleshooting path for observing, isolating, and verifying memory pressure",
+      "caption": "Observe first, isolate one recognizable workload, and verify the result before making another change.",
+      "prompt": "Codex image generation brief. Fresh prompt rule: do not treat this as a reusable template; create a fresh one-off prompt before generating. Domain: beginner Windows help. Article title: 'High Memory Usage Windows 11: A Low-Risk Windows Diagnostic Path'. Search intent / reader need: show a distinct safe process, checklist, decision flow, or cause-and-fix relationship inside the article. Image role: inline. Role purpose: explain the safe order of checks, decision path, or cause-and-fix relationship without using screenshots. Visual brief: beginner computer help with safe, calm troubleshooting cues. Fresh visual metaphor: safe troubleshooting as a non-screen object story. Subject to visualize: beginner computer help with safe, calm troubleshooting cues. Use case: productivity-visual. Medium/style: editorial object photography; step-by-step object arrangement using three distinct physical zones. Composition: no centered laptop; make the topic-specific object or metaphor the dominant subject; tight crop that avoids the generic full laptop-on-desk look. Key objects or scene cues: a small process map built from physical props, no screenshots; abstract blocks, safe-step tokens, magnifier, soft device outline. Lighting/mood: warm evening home light with restrained cool technical accents. Color palette: clean whites, soft blue-green accents, graphite, and calm neutral tones. Recent-image avoidance: avoid laptop centered on a bright desk, repeated laptop+coffee setups, generic home-office stock scenes, and using the same camera angle as the other image. Quality bar: the result must be clearly article-specific for 'high memory usage windows 11', not a generic stock image, and not a variation of the other image in this post. Constraints: No real or fake operating-system screens, Microsoft logos, readable UI text, error codes, scary warning overlays, command prompts, registry editors, fake official documentation, watermarks, or brand marks. Do not make this a second laptop-on-desk image.",
+      "required": true,
+      "url": "assets/ai-inline-1.jpg"
+    }
+  ]
+}
