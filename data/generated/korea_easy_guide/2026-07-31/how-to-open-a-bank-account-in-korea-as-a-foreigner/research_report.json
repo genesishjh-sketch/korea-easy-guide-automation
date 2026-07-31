@@ -1,0 +1,135 @@
+{
+  "schema_version": 2,
+  "collector_role": "codex_official_source_research",
+  "site": "korea_easy_guide",
+  "content_domain": "korea_travel",
+  "seed_keyword": "how to open a bank account in korea as a foreigner",
+  "topic": "How to Open a Bank Account in Korea as a Foreigner",
+  "queries": [
+    "foreigner open bank account Korea residence card official",
+    "Korea bank account foreign customer required documents official bank",
+    "mobile foreigner residence card bank account Korea official 2025",
+    "Korea foreigner online financial identity verification Ministry of Justice",
+    "Korea deposit protection limit 100 million won September 2025 official",
+    "financial guide book foreigners Korea bank account documents",
+    "Korean bank restricted account transaction purpose foreign resident",
+    "Korea foreign student bank account passport residence card official bank"
+  ],
+  "reader_questions": [
+    "Can a short-term tourist open a normal Korean bank account?",
+    "Which original documents should a registered foreign resident bring?",
+    "Can a mobile foreigner residence card be used at a bank?",
+    "Why might a new account have low transfer or ATM limits?",
+    "Can a foreign resident open an account fully online?",
+    "What fees should the customer check before choosing a bank?",
+    "How should the account be closed before leaving Korea?",
+    "How much eligible deposit money is protected in 2026?"
+  ],
+  "sources": [
+    {
+      "name": "Woori Bank Banking Guide for Foreign Customers",
+      "url": "https://spib.wooribank.com/pib/Dream?withyou=ENENG0688",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_use": "Passport or residence card is required; the bank may ask for employment, income, utility, or other supporting documents; branch and foreign-language service information."
+    },
+    {
+      "name": "Financial Services Commission mobile foreigner residence card announcement",
+      "url": "https://www.fsc.go.kr/eng/pr010101/84215",
+      "type": "official",
+      "opened": true,
+      "factual_use": "Registered foreign residents gained in-person banking access using the mobile foreigner residence card at an initial group of banks from March 2025."
+    },
+    {
+      "name": "Seoul Foreign Portal mobile foreigner residence card issuance notice",
+      "url": "https://global.seoul.go.kr/web/news/senw/bordContDetail.do?brd_no=5&lang=ko&mode=W&post_no=2B514F3675690198E063C0A8A0232FDC",
+      "type": "official",
+      "opened": true,
+      "factual_use": "Mobile foreigner residence cards are available to registered foreign residents aged 14 or older, with issuance routes tied to the physical card type and a phone in the resident's own name."
+    },
+    {
+      "name": "Financial Services Commission deposit protection increase",
+      "url": "https://www.fsc.go.kr/eng/pr010101/84977",
+      "type": "official",
+      "opened": true,
+      "factual_use": "Eligible deposits at KDIC-covered institutions are protected up to KRW 100 million per depositor per institution from September 1, 2025; market-performance-linked funds are not covered."
+    },
+    {
+      "name": "Seoul Foreign Portal Financial Guide Book for Foreigners in Korea",
+      "url": "https://global.seoul.go.kr/web/news/libr/bordContDetail.do?brd_no=9&lang=en&mode=W&post_no=F413CFA15F65011CE053C0A8A0239B3B",
+      "type": "official",
+      "opened": true,
+      "factual_use": "Government-hosted foreigner banking guide used for process orientation and cross-checking."
+    },
+    {
+      "name": "Financial Transactions Guide for Foreigners in Korea",
+      "url": "https://img.shinhan.com/nexhpe/ko/news/201001280441159_1264643513000000173.pdf",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_use": "Real-name identification, passport/residence card use, additional identity documents, account-purpose review, branch procedure, closure, and security precautions."
+    }
+  ],
+  "notes": [
+    "A residence card is the strongest practical identity route, but official bank guidance also recognizes a passport; product and branch requirements vary.",
+    "A bank may request proof of employment, income, address, study, or another transaction purpose in addition to identity documents.",
+    "Mobile foreigner residence cards became usable for account opening at an initial group of banks in March 2025, with wider implementation dependent on participating institutions.",
+    "Online identity verification exists for registered foreign residents, but it does not guarantee that every bank or product supports fully remote opening.",
+    "Current 2026 deposit-protection wording must use KRW 100 million, not the older KRW 50 million text still visible on some bank pages.",
+    "The article avoids promising a universal transfer limit because account restrictions and proof needed to raise limits are bank-specific.",
+    "The article treats passport-only tourist opening as uncertain and recommends alternative payment methods rather than presenting it as guaranteed.",
+    "Community text and search suggestions were not used as factual evidence or as proof of demand."
+  ],
+  "topic_context": {
+    "topic_id": "",
+    "cluster_id": "",
+    "category_id": "",
+    "action": "NEW_POST",
+    "topic_action": "NEW_POST",
+    "revision": 0,
+    "topic_revision": 0,
+    "editor_brief": {},
+    "reader_questions": [],
+    "difference_from_existing": "No live Korea Easy Guide post covers opening a resident bank account; existing payment and ATM guides address spending and cash access, not account setup.",
+    "existing_post_refs": []
+  },
+  "signal_evidence": [],
+  "signal_source_counts": {},
+  "reddit_collection_method_counts": {
+    "oauth": 0,
+    "public_json": 0,
+    "google_site_search": 0,
+    "fallback": 0
+  },
+  "google_suggest_method_counts": {
+    "live": 0,
+    "fallback": 0
+  },
+  "evidence_type_counts": {
+    "OBSERVED_QUESTION": 0,
+    "FIRST_PARTY_QUERY": 0,
+    "SEARCH_SUGGESTION": 0,
+    "QUERY_PLAN": 0,
+    "FALLBACK_TEMPLATE": 0
+  },
+  "live_reddit_signal_count": 0,
+  "reddit_oauth_signal_count": 0,
+  "reddit_public_json_signal_count": 0,
+  "reddit_google_site_search_signal_count": 0,
+  "fallback_reddit_signal_count": 0,
+  "google_suggest_signal_count": 0,
+  "google_suggest_live_signal_count": 0,
+  "google_suggest_fallback_signal_count": 0,
+  "observed_evidence_count": 0,
+  "observed_question_count": 0,
+  "first_party_query_count": 0,
+  "verified_public_page_signal_count": 0,
+  "query_plan_count": 0,
+  "fallback_evidence_count": 0,
+  "search_suggestion_count": 0,
+  "demand_eligible_signal_count": 0,
+  "stability_eligible_signal_count": 0,
+  "ready_eligible_signal_count": 0,
+  "cadence_eligible_signal_count": 0,
+  "research_completed_at": "2026-07-31T09:25:00+09:00",
+  "research_method": "Opened and read official Korean government, Seoul Foreign Portal, and bank guidance before writing. No search-result URL was counted as factual evidence."
+}

@@ -1,0 +1,41 @@
+{
+  "mode": "codex_generated_no_api",
+  "strict": true,
+  "notes": [
+    "Both final images were generated with the Codex app built-in image_gen tool without a paid image API.",
+    "The first inline attempt was discarded because it contained too much text.",
+    "Hero and inline images have different roles and compositions.",
+    "Hosted copies use unique filenames under src/images/ai_assets/hosted/.",
+    "Publishing must stop if either required image is missing or reused."
+  ],
+  "prompt_policy": {
+    "generation_owner": "codex_app_automation",
+    "tool": "built_in_image_gen",
+    "api_cost_policy": "No OpenAI Images API or external paid image API was used.",
+    "prompt_method": "Fresh one-off prompts were written from the article intent, image role, and recent Korea image history.",
+    "diversity_rule": "Avoid traveler-with-phone, luggage-only airport, skyline-only, and cafe-table phone scenes.",
+    "quality_loop": "The text-heavy first inline result was rejected and regenerated as a mostly wordless object flow."
+  },
+  "images": [
+    {
+      "role": "hero",
+      "filename": "ai-hero.jpg",
+      "alt": "A foreign resident preparing identity and purpose documents at a Korean bank counter",
+      "caption": "Prepare identity, address, and transaction-purpose evidence before visiting the branch.",
+      "prompt": "Fresh one-off prompt, not a reusable template. Image role: hero. Role purpose: show the branch preparation and identity-verification moment. Photorealistic editorial scene at a modern Korean bank counter: a foreign resident seen from a side/back angle organizes a passport, unreadable generic residence card, proof-of-address envelope, and employment or university document while a bank employee gestures toward a blank application. Wide landscape, calm morning light, unbranded branch, documentary realism. Recent-image avoidance: avoid repeated traveler-with-phone, luggage-only airport, skyline-only, and cafe-table scenes. No readable personal data, logos, currency piles, text overlay, or watermark.",
+      "required": true,
+      "url": "assets/ai-hero.jpg",
+      "hosted_filename": "korea-bank-account-foreigner-hero-20260731.jpg"
+    },
+    {
+      "role": "inline",
+      "filename": "ai-inline-1.jpg",
+      "alt": "A wordless preparation flow showing resident and short-stay document paths, branch setup, and transfer-limit checks",
+      "caption": "A stronger resident-document path and a more uncertain passport-only path both lead to branch-specific approval and limit checks.",
+      "prompt": "Fresh one-off prompt, not a reusable template. Image role: inline process and comparison checklist. Role purpose: compare the stronger resident-document path with the uncertain passport-only path, then show branch setup and limit checks. Completely wordless top-down educational still life on pale wood. Two preparation trays: teal with closed passport, generic residence-ID silhouette, house document, SIM, and work/student pictogram; muted red with passport, smaller document bundle, and caution triangle. Arrows lead to queue ticket, signature pen, unbranded debit card, security token, then a transfer-limit gauge, shield, and check mark. Recent-image avoidance: avoid repeated traveler-with-phone, luggage-only airport, skyline-only, cafe-table scenes, and do not make this a second version of the hero. No words, letters, pseudo-writing, personal data, bank logos, currency, smartphone, fake UI, or watermark.",
+      "required": true,
+      "url": "assets/ai-inline-1.jpg",
+      "hosted_filename": "korea-bank-account-foreigner-inline-20260731.jpg"
+    }
+  ]
+}
