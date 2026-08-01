@@ -1,0 +1,59 @@
+{
+  "schema_version": 2,
+  "collector_role": "codex_official_source_research",
+  "site": "korea_easy_guide",
+  "content_domain": "korea_travel",
+  "seed_keyword": "korea heatwave travel safety tips",
+  "topic": "Korea Heatwave Travel Safety: A Practical Plan for Foreign Visitors",
+  "queries": [
+    "site:weather.go.kr English Korea heat wave warning official",
+    "site:safekorea.go.kr heat wave safety English Korea official",
+    "site:kdca.go.kr heat-related illness Korea official",
+    "site:kdca.go.kr heatstroke symptoms first aid Korea official",
+    "site:english.seoul.go.kr 2026 heatwave cooling shelter official",
+    "site:english.visitkorea.or.kr Korea summer heat official",
+    "site:english.visitkorea.or.kr emergency numbers 119 1330 Korea official",
+    "site:weather.go.kr impact based heat wave forecast English PDF"
+  ],
+  "reader_questions": [
+    "How should a traveler change a Korea itinerary during a heatwave warning?",
+    "Where can a foreign visitor check authoritative heat alerts in English?",
+    "Which hours and outdoor activities should be reduced first?",
+    "Where can a visitor cool down without relying on one cafe?",
+    "What symptoms require emergency help?",
+    "Which numbers provide emergency and multilingual help?",
+    "Does a warning automatically qualify a booking for a refund?",
+    "Why might a foreign phone miss Korean alerts?"
+  ],
+  "sources": [
+    {"name": "KMA Current Severe Weather Status", "url": "https://www.weather.go.kr/neng/forecast/warning.do", "type": "official", "opened": true, "factual_use": "Authoritative location-specific warnings and forecasts."},
+    {"name": "KMA Impact-Based Heat Wave Forecasting Leaflet", "url": "https://www.weather.go.kr/wnuri_help/doc/heatwave_leaflet_eng.pdf", "type": "official", "opened": true, "factual_use": "Risk levels, apparent temperature, water-shade-rest, and hottest-hour precautions."},
+    {"name": "Safe Korea English Emergency Alerts", "url": "https://eng.safekorea.go.kr/safekorea-eng/ctim/cmsg/calamitySms.do?menuSn=1005&smsLang=en", "type": "official", "opened": true, "factual_use": "Current municipal heat and tropical-night messages and translation caveat."},
+    {"name": "KDCA Heat Illness Prevention and First Aid", "url": "https://health.kdca.go.kr/healthinfo/biz/health/ntcnInfo/healthSourc/thtimtCntnts/thtimtCntntsView.do?thtimt_cntnts_sn=122", "type": "official", "opened": true, "factual_use": "Symptoms, cooling response, hydration only when conscious, and 119 escalation."},
+    {"name": "KDCA 2026 Heat-Stroke Guidance", "url": "https://www.kdca.go.kr/kdca/2848/subview.do?enc=Zm5jdDF8QEB8JTJGa2RjYSUyRjQyJTJGMzExNjE2JTJGYXJ0Y2xWaWV3LmRvJTNG", "type": "official", "opened": true, "factual_use": "Current distinction between heat exhaustion and life-threatening heat stroke and rapid cooling."},
+    {"name": "VISITKOREA Climate Guide", "url": "https://english.visitkorea.or.kr/svc/contents/infoBscView.do?vcontsId=140636", "type": "official_or_platform", "opened": true, "factual_use": "Hot humid summer, August orientation, and live-forecast advice."},
+    {"name": "VISITKOREA Emergency Situations", "url": "https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=140042", "type": "official_or_platform", "opened": true, "factual_use": "119, 1339, and multilingual 1330 roles."},
+    {"name": "Seoul 2026 COOL Library Program", "url": "https://english.seoul.go.kr/cool-off-at-the-library-this-summer-with-seouls-cool-library-campaign-across-223-libraries/", "type": "official", "opened": true, "factual_use": "223 libraries across 25 districts during July and August 2026."}
+  ],
+  "notes": [
+    "KMA current alerts are the primary weather decision source.",
+    "The article does not tell readers to self-issue a warning from one number.",
+    "Safe Korea English alerts disclose possible translation inaccuracies.",
+    "No fluid is advised for an unconscious person.",
+    "Individual COOL Library hours require verification.",
+    "No universal heatwave refund right was claimed.",
+    "Community text, suggestions, QUERY_PLAN records, and unopened URLs were not factual evidence or proof of demand.",
+    "This is a legacy SHADOW candidate, not an AI Registry READY topic."
+  ],
+  "topic_context": {"topic_id": "", "cluster_id": "", "category_id": "", "action": "NEW_POST", "topic_action": "NEW_POST", "revision": 0, "topic_revision": 0, "editor_brief": {}, "reader_questions": [], "difference_from_existing": "Live alert interpretation, day-plan redesign, cooling locations, heat-illness response, and foreigner emergency access.", "existing_post_refs": ["https://koreaeasyguide.blogspot.com/2026/07/korea-weather-and-packing-guide-by.html"]},
+  "signal_evidence": [], "signal_source_counts": {},
+  "reddit_collection_method_counts": {"oauth": 0, "public_json": 0, "google_site_search": 0, "fallback": 0},
+  "google_suggest_method_counts": {"live": 0, "fallback": 0},
+  "evidence_type_counts": {"OBSERVED_QUESTION": 0, "FIRST_PARTY_QUERY": 0, "SEARCH_SUGGESTION": 0, "QUERY_PLAN": 0, "FALLBACK_TEMPLATE": 0},
+  "live_reddit_signal_count": 0, "reddit_oauth_signal_count": 0, "reddit_public_json_signal_count": 0, "reddit_google_site_search_signal_count": 0, "fallback_reddit_signal_count": 0,
+  "google_suggest_signal_count": 0, "google_suggest_live_signal_count": 0, "google_suggest_fallback_signal_count": 0,
+  "observed_evidence_count": 0, "observed_question_count": 0, "first_party_query_count": 0, "verified_public_page_signal_count": 0, "query_plan_count": 0,
+  "fallback_evidence_count": 0, "search_suggestion_count": 0, "demand_eligible_signal_count": 0, "stability_eligible_signal_count": 0, "ready_eligible_signal_count": 0, "cadence_eligible_signal_count": 0,
+  "research_completed_at": "2026-08-01T09:22:00+09:00",
+  "research_method": "Opened and read official Korean government, tourism, health, weather, safety, and Seoul city pages before writing. Search-result URLs were not counted as sources."
+}

@@ -1,0 +1,26 @@
+{
+  "article": {
+    "title": "Korea Heatwave Travel Safety: A Practical Plan for Foreign Visitors",
+    "slug": "korea-heatwave-travel-safety-foreign-visitors",
+    "category": "Travel Basics",
+    "tags": ["Travel Basics", "Korea summer", "heatwave safety", "foreign visitors", "weather alerts"],
+    "meta_description": "Travel safely during a Korea heatwave: check official alerts, rebuild outdoor plans, find cooling spaces, recognize heat illness, and get English help.",
+    "image": {"path": "assets/ai-hero.jpg", "url": "assets/ai-hero.jpg", "alt": "A traveler choosing a shaded route beside a cooling library during a Korean heatwave", "source": "codex_image_plan", "credit": "Generated with Codex built-in image generation", "caption": "Use official alerts to choose shade, cooling stops, and safer travel hours."},
+    "sources": [
+      {"name": "KMA", "url": "https://www.weather.go.kr/neng/forecast/warning.do"},
+      {"name": "Safe Korea", "url": "https://eng.safekorea.go.kr/safekorea-eng/ctim/cmsg/calamitySms.do?menuSn=1005&smsLang=en"},
+      {"name": "KDCA", "url": "https://health.kdca.go.kr/healthinfo/biz/health/ntcnInfo/healthSourc/thtimtCntnts/thtimtCntntsView.do?thtimt_cntnts_sn=122"},
+      {"name": "VISITKOREA", "url": "https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=140042"}
+    ],
+    "created_at": "2026-08-01T09:25:00+09:00",
+    "inline_images": [{"path": "assets/ai-inline-1.jpg", "url": "assets/ai-inline-1.jpg", "alt": "A wordless heat-safety decision flow from official alert to shade, cooling, water, rest, and emergency response", "source": "codex_image_plan", "credit": "Generated with Codex built-in image generation", "caption": "Check the alert, route, cooling stops, hydration, rest, and emergency threshold."}]
+  },
+  "candidate": {
+    "keyword": "korea heatwave travel safety tips", "category": "Travel Basics", "intent": "safety-checklist", "score": 0.0, "signals": [],
+    "topic_id": "", "cluster_id": "", "category_id": "", "action": "NEW_POST", "topic_action": "NEW_POST", "revision": 0, "topic_revision": 0,
+    "editor_brief": {}, "reader_questions": [],
+    "difference_from_existing": "Distinct from the broad seasonal packing article: live heat alerts, itinerary redesign, cooling locations, heat-illness response, and foreigner-specific emergency access.",
+    "existing_post_refs": ["https://koreaeasyguide.blogspot.com/2026/07/korea-weather-and-packing-guide-by.html", "https://koreaeasyguide.blogspot.com/2026/07/korea-hospital-and-pharmacy-guide-for.html"],
+    "claim_run_id": "", "topic_source": "legacy"
+  }
+}
