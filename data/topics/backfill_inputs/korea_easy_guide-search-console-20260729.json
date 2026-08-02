@@ -1,0 +1,262 @@
+{
+  "schema_version": 1,
+  "site": "korea_easy_guide",
+  "run_id": "backfill-search-console-20260729-korea-easy-guide",
+  "run_type": "BACKFILL_RESEARCH",
+  "started_at": "2026-07-29T15:45:00+09:00",
+  "ended_at": "2026-07-29T15:50:00+09:00",
+  "complete": false,
+  "degraded": true,
+  "collector_status": "DEGRADED",
+  "stop_condition": "SOURCE_LIMIT",
+  "checkpoint": {
+    "cursor": "search-console-top-10",
+    "searched_scope": [
+      "Search Console query dimension from 2025-07-29 through 2026-07-29"
+    ],
+    "notes": "The existing reporting client returns the top 10 rows only."
+  },
+  "source_coverage": {
+    "google_search_console": 10
+  },
+  "unexplored_scope": [
+    "Search Console query rows beyond the reporting client's top-10 limit"
+  ],
+  "synthetic_influence_count": 0,
+  "blogger_duplicate_count": 0,
+  "sheet_sync_status": "PENDING",
+  "auditor": {
+    "passed": true,
+    "decision": "PASS",
+    "auditor_id": "codex-search-console-auditor",
+    "evidence_url_coverage_verified": true,
+    "synthetic_influence_verified": true,
+    "blogger_duplicates_verified": true,
+    "notes": "Queries came directly from the authorized Search Console property. No topic was promoted to READY."
+  },
+  "questions": [
+    {
+      "question_id": "q_sc_korea_airport_limousine_bus_seoul",
+      "source": "google_search_console",
+      "source_item_id": "sc-korea-20250729-20260729-airport-limousine-bus-seoul",
+      "title": "airport limousine bus seoul",
+      "summary": "Authorized Search Console query: 1 impression, 0 clicks, average position 26 in the 12-month window.",
+      "created_at": "2026-07-29T00:00:00+09:00",
+      "collected_at": "2026-07-29T15:50:00+09:00",
+      "engagement": {"impressions": 1, "clicks": 0, "ctr": 0, "position": 26},
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-07-29T15:50:00+09:00",
+      "verified_by": "codex",
+      "property_id": "https://koreaeasyguide.blogspot.com/"
+    },
+    {
+      "question_id": "q_sc_korea_arex_all_stop_train",
+      "source": "google_search_console",
+      "source_item_id": "sc-korea-20250729-20260729-arex-all-stop-train",
+      "title": "arex all stop train",
+      "summary": "Authorized Search Console query: 1 impression, 0 clicks, average position 41 in the 12-month window.",
+      "created_at": "2026-07-29T00:00:00+09:00",
+      "collected_at": "2026-07-29T15:50:00+09:00",
+      "engagement": {"impressions": 1, "clicks": 0, "ctr": 0, "position": 41},
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-07-29T15:50:00+09:00",
+      "verified_by": "codex",
+      "property_id": "https://koreaeasyguide.blogspot.com/"
+    },
+    {
+      "question_id": "q_sc_korea_how_to_charge_tmoney_card",
+      "source": "google_search_console",
+      "source_item_id": "sc-korea-20250729-20260729-how-to-charge-tmoney-card",
+      "title": "how to charge tmoney card",
+      "summary": "Authorized Search Console query: 1 impression, 0 clicks, average position 19 in the 12-month window.",
+      "created_at": "2026-07-29T00:00:00+09:00",
+      "collected_at": "2026-07-29T15:50:00+09:00",
+      "engagement": {"impressions": 1, "clicks": 0, "ctr": 0, "position": 19},
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-07-29T15:50:00+09:00",
+      "verified_by": "codex",
+      "property_id": "https://koreaeasyguide.blogspot.com/"
+    },
+    {
+      "question_id": "q_sc_korea_how_to_top_up_tmoney_card",
+      "source": "google_search_console",
+      "source_item_id": "sc-korea-20250729-20260729-how-to-top-up-tmoney-card",
+      "title": "how to top up t-money card",
+      "summary": "Authorized Search Console query: 1 impression, 0 clicks, average position 18 in the 12-month window.",
+      "created_at": "2026-07-29T00:00:00+09:00",
+      "collected_at": "2026-07-29T15:50:00+09:00",
+      "engagement": {"impressions": 1, "clicks": 0, "ctr": 0, "position": 18},
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-07-29T15:50:00+09:00",
+      "verified_by": "codex",
+      "property_id": "https://koreaeasyguide.blogspot.com/"
+    },
+    {
+      "question_id": "q_sc_korea_icn_airport_to_seoul_station",
+      "source": "google_search_console",
+      "source_item_id": "sc-korea-20250729-20260729-icn-airport-to-seoul-station",
+      "title": "icn airport to seoul station",
+      "summary": "Authorized Search Console query: 1 impression, 0 clicks, average position 71 in the 12-month window.",
+      "created_at": "2026-07-29T00:00:00+09:00",
+      "collected_at": "2026-07-29T15:50:00+09:00",
+      "engagement": {"impressions": 1, "clicks": 0, "ctr": 0, "position": 71},
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-07-29T15:50:00+09:00",
+      "verified_by": "codex",
+      "property_id": "https://koreaeasyguide.blogspot.com/"
+    },
+    {
+      "question_id": "q_sc_korea_incheon_limousine_bus",
+      "source": "google_search_console",
+      "source_item_id": "sc-korea-20250729-20260729-incheon-limousine-bus",
+      "title": "incheon limousine bus",
+      "summary": "Authorized Search Console query: 1 impression, 0 clicks, average position 26 in the 12-month window.",
+      "created_at": "2026-07-29T00:00:00+09:00",
+      "collected_at": "2026-07-29T15:50:00+09:00",
+      "engagement": {"impressions": 1, "clicks": 0, "ctr": 0, "position": 26},
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-07-29T15:50:00+09:00",
+      "verified_by": "codex",
+      "property_id": "https://koreaeasyguide.blogspot.com/"
+    },
+    {
+      "question_id": "q_sc_korea_incheon_to_seoul",
+      "source": "google_search_console",
+      "source_item_id": "sc-korea-20250729-20260729-incheon-to-seoul",
+      "title": "incheon to seoul",
+      "summary": "Authorized Search Console query: 1 impression, 0 clicks, average position 69 in the 12-month window.",
+      "created_at": "2026-07-29T00:00:00+09:00",
+      "collected_at": "2026-07-29T15:50:00+09:00",
+      "engagement": {"impressions": 1, "clicks": 0, "ctr": 0, "position": 69},
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-07-29T15:50:00+09:00",
+      "verified_by": "codex",
+      "property_id": "https://koreaeasyguide.blogspot.com/"
+    },
+    {
+      "question_id": "q_sc_korea_intercity_bus_korea",
+      "source": "google_search_console",
+      "source_item_id": "sc-korea-20250729-20260729-intercity-bus-korea",
+      "title": "intercity bus korea",
+      "summary": "Authorized Search Console query: 1 impression, 0 clicks, average position 14 in the 12-month window.",
+      "created_at": "2026-07-29T00:00:00+09:00",
+      "collected_at": "2026-07-29T15:50:00+09:00",
+      "engagement": {"impressions": 1, "clicks": 0, "ctr": 0, "position": 14},
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-07-29T15:50:00+09:00",
+      "verified_by": "codex",
+      "property_id": "https://koreaeasyguide.blogspot.com/"
+    },
+    {
+      "question_id": "q_sc_korea_bus_ticket",
+      "source": "google_search_console",
+      "source_item_id": "sc-korea-20250729-20260729-korea-bus-ticket",
+      "title": "korea bus ticket",
+      "summary": "Authorized Search Console query: 4 impressions, 0 clicks, average position 28.25 in the 12-month window.",
+      "created_at": "2026-07-29T00:00:00+09:00",
+      "collected_at": "2026-07-29T15:50:00+09:00",
+      "engagement": {"impressions": 4, "clicks": 0, "ctr": 0, "position": 28.25},
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-07-29T15:50:00+09:00",
+      "verified_by": "codex",
+      "property_id": "https://koreaeasyguide.blogspot.com/"
+    },
+    {
+      "question_id": "q_sc_korea_bus_tickets",
+      "source": "google_search_console",
+      "source_item_id": "sc-korea-20250729-20260729-korea-bus-tickets",
+      "title": "korea bus tickets",
+      "summary": "Authorized Search Console query: 1 impression, 0 clicks, average position 29 in the 12-month window.",
+      "created_at": "2026-07-29T00:00:00+09:00",
+      "collected_at": "2026-07-29T15:50:00+09:00",
+      "engagement": {"impressions": 1, "clicks": 0, "ctr": 0, "position": 29},
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-07-29T15:50:00+09:00",
+      "verified_by": "codex",
+      "property_id": "https://koreaeasyguide.blogspot.com/"
+    }
+  ],
+  "clusters": [
+    {
+      "cluster_id": "cluster_8f0c5ac6ee8bba461f",
+      "problem_signature": "Airport Limousine Bus Korea Guide: Tickets, Luggage, Stops, and Payment",
+      "canonical_label": "Airport Limousine Bus Korea Guide: Tickets, Luggage, Stops, and Payment",
+      "question_ids": [
+        "q_sc_korea_airport_limousine_bus_seoul",
+        "q_sc_korea_incheon_limousine_bus"
+      ],
+      "topic_ids": ["topic_32fd1155c0c7f0f0ad"],
+      "aliases": [],
+      "observation_run_ids": []
+    },
+    {
+      "cluster_id": "cluster_7f0b37b3d2f8e1486d",
+      "problem_signature": "AREX Airport Railroad Guide for Tourists: Express vs All-Stop to Seoul",
+      "canonical_label": "AREX Airport Railroad Guide for Tourists: Express vs All-Stop to Seoul",
+      "question_ids": ["q_sc_korea_arex_all_stop_train"],
+      "topic_ids": ["topic_b3c9abb6252364c13b"],
+      "aliases": [],
+      "observation_run_ids": []
+    },
+    {
+      "cluster_id": "cluster_5cb554ed3054c4a8fc",
+      "problem_signature": "How to Use a T-money Card in Korea: Easy Guide for Foreign Visitors",
+      "canonical_label": "How to Use a T-money Card in Korea: Easy Guide for Foreign Visitors",
+      "question_ids": [
+        "q_sc_korea_how_to_charge_tmoney_card",
+        "q_sc_korea_how_to_top_up_tmoney_card"
+      ],
+      "topic_ids": ["topic_4633cea98ef2dc5eaf"],
+      "aliases": [],
+      "observation_run_ids": []
+    },
+    {
+      "cluster_id": "cluster_33a487a7e790db908a",
+      "problem_signature": "How to Get from Incheon Airport to Seoul: Easy Guide for First-Time Visitors",
+      "canonical_label": "How to Get from Incheon Airport to Seoul: Easy Guide for First-Time Visitors",
+      "question_ids": [
+        "q_sc_korea_icn_airport_to_seoul_station",
+        "q_sc_korea_incheon_to_seoul"
+      ],
+      "topic_ids": ["topic_405d908d82465e2077"],
+      "aliases": [],
+      "observation_run_ids": []
+    },
+    {
+      "cluster_id": "cluster_6c7bc3f03c4192abce",
+      "problem_signature": "Korea Intercity Bus Ticket Guide: Express vs Intercity, Booking, Payment, and Boarding",
+      "canonical_label": "Korea Intercity Bus Ticket Guide: Express vs Intercity, Booking, Payment, and Boarding",
+      "question_ids": [
+        "q_sc_korea_intercity_bus_korea",
+        "q_sc_korea_bus_ticket",
+        "q_sc_korea_bus_tickets"
+      ],
+      "topic_ids": ["topic_1ce783e0d6e245355a"],
+      "aliases": [],
+      "observation_run_ids": []
+    }
+  ],
+  "topics": [],
+  "assignments": [
+    {"question_id": "q_sc_korea_airport_limousine_bus_seoul", "topic_id": "topic_32fd1155c0c7f0f0ad"},
+    {"question_id": "q_sc_korea_incheon_limousine_bus", "topic_id": "topic_32fd1155c0c7f0f0ad"},
+    {"question_id": "q_sc_korea_arex_all_stop_train", "topic_id": "topic_b3c9abb6252364c13b"},
+    {"question_id": "q_sc_korea_how_to_charge_tmoney_card", "topic_id": "topic_4633cea98ef2dc5eaf"},
+    {"question_id": "q_sc_korea_how_to_top_up_tmoney_card", "topic_id": "topic_4633cea98ef2dc5eaf"},
+    {"question_id": "q_sc_korea_icn_airport_to_seoul_station", "topic_id": "topic_405d908d82465e2077"},
+    {"question_id": "q_sc_korea_incheon_to_seoul", "topic_id": "topic_405d908d82465e2077"},
+    {"question_id": "q_sc_korea_intercity_bus_korea", "topic_id": "topic_1ce783e0d6e245355a"},
+    {"question_id": "q_sc_korea_bus_ticket", "topic_id": "topic_1ce783e0d6e245355a"},
+    {"question_id": "q_sc_korea_bus_tickets", "topic_id": "topic_1ce783e0d6e245355a"}
+  ]
+}

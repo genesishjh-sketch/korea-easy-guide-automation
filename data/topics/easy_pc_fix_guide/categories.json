@@ -1,0 +1,138 @@
+{
+  "categories": {
+    "cat_248b006ddb6584": {
+      "aliases": [],
+      "blogger_label": "File Explorer",
+      "category_id": "cat_248b006ddb6584",
+      "created_at": "2026-07-29T05:09:13.501837+00:00",
+      "name": "File Explorer",
+      "site": "easy_pc_fix_guide",
+      "status": "ACTIVE",
+      "updated_at": "2026-07-29T05:09:13.501839+00:00"
+    },
+    "cat_2f17b4ee478a4e": {
+      "aliases": [],
+      "blogger_label": "OneDrive & Account",
+      "category_id": "cat_2f17b4ee478a4e",
+      "created_at": "2026-07-29T05:09:13.501894+00:00",
+      "name": "OneDrive & Account",
+      "site": "easy_pc_fix_guide",
+      "status": "ACTIVE",
+      "updated_at": "2026-07-29T05:09:13.501895+00:00"
+    },
+    "cat_360336d6ede9b7": {
+      "aliases": [],
+      "blogger_label": "Apps & Settings",
+      "category_id": "cat_360336d6ede9b7",
+      "created_at": "2026-07-29T05:09:13.501900+00:00",
+      "name": "Apps & Settings",
+      "site": "easy_pc_fix_guide",
+      "status": "ACTIVE",
+      "updated_at": "2026-07-29T05:09:13.501901+00:00"
+    },
+    "cat_3e8874b2ae6eb5": {
+      "aliases": [],
+      "blogger_label": "Boot & Recovery",
+      "category_id": "cat_3e8874b2ae6eb5",
+      "created_at": "2026-07-29T05:09:13.501826+00:00",
+      "name": "Boot & Recovery",
+      "site": "easy_pc_fix_guide",
+      "status": "ACTIVE",
+      "updated_at": "2026-07-29T05:09:13.501828+00:00"
+    },
+    "cat_44a5729594e1c9": {
+      "aliases": [],
+      "blogger_label": "Windows Search",
+      "category_id": "cat_44a5729594e1c9",
+      "created_at": "2026-07-29T05:09:13.501881+00:00",
+      "name": "Windows Search",
+      "site": "easy_pc_fix_guide",
+      "status": "ACTIVE",
+      "updated_at": "2026-07-29T05:09:13.501886+00:00"
+    },
+    "cat_59262a4b41871e": {
+      "aliases": [],
+      "blogger_label": "Bluetooth & Devices",
+      "category_id": "cat_59262a4b41871e",
+      "created_at": "2026-07-29T05:09:13.501787+00:00",
+      "name": "Bluetooth & Devices",
+      "site": "easy_pc_fix_guide",
+      "status": "ACTIVE",
+      "updated_at": "2026-07-29T05:09:13.501789+00:00"
+    },
+    "cat_6674ea2547ccfe": {
+      "aliases": [],
+      "blogger_label": "Error Codes",
+      "category_id": "cat_6674ea2547ccfe",
+      "created_at": "2026-07-29T05:09:13.501920+00:00",
+      "name": "Error Codes",
+      "site": "easy_pc_fix_guide",
+      "status": "ACTIVE",
+      "updated_at": "2026-07-29T05:09:13.501921+00:00"
+    },
+    "cat_69d8cb5b45a7ff": {
+      "aliases": [],
+      "blogger_label": "Sound & Microphone",
+      "category_id": "cat_69d8cb5b45a7ff",
+      "created_at": "2026-07-29T05:09:13.501801+00:00",
+      "name": "Sound & Microphone",
+      "site": "easy_pc_fix_guide",
+      "status": "ACTIVE",
+      "updated_at": "2026-07-29T05:09:13.501803+00:00"
+    },
+    "cat_7cc7462a4538fb": {
+      "aliases": [],
+      "blogger_label": "Wi-Fi & Internet",
+      "category_id": "cat_7cc7462a4538fb",
+      "created_at": "2026-07-29T05:09:13.501493+00:00",
+      "name": "Wi-Fi & Internet",
+      "site": "easy_pc_fix_guide",
+      "status": "ACTIVE",
+      "updated_at": "2026-07-29T05:09:13.501763+00:00"
+    },
+    "cat_a5f6f20747507c": {
+      "aliases": [],
+      "blogger_label": "Computer Help",
+      "category_id": "cat_a5f6f20747507c",
+      "created_at": "2026-07-29T05:09:13.501925+00:00",
+      "name": "Computer Help",
+      "site": "easy_pc_fix_guide",
+      "status": "ACTIVE",
+      "updated_at": "2026-07-29T05:09:13.501926+00:00"
+    },
+    "cat_bd6cc833ce082a": {
+      "aliases": [],
+      "blogger_label": "Windows Update",
+      "category_id": "cat_bd6cc833ce082a",
+      "created_at": "2026-07-29T05:09:13.501914+00:00",
+      "name": "Windows Update",
+      "site": "easy_pc_fix_guide",
+      "status": "ACTIVE",
+      "updated_at": "2026-07-29T05:09:13.501916+00:00"
+    },
+    "cat_c48a49c354220f": {
+      "aliases": [],
+      "blogger_label": "Beginner PC Tips",
+      "category_id": "cat_c48a49c354220f",
+      "created_at": "2026-07-29T05:09:13.501909+00:00",
+      "name": "Beginner PC Tips",
+      "site": "easy_pc_fix_guide",
+      "status": "ACTIVE",
+      "updated_at": "2026-07-29T05:09:13.501910+00:00"
+    },
+    "cat_cce9fd35f6178b": {
+      "aliases": [],
+      "blogger_label": "Printer & Scanner",
+      "category_id": "cat_cce9fd35f6178b",
+      "created_at": "2026-07-29T05:09:13.501814+00:00",
+      "name": "Printer & Scanner",
+      "site": "easy_pc_fix_guide",
+      "status": "ACTIVE",
+      "updated_at": "2026-07-29T05:09:13.501816+00:00"
+    }
+  },
+  "revision": 36,
+  "schema_version": 1,
+  "site": "easy_pc_fix_guide",
+  "updated_at": "2026-08-02T11:24:34.582283+00:00"
+}

@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "title": "Blog Topic Intelligence Board",
+  "spreadsheet_id": "1t_ghtbuDCEDfgGt6986GTa8ZUCt_CO6mnAcWBsnZJ24",
+  "spreadsheet_url": "https://docs.google.com/spreadsheets/d/1t_ghtbuDCEDfgGt6986GTa8ZUCt_CO6mnAcWBsnZJ24/edit",
+  "timezone": "Asia/Seoul",
+  "tabs": {
+    "Dashboard": 1169193255,
+    "Topic Board": 2064023730,
+    "Question Inbox": 432747840,
+    "Categories": 1474096859,
+    "Monthly Review": 1153239975,
+    "Published Map": 537661606,
+    "Runs": 1145331731
+  },
+  "editable_ranges": {
+    "Topic Board": [
+      "I2:K10000"
+    ],
+    "Monthly Review": [
+      "I2:J10000"
+    ]
+  },
+  "verified_at": "2026-07-29T06:12:56Z"
+}

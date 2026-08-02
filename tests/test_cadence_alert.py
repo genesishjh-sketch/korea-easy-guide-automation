@@ -32,6 +32,14 @@ class CadenceAlertTests(unittest.TestCase):
                 "reddit_public_json_signal_count": 0,
                 "reddit_google_site_search_signal_count": 0,
                 "fallback_reddit_signal_count": 0,
+                "evidence_counts_verified": True,
+                "derived_evidence_counts": {
+                    "live_reddit_signal_count": 5,
+                    "reddit_oauth_signal_count": 5,
+                    "observed_question_count": 5,
+                    "first_party_query_count": 0,
+                    "demand_eligible_signal_count": 5,
+                },
             }
             reporter.return_value._operations_result.return_value = {
                 "reddit_health": {
@@ -57,7 +65,7 @@ class CadenceAlertTests(unittest.TestCase):
         self.assertTrue(sent)
         notification.return_value.send_required.assert_called_once()
 
-    def test_search_based_reddit_discovery_does_not_include_oauth_setup_fields(self) -> None:
+    def test_query_plan_only_includes_observed_evidence_setup_fields(self) -> None:
         with patch("src.pipeline.stage3_cadence_alert.WeeklyReporter") as reporter, patch(
             "src.pipeline.stage3_cadence_alert.actual_public_post_count", return_value=25
         ), patch("src.pipeline.stage3_cadence_alert.SearchConsoleClient") as search_console, patch(
@@ -97,9 +105,11 @@ class CadenceAlertTests(unittest.TestCase):
 
         self.assertTrue(sent)
         message = notification.return_value.send_required.call_args.args[0]
-        self.assertIn("Reddit Google 검색 신호 수: 6", message)
-        self.assertNotIn("Reddit 앱 입력값:", message)
-        self.assertNotIn("REDDIT_CLIENT_SECRET = Reddit 앱 상세 화면의 secret", message)
+        self.assertIn("Reddit QUERY_PLAN 수(판단 점수 0): 6", message)
+        self.assertIn("OBSERVED_QUESTION 근거 수: 0", message)
+        self.assertIn("FIRST_PARTY_QUERY 근거 수: 0", message)
+        self.assertIn("Reddit 앱 입력값:", message)
+        self.assertIn("REDDIT_CLIENT_SECRET = Reddit 앱 상세 화면의 secret", message)
 
     def test_notification_failure_is_not_silenced(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir, patch(
@@ -117,6 +127,14 @@ class CadenceAlertTests(unittest.TestCase):
                 "reddit_public_json_signal_count": 0,
                 "reddit_google_site_search_signal_count": 0,
                 "fallback_reddit_signal_count": 0,
+                "evidence_counts_verified": True,
+                "derived_evidence_counts": {
+                    "live_reddit_signal_count": 5,
+                    "reddit_oauth_signal_count": 5,
+                    "observed_question_count": 5,
+                    "first_party_query_count": 0,
+                    "demand_eligible_signal_count": 5,
+                },
             }
             reporter.return_value._operations_result.return_value = {
                 "reddit_health": {

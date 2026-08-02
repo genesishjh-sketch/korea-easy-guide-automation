@@ -10,4 +10,7 @@ data/backups/
 data/previews/
 data/repurpose/
 reports/
+data/topics/**/.topic-board.lock
+data/topics/publication_sync_pending.jsonl
+data/topics/sheet_export.json
 logs/

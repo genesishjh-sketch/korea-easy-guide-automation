@@ -1,0 +1,32 @@
+{
+  "run_type": "WEEKLY_RESEARCH",
+  "window_start": "2025-08-02",
+  "window_end": "2026-08-02",
+  "logic_version": "topic-intelligence-v2",
+  "work_items": [
+    {
+      "work_id": "search-console-all-queries",
+      "source": "google_search_console",
+      "query_family": "all-first-party-queries",
+      "required": true
+    },
+    {
+      "work_id": "reddit-korea-transport-payments",
+      "source": "reddit",
+      "query_family": "ktx-tmoney-payment-exceptions",
+      "required": true
+    },
+    {
+      "work_id": "travel-stackexchange-korea",
+      "source": "stack_exchange",
+      "query_family": "tmoney-arex-payment-exceptions",
+      "required": true
+    },
+    {
+      "work_id": "quora-korea",
+      "source": "quora",
+      "query_family": "korea-transport-payment-exceptions",
+      "required": false
+    }
+  ]
+}

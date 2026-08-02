@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sheet_sync.schema.json",
+  "type": "object",
+  "required": ["schema_version", "site", "runs", "updated_at"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "site": {"enum": ["korea_easy_guide", "easy_pc_fix_guide"]},
+    "updated_at": {"type": "string"},
+    "runs": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "run_id",
+          "status",
+          "pending",
+          "attempts",
+          "last_error",
+          "updated_at",
+          "last_success_at"
+        ],
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]+$"
+          },
+          "status": {"enum": ["PENDING", "SUCCESS", "FAILED"]},
+          "pending": {"type": "boolean"},
+          "attempts": {"type": "integer", "minimum": 0},
+          "last_error": {"type": "string"},
+          "updated_at": {"type": "string", "minLength": 1},
+          "last_success_at": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

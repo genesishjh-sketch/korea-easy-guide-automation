@@ -1,0 +1,46 @@
+{
+  "assignments": [],
+  "auditor": {
+    "auditor_id": "codex-initial-backfill-auditor",
+    "blogger_duplicates_verified": true,
+    "decision": "HOLD",
+    "evidence_url_coverage_verified": false,
+    "notes": "Do not promote this backfill or create FIRST_PARTY_QUERY evidence until Search Console access is reauthorized and verified.",
+    "passed": false,
+    "synthetic_influence_verified": true
+  },
+  "blogger_duplicate_count": 0,
+  "checkpoint": {
+    "cursor": "search-console-scope-reauthorization-required",
+    "notes": "Google Search Console 12-month read-only query could not run because the existing OAuth token requires scope reauthorization.",
+    "searched_scope": [
+      "local_seed_topics",
+      "local_generated_metadata",
+      "local_blogger_publish_receipts"
+    ]
+  },
+  "clusters": [],
+  "collector_status": "DEGRADED",
+  "complete": false,
+  "degraded": true,
+  "ended_at": "2026-07-29T14:24:00+09:00",
+  "questions": [],
+  "run_id": "backfill-20260729-easy-pc-fix-guide",
+  "run_type": "BACKFILL_RESEARCH",
+  "schema_version": 1,
+  "sheet_sync_status": "PENDING",
+  "site": "easy_pc_fix_guide",
+  "source_coverage": {
+    "google_search_console_12m": false,
+    "local_generated_metadata": 80,
+    "local_publication_receipts": 35,
+    "local_seed_topics": 113
+  },
+  "started_at": "2026-07-29T14:00:00+09:00",
+  "stop_condition": "DEGRADED",
+  "synthetic_influence_count": 0,
+  "topics": [],
+  "unexplored_scope": [
+    "Google Search Console 12-month FIRST_PARTY_QUERY data (OAuth scope reauthorization required)"
+  ]
+}

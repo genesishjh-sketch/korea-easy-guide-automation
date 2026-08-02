@@ -11,6 +11,10 @@ from src.utils.text import clean_space
 
 LOGGER = logging.getLogger(__name__)
 
+EVIDENCE_SEARCH_SUGGESTION = "SEARCH_SUGGESTION"
+EVIDENCE_FALLBACK_TEMPLATE = "FALLBACK_TEMPLATE"
+SEED_ENRICHER_ROLE = "seed_enricher"
+
 
 FALLBACK_SUGGESTIONS = {
     "incheon airport to seoul": [
@@ -81,17 +85,23 @@ WINDOWS_FALLBACK_SUGGESTIONS = {
 }
 
 
-class GoogleSuggestCollector:
+class GoogleSuggestSeedEnricher:
     def __init__(self, timeout: int = 12) -> None:
         self.timeout = timeout
         self.diagnostics: dict = {}
 
     def collect(self, query: str, limit: int = 10) -> list[TopicSignal]:
         self.diagnostics = {
+            "collector_name": "google_suggest_seed_enricher",
+            "collector_role": SEED_ENRICHER_ROLE,
             "query": query,
             "status": "not_started",
             "live_suggestion_count": 0,
             "fallback_suggestion_count": 0,
+            "search_suggestion_count": 0,
+            "fallback_template_count": 0,
+            "demand_eligible_signal_count": 0,
+            "evidence_type_counts": {},
             "used_fallback": False,
             "fallback_reason": "",
             "error": "",
@@ -109,24 +119,48 @@ class GoogleSuggestCollector:
             LOGGER.warning("Google suggestion collection failed: %s", exc)
             self.diagnostics["error"] = str(exc)
             suggestions = fallback_suggestions(query)
-            collection_method = "fallback"
+            collection_method = "fallback_template"
             self.diagnostics["status"] = "fallback_only" if suggestions else "no_google_suggestions"
             self.diagnostics["fallback_suggestion_count"] = len(suggestions)
             self.diagnostics["used_fallback"] = bool(suggestions)
             if suggestions:
                 self.diagnostics["fallback_reason"] = "Google Suggest request failed; used local query-intent fallback."
 
-        return [
+        evidence_type = (
+            EVIDENCE_SEARCH_SUGGESTION
+            if collection_method == "live"
+            else EVIDENCE_FALLBACK_TEMPLATE
+        )
+        signals = [
             TopicSignal(
                 source="google_suggest",
                 keyword=query,
                 title=clean_space(suggestion),
-                score=max(1.0, float(limit - index)),
-                metadata={"collection_method": collection_method},
+                score=0.0,
+                metadata={
+                    "collection_method": collection_method,
+                    "evidence_type": evidence_type,
+                    "collector_role": SEED_ENRICHER_ROLE,
+                    "query_expansion_only": True,
+                    "is_fallback": collection_method == "fallback_template",
+                    "suggestion_order": index,
+                    "demand_weight": 0.0,
+                    "stability_weight": 0.0,
+                    "ready_weight": 0.0,
+                    "cadence_weight": 0.0,
+                },
             )
             for index, suggestion in enumerate(suggestions[:limit])
             if clean_space(suggestion)
         ]
+        self.diagnostics["search_suggestion_count"] = (
+            len(signals) if evidence_type == EVIDENCE_SEARCH_SUGGESTION else 0
+        )
+        self.diagnostics["fallback_template_count"] = (
+            len(signals) if evidence_type == EVIDENCE_FALLBACK_TEMPLATE else 0
+        )
+        self.diagnostics["evidence_type_counts"] = {evidence_type: len(signals)} if signals else {}
+        return signals
 
 
 def fallback_suggestions(query: str) -> list[str]:
@@ -163,3 +197,7 @@ def looks_like_windows_query(query: str) -> bool:
             "0x",
         ]
     )
+
+
+# Backwards-compatible import for existing pipeline code and third-party callers.
+GoogleSuggestCollector = GoogleSuggestSeedEnricher

@@ -1,4 +1,4 @@
-name: Daily Draft Pipeline
+name: Korea Daily Validate / Manual Publish
 
 on:
   workflow_dispatch:
@@ -7,13 +7,13 @@ on:
         description: "Optional topic seed"
         required: false
       mode:
-        description: "draft or publish"
+        description: "validate, draft, or publish"
         required: false
-        default: "draft"
+        default: "validate"
   schedule:
-    # 09:40 KST primary Korea publish, after Easy PC Fix Guide finishes.
+    # 09:40 KST GitHub validation fallback. Codex local owns scheduled publishing.
     - cron: "40 0 * * *"
-    # 09:55 KST backup. The daily limit guard prevents duplicate publishing.
+    # 09:55 KST validation retry. Scheduled GitHub runs never insert Blogger posts.
     - cron: "55 0 * * *"
 
 concurrency:
@@ -31,7 +31,7 @@ jobs:
       BLOGGER_BLOG_ID: ${{ vars.BLOGGER_BLOG_ID || '288143591612645486' }}
       GOOGLE_OAUTH_CLIENT_SECRET_FILE: .credentials/client_secret.json
       GOOGLE_OAUTH_TOKEN_FILE: .credentials/google_token.json
-      BLOGGER_PUBLISH_MODE: ${{ github.event_name == 'schedule' && 'publish' || github.event.inputs.mode || 'draft' }}
+      BLOGGER_PUBLISH_MODE: ${{ github.event.inputs.mode || 'validate' }}
       DAILY_BATCH_MAX_POSTS: ${{ vars.KOREA_EASY_GUIDE_DAILY_BATCH_MAX_POSTS || '1' }}
       REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
       REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}

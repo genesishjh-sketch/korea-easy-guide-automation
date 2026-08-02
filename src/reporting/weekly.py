@@ -12,6 +12,8 @@ from src.pipeline.stage4_publication_check import fetch_public_feed
 from src.pipeline.stage4_publication_check import is_success_status
 from src.pipeline.stage4_publication_check import parse_posts
 from src.pipeline.stage4_publication_check import publication_status
+from src.pipeline.stage1_generate import NUMERIC_RESEARCH_FIELDS
+from src.pipeline.stage1_generate import validate_research_report
 from src.reporting.daily_reports import read_daily_success_report
 from src.reporting.cadence import review_cadence
 from src.reporting.analytics import GA4Client
@@ -461,6 +463,17 @@ class WeeklyReporter:
             "google_suggest_signal_count": 0,
             "google_suggest_live_signal_count": 0,
             "google_suggest_fallback_signal_count": 0,
+            "observed_evidence_count": 0,
+            "observed_question_count": 0,
+            "first_party_query_count": 0,
+            "verified_public_page_signal_count": 0,
+            "query_plan_count": 0,
+            "fallback_evidence_count": 0,
+            "search_suggestion_count": 0,
+            "demand_eligible_signal_count": 0,
+            "stability_eligible_signal_count": 0,
+            "ready_eligible_signal_count": 0,
+            "cadence_eligible_signal_count": 0,
         }
         source_counts: dict[str, int] = {}
         reddit_method_counts: dict[str, int] = {}
@@ -469,36 +482,69 @@ class WeeklyReporter:
         fallback_article_count = 0
         reddit_diagnostics: list[dict] = []
         google_diagnostics: list[dict] = []
+        numeric_schema_issues: list[dict] = []
+        valid_research_report_count = 0
         for article in articles:
             research_path = Path(article.get("article_dir", "")) / "research_report.json"
             if not research_path.exists():
                 continue
+            totals["article_count_with_research"] += 1
+            article_label = (
+                article.get("title")
+                or article.get("slug")
+                or article.get("article_dir", "")
+            )
             try:
                 report = json.loads(research_path.read_text(encoding="utf-8"))
-            except json.JSONDecodeError:
+            except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+                numeric_schema_issues.append(
+                    {
+                        "article": article_label,
+                        "field": "research_report",
+                        "code": "invalid_research_report_schema",
+                        "message": str(exc),
+                    }
+                )
                 continue
-            totals["article_count_with_research"] += 1
-            for key in [
-                "live_reddit_signal_count",
-                "reddit_oauth_signal_count",
-                "reddit_public_json_signal_count",
-                "reddit_google_site_search_signal_count",
-                "fallback_reddit_signal_count",
-                "google_suggest_signal_count",
-                "google_suggest_live_signal_count",
-                "google_suggest_fallback_signal_count",
-            ]:
-                totals[key] += int(report.get(key, 0) or 0)
-            for source, count in report.get("signal_source_counts", {}).items():
-                source_counts[source] = source_counts.get(source, 0) + int(count or 0)
-            for method, count in report.get("reddit_collection_method_counts", {}).items():
-                reddit_method_counts[method] = reddit_method_counts.get(method, 0) + int(count or 0)
-            for method, count in report.get("google_suggest_method_counts", {}).items():
-                google_method_counts[method] = google_method_counts.get(method, 0) + int(count or 0)
+            try:
+                derived = validate_research_report(report)
+            except (TypeError, ValueError) as exc:
+                message = str(exc)
+                numeric_schema_issues.append(
+                    {
+                        "article": article_label,
+                        "field": "research_report",
+                        "code": (
+                            "invalid_research_report_schema_version"
+                            if "schema_version" in message
+                            else "invalid_research_report_schema"
+                        ),
+                        "message": message,
+                    }
+                )
+                continue
+
+            valid_research_report_count += 1
+            for key in NUMERIC_RESEARCH_FIELDS:
+                totals[key] += int(derived[key])
+            for source, count in derived["signal_source_counts"].items():
+                source_counts[source] = source_counts.get(source, 0) + int(count)
+            for method, count in derived["reddit_collection_method_counts"].items():
+                reddit_method_counts[method] = (
+                    reddit_method_counts.get(method, 0) + int(count)
+                )
+            for method, count in derived["google_suggest_method_counts"].items():
+                google_method_counts[method] = (
+                    google_method_counts.get(method, 0) + int(count)
+                )
             if (
-                int(report.get("fallback_reddit_signal_count", 0) or 0)
-                and not int(report.get("live_reddit_signal_count", 0) or 0)
-                and not int(report.get("reddit_google_site_search_signal_count", 0) or 0)
+                derived["fallback_reddit_signal_count"]
+                and not max(
+                    derived["demand_eligible_signal_count"],
+                    derived["observed_question_count"]
+                    + derived["first_party_query_count"],
+                    derived["reddit_oauth_signal_count"],
+                )
             ):
                 fallback_article_count += 1
                 fallback_articles.append(article.get("title") or article.get("slug") or article.get("article_dir", ""))
@@ -509,9 +555,11 @@ class WeeklyReporter:
                         "title": article.get("title") or article.get("slug") or article.get("article_dir", ""),
                         "status": diagnostics.get("status", "unknown"),
                         "oauth_configured": bool(diagnostics.get("oauth_configured")),
-                        "public_json_error_count": int(diagnostics.get("public_json_error_count", 0) or 0),
-                        "google_site_search_signal_count": int(
-                            diagnostics.get("google_site_search_signal_count", 0) or 0
+                        "public_json_error_count": _safe_non_negative_int(
+                            diagnostics.get("public_json_error_count", 0)
+                        ),
+                        "google_site_search_signal_count": _safe_non_negative_int(
+                            diagnostics.get("google_site_search_signal_count", 0)
                         ),
                         "failed_subreddits": [
                             item.get("subreddit", "")
@@ -528,8 +576,12 @@ class WeeklyReporter:
                     {
                         "title": article.get("title") or article.get("slug") or article.get("article_dir", ""),
                         "status": google_diagnostic.get("status", "unknown"),
-                        "live_suggestion_count": int(google_diagnostic.get("live_suggestion_count", 0) or 0),
-                        "fallback_suggestion_count": int(google_diagnostic.get("fallback_suggestion_count", 0) or 0),
+                        "live_suggestion_count": _safe_non_negative_int(
+                            google_diagnostic.get("live_suggestion_count", 0)
+                        ),
+                        "fallback_suggestion_count": _safe_non_negative_int(
+                            google_diagnostic.get("fallback_suggestion_count", 0)
+                        ),
                         "used_fallback": bool(google_diagnostic.get("used_fallback")),
                         "fallback_reason": google_diagnostic.get("fallback_reason", ""),
                         "error": google_diagnostic.get("error", ""),
@@ -538,10 +590,42 @@ class WeeklyReporter:
 
         status = "not_uploaded"
         if totals["article_count_with_research"]:
-            status = "fallback_only" if fallback_articles else "connected"
+            if (
+                totals["demand_eligible_signal_count"]
+                or totals["observed_question_count"]
+                or totals["first_party_query_count"]
+                or totals["reddit_oauth_signal_count"]
+            ):
+                status = "observed"
+            elif fallback_articles:
+                status = "fallback_only"
+            elif totals["query_plan_count"] or totals["reddit_google_site_search_signal_count"] or totals["search_suggestion_count"]:
+                status = "query_expansion_only"
+            else:
+                status = "no_observed_evidence"
         return {
             "status": status,
             **totals,
+            "valid_research_report_count": valid_research_report_count,
+            "invalid_research_report_count": (
+                totals["article_count_with_research"]
+                - valid_research_report_count
+            ),
+            "research_schema_issue_count": len(numeric_schema_issues),
+            "evidence_counts_verified": True,
+            "derived_evidence_counts": {
+                "live_reddit_signal_count": totals[
+                    "live_reddit_signal_count"
+                ],
+                "reddit_oauth_signal_count": totals[
+                    "reddit_oauth_signal_count"
+                ],
+                "observed_question_count": totals["observed_question_count"],
+                "first_party_query_count": totals["first_party_query_count"],
+                "demand_eligible_signal_count": totals[
+                    "demand_eligible_signal_count"
+                ],
+            },
             "signal_source_counts": dict(sorted(source_counts.items())),
             "reddit_collection_method_counts": dict(sorted(reddit_method_counts.items())),
             "google_suggest_method_counts": dict(sorted(google_method_counts.items())),
@@ -549,6 +633,8 @@ class WeeklyReporter:
             "fallback_only_articles": list(dict.fromkeys(fallback_articles)),
             "reddit_collection_diagnostics": reddit_diagnostics,
             "google_suggest_diagnostics": google_diagnostics,
+            "numeric_schema_issue_count": len(numeric_schema_issues),
+            "numeric_schema_issues": numeric_schema_issues,
         }
 
     def _next_actions(
@@ -659,19 +745,45 @@ class WeeklyReporter:
                 "최근 자동 발행에서 품질검수 실패 후 다른 시드로 재시도했습니다. 실패 시드의 공식 출처, 이미지 계획, beginner-safe 섹션 구성을 보강하세요."
             )
         actions.extend(quality_issue_actions(quality_issues or []))
-        has_search_based_reddit = bool((signal_quality or {}).get("reddit_google_site_search_signal_count", 0))
-        reddit_health_blocks_cadence = bool(reddit_health.get("blocks_cadence_increase")) and not has_search_based_reddit
+        query_plan_count = max(
+            _safe_non_negative_int((signal_quality or {}).get("query_plan_count", 0)),
+            _safe_non_negative_int(
+                (signal_quality or {}).get("reddit_google_site_search_signal_count", 0)
+            ),
+        )
+        eligible_count = max(
+            _safe_non_negative_int(
+                (signal_quality or {}).get("demand_eligible_signal_count", 0)
+            ),
+            _safe_non_negative_int(
+                (signal_quality or {}).get("observed_question_count", 0)
+            )
+            + _safe_non_negative_int(
+                (signal_quality or {}).get("first_party_query_count", 0)
+            ),
+            _safe_non_negative_int(
+                (signal_quality or {}).get("reddit_oauth_signal_count", 0)
+            ),
+        )
+        reddit_health_blocks_cadence = bool(reddit_health.get("blocks_cadence_increase"))
+        if query_plan_count and not eligible_count:
+            actions.append(
+                "QUERY_PLAN만 있고 OBSERVED_QUESTION 또는 FIRST_PARTY_QUERY 근거가 없습니다. QUERY_PLAN은 표현 확장용이며 "
+                "수요·안정성·READY·발행량 판단 점수가 0입니다."
+            )
         if not reddit_health_blocks_cadence and (signal_quality or {}).get("status") == "fallback_only":
             actions.append(
                 "Reddit 실제 신호 없이 fallback 질문만 사용한 글이 있습니다. 하루 1개 자동 발행은 계속 가능하지만, "
-                "발행량을 늘리기 전 Google site:reddit.com 검색 신호 또는 OAuth 신호가 research_report에 잡히는지 확인하세요."
+                "FALLBACK_TEMPLATE은 판단 점수가 0이므로 발행량을 늘리기 전 검증 근거를 확보하세요."
             )
-        elif not reddit_health_blocks_cadence and (signal_quality or {}).get("reddit_public_json_signal_count", 0) and not (signal_quality or {}).get(
-            "reddit_oauth_signal_count", 0
+        elif (
+            not reddit_health_blocks_cadence
+            and (signal_quality or {}).get("reddit_public_json_signal_count", 0)
+            and not eligible_count
         ):
             actions.append(
-                "Reddit 실제 신호가 public JSON 경로에만 의존하고 있습니다. 하루 1개 자동 발행은 계속 가능하지만, "
-                "public JSON은 403 차단 가능성이 있으므로 Google site:reddit.com 검색 신호를 함께 유지하세요. OAuth는 선택 보강입니다. "
+                "자동 Reddit public JSON(public_json) 결과만 있습니다. 실제 공개 원문을 검증하기 전에는 QUERY_PLAN이며 판단 점수가 0입니다. "
+                "OAuth 또는 Codex 원문 검증으로 OBSERVED_QUESTION을 확보하세요. "
                 f"Reddit 앱: {REDDIT_APPS_URL} / GitHub Secrets: {GITHUB_SECRETS_URL} "
                 f"({reddit_oauth_secret_label()})"
             )
@@ -682,7 +794,9 @@ class WeeklyReporter:
         if reddit_health_blocks_cadence:
             action_required = reddit_health.get("action_required") or "Reddit OAuth 상태를 점검하세요."
             actions.append(
-                f"Reddit OAuth Health가 주의 상태입니다. 자동 발행은 Google site:reddit.com 검색 기반으로 계속 가능하며, OAuth는 선택 보강입니다. {action_required} "
+                "Reddit OAuth Health가 주의 상태입니다. 기존 승인된 READY/legacy 큐만 DEGRADED 상태로 유지할 수 있으며, "
+                f"새 주제 승인을 위해서는 OBSERVED_QUESTION 또는 FIRST_PARTY_QUERY 근거가 필요합니다. {action_required} "
+                "QUERY_PLAN·FALLBACK_TEMPLATE·SEARCH_SUGGESTION은 표현 확장용으로만 사용되며 판단 점수가 0입니다. "
                 f"상태 점수: {reddit_health.get('health_score', 0)}/100."
             )
         actions.append("트래픽과 수익 신호가 보일 때까지 추가 유료 API 비용은 0원 정책을 유지하세요.")
@@ -743,10 +857,36 @@ class WeeklyReporter:
         signal_quality = report.get("signal_quality", {})
         lines.append(f"- 상태: {_status_kr(signal_quality.get('status', 'not_uploaded'))}")
         lines.append(f"- research_report 확인 글 수: {signal_quality.get('article_count_with_research', 0)}")
+        lines.append(
+            "- 유효 research_report 수: "
+            f"{signal_quality.get('valid_research_report_count', 0)}"
+        )
+        lines.append(
+            "- 제외된 research_report 수: "
+            f"{signal_quality.get('invalid_research_report_count', 0)}"
+        )
+        lines.append(
+            "- signal_evidence 파생 집계 검증: "
+            f"{'통과' if signal_quality.get('evidence_counts_verified') else '실패'}"
+        )
         lines.append(f"- 실제 Reddit 신호 수: {signal_quality.get('live_reddit_signal_count', 0)}")
         lines.append(f"- Reddit OAuth 신호 수: {signal_quality.get('reddit_oauth_signal_count', 0)}")
-        lines.append(f"- Reddit public JSON 신호 수: {signal_quality.get('reddit_public_json_signal_count', 0)}")
-        lines.append(f"- Reddit Google 검색 신호 수: {signal_quality.get('reddit_google_site_search_signal_count', 0)}")
+        lines.append(
+            "- Reddit public JSON 후보 수(원문 검증 전 QUERY_PLAN): "
+            f"{signal_quality.get('reddit_public_json_signal_count', 0)}"
+        )
+        lines.append(
+            f"- QUERY_PLAN 수(판단 점수 0): {signal_quality.get('query_plan_count', signal_quality.get('reddit_google_site_search_signal_count', 0))}"
+        )
+        lines.append(
+            f"- OBSERVED_QUESTION 근거 수: {signal_quality.get('observed_question_count', signal_quality.get('reddit_oauth_signal_count', 0))}"
+        )
+        lines.append(
+            f"- FIRST_PARTY_QUERY 근거 수: {signal_quality.get('first_party_query_count', 0)}"
+        )
+        lines.append(
+            f"- 수요 판단 가능 근거 수: {signal_quality.get('demand_eligible_signal_count', 0)}"
+        )
         lines.append(f"- Reddit fallback 신호 수: {signal_quality.get('fallback_reddit_signal_count', 0)}")
         lines.append(f"- Google Suggest 신호 수: {signal_quality.get('google_suggest_signal_count', 0)}")
         lines.append(f"- Google Suggest live 신호 수: {signal_quality.get('google_suggest_live_signal_count', 0)}")
@@ -1064,8 +1204,13 @@ class WeeklyReporter:
         lines.append(f"- 품질 이슈 수: {cadence.get('quality_issue_count', 0)}")
         lines.append(f"- 수집 신호 상태: {_status_kr(cadence.get('signal_quality_status', 'not_uploaded'))}")
         lines.append(f"- Reddit OAuth 신호 수: {cadence.get('reddit_oauth_signal_count', 0)}")
-        lines.append(f"- Reddit public JSON 신호 수: {cadence.get('reddit_public_json_signal_count', 0)}")
-        lines.append(f"- Reddit Google 검색 신호 수: {cadence.get('reddit_google_site_search_signal_count', 0)}")
+        lines.append(
+            f"- Reddit public JSON 후보 수: {cadence.get('reddit_public_json_signal_count', 0)}"
+        )
+        lines.append(f"- Reddit QUERY_PLAN 수(판단 점수 0): {cadence.get('reddit_google_site_search_signal_count', 0)}")
+        lines.append(f"- OBSERVED_QUESTION 근거 수: {cadence.get('observed_question_count', 0)}")
+        lines.append(f"- FIRST_PARTY_QUERY 근거 수: {cadence.get('first_party_query_count', 0)}")
+        lines.append(f"- 수요 판단 가능 근거 수: {cadence.get('eligible_demand_evidence_count', 0)}")
         lines.append(f"- Reddit fallback 신호 수: {cadence.get('fallback_reddit_signal_count', 0)}")
         lines.append(f"- Reddit Health 상태: {_status_kr(cadence.get('reddit_health_status', 'not_uploaded'))}")
         lines.append(f"- Reddit Health 점수: {cadence.get('reddit_health_score', 0)}/100")
@@ -1206,6 +1351,12 @@ def _safe_int(value) -> int:
         return 0
 
 
+def _safe_non_negative_int(value) -> int:
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        return 0
+    return value
+
+
 def _format_article_status_counts(counts: dict) -> str:
     if not counts:
         return "없음"
@@ -1288,6 +1439,11 @@ def _status_kr(status: str | None) -> str:
         "live_connected": "live 연결",
         "no_google_suggestions": "Google Suggest 신호 없음",
         "public_json_connected": "public JSON 연결",
+        "public_json_unverified": "public JSON 후보(원문 미검증)",
+        "query_plan_only": "QUERY_PLAN만 있음",
+        "observed": "검증 근거 있음",
+        "query_expansion_only": "표현 확장 신호만 있음",
+        "no_observed_evidence": "검증 근거 없음",
         "no_reddit_signals": "Reddit 신호 없음",
         "failed": "실패",
         "stale_failure": "이전 실패 리포트",

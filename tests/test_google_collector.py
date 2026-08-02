@@ -18,9 +18,19 @@ class GoogleSuggestCollectorTests(unittest.TestCase):
         self.assertIn("windows shift s not working windows 11", titles)
         self.assertIn("repair snipping tool windows 11", titles)
         self.assertTrue(all(signal.source == "google_suggest" for signal in signals))
-        self.assertTrue(all(signal.metadata["collection_method"] == "fallback" for signal in signals))
+        self.assertTrue(
+            all(signal.metadata["collection_method"] == "fallback_template" for signal in signals)
+        )
+        self.assertTrue(
+            all(signal.metadata["evidence_type"] == "FALLBACK_TEMPLATE" for signal in signals)
+        )
+        self.assertTrue(all(signal.metadata["query_expansion_only"] for signal in signals))
+        self.assertTrue(all(signal.score == 0 for signal in signals))
+        self.assertTrue(all(signal.metadata["demand_weight"] == 0 for signal in signals))
         self.assertEqual(collector.diagnostics["status"], "fallback_only")
         self.assertEqual(collector.diagnostics["fallback_suggestion_count"], 5)
+        self.assertEqual(collector.diagnostics["search_suggestion_count"], 0)
+        self.assertEqual(collector.diagnostics["fallback_template_count"], 5)
         self.assertTrue(collector.diagnostics["used_fallback"])
 
     def test_windows_unknown_query_gets_generic_beginner_fallback_when_request_fails(self) -> None:
@@ -59,8 +69,13 @@ class GoogleSuggestCollectorTests(unittest.TestCase):
 
         self.assertEqual(len(signals), 2)
         self.assertTrue(all(signal.metadata["collection_method"] == "live" for signal in signals))
+        self.assertTrue(all(signal.metadata["evidence_type"] == "SEARCH_SUGGESTION" for signal in signals))
+        self.assertTrue(all(signal.metadata["ready_weight"] == 0 for signal in signals))
+        self.assertTrue(all(signal.score == 0 for signal in signals))
         self.assertEqual(collector.diagnostics["status"], "live_connected")
         self.assertEqual(collector.diagnostics["live_suggestion_count"], 2)
+        self.assertEqual(collector.diagnostics["search_suggestion_count"], 2)
+        self.assertEqual(collector.diagnostics["fallback_template_count"], 0)
 
 
 if __name__ == "__main__":

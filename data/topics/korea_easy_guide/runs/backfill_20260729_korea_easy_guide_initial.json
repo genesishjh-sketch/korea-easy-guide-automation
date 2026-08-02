@@ -1,0 +1,642 @@
+{
+  "assignments": [
+    {
+      "question_id": "question_91103c15c1acb55535",
+      "topic_id": "topic_86c29e932ff0370e6d"
+    },
+    {
+      "question_id": "question_34475e72c85fc2903c",
+      "topic_id": "topic_1a63e2352006d3b004"
+    },
+    {
+      "question_id": "question_10f6da39a2ffd501d0",
+      "topic_id": "topic_9315e0c78919352609"
+    },
+    {
+      "question_id": "question_cd53f32cea92be156f",
+      "topic_id": "topic_a993e2c3f508e36d8d"
+    },
+    {
+      "question_id": "question_d977aaea08d1554dd2",
+      "topic_id": "topic_aae88dfc92df3d2645"
+    },
+    {
+      "question_id": "question_894d60d96e7f9f0a7b",
+      "topic_id": "topic_aae88dfc92df3d2645"
+    },
+    {
+      "question_id": "question_00cae6d5cfa6980cb0",
+      "topic_id": "topic_7f350f8a840d939eb6"
+    },
+    {
+      "question_id": "question_b13712d26b57473429",
+      "topic_id": "topic_7f350f8a840d939eb6"
+    },
+    {
+      "question_id": "question_c00eb4b1a8e8852f1d",
+      "topic_id": "topic_7f350f8a840d939eb6"
+    },
+    {
+      "question_id": "question_220904785b02d2a176",
+      "topic_id": "topic_654d8e2edea53417ef"
+    },
+    {
+      "question_id": "question_75a7fd5afb1897e276",
+      "topic_id": "topic_654d8e2edea53417ef"
+    }
+  ],
+  "auditor": {
+    "auditor_id": "codex-backfill-auditor",
+    "blogger_duplicates_verified": false,
+    "decision": "HOLD",
+    "evidence_url_coverage_verified": true,
+    "notes": "Privacy-safe initial slice only. Complete Blogger semantic comparison and additional source families remain unexplored.",
+    "passed": false,
+    "synthetic_influence_verified": true
+  },
+  "blogger_duplicate_count": 0,
+  "checkpoint": {
+    "cursor": "initial_verified_slice_complete",
+    "notes": "Stopped at the 90-minute backfill budget; remaining source families are recorded in unexplored_scope.",
+    "searched_scope": [
+      "incheon_late_night_tmoney_purchase",
+      "korea_esim_away_from_airport",
+      "naver_account_suspension",
+      "naver_booking_language_mismatch",
+      "naver_foreign_phone_verification",
+      "naver_passport_verification",
+      "tmoney_foreign_card_topup"
+    ]
+  },
+  "clusters": [
+    {
+      "aliases": [
+        "incheon_late_night_tmoney_purchase"
+      ],
+      "canonical_label": "Buying and loading T-money after a late-night Incheon arrival",
+      "cluster_id": "cluster_86c29e932ff0370e6d",
+      "observation_run_ids": [
+        "backfill_20260729_korea_easy_guide_initial"
+      ],
+      "problem_signature": "incheon late night tmoney purchase",
+      "question_ids": [
+        "question_91103c15c1acb55535"
+      ],
+      "topic_ids": [
+        "topic_86c29e932ff0370e6d"
+      ]
+    },
+    {
+      "aliases": [
+        "korea_esim_away_from_airport"
+      ],
+      "canonical_label": "Getting a Korea eSIM after leaving the airport",
+      "cluster_id": "cluster_1a63e2352006d3b004",
+      "observation_run_ids": [
+        "backfill_20260729_korea_easy_guide_initial"
+      ],
+      "problem_signature": "korea esim away from airport",
+      "question_ids": [
+        "question_34475e72c85fc2903c"
+      ],
+      "topic_ids": [
+        "topic_1a63e2352006d3b004"
+      ]
+    },
+    {
+      "aliases": [
+        "naver_account_suspension"
+      ],
+      "canonical_label": "What to do when a foreigner's Naver account is suspended",
+      "cluster_id": "cluster_9315e0c78919352609",
+      "observation_run_ids": [
+        "backfill_20260729_korea_easy_guide_initial"
+      ],
+      "problem_signature": "naver account suspension",
+      "question_ids": [
+        "question_10f6da39a2ffd501d0"
+      ],
+      "topic_ids": [
+        "topic_9315e0c78919352609"
+      ]
+    },
+    {
+      "aliases": [
+        "naver_booking_language_mismatch"
+      ],
+      "canonical_label": "Why Naver Map booking screens stay in Korean",
+      "cluster_id": "cluster_a993e2c3f508e36d8d",
+      "observation_run_ids": [
+        "backfill_20260729_korea_easy_guide_initial"
+      ],
+      "problem_signature": "naver booking language mismatch",
+      "question_ids": [
+        "question_cd53f32cea92be156f"
+      ],
+      "topic_ids": [
+        "topic_a993e2c3f508e36d8d"
+      ]
+    },
+    {
+      "aliases": [
+        "naver_foreign_phone_verification"
+      ],
+      "canonical_label": "Naver foreign phone verification and lost-number recovery",
+      "cluster_id": "cluster_aae88dfc92df3d2645",
+      "observation_run_ids": [
+        "backfill_20260729_korea_easy_guide_initial"
+      ],
+      "problem_signature": "naver foreign phone verification",
+      "question_ids": [
+        "question_d977aaea08d1554dd2",
+        "question_894d60d96e7f9f0a7b"
+      ],
+      "topic_ids": [
+        "topic_aae88dfc92df3d2645"
+      ]
+    },
+    {
+      "aliases": [
+        "naver_passport_verification"
+      ],
+      "canonical_label": "Naver passport verification for foreign visitors",
+      "cluster_id": "cluster_7f350f8a840d939eb6",
+      "observation_run_ids": [
+        "backfill_20260729_korea_easy_guide_initial"
+      ],
+      "problem_signature": "naver passport verification",
+      "question_ids": [
+        "question_00cae6d5cfa6980cb0",
+        "question_b13712d26b57473429",
+        "question_c00eb4b1a8e8852f1d"
+      ],
+      "topic_ids": [
+        "topic_7f350f8a840d939eb6"
+      ]
+    },
+    {
+      "aliases": [
+        "tmoney_foreign_card_topup"
+      ],
+      "canonical_label": "Can foreign cards top up T-money in Korea?",
+      "cluster_id": "cluster_654d8e2edea53417ef",
+      "observation_run_ids": [
+        "backfill_20260729_korea_easy_guide_initial"
+      ],
+      "problem_signature": "tmoney foreign card topup",
+      "question_ids": [
+        "question_220904785b02d2a176",
+        "question_75a7fd5afb1897e276"
+      ],
+      "topic_ids": [
+        "topic_654d8e2edea53417ef"
+      ]
+    }
+  ],
+  "collector_status": "DEGRADED",
+  "complete": false,
+  "degraded": true,
+  "ended_at": "2026-07-29T01:30:00+09:00",
+  "questions": [
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 6
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2026-04-02T00:00:00Z",
+      "question_id": "question_91103c15c1acb55535",
+      "source": "reddit",
+      "source_id": "1sai84n",
+      "summary": "A passenger arriving at Incheon Terminal 1 around 1 a.m. asks where a T-money card can be purchased after normal pickup counters close.",
+      "title": "Where to get T-Money card at airport for red eye flight?",
+      "url": "https://www.reddit.com/r/koreatravel/comments/1sai84n/where_to_get_tmoney_card_at_airport_for_red_eye/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    },
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 4
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2025-08-05T00:00:00Z",
+      "question_id": "question_34475e72c85fc2903c",
+      "source": "reddit",
+      "source_id": "1mi2di7",
+      "summary": "A traveler away from the airport asks how to obtain a Korea eSIM, particularly one that may include a local number.",
+      "title": "Is there a way I can get an eSIM without traveling back to the airport?",
+      "url": "https://www.reddit.com/r/koreatravel/comments/1mi2di7/is_there_a_way_i_can_get_an_esim_without/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    },
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 2
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2026-04-24T00:00:00Z",
+      "question_id": "question_10f6da39a2ffd501d0",
+      "source": "reddit",
+      "source_id": "1su1obk",
+      "summary": "A traveler asks what to do after a newly created Naver account is suspended as an abuse-suspicious signup.",
+      "title": "Naver problems",
+      "url": "https://www.reddit.com/r/koreatravel/comments/1su1obk/naver_problems/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    },
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 0
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2026-06-14T00:00:00Z",
+      "question_id": "question_cd53f32cea92be156f",
+      "source": "reddit",
+      "source_id": "1u5i4ju",
+      "summary": "An iOS user has the app language set to English but the booking area remains Korean and exposes different options from another phone.",
+      "title": "Naver Maps booking tab still in Korean, despite English language setting",
+      "url": "https://www.reddit.com/r/koreatravel/comments/1u5i4ju/naver_maps_booking_tab_still_in_korean_despite/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    },
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 3
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2025-11-16T00:00:00Z",
+      "question_id": "question_d977aaea08d1554dd2",
+      "source": "reddit",
+      "source_id": "1oynkvn",
+      "summary": "A traveler cannot receive the foreign-number verification code needed to create a Naver account and make reservations.",
+      "title": "Anyone else having trouble signing up for Naver?",
+      "url": "https://www.reddit.com/r/koreatravel/comments/1oynkvn/anyone_else_having_trouble_signing_up_for_naver/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    },
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 1
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2026-06-05T00:00:00Z",
+      "question_id": "question_894d60d96e7f9f0a7b",
+      "source": "reddit",
+      "source_id": "1tx70j1",
+      "summary": "A foreign account holder no longer has the registered phone and asks how to change it without receiving an OTP on the old number.",
+      "title": "Update of Naver Number",
+      "url": "https://www.reddit.com/r/KoreaTravelAdvice/comments/1tx70j1/update_of_naver_number/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    },
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 12
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2026-06-10T00:00:00Z",
+      "question_id": "question_00cae6d5cfa6980cb0",
+      "source": "reddit",
+      "source_id": "1u1x32o",
+      "summary": "A traveler cannot locate Naver's announced passport-verification flow and asks how it works for an already verified foreign account.",
+      "title": "Naver's new passport verification system",
+      "url": "https://www.reddit.com/r/koreatravel/comments/1u1x32o/navers_new_passport_verification_system/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    },
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 54
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2026-06-11T00:00:00Z",
+      "question_id": "question_b13712d26b57473429",
+      "source": "reddit",
+      "source_id": "1u357jf",
+      "summary": "A traveler still sees Korean-phone verification after the passport feature announcement and asks whether the new method works.",
+      "title": "Naver passport verification for foreigners?",
+      "url": "https://www.reddit.com/r/koreatravel/comments/1u357jf/naver_passport_verification_for_foreigners/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    },
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 2
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2026-06-16T00:00:00Z",
+      "question_id": "question_c00eb4b1a8e8852f1d",
+      "source": "reddit",
+      "source_id": "1u76zqm",
+      "summary": "A visitor's passport verification is rejected as an unsafe environment shortly before a time-sensitive reservation.",
+      "title": "Naver account verification help",
+      "url": "https://www.reddit.com/r/koreatravel/comments/1u76zqm/naver_account_verification_help/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    },
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 3
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2026-05-10T00:00:00Z",
+      "question_id": "question_220904785b02d2a176",
+      "source": "reddit",
+      "source_id": "1t99dau",
+      "summary": "A family arriving at Incheon asks whether a foreign credit card can recharge T-money before they obtain Korean cash.",
+      "title": "Need advice on T-money card",
+      "url": "https://www.reddit.com/r/koreatravel/comments/1t99dau/need_advice_on_tmoney_card/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    },
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 1
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2026-07-22T00:00:00Z",
+      "question_id": "question_75a7fd5afb1897e276",
+      "source": "reddit",
+      "source_id": "1v3u09k",
+      "summary": "A visitor asks whether Seoul's newer kiosks can successfully top up a transit card with a foreign Visa card.",
+      "title": "Foreign Card and Tmoney",
+      "url": "https://www.reddit.com/r/koreatravel/comments/1v3u09k/foreign_card_and_tmoney/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    }
+  ],
+  "run_at": "2026-07-29T00:00:00+09:00",
+  "run_id": "backfill_20260729_korea_easy_guide_initial",
+  "run_type": "BACKFILL_RESEARCH",
+  "schema_version": 1,
+  "sheet_sync_status": "PENDING",
+  "site": "korea_easy_guide",
+  "source_coverage": {
+    "public_page_verification": true,
+    "reddit_public_pages_opened": 11,
+    "search_console_queries_imported": 0
+  },
+  "started_at": "2026-07-29T00:00:00+09:00",
+  "stop_condition": "TIME_BUDGET",
+  "synthetic_influence_count": 0,
+  "topics": [
+    {
+      "action": "WATCH",
+      "aliases": [
+        "incheon_late_night_tmoney_purchase"
+      ],
+      "audited_at": "2026-07-29T00:00:00+09:00",
+      "auditor_decision": "HOLD",
+      "auditor_reasons": [
+        "Initial backfill is incomplete.",
+        "Official answer sources and complete Blogger comparison are pending."
+      ],
+      "canonical_intent": "Obtain and load a transit card when airport counters are closed.",
+      "canonical_title": "Buying and loading T-money after a late-night Incheon arrival",
+      "category": "Transportation",
+      "category_id": "cat_38224e1c4ad74f",
+      "cluster_id": "cluster_86c29e932ff0370e6d",
+      "difference_from_existing": "Pending complete Blogger semantic comparison; do not publish from this backfill run.",
+      "editor_brief": "Backfill brief: Obtain and load a transit card when airport counters are closed. Compare the complete Blogger map, verify current official guidance, then route NEW/UPDATE/FAQ before READY.",
+      "official_answerable": false,
+      "official_source_refs": [],
+      "official_source_urls": [],
+      "priority_score": 0,
+      "problem_signature": "incheon late night tmoney purchase",
+      "question_ids": [
+        "question_91103c15c1acb55535"
+      ],
+      "reader_questions": [
+        "Where to get T-Money card at airport for red eye flight?"
+      ],
+      "status": "REVIEW",
+      "topic_id": "topic_86c29e932ff0370e6d"
+    },
+    {
+      "action": "WATCH",
+      "aliases": [
+        "korea_esim_away_from_airport"
+      ],
+      "audited_at": "2026-07-29T00:00:00+09:00",
+      "auditor_decision": "HOLD",
+      "auditor_reasons": [
+        "Initial backfill is incomplete.",
+        "Official answer sources and complete Blogger comparison are pending."
+      ],
+      "canonical_intent": "Activate tourist mobile data without returning to an airport counter.",
+      "canonical_title": "Getting a Korea eSIM after leaving the airport",
+      "category": "Mobile & Internet",
+      "category_id": "cat_3a2b695cf83810",
+      "cluster_id": "cluster_1a63e2352006d3b004",
+      "difference_from_existing": "Pending complete Blogger semantic comparison; do not publish from this backfill run.",
+      "editor_brief": "Backfill brief: Activate tourist mobile data without returning to an airport counter. Compare the complete Blogger map, verify current official guidance, then route NEW/UPDATE/FAQ before READY.",
+      "official_answerable": false,
+      "official_source_refs": [],
+      "official_source_urls": [],
+      "priority_score": 0,
+      "problem_signature": "korea esim away from airport",
+      "question_ids": [
+        "question_34475e72c85fc2903c"
+      ],
+      "reader_questions": [
+        "Is there a way I can get an eSIM without traveling back to the airport?"
+      ],
+      "status": "REVIEW",
+      "topic_id": "topic_1a63e2352006d3b004"
+    },
+    {
+      "action": "WATCH",
+      "aliases": [
+        "naver_account_suspension"
+      ],
+      "audited_at": "2026-07-29T00:00:00+09:00",
+      "auditor_decision": "HOLD",
+      "auditor_reasons": [
+        "Initial backfill is incomplete.",
+        "Official answer sources and complete Blogger comparison are pending."
+      ],
+      "canonical_intent": "Diagnose a suspended Naver account and use official recovery routes.",
+      "canonical_title": "What to do when a foreigner's Naver account is suspended",
+      "category": "Apps in Korea",
+      "category_id": "cat_43dc230f352201",
+      "cluster_id": "cluster_9315e0c78919352609",
+      "difference_from_existing": "Pending complete Blogger semantic comparison; do not publish from this backfill run.",
+      "editor_brief": "Backfill brief: Diagnose a suspended Naver account and use official recovery routes. Compare the complete Blogger map, verify current official guidance, then route NEW/UPDATE/FAQ before READY.",
+      "official_answerable": false,
+      "official_source_refs": [],
+      "official_source_urls": [],
+      "priority_score": 0,
+      "problem_signature": "naver account suspension",
+      "question_ids": [
+        "question_10f6da39a2ffd501d0"
+      ],
+      "reader_questions": [
+        "Naver problems"
+      ],
+      "status": "REVIEW",
+      "topic_id": "topic_9315e0c78919352609"
+    },
+    {
+      "action": "WATCH",
+      "aliases": [
+        "naver_booking_language_mismatch"
+      ],
+      "audited_at": "2026-07-29T00:00:00+09:00",
+      "auditor_decision": "HOLD",
+      "auditor_reasons": [
+        "Initial backfill is incomplete.",
+        "Official answer sources and complete Blogger comparison are pending."
+      ],
+      "canonical_intent": "Complete a reservation when the booking flow ignores the selected English language.",
+      "canonical_title": "Why Naver Map booking screens stay in Korean",
+      "category": "Apps in Korea",
+      "category_id": "cat_43dc230f352201",
+      "cluster_id": "cluster_a993e2c3f508e36d8d",
+      "difference_from_existing": "Pending complete Blogger semantic comparison; do not publish from this backfill run.",
+      "editor_brief": "Backfill brief: Complete a reservation when the booking flow ignores the selected English language. Compare the complete Blogger map, verify current official guidance, then route NEW/UPDATE/FAQ before READY.",
+      "official_answerable": false,
+      "official_source_refs": [],
+      "official_source_urls": [],
+      "priority_score": 0,
+      "problem_signature": "naver booking language mismatch",
+      "question_ids": [
+        "question_cd53f32cea92be156f"
+      ],
+      "reader_questions": [
+        "Naver Maps booking tab still in Korean, despite English language setting"
+      ],
+      "status": "REVIEW",
+      "topic_id": "topic_a993e2c3f508e36d8d"
+    },
+    {
+      "action": "NEW_POST",
+      "aliases": [
+        "naver_foreign_phone_verification"
+      ],
+      "audited_at": "2026-07-29T00:00:00+09:00",
+      "auditor_decision": "HOLD",
+      "auditor_reasons": [
+        "Initial backfill is incomplete.",
+        "Official answer sources and complete Blogger comparison are pending."
+      ],
+      "canonical_intent": "Create or recover a Naver account when foreign-phone verification fails.",
+      "canonical_title": "Naver foreign phone verification and lost-number recovery",
+      "category": "Apps in Korea",
+      "category_id": "cat_43dc230f352201",
+      "cluster_id": "cluster_aae88dfc92df3d2645",
+      "difference_from_existing": "Pending complete Blogger semantic comparison; do not publish from this backfill run.",
+      "editor_brief": "Backfill brief: Create or recover a Naver account when foreign-phone verification fails. Compare the complete Blogger map, verify current official guidance, then route NEW/UPDATE/FAQ before READY.",
+      "official_answerable": false,
+      "official_source_refs": [],
+      "official_source_urls": [],
+      "priority_score": 0,
+      "problem_signature": "naver foreign phone verification",
+      "question_ids": [
+        "question_d977aaea08d1554dd2",
+        "question_894d60d96e7f9f0a7b"
+      ],
+      "reader_questions": [
+        "Anyone else having trouble signing up for Naver?",
+        "Update of Naver Number"
+      ],
+      "status": "REVIEW",
+      "topic_id": "topic_aae88dfc92df3d2645"
+    },
+    {
+      "action": "NEW_POST",
+      "aliases": [
+        "naver_passport_verification"
+      ],
+      "audited_at": "2026-07-29T00:00:00+09:00",
+      "auditor_decision": "HOLD",
+      "auditor_reasons": [
+        "Initial backfill is incomplete.",
+        "Official answer sources and complete Blogger comparison are pending."
+      ],
+      "canonical_intent": "Find and complete Naver passport verification, including unsafe-environment errors.",
+      "canonical_title": "Naver passport verification for foreign visitors",
+      "category": "Apps in Korea",
+      "category_id": "cat_43dc230f352201",
+      "cluster_id": "cluster_7f350f8a840d939eb6",
+      "difference_from_existing": "Pending complete Blogger semantic comparison; do not publish from this backfill run.",
+      "editor_brief": "Backfill brief: Find and complete Naver passport verification, including unsafe-environment errors. Compare the complete Blogger map, verify current official guidance, then route NEW/UPDATE/FAQ before READY.",
+      "official_answerable": false,
+      "official_source_refs": [],
+      "official_source_urls": [],
+      "priority_score": 0,
+      "problem_signature": "naver passport verification",
+      "question_ids": [
+        "question_00cae6d5cfa6980cb0",
+        "question_b13712d26b57473429",
+        "question_c00eb4b1a8e8852f1d"
+      ],
+      "reader_questions": [
+        "Naver's new passport verification system",
+        "Naver passport verification for foreigners?",
+        "Naver account verification help"
+      ],
+      "status": "REVIEW",
+      "topic_id": "topic_7f350f8a840d939eb6"
+    },
+    {
+      "action": "NEW_POST",
+      "aliases": [
+        "tmoney_foreign_card_topup"
+      ],
+      "audited_at": "2026-07-29T00:00:00+09:00",
+      "auditor_decision": "HOLD",
+      "auditor_reasons": [
+        "Initial backfill is incomplete.",
+        "Official answer sources and complete Blogger comparison are pending."
+      ],
+      "canonical_intent": "Choose a working T-money top-up method when a foreign payment card is rejected.",
+      "canonical_title": "Can foreign cards top up T-money in Korea?",
+      "category": "Transportation",
+      "category_id": "cat_38224e1c4ad74f",
+      "cluster_id": "cluster_654d8e2edea53417ef",
+      "difference_from_existing": "Pending complete Blogger semantic comparison; do not publish from this backfill run.",
+      "editor_brief": "Backfill brief: Choose a working T-money top-up method when a foreign payment card is rejected. Compare the complete Blogger map, verify current official guidance, then route NEW/UPDATE/FAQ before READY.",
+      "official_answerable": false,
+      "official_source_refs": [],
+      "official_source_urls": [],
+      "priority_score": 0,
+      "problem_signature": "tmoney foreign card topup",
+      "question_ids": [
+        "question_220904785b02d2a176",
+        "question_75a7fd5afb1897e276"
+      ],
+      "reader_questions": [
+        "Need advice on T-money card",
+        "Foreign Card and Tmoney"
+      ],
+      "status": "REVIEW",
+      "topic_id": "topic_654d8e2edea53417ef"
+    }
+  ],
+  "unexplored_scope": [
+    "Additional Korea travel community categories beyond navigation, transit cards, and connectivity",
+    "Additional Windows communities and lower-frequency device-specific problems",
+    "First-party Search Console query import"
+  ]
+}

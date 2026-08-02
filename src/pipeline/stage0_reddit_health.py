@@ -261,14 +261,14 @@ def reddit_health_metadata(status: str) -> dict:
         "missing_credentials": {
             "collection_status": "missing_credentials",
             "health_score": 60,
-            "blocks_cadence_increase": False,
-            "status_label": "Reddit OAuth 선택 보강 미설정",
+            "blocks_cadence_increase": True,
+            "status_label": "Reddit OAuth 미설정, 신규 근거 수집 제한",
         },
         "approval_pending": {
             "collection_status": "approval_pending",
             "health_score": 60,
-            "blocks_cadence_increase": False,
-            "status_label": "Reddit OAuth 승인 대기, 검색 기반 운영 가능",
+            "blocks_cadence_increase": True,
+            "status_label": "Reddit OAuth 승인 대기, 신규 근거 수집 제한",
         },
         "missing_user_agent": {
             "collection_status": "missing_user_agent",
@@ -305,12 +305,13 @@ def missing_credentials_guidance(data_access_submitted_at: str = "") -> tuple[st
         return (
             f"Reddit Data Access Request는 {data_access_submitted_at}에 제출 완료했습니다. "
             "승인 전에는 Reddit 앱 생성이 Responsible Builder Policy/Data API 안내에서 막힐 수 있습니다. "
-            "자동 발행은 Google site:reddit.com 검색, Google Suggest, Microsoft 공식 출처로 계속 운영합니다. "
+            "기존 승인 READY backlog 또는 검증된 legacy 주제만 DEGRADED fallback으로 발행할 수 있습니다. "
+            "QUERY_PLAN·SEARCH_SUGGESTION·FALLBACK_TEMPLATE은 신규 READY 판단 점수가 0입니다. "
             f"승인 메일을 받은 뒤 {reddit_oauth_secret_label()}을 GitHub Secrets 또는 .env에 설정하세요.",
             [
-                "Reddit OAuth는 선택 보강이므로 승인 메일을 기다리면서 자동 발행은 계속 진행하세요.",
+                "승인 대기 중에는 기존 승인 READY backlog 또는 검증된 legacy 주제만 DEGRADED 상태로 사용하세요.",
                 "승인 메일 전에는 Reddit 앱 생성 버튼을 다시 눌러도 같은 정책 안내에서 막힐 수 있습니다.",
-                "증량 판단은 OAuth 승인보다 색인/노출/품질/검색 기반 주제 신호를 우선 보세요.",
+                "QUERY_PLAN·SEARCH_SUGGESTION·FALLBACK_TEMPLATE을 수요·안정성·READY·발행량 근거로 사용하지 마세요.",
                 "승인 후 원하면 Reddit 앱을 script 타입으로 만들고 client id와 secret을 확인하세요.",
                 f"GitHub Secrets에 {REDDIT_CLIENT_ID_SECRET}를 추가하세요.",
                 f"GitHub Secrets에 {REDDIT_CLIENT_SECRET_SECRET}을 추가하세요.",
@@ -318,9 +319,10 @@ def missing_credentials_guidance(data_access_submitted_at: str = "") -> tuple[st
             ],
         )
     return (
-        f"{reddit_oauth_secret_label()}이 없어도 기본 자동화는 Google site:reddit.com 검색 기반으로 운영됩니다.",
+        f"{reddit_oauth_secret_label()}이 없어 신규 OBSERVED_QUESTION 수집이 제한됩니다. "
+        "기존 승인 READY backlog 또는 검증된 legacy 주제만 DEGRADED fallback으로 사용할 수 있습니다.",
         [
-            "Reddit OAuth는 선택 보강입니다. 당장 설정하지 않아도 자동 발행은 계속할 수 있습니다.",
+            "QUERY_PLAN·SEARCH_SUGGESTION·FALLBACK_TEMPLATE은 신규 READY 판단 점수가 0입니다.",
             "나중에 Reddit 앱을 script 타입으로 만들고 client id와 secret을 확인하세요.",
             f"GitHub Secrets에 {REDDIT_CLIENT_ID_SECRET}를 추가하세요.",
             f"GitHub Secrets에 {REDDIT_CLIENT_SECRET_SECRET}을 추가하세요.",
@@ -362,7 +364,7 @@ def build_message(result: dict) -> str:
         "oauth_connected": "OAuth 연결 확인",
         "oauth_connected_no_results": "OAuth 연결됨, 결과 없음",
         "missing_credentials": "Reddit OAuth 키 없음",
-        "approval_pending": "Reddit 승인 대기, 검색 기반 운영 가능",
+        "approval_pending": "Reddit 승인 대기, 신규 근거 수집 제한",
         "missing_user_agent": "Reddit User-Agent 없음",
         "missing_praw": "PRAW 패키지 없음",
         "oauth_error": "OAuth 오류",
@@ -381,7 +383,7 @@ def build_message(result: dict) -> str:
         f"- 상태 점수: {result.get('health_score', 0)}/100",
         f"- 발행량 증량 차단: {'예' if result.get('blocks_cadence_increase', True) else '아니오'}",
         (
-            "- 자동 발행: Google site:reddit.com 검색 기반으로 계속 운영 가능"
+            "- 자동 발행: 기존 승인 READY backlog 또는 검증된 legacy만 DEGRADED fallback 가능"
             if result.get("status") in {"missing_credentials", "approval_pending"}
             else "- 하루 1개 자동 발행: Reddit 상태 기준 차단 없음"
         ),

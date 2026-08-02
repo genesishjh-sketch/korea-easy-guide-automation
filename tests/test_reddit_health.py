@@ -27,9 +27,9 @@ class RedditHealthTests(unittest.TestCase):
         self.assertEqual(result["status"], "missing_credentials")
         self.assertEqual(result["collection_status"], "missing_credentials")
         self.assertEqual(result["health_score"], 60)
-        self.assertFalse(result["blocks_cadence_increase"])
-        self.assertIn("Google site:reddit.com", result["action_required"])
-        self.assertIn("Reddit OAuth는 선택 보강입니다.", result["remediation_steps"][0])
+        self.assertTrue(result["blocks_cadence_increase"])
+        self.assertIn("DEGRADED fallback", result["action_required"])
+        self.assertIn("QUERY_PLAN·SEARCH_SUGGESTION·FALLBACK_TEMPLATE", result["remediation_steps"][0])
         self.assertEqual(result["setup_links"]["reddit_apps_url"], "https://www.reddit.com/prefs/apps")
         self.assertIn("/settings/secrets/actions", result["setup_links"]["github_actions_secrets_url"])
         self.assertEqual(result["setup_links"]["recommended_redirect_uri"], "http://localhost:8080")
@@ -56,12 +56,15 @@ class RedditHealthTests(unittest.TestCase):
 
         self.assertEqual(result["status"], "approval_pending")
         self.assertEqual(result["collection_status"], "approval_pending")
-        self.assertEqual(result["status_label"], "Reddit OAuth 승인 대기, 검색 기반 운영 가능")
+        self.assertEqual(result["status_label"], "Reddit OAuth 승인 대기, 신규 근거 수집 제한")
         self.assertEqual(result["data_access_request_submitted_at"], "2026-06-25")
         self.assertEqual(result["data_access_request_status"], "approval_pending")
         self.assertIn("제출 완료했습니다", result["action_required"])
         self.assertIn("Responsible Builder Policy/Data API", result["action_required"])
-        self.assertIn("Reddit OAuth는 선택 보강이므로 승인 메일을 기다리면서 자동 발행은 계속 진행하세요.", result["remediation_steps"])
+        self.assertIn(
+            "승인 대기 중에는 기존 승인 READY backlog 또는 검증된 legacy 주제만 DEGRADED 상태로 사용하세요.",
+            result["remediation_steps"],
+        )
         self.assertIn("승인 메일 전에는 Reddit 앱 생성 버튼을 다시 눌러도 같은 정책 안내에서 막힐 수 있습니다.", result["remediation_steps"])
         self.assertEqual(result["setup_links"]["data_access_request_submitted_at"], "2026-06-25")
 
@@ -242,7 +245,8 @@ class RedditHealthTests(unittest.TestCase):
         message = notifier.return_value.send_required.call_args.args[0]
         self.assertIn("Reddit OAuth 상태 점검", message)
         self.assertIn("상태 점수: 60/100", message)
-        self.assertIn("발행량 증량 차단: 아니오", message)
+        self.assertIn("발행량 증량 차단: 예", message)
+        self.assertIn("기존 승인 READY backlog 또는 검증된 legacy만 DEGRADED fallback 가능", message)
         self.assertIn("테스트한 subreddit: 없음", message)
         self.assertIn("신호 발견 subreddit: 없음", message)
         self.assertIn("다음 조치:", message)
@@ -286,11 +290,14 @@ class RedditHealthTests(unittest.TestCase):
         self.assertIn("Data Access Request submitted at: 2026-06-25", payload["human_summary_markdown"])
         self.assertIn("Data Access Request status: approval_pending", payload["human_summary_markdown"])
         message = notifier.return_value.send_required.call_args.args[0]
-        self.assertIn("상태: Reddit 승인 대기, 검색 기반 운영 가능", message)
-        self.assertIn("자동 발행: Google site:reddit.com 검색 기반으로 계속 운영 가능", message)
+        self.assertIn("상태: Reddit 승인 대기, 신규 근거 수집 제한", message)
+        self.assertIn(
+            "자동 발행: 기존 승인 READY backlog 또는 검증된 legacy만 DEGRADED fallback 가능",
+            message,
+        )
         self.assertIn("Data Access Request 제출일: 2026-06-25", message)
         self.assertIn("Data Access Request 상태: 승인 대기", message)
-        self.assertIn("승인 메일을 기다리면서 자동 발행은 계속 진행하세요.", message)
+        self.assertIn("QUERY_PLAN·SEARCH_SUGGESTION·FALLBACK_TEMPLATE", message)
 
 
     def test_run_persists_reports_before_notification_failure(self) -> None:
@@ -346,7 +353,7 @@ class RedditHealthTests(unittest.TestCase):
         self.assertEqual(payload["status"], "missing_credentials")
         self.assertEqual(payload["collection_status"], "missing_credentials")
         self.assertEqual(payload["health_score"], 60)
-        self.assertFalse(payload["blocks_cadence_increase"])
+        self.assertTrue(payload["blocks_cadence_increase"])
         self.assertIn("REDDIT_CLIENT_ID", payload["action_required"])
         self.assertEqual(payload["setup_links"]["reddit_apps_url"], "https://www.reddit.com/prefs/apps")
         self.assertEqual(payload["tested_subreddits"], ["WindowsHelp"])

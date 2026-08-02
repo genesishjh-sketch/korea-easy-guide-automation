@@ -1061,14 +1061,15 @@ def build_daily_success_message(result: dict[str, str]) -> str:
             f"- 이미지 수: {quality_metrics.get('image_count', 'n/a')}",
             f"- 공식 링크 수: {quality_metrics.get('official_link_count', 'n/a')}",
             f"- FAQ 수: {quality_metrics.get('faq_question_count', 'n/a')}",
-            f"- Reddit 실제 신호 수: {reddit_signal_quality.get('live_reddit_signal_count', 0)}",
+            f"- OBSERVED_QUESTION 수: {reddit_signal_quality.get('observed_question_count', 0)}",
+            f"- FIRST_PARTY_QUERY 수: {reddit_signal_quality.get('first_party_query_count', 0)}",
             f"- Reddit OAuth 신호 수: {reddit_signal_quality.get('reddit_oauth_signal_count', 0)}",
-            f"- Reddit public JSON 신호 수: {reddit_signal_quality.get('reddit_public_json_signal_count', 0)}",
-            f"- Reddit Google 검색 신호 수: {reddit_signal_quality.get('reddit_google_site_search_signal_count', 0)}",
-            f"- Reddit fallback 신호 수: {reddit_signal_quality.get('fallback_reddit_signal_count', 0)}",
+            f"- Reddit public JSON 후보 수(원문 검증 전 QUERY_PLAN): {reddit_signal_quality.get('reddit_public_json_signal_count', 0)}",
+            f"- Reddit Google QUERY_PLAN 수: {reddit_signal_quality.get('reddit_google_site_search_signal_count', 0)}",
+            f"- Reddit FALLBACK_TEMPLATE 수: {reddit_signal_quality.get('fallback_reddit_signal_count', 0)}",
             f"- Google Suggest 신호 수: {google_signal_quality.get('google_suggest_signal_count', 0)}",
-            f"- Google Suggest live 신호 수: {google_signal_quality.get('google_suggest_live_signal_count', 0)}",
-            f"- Google Suggest fallback 신호 수: {google_signal_quality.get('google_suggest_fallback_signal_count', 0)}",
+            f"- SEARCH_SUGGESTION 수: {google_signal_quality.get('google_suggest_live_signal_count', 0)}",
+            f"- Google FALLBACK_TEMPLATE 수: {google_signal_quality.get('google_suggest_fallback_signal_count', 0)}",
             f"- 운영 상태: {operational_status.get('status_label')}",
             f"- 발행 품질 안정성: {'안정' if operational_status.get('publish_quality_ok') else '점검 필요'}",
             f"- 수집 안정성: {operational_status.get('collection_status_label')}",
@@ -1244,7 +1245,9 @@ def build_reddit_diagnostics_summary(research_report: dict) -> list[str]:
         lines.append("- Reddit public JSON 스킵: 예")
         if diagnostics.get("public_json_skip_reason"):
             lines.append(f"- Reddit public JSON 스킵 이유: {diagnostics.get('public_json_skip_reason')}")
-    public_json_error_count = int(diagnostics.get("public_json_error_count", 0) or 0)
+    public_json_error_count = non_negative_integer(
+        diagnostics.get("public_json_error_count", 0)
+    )
     if public_json_error_count:
         lines.append(f"- Reddit public JSON 실패 수: {public_json_error_count}")
     failed_subreddits = [
@@ -1262,24 +1265,74 @@ def build_reddit_diagnostics_summary(research_report: dict) -> list[str]:
 
 
 def build_reddit_signal_quality(research_report: dict) -> dict:
-    live_count = int(research_report.get("live_reddit_signal_count", 0) or 0)
-    oauth_count = int(research_report.get("reddit_oauth_signal_count", 0) or 0)
-    public_json_count = int(research_report.get("reddit_public_json_signal_count", 0) or 0)
-    google_site_search_count = int(research_report.get("reddit_google_site_search_signal_count", 0) or 0)
-    fallback_count = int(research_report.get("fallback_reddit_signal_count", 0) or 0)
+    numeric_issues: list[str] = []
+    live_count = research_numeric_count(research_report, "live_reddit_signal_count", numeric_issues)
+    oauth_count = research_numeric_count(research_report, "reddit_oauth_signal_count", numeric_issues)
+    public_json_count = research_numeric_count(research_report, "reddit_public_json_signal_count", numeric_issues)
+    google_site_search_count = research_numeric_count(
+        research_report,
+        "reddit_google_site_search_signal_count",
+        numeric_issues,
+    )
+    query_plan_count = research_numeric_count(
+        research_report,
+        "query_plan_count",
+        numeric_issues,
+        default=google_site_search_count + public_json_count,
+    )
+    fallback_count = research_numeric_count(research_report, "fallback_reddit_signal_count", numeric_issues)
+    observed_question_count = research_numeric_count(
+        research_report,
+        "observed_question_count",
+        numeric_issues,
+        default=oauth_count,
+    )
+    first_party_query_count = research_numeric_count(
+        research_report,
+        "first_party_query_count",
+        numeric_issues,
+    )
+    verified_public_page_count = research_numeric_count(
+        research_report,
+        "verified_public_page_signal_count",
+        numeric_issues,
+    )
+    eligible_count = research_numeric_count(
+        research_report,
+        "demand_eligible_signal_count",
+        numeric_issues,
+        default=observed_question_count + first_party_query_count,
+    )
     method_counts = research_report.get("reddit_collection_method_counts", {}) or {}
     warning = ""
-    if fallback_count and not live_count and not google_site_search_count:
-        warning = "Reddit 실제 신호 없이 fallback 질문만 사용했습니다. Google site:reddit.com 검색 신호가 잡히는지 확인하세요."
-    elif public_json_count and not oauth_count:
-        warning = "Reddit 실제 신호가 public JSON 경로에만 의존합니다. Google site:reddit.com 검색 신호를 함께 유지하세요. OAuth는 선택 보강입니다."
+    if numeric_issues:
+        warning = f"research_report 숫자 스키마 오류: {', '.join(numeric_issues)}"
+    elif public_json_count and not verified_public_page_count and not eligible_count:
+        warning = (
+            "자동 public_json 결과는 공개 원문 검증 전 QUERY_PLAN입니다. "
+            "수요·안정성·READY·발행량 판단 점수는 0입니다."
+        )
+    elif query_plan_count and not eligible_count:
+        warning = "실제 근거 없이 QUERY_PLAN만 있습니다. 검색 계획은 수요·안정성·READY·발행량 판단에 사용하지 않습니다."
+    elif fallback_count and not eligible_count:
+        warning = "실제 근거 없이 FALLBACK_TEMPLATE 질문만 있습니다. 템플릿은 수요·안정성·READY·발행량 판단에 사용하지 않습니다."
     return {
         "live_reddit_signal_count": live_count,
         "reddit_oauth_signal_count": oauth_count,
         "reddit_public_json_signal_count": public_json_count,
         "reddit_google_site_search_signal_count": google_site_search_count,
+        "query_plan_count": query_plan_count,
         "fallback_reddit_signal_count": fallback_count,
+        "observed_evidence_count": observed_question_count,
+        "observed_question_count": observed_question_count,
+        "first_party_query_count": first_party_query_count,
+        "verified_public_page_signal_count": verified_public_page_count,
+        "demand_eligible_signal_count": eligible_count,
+        "stability_eligible_signal_count": eligible_count,
+        "ready_eligible_signal_count": eligible_count,
+        "cadence_eligible_signal_count": eligible_count,
         "reddit_collection_method_counts": method_counts,
+        "numeric_schema_issues": numeric_issues,
         "warning": warning,
     }
 
@@ -1292,8 +1345,13 @@ def build_google_diagnostics_summary(research_report: dict) -> list[str]:
     status = diagnostics.get("status")
     if status:
         lines.append(f"- Google Suggest 수집 진단 상태: {status}")
-    lines.append(f"- Google Suggest live 제안 수: {int(diagnostics.get('live_suggestion_count', 0) or 0)}")
-    lines.append(f"- Google Suggest fallback 제안 수: {int(diagnostics.get('fallback_suggestion_count', 0) or 0)}")
+    lines.append(
+        f"- Google Suggest live 제안 수: {non_negative_integer(diagnostics.get('live_suggestion_count', 0))}"
+    )
+    lines.append(
+        "- Google Suggest fallback 제안 수: "
+        f"{non_negative_integer(diagnostics.get('fallback_suggestion_count', 0))}"
+    )
     if diagnostics.get("fallback_reason"):
         lines.append(f"- Google Suggest fallback 이유: {diagnostics.get('fallback_reason')}")
     if diagnostics.get("error"):
@@ -1302,13 +1360,16 @@ def build_google_diagnostics_summary(research_report: dict) -> list[str]:
 
 
 def build_google_signal_quality(research_report: dict) -> dict:
-    total_count = int(research_report.get("google_suggest_signal_count", 0) or 0)
-    live_count = int(research_report.get("google_suggest_live_signal_count", 0) or 0)
-    fallback_count = int(research_report.get("google_suggest_fallback_signal_count", 0) or 0)
+    numeric_issues: list[str] = []
+    total_count = research_numeric_count(research_report, "google_suggest_signal_count", numeric_issues)
+    live_count = research_numeric_count(research_report, "google_suggest_live_signal_count", numeric_issues)
+    fallback_count = research_numeric_count(research_report, "google_suggest_fallback_signal_count", numeric_issues)
     method_counts = research_report.get("google_suggest_method_counts", {}) or {}
     warning = ""
-    if fallback_count and not live_count:
-        warning = "Google Suggest live 신호 없이 fallback 검색 의도만 사용했습니다. 네트워크 또는 Google Suggest 응답 상태를 확인하세요."
+    if numeric_issues:
+        warning = f"research_report 숫자 스키마 오류: {', '.join(numeric_issues)}"
+    elif fallback_count and not live_count:
+        warning = "Google Suggest live 신호 없이 FALLBACK_TEMPLATE만 사용했습니다. 자동완성 관측값으로 간주하지 않습니다."
     elif not total_count:
         warning = "Google Suggest 신호가 없습니다. 글 주제 확장 신호가 부족할 수 있습니다."
     return {
@@ -1316,6 +1377,19 @@ def build_google_signal_quality(research_report: dict) -> dict:
         "google_suggest_live_signal_count": live_count,
         "google_suggest_fallback_signal_count": fallback_count,
         "google_suggest_method_counts": method_counts,
+        "evidence_type": (
+            "SEARCH_SUGGESTION"
+            if live_count
+            else "FALLBACK_TEMPLATE"
+            if fallback_count
+            else ""
+        ),
+        "query_expansion_only": True,
+        "demand_eligible_signal_count": 0,
+        "stability_eligible_signal_count": 0,
+        "ready_eligible_signal_count": 0,
+        "cadence_eligible_signal_count": 0,
+        "numeric_schema_issues": numeric_issues,
         "warning": warning,
     }
 
@@ -1325,16 +1399,53 @@ def build_operational_status(quality_report: dict, reddit_signal_quality: dict) 
     passed = bool(quality_report.get("passed"))
     issues = quality_report.get("issues") or []
     publish_quality_ok = passed and score >= 90 and not issues
-    if reddit_signal_quality.get("reddit_oauth_signal_count", 0) > 0:
+    oauth_count = non_negative_integer(reddit_signal_quality.get("reddit_oauth_signal_count", 0))
+    public_json_count = non_negative_integer(
+        reddit_signal_quality.get("reddit_public_json_signal_count", 0)
+    )
+    observed_question_count = non_negative_integer(
+        reddit_signal_quality.get(
+            "observed_question_count",
+            oauth_count,
+        )
+    )
+    first_party_query_count = non_negative_integer(
+        reddit_signal_quality.get("first_party_query_count", 0)
+    )
+    verified_public_page_count = non_negative_integer(
+        reddit_signal_quality.get("verified_public_page_signal_count", 0)
+    )
+    eligible_count = non_negative_integer(
+        reddit_signal_quality.get(
+            "demand_eligible_signal_count",
+            observed_question_count + first_party_query_count,
+        )
+    )
+    query_plan_count = non_negative_integer(
+        reddit_signal_quality.get(
+            "query_plan_count",
+            reddit_signal_quality.get("reddit_google_site_search_signal_count", 0),
+        )
+    )
+    fallback_count = non_negative_integer(
+        reddit_signal_quality.get("fallback_reddit_signal_count", 0)
+    )
+    if oauth_count > 0:
         collection_status = "stable_oauth"
         collection_label = "안정: Reddit OAuth 신호 사용"
-    elif reddit_signal_quality.get("reddit_google_site_search_signal_count", 0) > 0:
-        collection_status = "stable_google_site_search"
-        collection_label = "안정: Google site:reddit.com 검색 신호 사용"
-    elif reddit_signal_quality.get("reddit_public_json_signal_count", 0) > 0:
-        collection_status = "public_json_only"
-        collection_label = "주의: Reddit public JSON 의존"
-    elif reddit_signal_quality.get("fallback_reddit_signal_count", 0) > 0:
+    elif verified_public_page_count > 0 and observed_question_count > 0:
+        collection_status = "verified_public_question"
+        collection_label = "검증됨: 실제 공개 질문 원문 확인"
+    elif first_party_query_count > 0 and eligible_count > 0:
+        collection_status = "stable_first_party_query"
+        collection_label = "안정: Search Console FIRST_PARTY_QUERY 사용"
+    elif observed_question_count > 0 and eligible_count > 0:
+        collection_status = "observed_question"
+        collection_label = "관측됨: 검증된 실제 질문 사용"
+    elif query_plan_count > 0 or public_json_count > 0:
+        collection_status = "query_plan_only"
+        collection_label = "주의: 검증 전 QUERY_PLAN만 있음"
+    elif fallback_count > 0:
         collection_status = "fallback_only"
         collection_label = "주의: fallback 질문 의존"
     else:
@@ -1342,7 +1453,9 @@ def build_operational_status(quality_report: dict, reddit_signal_quality: dict) 
         collection_label = "주의: Reddit 신호 없음"
     ready_for_cadence_increase = publish_quality_ok and collection_status in {
         "stable_oauth",
-        "stable_google_site_search",
+        "verified_public_question",
+        "stable_first_party_query",
+        "observed_question",
     }
     if publish_quality_ok and ready_for_cadence_increase:
         status_label = "품질/수집 안정"
@@ -1357,6 +1470,27 @@ def build_operational_status(quality_report: dict, reddit_signal_quality: dict) 
         "ready_for_cadence_increase": ready_for_cadence_increase,
         "status_label": status_label,
     }
+
+
+def research_numeric_count(
+    report: dict,
+    field_name: str,
+    issues: list[str],
+    default: int = 0,
+) -> int:
+    if field_name not in report:
+        return int(default)
+    value = report.get(field_name)
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        issues.append(field_name)
+        return int(default)
+    return value
+
+
+def non_negative_integer(value) -> int:
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        return 0
+    return value
 
 
 def build_daily_limit_operational_status() -> dict:

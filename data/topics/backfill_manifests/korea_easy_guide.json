@@ -1,0 +1,17 @@
+{
+  "run_type": "BACKFILL_RESEARCH",
+  "window_start": "2025-08-01",
+  "window_end": "2026-07-31",
+  "logic_version": "topic-intelligence-v2",
+  "work_items": [
+    {"work_id": "reddit-transportation", "source": "reddit", "query_family": "transportation-navigation-transit-cards", "required": true},
+    {"work_id": "reddit-connectivity", "source": "reddit", "query_family": "sim-esim-wifi-connectivity", "required": true},
+    {"work_id": "reddit-apps-payments", "source": "reddit", "query_family": "apps-payments-verification", "required": true},
+    {"work_id": "reddit-food-delivery", "source": "reddit", "query_family": "food-delivery-ordering", "required": true},
+    {"work_id": "reddit-accommodation", "source": "reddit", "query_family": "accommodation-checkin-booking", "required": true},
+    {"work_id": "reddit-travel-basics", "source": "reddit", "query_family": "holidays-etiquette-emergency-basics", "required": true},
+    {"work_id": "travel-stackexchange-korea", "source": "stack_exchange", "query_family": "travel-stackexchange-korea", "required": true},
+    {"work_id": "search-console-all-queries", "source": "search_console", "query_family": "all-first-party-queries", "required": true},
+    {"work_id": "quora-korea", "source": "quora", "query_family": "korea-travel-and-daily-life", "required": false}
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "categories.schema.json",
+  "type": "object",
+  "required": ["schema_version", "site", "revision", "categories", "updated_at"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "site": {"type": "string"},
+    "revision": {"type": "integer", "minimum": 0},
+    "updated_at": {"type": "string"},
+    "categories": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["category_id", "site", "name", "blogger_label", "aliases", "status", "created_at", "updated_at"],
+        "properties": {
+          "category_id": {"type": "string"},
+          "site": {"type": "string"},
+          "name": {"type": "string"},
+          "blogger_label": {"type": "string"},
+          "aliases": {"type": "array", "items": {"type": "string"}},
+          "status": {"type": "string"},
+          "created_at": {"type": "string"},
+          "updated_at": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

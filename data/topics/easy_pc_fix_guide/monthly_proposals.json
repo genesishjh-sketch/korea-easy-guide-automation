@@ -1,0 +1,37 @@
+{
+  "proposals": {
+    "proposal_ca0d7c5febbd9c38f8": {
+      "applied_at": "",
+      "approved_at": "",
+      "approved_by": "",
+      "created_at": "2026-07-29T07:21:01.227752+00:00",
+      "kind": "MERGE_CLUSTER",
+      "label_snapshot": {},
+      "label_sync_snapshot_path": "",
+      "payload": {
+        "current_value": "Network Adapter Missing in Windows 11? Check Device Manager and Updates ↔ Network Adapter Missing in Windows 11: Device Manager and BIOS Boundaries",
+        "evidence_summary": "Semantic similarity 87.3%; at least one cluster is linked to published content.",
+        "impact": "Approval merges Registry cluster identity while preserving aliases, questions, topic links, and publication URLs. It does not change Blogger labels.",
+        "proposed_value": "Merge cluster_3df8440f015e183eed into cluster_10b981f1d38104db7b",
+        "source_cluster_id": "cluster_3df8440f015e183eed",
+        "source_topic_id": "topic_6f7333819eba902082",
+        "target_cluster_id": "cluster_10b981f1d38104db7b",
+        "target_topic_id": "topic_6da7372c96f41885ab"
+      },
+      "proposal_id": "proposal_ca0d7c5febbd9c38f8",
+      "publication_sync_error": "",
+      "publication_sync_pending": false,
+      "reason": "Possible duplicate published guides: \"Network Adapter Missing in Windows 11? Check Device Manager and Updates\" and \"Network Adapter Missing in Windows 11: Device Manager and BIOS Boundaries\". Explicit approval is required.",
+      "reviewer_notes": "",
+      "rollback_audit_path": "",
+      "rollback_path": "",
+      "rolled_back_at": "",
+      "site": "easy_pc_fix_guide",
+      "snapshot_path": "",
+      "status": "PROPOSED"
+    }
+  },
+  "schema_version": 1,
+  "site": "easy_pc_fix_guide",
+  "updated_at": "2026-07-29T07:21:01.230931+00:00"
+}

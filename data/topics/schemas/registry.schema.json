@@ -1,0 +1,498 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "registry.schema.json",
+  "$defs": {
+    "publication": {
+      "type": "object",
+      "required": [
+        "blogger_post_id",
+        "url",
+        "title",
+        "status",
+        "published_at",
+        "updated_at",
+        "last_verified_at",
+        "primary"
+      ],
+      "properties": {
+        "blogger_post_id": {"type": "string"},
+        "url": {"type": "string"},
+        "title": {"type": "string"},
+        "status": {"type": "string"},
+        "published_at": {"type": "string"},
+        "updated_at": {"type": "string"},
+        "last_verified_at": {"type": "string"},
+        "primary": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "attemptPublication": {
+      "oneOf": [
+        {"type": "object", "maxProperties": 0},
+        {"$ref": "#/$defs/publication"}
+      ]
+    },
+    "externalAttempt": {
+      "type": "object",
+      "required": [
+        "attempt_id", "site", "topic_id", "run_id", "topic_revision",
+        "operation", "action", "status", "started_at", "expires_at",
+        "receipt_recorded_at", "publication", "last_error", "prior_attempts"
+      ],
+      "properties": {
+        "attempt_id": {"type": "string", "minLength": 1},
+        "site": {"type": "string", "minLength": 1},
+        "topic_id": {"type": "string", "minLength": 1},
+        "run_id": {"type": "string", "minLength": 1},
+        "topic_revision": {"type": "integer", "minimum": 1},
+        "operation": {"enum": ["INSERT", "UPDATE"]},
+        "action": {"enum": ["NEW_POST", "UPDATE_EXISTING", "FAQ_ADD"]},
+        "target_blogger_post_id": {"type": "string", "minLength": 1},
+        "target_url": {"type": "string", "minLength": 1},
+        "target_primary": {"type": "boolean"},
+        "status": {
+          "enum": [
+            "LEASED", "INSERTING", "UPDATE_STARTED", "UNKNOWN",
+            "RECEIPT_RECORDED", "ABORTED_PRE_INSERT",
+            "ABORTED_PRE_UPDATE"
+          ]
+        },
+        "started_at": {"type": "string", "minLength": 1},
+        "expires_at": {"type": "string", "minLength": 1},
+        "insert_started_at": {"type": "string"},
+        "update_started_at": {"type": "string"},
+        "receipt_recorded_at": {"type": "string"},
+        "publication": {"$ref": "#/$defs/attemptPublication"},
+        "last_error": {"type": "string"},
+        "outbox_id": {"type": "string"},
+        "updated_at": {"type": "string"},
+        "prior_attempts": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/externalAttempt"}
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"operation": {"const": "INSERT"}},
+            "required": ["operation"]
+          },
+          "then": {
+            "required": ["insert_started_at"],
+            "properties": {"action": {"const": "NEW_POST"}}
+          }
+        },
+        {
+          "if": {
+            "properties": {"operation": {"const": "UPDATE"}},
+            "required": ["operation"]
+          },
+          "then": {
+            "required": [
+              "target_blogger_post_id", "target_url", "target_primary",
+              "update_started_at"
+            ],
+            "properties": {
+              "action": {"enum": ["UPDATE_EXISTING", "FAQ_ADD"]},
+              "target_primary": {"const": true}
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "publicationReceipt": {
+      "type": "object",
+      "required": [
+        "attempt_id", "topic_id", "run_id", "topic_revision", "operation",
+        "action", "publication", "status", "recorded_at", "last_error"
+      ],
+      "properties": {
+        "attempt_id": {"type": "string", "minLength": 1},
+        "topic_id": {"type": "string", "minLength": 1},
+        "run_id": {"type": "string", "minLength": 1},
+        "topic_revision": {"type": "integer", "minimum": 1},
+        "operation": {"enum": ["INSERT", "UPDATE"]},
+        "action": {"enum": ["NEW_POST", "UPDATE_EXISTING", "FAQ_ADD"]},
+        "target_blogger_post_id": {"type": "string", "minLength": 1},
+        "target_url": {"type": "string", "minLength": 1},
+        "publication": {"$ref": "#/$defs/publication"},
+        "status": {"enum": ["PENDING", "RECORDED"]},
+        "recorded_at": {"type": "string", "minLength": 1},
+        "last_error": {"type": "string"},
+        "outbox_id": {"type": "string", "minLength": 1}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"operation": {"const": "INSERT"}},
+            "required": ["operation"]
+          },
+          "then": {"properties": {"action": {"const": "NEW_POST"}}}
+        },
+        {
+          "if": {
+            "properties": {"operation": {"const": "UPDATE"}},
+            "required": ["operation"]
+          },
+          "then": {
+            "required": ["target_blogger_post_id", "target_url"],
+            "properties": {
+              "action": {"enum": ["UPDATE_EXISTING", "FAQ_ADD"]}
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "topicReservation": {
+      "type": "object",
+      "required": [
+        "kind", "topic_id", "run_id", "started_at", "expires_at", "status"
+      ],
+      "properties": {
+        "kind": {"enum": ["SCHEDULE", "CLAIM", "UPDATE"]},
+        "topic_id": {"type": "string", "minLength": 1},
+        "run_id": {"type": "string"},
+        "started_at": {"type": "string", "minLength": 1},
+        "expires_at": {"type": "string", "minLength": 1},
+        "scheduled_for": {"type": "string"},
+        "status": {
+          "enum": [
+            "ACTIVE", "UPDATE_STARTED", "UNKNOWN", "COMPLETED", "EXPIRED"
+          ]
+        },
+        "publish_attempt_id": {"type": "string", "minLength": 1},
+        "update_attempt_id": {"type": "string", "minLength": 1},
+        "target_blogger_post_id": {"type": "string", "minLength": 1},
+        "target_url": {"type": "string", "minLength": 1},
+        "outbox_id": {"type": "string", "minLength": 1},
+        "outcome": {
+          "enum": ["READY", "HOLD_RECONCILE", "RECEIPT_RECORDED"]
+        },
+        "updated_at": {"type": "string"},
+        "completed_at": {"type": "string"},
+        "expired_at": {"type": "string"}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"kind": {"const": "SCHEDULE"}},
+            "required": ["kind"]
+          },
+          "then": {"required": ["scheduled_for"]}
+        },
+        {
+          "if": {
+            "properties": {"kind": {"const": "UPDATE"}},
+            "required": ["kind"]
+          },
+          "then": {
+            "required": [
+              "update_attempt_id", "target_blogger_post_id", "target_url"
+            ]
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "topic": {
+      "type": "object",
+      "required": [
+        "topic_id", "site", "canonical_title", "category_id", "cluster_id",
+        "question_ids", "aliases", "action", "status", "priority_score",
+        "revision", "publications", "created_at", "updated_at"
+      ],
+      "properties": {
+        "topic_id": {"type": "string"},
+        "site": {"type": "string"},
+        "canonical_title": {"type": "string"},
+        "category_id": {"type": "string"},
+        "cluster_id": {"type": "string"},
+        "canonical_intent": {"type": "string"},
+        "problem_signature": {"type": "string"},
+        "question_ids": {"type": "array", "items": {"type": "string"}},
+        "aliases": {"type": "array", "items": {"type": "string"}},
+        "action": {"enum": ["NEW_POST", "UPDATE_EXISTING", "FAQ_ADD", "WATCH", "MERGE", "REJECT"]},
+        "status": {
+          "enum": [
+            "DISCOVERED", "REVIEW", "READY", "SCHEDULED", "CLAIMED",
+            "GENERATED", "LIVE_UNVERIFIED", "PUBLISHED", "UPDATE_DUE",
+            "HOLD", "STALE", "MERGED", "REJECTED"
+          ]
+        },
+        "priority_score": {"type": "number", "minimum": 0, "maximum": 100},
+        "priority_components": {
+          "oneOf": [
+            {
+              "type": "object",
+              "maxProperties": 0
+            },
+            {
+              "type": "object",
+              "required": [
+                "evidence_strength",
+                "recurrence",
+                "content_gap",
+                "severity",
+                "answerability",
+                "recency"
+              ],
+              "properties": {
+                "evidence_strength": {"type": "number", "minimum": 0, "maximum": 25},
+                "recurrence": {"type": "number", "minimum": 0, "maximum": 20},
+                "content_gap": {"type": "number", "minimum": 0, "maximum": 20},
+                "severity": {"type": "number", "minimum": 0, "maximum": 15},
+                "answerability": {"type": "number", "minimum": 0, "maximum": 10},
+                "recency": {"type": "number", "minimum": 0, "maximum": 10}
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "priority_override": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 100
+        },
+        "revision": {"type": "integer", "minimum": 1},
+        "merged_into_topic_id": {"type": "string"},
+        "publications": {"type": "array", "items": {"$ref": "#/$defs/publication"}},
+        "editor_brief": {"type": "string"},
+        "editor_notes": {"type": "array", "items": {"type": "string"}},
+        "reader_questions": {"type": "array", "items": {"type": "string"}},
+        "difference_from_existing": {"type": "string"},
+        "severity_score": {"type": "number", "minimum": 0, "maximum": 15},
+        "severity_reason": {"type": "string"},
+        "official_source_urls": {"type": "array", "items": {"type": "string"}},
+        "official_source_refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["url", "authority_type"],
+            "properties": {
+              "url": {"type": "string"},
+              "authority_type": {"type": "string"}
+            },
+            "additionalProperties": false
+          }
+        },
+        "official_answerable": {"type": "boolean"},
+        "auditor_decision": {"type": "string"},
+        "auditor_reasons": {"type": "array", "items": {"type": "string"}},
+        "audited_at": {"type": "string"},
+        "duplicate_candidate_ids": {"type": "array", "items": {"type": "string"}},
+        "evidence_exception": {
+          "oneOf": [
+            {
+              "type": "object",
+              "maxProperties": 0
+            },
+            {
+              "type": "object",
+              "required": [
+                "approved_by",
+                "approved_at",
+                "reason",
+                "basis",
+                "approval_source",
+                "decision_id"
+              ],
+              "properties": {
+                "approved_by": {"type": "string", "minLength": 1},
+                "approved_at": {"type": "string", "minLength": 1},
+                "reason": {"type": "string", "minLength": 1},
+                "approval_source": {"const": "USER_DECISION"},
+                "decision_id": {"type": "string", "minLength": 1},
+                "basis": {
+                  "enum": [
+                    "INFORMATION_DENSITY",
+                    "ENGAGEMENT",
+                    "FIRST_PARTY_DEMAND",
+                    "OFFICIAL_ISSUE"
+                  ]
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "status_reason": {"type": "string"},
+        "claim_run_id": {"type": "string"},
+        "created_at": {"type": "string"},
+        "updated_at": {"type": "string"},
+        "last_validated_at": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "cluster": {
+      "type": "object",
+      "required": [
+        "cluster_id", "site", "problem_signature", "canonical_label",
+        "question_ids", "topic_ids", "aliases", "merged_into_cluster_id",
+        "observation_run_ids", "revision", "created_at", "updated_at"
+      ],
+      "properties": {
+        "cluster_id": {"type": "string"},
+        "site": {"type": "string"},
+        "problem_signature": {"type": "string"},
+        "canonical_label": {"type": "string"},
+        "question_ids": {"type": "array", "items": {"type": "string"}},
+        "topic_ids": {"type": "array", "items": {"type": "string"}},
+        "aliases": {"type": "array", "items": {"type": "string"}},
+        "merged_into_cluster_id": {"type": "string"},
+        "observation_run_ids": {"type": "array", "items": {"type": "string"}},
+        "revision": {"type": "integer", "minimum": 1},
+        "created_at": {"type": "string"},
+        "updated_at": {"type": "string"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "required": [
+    "schema_version", "site", "revision", "topics", "clusters", "aliases",
+    "cluster_aliases", "publication_index", "blogger_catalog", "publication_outbox", "rollout",
+    "publish_attempts", "publish_attempt_history", "publication_receipts",
+    "topic_reservations",
+    "updated_at"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "site": {"type": "string", "minLength": 1},
+    "revision": {"type": "integer", "minimum": 0},
+    "topics": {"type": "object", "additionalProperties": {"$ref": "#/$defs/topic"}},
+    "clusters": {"type": "object", "additionalProperties": {"$ref": "#/$defs/cluster"}},
+    "aliases": {"type": "object", "additionalProperties": {"type": "string"}},
+    "cluster_aliases": {"type": "object", "additionalProperties": {"type": "string"}},
+    "publication_index": {"type": "object", "additionalProperties": {"type": "string"}},
+    "blogger_catalog": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "publication_key", "blogger_post_id", "url", "title", "status",
+          "published_at", "updated_at", "last_seen_at", "topic_id",
+          "has_topic_marker"
+        ],
+        "properties": {
+          "publication_key": {"type": "string"},
+          "blogger_post_id": {"type": "string"},
+          "url": {"type": "string"},
+          "title": {"type": "string"},
+          "status": {"type": "string"},
+          "published_at": {"type": "string"},
+          "updated_at": {"type": "string"},
+          "last_seen_at": {"type": "string"},
+          "topic_id": {"type": "string"},
+          "has_topic_marker": {"type": "boolean"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "publication_outbox": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["outbox_id", "site", "topic_id", "publication_key", "publication", "status", "attempts", "last_error", "stages", "created_at", "updated_at"],
+        "properties": {
+          "outbox_id": {"type": "string"},
+          "site": {"type": "string"},
+          "topic_id": {"type": "string"},
+          "attempt_id": {"type": "string"},
+          "update_attempt_id": {"type": "string"},
+          "publication_key": {"type": "string"},
+          "publication": {"$ref": "#/$defs/publication"},
+          "status": {"const": "PENDING"},
+          "attempts": {"type": "integer", "minimum": 0},
+          "last_error": {"type": "string"},
+          "stages": {
+            "type": "object",
+            "required": ["blogger", "registry", "sheet"],
+            "properties": {
+              "blogger": {"enum": ["PENDING", "SUCCESS", "FAILED"]},
+              "registry": {"enum": ["PENDING", "SUCCESS", "FAILED"]},
+              "sheet": {"enum": ["PENDING", "SUCCESS", "FAILED"]}
+            },
+            "additionalProperties": false
+          },
+          "next_retry_at": {"type": "string"},
+          "created_at": {"type": "string"},
+          "updated_at": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "rollout": {
+      "type": "object",
+      "required": ["mode", "required_qualifying_runs", "consecutive_qualifying_runs", "last_run_id", "last_run_at", "last_status", "recent_runs"],
+      "properties": {
+        "mode": {"enum": ["SHADOW", "READY_FIRST", "DEGRADED"]},
+        "required_qualifying_runs": {"type": "integer", "minimum": 1},
+        "consecutive_qualifying_runs": {"type": "integer", "minimum": 0},
+        "last_run_id": {"type": "string"},
+        "last_run_at": {"type": "string"},
+        "last_status": {"type": "string"},
+        "promoted": {"type": "boolean"},
+        "backfill": {
+          "type": "object",
+          "required": [
+            "complete",
+            "last_run_id",
+            "completed_at",
+            "coverage_hash",
+            "logic_version",
+            "unexplored_scope"
+          ],
+          "properties": {
+            "complete": {"type": "boolean"},
+            "last_run_id": {"type": "string"},
+            "completed_at": {"type": "string"},
+            "coverage_hash": {"type": "string"},
+            "logic_version": {"type": "string"},
+            "unexplored_scope": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          },
+          "additionalProperties": false
+        },
+        "recent_runs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["run_id", "run_at", "status", "qualifying", "mode_after", "details"],
+            "properties": {
+              "run_id": {"type": "string"},
+              "run_at": {"type": "string"},
+              "status": {"type": "string"},
+              "qualifying": {"type": "boolean"},
+              "mode_after": {"type": "string"},
+              "details": {"type": "object"}
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "publish_attempts": {
+      "type": "object",
+      "additionalProperties": {"$ref": "#/$defs/externalAttempt"}
+    },
+    "publish_attempt_history": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/externalAttempt"}
+    },
+    "publication_receipts": {
+      "type": "object",
+      "additionalProperties": {"$ref": "#/$defs/publicationReceipt"}
+    },
+    "topic_reservations": {
+      "type": "object",
+      "additionalProperties": {"$ref": "#/$defs/topicReservation"}
+    },
+    "updated_at": {"type": "string"}
+  },
+  "additionalProperties": false
+}

@@ -31,6 +31,9 @@ class RedditCollectorTests(unittest.TestCase):
         public_get.assert_not_called()
         self.assertEqual(signals, [oauth_signal])
         self.assertEqual(signals[0].metadata["collection_method"], "oauth")
+        self.assertEqual(signals[0].metadata["evidence_type"], "OBSERVED_QUESTION")
+        self.assertEqual(signals[0].metadata["demand_weight"], 1.0)
+        self.assertEqual(collector.diagnostics["observed_signal_count"], 1)
 
     def test_fallback_signals_include_collection_method(self) -> None:
         collector = RedditCollector("easy-pc-fix-guide/0.1", subreddits=["WindowsHelp"])
@@ -43,6 +46,11 @@ class RedditCollectorTests(unittest.TestCase):
         self.assertTrue(signals)
         self.assertTrue(all(signal.source == "reddit_fallback" for signal in signals))
         self.assertTrue(all(signal.metadata["collection_method"] == "fallback" for signal in signals))
+        self.assertTrue(
+            all(signal.metadata["evidence_type"] == "FALLBACK_TEMPLATE" for signal in signals)
+        )
+        self.assertTrue(all(signal.score == 0 for signal in signals))
+        self.assertTrue(all(signal.metadata["demand_weight"] == 0 for signal in signals))
         self.assertEqual(collector.diagnostics["status"], "fallback_only")
         self.assertEqual(collector.diagnostics["public_json_attempted_subreddits"], ["WindowsHelp"])
         self.assertEqual(collector.diagnostics["public_json_error_count"], 1)
@@ -63,7 +71,7 @@ class RedditCollectorTests(unittest.TestCase):
 
         public_get.assert_not_called()
         self.assertTrue(signals)
-        self.assertEqual(collector.diagnostics["status"], "google_site_search_ready")
+        self.assertEqual(collector.diagnostics["status"], "query_plan_only")
         self.assertTrue(collector.diagnostics["public_json_skipped"])
         self.assertEqual(collector.diagnostics["public_json_skip_reason"], "approval pending")
         self.assertEqual(collector.diagnostics["public_json_attempted_subreddits"], [])
@@ -71,6 +79,9 @@ class RedditCollectorTests(unittest.TestCase):
         self.assertEqual(collector.diagnostics["google_site_search_signal_count"], len(signals))
         self.assertEqual(signals[0].source, "reddit_search")
         self.assertEqual(signals[0].metadata["collection_method"], "google_site_search")
+        self.assertEqual(signals[0].metadata["evidence_type"], "QUERY_PLAN")
+        self.assertEqual(signals[0].score, 0)
+        self.assertEqual(signals[0].metadata["ready_weight"], 0)
 
     def test_public_json_failure_uses_google_site_search_before_local_fallback(self) -> None:
         collector = RedditCollector("easy-pc-fix-guide/0.1", subreddits=["WindowsHelp"])
@@ -79,10 +90,49 @@ class RedditCollectorTests(unittest.TestCase):
             signals = collector.collect("wifi button missing windows 11")
 
         self.assertTrue(signals)
-        self.assertEqual(collector.diagnostics["status"], "google_site_search_ready")
+        self.assertEqual(collector.diagnostics["status"], "query_plan_only")
         self.assertEqual(collector.diagnostics["public_json_error_count"], 1)
         self.assertEqual(collector.diagnostics["google_site_search_signal_count"], len(signals))
         self.assertTrue(all(signal.source == "reddit_search" for signal in signals))
+        self.assertTrue(all(signal.metadata["evidence_type"] == "QUERY_PLAN" for signal in signals))
+        self.assertTrue(all(signal.metadata["cadence_weight"] == 0 for signal in signals))
+
+    def test_unverified_public_json_results_remain_zero_weight_query_plans(self) -> None:
+        collector = RedditCollector("easy-pc-fix-guide/0.1", subreddits=["WindowsHelp"])
+
+        class Response:
+            def raise_for_status(self) -> None:
+                return None
+
+            def json(self) -> dict:
+                return {
+                    "data": {
+                        "children": [
+                            {
+                                "data": {
+                                    "id": "abc123",
+                                    "title": "Wi-Fi disappeared after an update",
+                                    "permalink": "/r/WindowsHelp/comments/abc123/example/",
+                                    "score": 25,
+                                    "num_comments": 9,
+                                    "created_utc": 1_700_000_000,
+                                }
+                            }
+                        ]
+                    }
+                }
+
+        with patch("src.collectors.reddit.requests.get", return_value=Response()):
+            signals = collector.collect("wifi disappeared")
+
+        self.assertEqual(collector.diagnostics["status"], "public_json_unverified")
+        self.assertEqual(collector.diagnostics["observed_signal_count"], 0)
+        self.assertEqual(collector.diagnostics["query_plan_count"], 1)
+        self.assertEqual(signals[0].metadata["evidence_type"], "QUERY_PLAN")
+        self.assertFalse(signals[0].metadata["verified_by_codex"])
+        self.assertEqual(signals[0].metadata["reddit_item_id"], "abc123")
+        self.assertEqual(signals[0].score, 0)
+        self.assertEqual(signals[0].metadata["demand_weight"], 0)
 
     def test_oauth_failure_is_recorded_before_public_json_fallback(self) -> None:
         collector = RedditCollector(
@@ -102,7 +152,7 @@ class RedditCollectorTests(unittest.TestCase):
 
         self.assertTrue(signals)
         self.assertTrue(collector.diagnostics["oauth_configured"])
-        self.assertEqual(collector.diagnostics["status"], "google_site_search_ready")
+        self.assertEqual(collector.diagnostics["status"], "query_plan_only")
         self.assertEqual(collector.diagnostics["oauth_error"], "invalid_grant")
 
 

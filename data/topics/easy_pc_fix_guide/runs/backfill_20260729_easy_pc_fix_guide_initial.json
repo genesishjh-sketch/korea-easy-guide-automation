@@ -1,0 +1,1070 @@
+{
+  "assignments": [
+    {
+      "question_id": "question_babf3f62cd196b3ddc",
+      "topic_id": "topic_a78ee265abe03ff207"
+    },
+    {
+      "question_id": "question_4ae15a8ecc7318951f",
+      "topic_id": "topic_c27dde969b005beafa"
+    },
+    {
+      "question_id": "question_fdea1c6cf858868b16",
+      "topic_id": "topic_c27dde969b005beafa"
+    },
+    {
+      "question_id": "question_b5fd28fa21af3f4bb2",
+      "topic_id": "topic_c27dde969b005beafa"
+    },
+    {
+      "question_id": "question_21e47a599b0f885109",
+      "topic_id": "topic_f420b92db77dce2a59"
+    },
+    {
+      "question_id": "question_28f1d6e5080b8f434a",
+      "topic_id": "topic_f420b92db77dce2a59"
+    },
+    {
+      "question_id": "question_39f30ffde87a56830c",
+      "topic_id": "topic_f420b92db77dce2a59"
+    },
+    {
+      "question_id": "question_d31d430853405648ea",
+      "topic_id": "topic_f420b92db77dce2a59"
+    },
+    {
+      "question_id": "question_f5e1c966a798ff8e7c",
+      "topic_id": "topic_f420b92db77dce2a59"
+    },
+    {
+      "question_id": "question_617a82a5f62e81a13a",
+      "topic_id": "topic_ad2628ce129fcca2cf"
+    },
+    {
+      "question_id": "question_c4ac02ad780f4dc702",
+      "topic_id": "topic_3aa87de9fa9d19d2db"
+    },
+    {
+      "question_id": "question_7d79931af19a3d690e",
+      "topic_id": "topic_3aa87de9fa9d19d2db"
+    },
+    {
+      "question_id": "question_b1a363274529a70da3",
+      "topic_id": "topic_3aa87de9fa9d19d2db"
+    },
+    {
+      "question_id": "question_23cdd536c5eef61caa",
+      "topic_id": "topic_9e8fc79d1bb9015721"
+    },
+    {
+      "question_id": "question_5e84389eb903203289",
+      "topic_id": "topic_03e0af8703335e467a"
+    },
+    {
+      "question_id": "question_0bd6e6b70828b5abbf",
+      "topic_id": "topic_f8bf859c21a84cf9b4"
+    },
+    {
+      "question_id": "question_5a1efbcf02f5d914b3",
+      "topic_id": "topic_9af75ead16f1e7dbe4"
+    },
+    {
+      "question_id": "question_0e5e9464c0893a535b",
+      "topic_id": "topic_05feddb84a7b95a1d3"
+    },
+    {
+      "question_id": "question_cf35a90eced38a629f",
+      "topic_id": "topic_b391b0a574695530d4"
+    },
+    {
+      "question_id": "question_3d11e193b53fd8d9b6",
+      "topic_id": "topic_b391b0a574695530d4"
+    },
+    {
+      "question_id": "question_ab912ffb8f93908b15",
+      "topic_id": "topic_b391b0a574695530d4"
+    }
+  ],
+  "auditor": {
+    "auditor_id": "codex-backfill-auditor",
+    "blogger_duplicates_verified": false,
+    "decision": "HOLD",
+    "evidence_url_coverage_verified": true,
+    "notes": "Privacy-safe initial slice only. Complete Blogger semantic comparison and additional source families remain unexplored.",
+    "passed": false,
+    "synthetic_influence_verified": true
+  },
+  "blogger_duplicate_count": 0,
+  "checkpoint": {
+    "cursor": "initial_verified_slice_complete",
+    "notes": "Stopped at the 90-minute backfill budget; remaining source families are recorded in unexplored_scope.",
+    "searched_scope": [
+      "onedrive_file_explorer_crash",
+      "onedrive_sync_stuck_or_crashing",
+      "windows11_bluetooth_disappears",
+      "windows11_camera_missing",
+      "windows11_feature_update_download_stuck",
+      "windows11_microphone_code43",
+      "windows11_printer_driver_unavailable",
+      "windows11_repair_install_and_update_failed",
+      "windows11_update_0x800f0922_loop",
+      "windows11_update_completion_screen_stuck",
+      "windows11_update_removed_bluetooth"
+    ]
+  },
+  "clusters": [
+    {
+      "aliases": [
+        "onedrive_file_explorer_crash"
+      ],
+      "canonical_label": "Fix File Explorer crashing in OneDrive folders",
+      "cluster_id": "cluster_a78ee265abe03ff207",
+      "observation_run_ids": [
+        "backfill_20260729_easy_pc_fix_guide_initial"
+      ],
+      "problem_signature": "onedrive file explorer crash",
+      "question_ids": [
+        "question_babf3f62cd196b3ddc"
+      ],
+      "topic_ids": [
+        "topic_a78ee265abe03ff207"
+      ]
+    },
+    {
+      "aliases": [
+        "onedrive_sync_stuck_or_crashing"
+      ],
+      "canonical_label": "Fix OneDrive sync stuck or repeatedly crashing in Windows 11",
+      "cluster_id": "cluster_c27dde969b005beafa",
+      "observation_run_ids": [
+        "backfill_20260729_easy_pc_fix_guide_initial"
+      ],
+      "problem_signature": "onedrive sync stuck or crashing",
+      "question_ids": [
+        "question_4ae15a8ecc7318951f",
+        "question_fdea1c6cf858868b16",
+        "question_b5fd28fa21af3f4bb2"
+      ],
+      "topic_ids": [
+        "topic_c27dde969b005beafa"
+      ]
+    },
+    {
+      "aliases": [
+        "windows11_bluetooth_disappears"
+      ],
+      "canonical_label": "Fix Bluetooth completely missing in Windows 11",
+      "cluster_id": "cluster_f420b92db77dce2a59",
+      "observation_run_ids": [
+        "backfill_20260729_easy_pc_fix_guide_initial"
+      ],
+      "problem_signature": "windows11 bluetooth disappears",
+      "question_ids": [
+        "question_21e47a599b0f885109",
+        "question_28f1d6e5080b8f434a",
+        "question_39f30ffde87a56830c",
+        "question_d31d430853405648ea",
+        "question_f5e1c966a798ff8e7c"
+      ],
+      "topic_ids": [
+        "topic_f420b92db77dce2a59"
+      ]
+    },
+    {
+      "aliases": [
+        "windows11_camera_missing"
+      ],
+      "canonical_label": "Fix an integrated camera missing from Windows 11",
+      "cluster_id": "cluster_ad2628ce129fcca2cf",
+      "observation_run_ids": [
+        "backfill_20260729_easy_pc_fix_guide_initial"
+      ],
+      "problem_signature": "windows11 camera missing",
+      "question_ids": [
+        "question_617a82a5f62e81a13a"
+      ],
+      "topic_ids": [
+        "topic_ad2628ce129fcca2cf"
+      ]
+    },
+    {
+      "aliases": [
+        "windows11_feature_update_download_stuck"
+      ],
+      "canonical_label": "Fix a Windows 11 feature update download stuck at a percentage",
+      "cluster_id": "cluster_3aa87de9fa9d19d2db",
+      "observation_run_ids": [
+        "backfill_20260729_easy_pc_fix_guide_initial"
+      ],
+      "problem_signature": "windows11 feature update download stuck",
+      "question_ids": [
+        "question_c4ac02ad780f4dc702",
+        "question_7d79931af19a3d690e",
+        "question_b1a363274529a70da3"
+      ],
+      "topic_ids": [
+        "topic_3aa87de9fa9d19d2db"
+      ]
+    },
+    {
+      "aliases": [
+        "windows11_microphone_code43"
+      ],
+      "canonical_label": "Fix all microphone inputs missing with Code 43 in Windows 11",
+      "cluster_id": "cluster_9e8fc79d1bb9015721",
+      "observation_run_ids": [
+        "backfill_20260729_easy_pc_fix_guide_initial"
+      ],
+      "problem_signature": "windows11 microphone code43",
+      "question_ids": [
+        "question_23cdd536c5eef61caa"
+      ],
+      "topic_ids": [
+        "topic_9e8fc79d1bb9015721"
+      ]
+    },
+    {
+      "aliases": [
+        "windows11_printer_driver_unavailable"
+      ],
+      "canonical_label": "Fix printer driver unavailable in Windows 11",
+      "cluster_id": "cluster_03e0af8703335e467a",
+      "observation_run_ids": [
+        "backfill_20260729_easy_pc_fix_guide_initial"
+      ],
+      "problem_signature": "windows11 printer driver unavailable",
+      "question_ids": [
+        "question_5e84389eb903203289"
+      ],
+      "topic_ids": [
+        "topic_03e0af8703335e467a"
+      ]
+    },
+    {
+      "aliases": [
+        "windows11_repair_install_and_update_failed"
+      ],
+      "canonical_label": "When Windows 11 repair install and feature update both fail",
+      "cluster_id": "cluster_f8bf859c21a84cf9b4",
+      "observation_run_ids": [
+        "backfill_20260729_easy_pc_fix_guide_initial"
+      ],
+      "problem_signature": "windows11 repair install and update failed",
+      "question_ids": [
+        "question_0bd6e6b70828b5abbf"
+      ],
+      "topic_ids": [
+        "topic_f8bf859c21a84cf9b4"
+      ]
+    },
+    {
+      "aliases": [
+        "windows11_update_0x800f0922_loop"
+      ],
+      "canonical_label": "Fix Windows Update error 0x800f0922 and undoing changes",
+      "cluster_id": "cluster_9af75ead16f1e7dbe4",
+      "observation_run_ids": [
+        "backfill_20260729_easy_pc_fix_guide_initial"
+      ],
+      "problem_signature": "windows11 update 0x800f0922 loop",
+      "question_ids": [
+        "question_5a1efbcf02f5d914b3"
+      ],
+      "topic_ids": [
+        "topic_9af75ead16f1e7dbe4"
+      ]
+    },
+    {
+      "aliases": [
+        "windows11_update_completion_screen_stuck"
+      ],
+      "canonical_label": "Fix Windows Update stuck on the completion percentage screen",
+      "cluster_id": "cluster_05feddb84a7b95a1d3",
+      "observation_run_ids": [
+        "backfill_20260729_easy_pc_fix_guide_initial"
+      ],
+      "problem_signature": "windows11 update completion screen stuck",
+      "question_ids": [
+        "question_0e5e9464c0893a535b"
+      ],
+      "topic_ids": [
+        "topic_05feddb84a7b95a1d3"
+      ]
+    },
+    {
+      "aliases": [
+        "windows11_update_removed_bluetooth"
+      ],
+      "canonical_label": "Fix Bluetooth missing after a Windows 11 update",
+      "cluster_id": "cluster_b391b0a574695530d4",
+      "observation_run_ids": [
+        "backfill_20260729_easy_pc_fix_guide_initial"
+      ],
+      "problem_signature": "windows11 update removed bluetooth",
+      "question_ids": [
+        "question_cf35a90eced38a629f",
+        "question_3d11e193b53fd8d9b6",
+        "question_ab912ffb8f93908b15"
+      ],
+      "topic_ids": [
+        "topic_b391b0a574695530d4"
+      ]
+    }
+  ],
+  "collector_status": "DEGRADED",
+  "complete": false,
+  "degraded": true,
+  "ended_at": "2026-07-29T01:30:00+09:00",
+  "questions": [
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 1
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2026-03-16T00:00:00Z",
+      "question_id": "question_babf3f62cd196b3ddc",
+      "source": "reddit",
+      "source_id": "1rvo087",
+      "summary": "File Explorer repeatedly crashes when entering or moving files into OneDrive subfolders even after a full OneDrive reset.",
+      "title": "File Explorer Crashing for OneDrive Folders",
+      "url": "https://www.reddit.com/r/WindowsHelp/comments/1rvo087/file_explorer_crashing_for_onedrive_folders/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    },
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 1
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2026-07-13T00:00:00Z",
+      "question_id": "question_4ae15a8ecc7318951f",
+      "source": "reddit",
+      "source_id": "1uvh3mv",
+      "summary": "OneDrive remains stuck on a fixed number of files at zero transfer speed and continuously consumes CPU on a Windows 11 Surface.",
+      "title": "Onedrive sync stuck at 60 files, 100% and 0.0kB/s since weeks.",
+      "url": "https://www.reddit.com/r/WindowsHelp/comments/1uvh3mv/onedrive_sync_stuck_at_60_files_100_and_00kbs/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    },
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 1
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2026-03-05T00:00:00Z",
+      "question_id": "question_fdea1c6cf858868b16",
+      "source": "reddit",
+      "source_id": "1rllqcv",
+      "summary": "On new Windows 11 PCs, OneDrive stops starting correctly, reloads previously synced files, creates conflicts, and ignores folder selections.",
+      "title": "OneDrive crashing on Windows 11",
+      "url": "https://www.reddit.com/r/WindowsHelp/comments/1rllqcv/onedrive_crashing_on_windows_11/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    },
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 6
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2025-11-08T00:00:00Z",
+      "question_id": "question_b5fd28fa21af3f4bb2",
+      "source": "reddit",
+      "source_id": "1oru9dr",
+      "summary": "The desktop app freezes and fails to sync after storage is upgraded, while the web account reports the new capacity correctly.",
+      "title": "OneDrive is completely unfunctional",
+      "url": "https://www.reddit.com/r/WindowsHelp/comments/1oru9dr/onedrive_is_completely_unfunctional/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    },
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 7
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2025-10-02T00:00:00Z",
+      "question_id": "question_21e47a599b0f885109",
+      "source": "reddit",
+      "source_id": "1nwex5v",
+      "summary": "Windows 11 repeatedly loses the Bluetooth toggle and devices, then restores them only after the PC remains shut down.",
+      "title": "Bluetooth option disappeares itself",
+      "url": "https://www.reddit.com/r/WindowsHelp/comments/1nwex5v/bluetooth_option_disappeares_itself/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    },
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 5
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2026-04-14T00:00:00Z",
+      "question_id": "question_28f1d6e5080b8f434a",
+      "source": "reddit",
+      "source_id": "1slho1s",
+      "summary": "Bluetooth disappears from Device Manager and reinstalling Intel drivers or legacy hardware does not restore it.",
+      "title": "Can't get bluetooth back on windows 11",
+      "url": "https://www.reddit.com/r/WindowsHelp/comments/1slho1s/cant_get_bluetooth_back_on_windows_11/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    },
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 5
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2026-05-07T00:00:00Z",
+      "question_id": "question_39f30ffde87a56830c",
+      "source": "reddit",
+      "source_id": "1t6j4dr",
+      "summary": "Windows 11 loses the Bluetooth toggle and adapter, while the troubleshooter incorrectly reports that the previously working PC has no Bluetooth.",
+      "title": "Bluetooth completely vanished from Windows 11 – Device does not have Bluetooth error",
+      "url": "https://www.reddit.com/r/techsupport/comments/1t6j4dr/bluetooth_completely_vanished_from_windows_11/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    },
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 1
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2026-06-26T00:00:00Z",
+      "question_id": "question_d31d430853405648ea",
+      "source": "reddit",
+      "source_id": "1ug45el",
+      "summary": "A Windows 11 laptop loses the Bluetooth quick-control button immediately after a keyboard fails to reconnect.",
+      "title": "Bluetooth fault on my windows 11 laptop",
+      "url": "https://www.reddit.com/r/WindowsHelp/comments/1ug45el/bluetooth_fault_on_my_windows_11_laptop/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    },
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 8
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2025-09-03T00:00:00Z",
+      "question_id": "question_f5e1c966a798ff8e7c",
+      "source": "reddit",
+      "source_id": "1n7poee",
+      "summary": "The Bluetooth control is replaced by airplane mode and Windows settings can no longer activate Bluetooth.",
+      "title": "Bluetooth is gone from windows and I'm unable to connect anything via the settings?",
+      "url": "https://www.reddit.com/r/WindowsHelp/comments/1n7poee/bluetooth_is_gone_from_windows_and_im_unable_to/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    },
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 1
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2025-12-17T00:00:00Z",
+      "question_id": "question_617a82a5f62e81a13a",
+      "source": "reddit",
+      "source_id": "1pp4ayn",
+      "summary": "The integrated camera and its Device Manager driver are missing after common troubleshooting, and the user asks whether an external webcam will still work.",
+      "title": "Windows 11 laptop camera is not detected",
+      "url": "https://www.reddit.com/r/WindowsHelp/comments/1pp4ayn/windows_11_laptop_camera_is_not_detected_tried/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    },
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 1
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2026-07-14T00:00:00Z",
+      "question_id": "question_c4ac02ad780f4dc702",
+      "source": "reddit",
+      "source_id": "1uw8qkt",
+      "summary": "A remote Windows 11 feature update remains stuck at a low download percentage after standard repair methods, with ISO repair unavailable.",
+      "title": "Windows 11 Update 25H2 Stuck at 8% download - all options tryed",
+      "url": "https://www.reddit.com/r/WindowsHelp/comments/1uw8qkt/windows_11_update_25h2_stuck_at_8_download_all/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    },
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 5
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2026-02-21T00:00:00Z",
+      "question_id": "question_7d79931af19a3d690e",
+      "source": "reddit",
+      "source_id": "1rax2mz",
+      "summary": "Windows Update repeatedly reaches 99 percent but never completes, while Microsoft Store downloads also fail.",
+      "title": "Windows update downloads stuck at 99%",
+      "url": "https://www.reddit.com/r/WindowsHelp/comments/1rax2mz/windows_update_downloads_stuck_at_99/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    },
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 3
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2026-07-21T00:00:00Z",
+      "question_id": "question_b1a363274529a70da3",
+      "source": "reddit",
+      "source_id": "1v22h0b",
+      "summary": "A Windows 11 24H2 laptop handles normal updates but the 25H2 feature update stays around two percent.",
+      "title": "Laptop Stuck on Windows 11 version 25H2",
+      "url": "https://www.reddit.com/r/WindowsHelp/comments/1v22h0b/laptop_stuck_on_windows_11_version_25h2/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    },
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 7
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2026-07-06T00:00:00Z",
+      "question_id": "question_23cdd536c5eef61caa",
+      "source": "reddit",
+      "source_id": "1up7agu",
+      "summary": "All built-in and Bluetooth microphone inputs disappear while Intel Smart Sound OED reports Code 43 and a firmware-dump condition.",
+      "title": "Windows 11 suddenly lost all microphone input Code 43",
+      "url": "https://www.reddit.com/r/WindowsHelp/comments/1up7agu/windows_11_suddenly_lost_all_microphone_input/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    },
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 6
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2026-05-03T00:00:00Z",
+      "question_id": "question_5e84389eb903203289",
+      "source": "reddit",
+      "source_id": "1t2pm6k",
+      "summary": "Windows 11 reports a compatible Canon printer driver unavailable, and the vendor's own installer refuses to run on the detected operating system.",
+      "title": "Printer drivers unavailable",
+      "url": "https://www.reddit.com/r/techsupport/comments/1t2pm6k/printer_drivers_unavailable/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    },
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 1
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2026-07-25T00:00:00Z",
+      "question_id": "question_0bd6e6b70828b5abbf",
+      "source": "reddit",
+      "source_id": "1v6kc12",
+      "summary": "SFC, DISM, component reset, and an in-place repair all fail while an older Windows 11 release cannot upgrade.",
+      "title": "Windows 11 repair install failed, stuck on 23H2 and can't update",
+      "url": "https://www.reddit.com/r/WindowsHelp/comments/1v6kc12/windows_11_repair_install_failed_stuck_on_23h2/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    },
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 3
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2026-04-04T00:00:00Z",
+      "question_id": "question_5a1efbcf02f5d914b3",
+      "source": "reddit",
+      "source_id": "1sc4sed",
+      "summary": "A Windows 11 update repeatedly installs, restarts, fails with 0x800f0922, and rolls back without respecting idle or shutdown timing.",
+      "title": "Windows Update keeps failing repeatedly 0x800f0922 and undoing changes",
+      "url": "https://www.reddit.com/r/WindowsHelp/comments/1sc4sed/windows_update_keeps_failing_repeatedly/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    },
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 29
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2026-04-13T00:00:00Z",
+      "question_id": "question_0e5e9464c0893a535b",
+      "source": "reddit",
+      "source_id": "1skkyd0",
+      "summary": "A current Windows 11 laptop remains at zero percent for hours during the update completion screen and does not respond to a normal shutdown.",
+      "title": "Windows update stuck on You're 0% there",
+      "url": "https://www.reddit.com/r/WindowsHelp/comments/1skkyd0/windows_update_stuck_on_youre_0_there/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    },
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 9
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2025-10-20T00:00:00Z",
+      "question_id": "question_cf35a90eced38a629f",
+      "source": "reddit",
+      "source_id": "1obve9r",
+      "summary": "Bluetooth disappears from Device Manager after a Windows 11 25H2 update and driver reinstall, services, restore, and cold boot do not help.",
+      "title": "Windows 11 version 25H2 update completely killed my Bluetooth radio",
+      "url": "https://www.reddit.com/r/WindowsHelp/comments/1obve9r/windows_11_version_25h2_update_completely_killed/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    },
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 2
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2026-02-14T00:00:00Z",
+      "question_id": "question_3d11e193b53fd8d9b6",
+      "source": "reddit",
+      "source_id": "1r4ewts",
+      "summary": "A security update removes both Wi-Fi and Bluetooth; network reset, adapter reinstall, rollback, and system restore provide no lasting fix.",
+      "title": "Wifi and Bluetooth missing after latest update",
+      "url": "https://www.reddit.com/r/WindowsHelp/comments/1r4ewts/wifi_and_bluetooth_missing_after_latest_update/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    },
+    {
+      "collected_at": "2026-07-29T00:00:00+09:00",
+      "engagement": {
+        "score": 1
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "posted_at": "2026-03-12T00:00:00Z",
+      "question_id": "question_ab912ffb8f93908b15",
+      "source": "reddit",
+      "source_id": "1rs3zlx",
+      "summary": "After a security update and crash, the Bluetooth category and driver are gone from Device Manager.",
+      "title": "My Bluetooth was removed entirely in the last security update.",
+      "url": "https://www.reddit.com/r/WindowsHelp/comments/1rs3zlx/my_bluetooth_was_removed_entirely_in_the_last/",
+      "verification_method": "verified_by_codex",
+      "verified_at": "2026-07-29T00:00:00+09:00",
+      "verified_by": "codex-public-page-backfill"
+    }
+  ],
+  "run_at": "2026-07-29T00:00:00+09:00",
+  "run_id": "backfill_20260729_easy_pc_fix_guide_initial",
+  "run_type": "BACKFILL_RESEARCH",
+  "schema_version": 1,
+  "sheet_sync_status": "PENDING",
+  "site": "easy_pc_fix_guide",
+  "source_coverage": {
+    "public_page_verification": true,
+    "reddit_public_pages_opened": 21,
+    "search_console_queries_imported": 0
+  },
+  "started_at": "2026-07-29T00:00:00+09:00",
+  "stop_condition": "TIME_BUDGET",
+  "synthetic_influence_count": 0,
+  "topics": [
+    {
+      "action": "WATCH",
+      "aliases": [
+        "onedrive_file_explorer_crash"
+      ],
+      "audited_at": "2026-07-29T00:00:00+09:00",
+      "auditor_decision": "HOLD",
+      "auditor_reasons": [
+        "Initial backfill is incomplete.",
+        "Official answer sources and complete Blogger comparison are pending."
+      ],
+      "canonical_intent": "Stop Explorer crashes that occur only when browsing OneDrive-backed folders.",
+      "canonical_title": "Fix File Explorer crashing in OneDrive folders",
+      "category": "File Explorer",
+      "category_id": "cat_248b006ddb6584",
+      "cluster_id": "cluster_a78ee265abe03ff207",
+      "difference_from_existing": "Pending complete Blogger semantic comparison; do not publish from this backfill run.",
+      "editor_brief": "Backfill brief: Stop Explorer crashes that occur only when browsing OneDrive-backed folders. Compare the complete Blogger map, verify current official guidance, then route NEW/UPDATE/FAQ before READY.",
+      "official_answerable": false,
+      "official_source_refs": [],
+      "official_source_urls": [],
+      "priority_score": 0,
+      "problem_signature": "onedrive file explorer crash",
+      "question_ids": [
+        "question_babf3f62cd196b3ddc"
+      ],
+      "reader_questions": [
+        "File Explorer Crashing for OneDrive Folders"
+      ],
+      "status": "REVIEW",
+      "topic_id": "topic_a78ee265abe03ff207"
+    },
+    {
+      "action": "NEW_POST",
+      "aliases": [
+        "onedrive_sync_stuck_or_crashing"
+      ],
+      "audited_at": "2026-07-29T00:00:00+09:00",
+      "auditor_decision": "HOLD",
+      "auditor_reasons": [
+        "Initial backfill is incomplete.",
+        "Official answer sources and complete Blogger comparison are pending."
+      ],
+      "canonical_intent": "Recover a stalled or crashing OneDrive client without losing cloud or local files.",
+      "canonical_title": "Fix OneDrive sync stuck or repeatedly crashing in Windows 11",
+      "category": "OneDrive & Account",
+      "category_id": "cat_2f17b4ee478a4e",
+      "cluster_id": "cluster_c27dde969b005beafa",
+      "difference_from_existing": "Pending complete Blogger semantic comparison; do not publish from this backfill run.",
+      "editor_brief": "Backfill brief: Recover a stalled or crashing OneDrive client without losing cloud or local files. Compare the complete Blogger map, verify current official guidance, then route NEW/UPDATE/FAQ before READY.",
+      "official_answerable": false,
+      "official_source_refs": [],
+      "official_source_urls": [],
+      "priority_score": 0,
+      "problem_signature": "onedrive sync stuck or crashing",
+      "question_ids": [
+        "question_4ae15a8ecc7318951f",
+        "question_fdea1c6cf858868b16",
+        "question_b5fd28fa21af3f4bb2"
+      ],
+      "reader_questions": [
+        "Onedrive sync stuck at 60 files, 100% and 0.0kB/s since weeks.",
+        "OneDrive crashing on Windows 11",
+        "OneDrive is completely unfunctional"
+      ],
+      "status": "REVIEW",
+      "topic_id": "topic_c27dde969b005beafa"
+    },
+    {
+      "action": "NEW_POST",
+      "aliases": [
+        "windows11_bluetooth_disappears"
+      ],
+      "audited_at": "2026-07-29T00:00:00+09:00",
+      "auditor_decision": "HOLD",
+      "auditor_reasons": [
+        "Initial backfill is incomplete.",
+        "Official answer sources and complete Blogger comparison are pending."
+      ],
+      "canonical_intent": "Restore Bluetooth when the toggle, adapter, and Device Manager entry disappear.",
+      "canonical_title": "Fix Bluetooth completely missing in Windows 11",
+      "category": "Bluetooth & Devices",
+      "category_id": "cat_59262a4b41871e",
+      "cluster_id": "cluster_f420b92db77dce2a59",
+      "difference_from_existing": "Pending complete Blogger semantic comparison; do not publish from this backfill run.",
+      "editor_brief": "Backfill brief: Restore Bluetooth when the toggle, adapter, and Device Manager entry disappear. Compare the complete Blogger map, verify current official guidance, then route NEW/UPDATE/FAQ before READY.",
+      "official_answerable": false,
+      "official_source_refs": [],
+      "official_source_urls": [],
+      "priority_score": 0,
+      "problem_signature": "windows11 bluetooth disappears",
+      "question_ids": [
+        "question_21e47a599b0f885109",
+        "question_28f1d6e5080b8f434a",
+        "question_39f30ffde87a56830c",
+        "question_d31d430853405648ea",
+        "question_f5e1c966a798ff8e7c"
+      ],
+      "reader_questions": [
+        "Bluetooth option disappeares itself",
+        "Can't get bluetooth back on windows 11",
+        "Bluetooth completely vanished from Windows 11 – Device does not have Bluetooth error",
+        "Bluetooth fault on my windows 11 laptop",
+        "Bluetooth is gone from windows and I'm unable to connect anything via the settings?"
+      ],
+      "status": "REVIEW",
+      "topic_id": "topic_f420b92db77dce2a59"
+    },
+    {
+      "action": "WATCH",
+      "aliases": [
+        "windows11_camera_missing"
+      ],
+      "audited_at": "2026-07-29T00:00:00+09:00",
+      "auditor_decision": "HOLD",
+      "auditor_reasons": [
+        "Initial backfill is incomplete.",
+        "Official answer sources and complete Blogger comparison are pending."
+      ],
+      "canonical_intent": "Restore a built-in camera that is absent from Settings and Device Manager.",
+      "canonical_title": "Fix an integrated camera missing from Windows 11",
+      "category": "Bluetooth & Devices",
+      "category_id": "cat_59262a4b41871e",
+      "cluster_id": "cluster_ad2628ce129fcca2cf",
+      "difference_from_existing": "Pending complete Blogger semantic comparison; do not publish from this backfill run.",
+      "editor_brief": "Backfill brief: Restore a built-in camera that is absent from Settings and Device Manager. Compare the complete Blogger map, verify current official guidance, then route NEW/UPDATE/FAQ before READY.",
+      "official_answerable": false,
+      "official_source_refs": [],
+      "official_source_urls": [],
+      "priority_score": 0,
+      "problem_signature": "windows11 camera missing",
+      "question_ids": [
+        "question_617a82a5f62e81a13a"
+      ],
+      "reader_questions": [
+        "Windows 11 laptop camera is not detected"
+      ],
+      "status": "REVIEW",
+      "topic_id": "topic_ad2628ce129fcca2cf"
+    },
+    {
+      "action": "NEW_POST",
+      "aliases": [
+        "windows11_feature_update_download_stuck"
+      ],
+      "audited_at": "2026-07-29T00:00:00+09:00",
+      "auditor_decision": "HOLD",
+      "auditor_reasons": [
+        "Initial backfill is incomplete.",
+        "Official answer sources and complete Blogger comparison are pending."
+      ],
+      "canonical_intent": "Safely resume a feature update that remains at 8%, 99%, or another percentage.",
+      "canonical_title": "Fix a Windows 11 feature update download stuck at a percentage",
+      "category": "Windows Update",
+      "category_id": "cat_bd6cc833ce082a",
+      "cluster_id": "cluster_3aa87de9fa9d19d2db",
+      "difference_from_existing": "Pending complete Blogger semantic comparison; do not publish from this backfill run.",
+      "editor_brief": "Backfill brief: Safely resume a feature update that remains at 8%, 99%, or another percentage. Compare the complete Blogger map, verify current official guidance, then route NEW/UPDATE/FAQ before READY.",
+      "official_answerable": false,
+      "official_source_refs": [],
+      "official_source_urls": [],
+      "priority_score": 0,
+      "problem_signature": "windows11 feature update download stuck",
+      "question_ids": [
+        "question_c4ac02ad780f4dc702",
+        "question_7d79931af19a3d690e",
+        "question_b1a363274529a70da3"
+      ],
+      "reader_questions": [
+        "Windows 11 Update 25H2 Stuck at 8% download - all options tryed",
+        "Windows update downloads stuck at 99%",
+        "Laptop Stuck on Windows 11 version 25H2"
+      ],
+      "status": "REVIEW",
+      "topic_id": "topic_3aa87de9fa9d19d2db"
+    },
+    {
+      "action": "WATCH",
+      "aliases": [
+        "windows11_microphone_code43"
+      ],
+      "audited_at": "2026-07-29T00:00:00+09:00",
+      "auditor_decision": "HOLD",
+      "auditor_reasons": [
+        "Initial backfill is incomplete.",
+        "Official answer sources and complete Blogger comparison are pending."
+      ],
+      "canonical_intent": "Restore microphone input when Intel Smart Sound or another audio device reports Code 43.",
+      "canonical_title": "Fix all microphone inputs missing with Code 43 in Windows 11",
+      "category": "Sound & Microphone",
+      "category_id": "cat_69d8cb5b45a7ff",
+      "cluster_id": "cluster_9e8fc79d1bb9015721",
+      "difference_from_existing": "Pending complete Blogger semantic comparison; do not publish from this backfill run.",
+      "editor_brief": "Backfill brief: Restore microphone input when Intel Smart Sound or another audio device reports Code 43. Compare the complete Blogger map, verify current official guidance, then route NEW/UPDATE/FAQ before READY.",
+      "official_answerable": false,
+      "official_source_refs": [],
+      "official_source_urls": [],
+      "priority_score": 0,
+      "problem_signature": "windows11 microphone code43",
+      "question_ids": [
+        "question_23cdd536c5eef61caa"
+      ],
+      "reader_questions": [
+        "Windows 11 suddenly lost all microphone input Code 43"
+      ],
+      "status": "REVIEW",
+      "topic_id": "topic_9e8fc79d1bb9015721"
+    },
+    {
+      "action": "WATCH",
+      "aliases": [
+        "windows11_printer_driver_unavailable"
+      ],
+      "audited_at": "2026-07-29T00:00:00+09:00",
+      "auditor_decision": "HOLD",
+      "auditor_reasons": [
+        "Initial backfill is incomplete.",
+        "Official answer sources and complete Blogger comparison are pending."
+      ],
+      "canonical_intent": "Install a compatible printer safely when Windows and the vendor installer disagree.",
+      "canonical_title": "Fix printer driver unavailable in Windows 11",
+      "category": "Printer & Scanner",
+      "category_id": "cat_cce9fd35f6178b",
+      "cluster_id": "cluster_03e0af8703335e467a",
+      "difference_from_existing": "Pending complete Blogger semantic comparison; do not publish from this backfill run.",
+      "editor_brief": "Backfill brief: Install a compatible printer safely when Windows and the vendor installer disagree. Compare the complete Blogger map, verify current official guidance, then route NEW/UPDATE/FAQ before READY.",
+      "official_answerable": false,
+      "official_source_refs": [],
+      "official_source_urls": [],
+      "priority_score": 0,
+      "problem_signature": "windows11 printer driver unavailable",
+      "question_ids": [
+        "question_5e84389eb903203289"
+      ],
+      "reader_questions": [
+        "Printer drivers unavailable"
+      ],
+      "status": "REVIEW",
+      "topic_id": "topic_03e0af8703335e467a"
+    },
+    {
+      "action": "WATCH",
+      "aliases": [
+        "windows11_repair_install_and_update_failed"
+      ],
+      "audited_at": "2026-07-29T00:00:00+09:00",
+      "auditor_decision": "HOLD",
+      "auditor_reasons": [
+        "Initial backfill is incomplete.",
+        "Official answer sources and complete Blogger comparison are pending."
+      ],
+      "canonical_intent": "Choose safe recovery options after both normal update and repair install fail.",
+      "canonical_title": "When Windows 11 repair install and feature update both fail",
+      "category": "Boot & Recovery",
+      "category_id": "cat_3e8874b2ae6eb5",
+      "cluster_id": "cluster_f8bf859c21a84cf9b4",
+      "difference_from_existing": "Pending complete Blogger semantic comparison; do not publish from this backfill run.",
+      "editor_brief": "Backfill brief: Choose safe recovery options after both normal update and repair install fail. Compare the complete Blogger map, verify current official guidance, then route NEW/UPDATE/FAQ before READY.",
+      "official_answerable": false,
+      "official_source_refs": [],
+      "official_source_urls": [],
+      "priority_score": 0,
+      "problem_signature": "windows11 repair install and update failed",
+      "question_ids": [
+        "question_0bd6e6b70828b5abbf"
+      ],
+      "reader_questions": [
+        "Windows 11 repair install failed, stuck on 23H2 and can't update"
+      ],
+      "status": "REVIEW",
+      "topic_id": "topic_f8bf859c21a84cf9b4"
+    },
+    {
+      "action": "WATCH",
+      "aliases": [
+        "windows11_update_0x800f0922_loop"
+      ],
+      "audited_at": "2026-07-29T00:00:00+09:00",
+      "auditor_decision": "HOLD",
+      "auditor_reasons": [
+        "Initial backfill is incomplete.",
+        "Official answer sources and complete Blogger comparison are pending."
+      ],
+      "canonical_intent": "Break a repeated 0x800f0922 install-and-rollback loop.",
+      "canonical_title": "Fix Windows Update error 0x800f0922 and undoing changes",
+      "category": "Error Codes",
+      "category_id": "cat_6674ea2547ccfe",
+      "cluster_id": "cluster_9af75ead16f1e7dbe4",
+      "difference_from_existing": "Pending complete Blogger semantic comparison; do not publish from this backfill run.",
+      "editor_brief": "Backfill brief: Break a repeated 0x800f0922 install-and-rollback loop. Compare the complete Blogger map, verify current official guidance, then route NEW/UPDATE/FAQ before READY.",
+      "official_answerable": false,
+      "official_source_refs": [],
+      "official_source_urls": [],
+      "priority_score": 0,
+      "problem_signature": "windows11 update 0x800f0922 loop",
+      "question_ids": [
+        "question_5a1efbcf02f5d914b3"
+      ],
+      "reader_questions": [
+        "Windows Update keeps failing repeatedly 0x800f0922 and undoing changes"
+      ],
+      "status": "REVIEW",
+      "topic_id": "topic_9af75ead16f1e7dbe4"
+    },
+    {
+      "action": "WATCH",
+      "aliases": [
+        "windows11_update_completion_screen_stuck"
+      ],
+      "audited_at": "2026-07-29T00:00:00+09:00",
+      "auditor_decision": "HOLD",
+      "auditor_reasons": [
+        "Initial backfill is incomplete.",
+        "Official answer sources and complete Blogger comparison are pending."
+      ],
+      "canonical_intent": "Recover a PC stuck during the post-restart update completion phase.",
+      "canonical_title": "Fix Windows Update stuck on the completion percentage screen",
+      "category": "Windows Update",
+      "category_id": "cat_bd6cc833ce082a",
+      "cluster_id": "cluster_05feddb84a7b95a1d3",
+      "difference_from_existing": "Pending complete Blogger semantic comparison; do not publish from this backfill run.",
+      "editor_brief": "Backfill brief: Recover a PC stuck during the post-restart update completion phase. Compare the complete Blogger map, verify current official guidance, then route NEW/UPDATE/FAQ before READY.",
+      "official_answerable": false,
+      "official_source_refs": [],
+      "official_source_urls": [],
+      "priority_score": 0,
+      "problem_signature": "windows11 update completion screen stuck",
+      "question_ids": [
+        "question_0e5e9464c0893a535b"
+      ],
+      "reader_questions": [
+        "Windows update stuck on You're 0% there"
+      ],
+      "status": "REVIEW",
+      "topic_id": "topic_05feddb84a7b95a1d3"
+    },
+    {
+      "action": "NEW_POST",
+      "aliases": [
+        "windows11_update_removed_bluetooth"
+      ],
+      "audited_at": "2026-07-29T00:00:00+09:00",
+      "auditor_decision": "HOLD",
+      "auditor_reasons": [
+        "Initial backfill is incomplete.",
+        "Official answer sources and complete Blogger comparison are pending."
+      ],
+      "canonical_intent": "Recover Bluetooth specifically after a security or feature update removes the radio.",
+      "canonical_title": "Fix Bluetooth missing after a Windows 11 update",
+      "category": "Bluetooth & Devices",
+      "category_id": "cat_59262a4b41871e",
+      "cluster_id": "cluster_b391b0a574695530d4",
+      "difference_from_existing": "Pending complete Blogger semantic comparison; do not publish from this backfill run.",
+      "editor_brief": "Backfill brief: Recover Bluetooth specifically after a security or feature update removes the radio. Compare the complete Blogger map, verify current official guidance, then route NEW/UPDATE/FAQ before READY.",
+      "official_answerable": false,
+      "official_source_refs": [],
+      "official_source_urls": [],
+      "priority_score": 0,
+      "problem_signature": "windows11 update removed bluetooth",
+      "question_ids": [
+        "question_cf35a90eced38a629f",
+        "question_3d11e193b53fd8d9b6",
+        "question_ab912ffb8f93908b15"
+      ],
+      "reader_questions": [
+        "Windows 11 version 25H2 update completely killed my Bluetooth radio",
+        "Wifi and Bluetooth missing after latest update",
+        "My Bluetooth was removed entirely in the last security update."
+      ],
+      "status": "REVIEW",
+      "topic_id": "topic_b391b0a574695530d4"
+    }
+  ],
+  "unexplored_scope": [
+    "Additional Korea travel community categories beyond navigation, transit cards, and connectivity",
+    "Additional Windows communities and lower-frequency device-specific problems",
+    "First-party Search Console query import"
+  ]
+}

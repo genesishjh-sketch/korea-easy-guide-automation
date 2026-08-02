@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import traceback
+import uuid
 
 from src.config import ROOT_DIR
 from src.config import load_settings
@@ -24,6 +25,15 @@ from src.pipeline.daily_draft import save_daily_success_report
 from src.pipeline.daily_draft import seed_quality_precheck
 from src.pipeline.daily_draft import title_matches_existing
 from src.pipeline.daily_draft import used_keywords
+from src.pipeline.weekly_queue import NEW_POST_ACTION
+from src.pipeline.weekly_queue import list_registry_ready_candidates
+from src.pipeline.weekly_queue import load_topic_store
+from src.pipeline.weekly_queue import locally_published_topic_ids
+from src.pipeline.weekly_queue import normalize_topic_action
+from src.pipeline.weekly_queue import normalize_topic_record
+from src.pipeline.weekly_queue import resolve_topic_category_label
+from src.pipeline.weekly_queue import sweep_topic_reservations
+from src.pipeline.weekly_queue import topic_board_mode
 from src.pipeline.weekly_queue import today_queue_candidates
 from src.publishing.blogger import BloggerPublisher
 from src.pipeline.stage1_generate import run as run_stage1
@@ -49,6 +59,7 @@ def run(
     if mode != "publish":
         raise ValueError("daily_batch currently supports publish mode only.")
 
+    sweep_topic_reservations(load_topic_store(), settings.site_key)
     existing_today = count_public_posts_today(settings.site_url)
     remaining_slots = max(0, max_posts - existing_today)
     if remaining_slots == 0:
@@ -69,23 +80,76 @@ def run(
     )
     result = build_batch_result(settings.site_key, max_posts, existing_today)
     result["selected_candidates"] = selected
+    batch_run_id = f"{settings.site_key}:{datetime.now(tz=KST).isoformat()}:{uuid.uuid4().hex[:10]}"
+    result["run_id"] = batch_run_id
 
-    for candidate in selected:
+    for original_candidate in selected:
         if len(result["published"]) >= remaining_slots:
             break
+        claimed, candidate, claim_reason = claim_topic_candidate(
+            settings.site_key,
+            original_candidate,
+            batch_run_id,
+        )
+        if not claimed:
+            result["skipped"].append(
+                {
+                    "seed": original_candidate.get("seed", ""),
+                    "topic_id": original_candidate.get("topic_id", ""),
+                    "cluster_id": original_candidate.get("cluster_id", ""),
+                    "category": original_candidate.get("category", ""),
+                    "article_type": original_candidate.get("article_type", ""),
+                    "reason": "topic_claim_failed",
+                    "claim_reason": claim_reason,
+                }
+            )
+            continue
         seed = candidate["seed"]
         article_dir: Path | None = None
         try:
-            article_dir = run_stage1(seed, settings.site_key)
+            article_dir = run_stage1(seed, settings.site_key, topic_context=candidate)
+            generated_candidate = mark_topic_generated(
+                settings.site_key,
+                candidate,
+                batch_run_id,
+                article_dir=article_dir,
+            )
+            if isinstance(generated_candidate, dict):
+                candidate = generated_candidate
             result_path = run_publish_with_duplicate_guard(article_dir, settings.site_key)
+            ensure_publish_result_topic_context(result_path, article_dir, candidate)
         except Exception as exc:
+            if getattr(exc, "reconciliation_only", False):
+                save_daily_failure_report(seed, exc, settings.site_key, mode)
+                result["held"].append(
+                    {
+                        "seed": seed,
+                        "topic_id": candidate.get("topic_id", ""),
+                        "cluster_id": candidate.get("cluster_id", ""),
+                        "article_type": candidate.get("article_type", ""),
+                        "category": candidate.get("category", ""),
+                        "reason": "publication_reconciliation_pending",
+                        "recovery_status": "reconcile_only",
+                        "error": str(exc),
+                        "article_dir": str(article_dir) if article_dir else "",
+                        "next_action": (
+                            "Blogger와 publication receipt/outbox를 대조하세요. "
+                            "이 topic_id로 새 insert를 재시도하면 안 됩니다."
+                        ),
+                    }
+                )
+                continue
             if is_quality_gate_failure(exc):
                 result["held"].append(recover_quality_failure(candidate, exc, article_dir))
+                mark_topic_for_review(settings.site_key, candidate, str(exc))
                 continue
             save_daily_failure_report(seed, exc, settings.site_key, mode)
+            release_topic_claim(settings.site_key, candidate, batch_run_id, str(exc))
             result["failed"].append(
                 {
                     "seed": seed,
+                    "topic_id": candidate.get("topic_id", ""),
+                    "cluster_id": candidate.get("cluster_id", ""),
                     "article_type": candidate["article_type"],
                     "category": candidate["category"],
                     "reason": "unexpected_error",
@@ -95,9 +159,16 @@ def run(
             continue
 
         if is_duplicate_publish_result(result_path):
+            mark_topic_for_review(
+                settings.site_key,
+                candidate,
+                "A Blogger duplicate was found after the topic was claimed; merge or publication mapping review is required.",
+            )
             result["skipped"].append(
                 {
                     "seed": seed,
+                    "topic_id": candidate.get("topic_id", ""),
+                    "cluster_id": candidate.get("cluster_id", ""),
                     "article_type": candidate["article_type"],
                     "category": candidate["category"],
                     "reason": "duplicate_public_post",
@@ -116,8 +187,13 @@ def run(
             "skipped_quality_seeds": [],
         }
         save_daily_success_report(single_result)
-        result["published"].append(build_published_item(single_result, candidate))
+        published_item = build_published_item(single_result, candidate)
+        result["published"].append(published_item)
 
+    result["topic_publication_verification"] = verify_topic_publications(
+        settings.site_key,
+        result["published"],
+    )
     result["status"] = "published" if result["published"] else "held_no_publishable_candidates"
     result["created_at"] = datetime.utcnow().isoformat() + "Z"
     result["post_publish_checks"] = run_post_publish_checks(settings.site_key, result.get("published") or [])
@@ -138,25 +214,68 @@ def select_seed_candidates(
     max_posts: int,
     explicit_seed: str | None = None,
 ) -> list[dict]:
-    if not explicit_seed:
-        queued = today_queue_candidates(site, max_posts=max_posts)
-        if queued:
-            return queued
-
     publish_used = used_keywords(site, include_validation=False)
     generated_used = used_keywords(site, include_validation=True)
-    selected: list[dict] = []
-    selected_types: set[str] = set()
-    selected_categories: set[str] = set()
     max_precheck = int(os.getenv("DAILY_BATCH_MAX_PRECHECK", "12"))
     existing_titles = public_post_titles(site)
     recent_categories = set(public_recent_categories(site, content_domain, limit=max(6, max_posts * 2)))
-    candidates: list[dict] = []
+    published_topic_ids = locally_published_topic_ids(site)
+    queued = [] if explicit_seed else today_queue_candidates(site, max_posts=max_posts)
+    selection_mode = topic_board_mode(site)
+    registry_candidates = (
+        list_registry_ready_candidates(
+            site,
+            limit=max_precheck,
+            require_rollout_gate=False,
+        )
+        if not explicit_seed and selection_mode in {"ready_first", "registry_only"}
+        else []
+    )
+    legacy_candidates = []
+    if selection_mode != "registry_only" or explicit_seed:
+        legacy_candidates = [
+            {
+                "seed": seed,
+                "topic_id": "",
+                "cluster_id": "",
+                "category_id": "",
+                "action": NEW_POST_ACTION,
+                "topic_action": NEW_POST_ACTION,
+                "revision": 0,
+                "topic_revision": 0,
+                "editor_brief": {},
+                "reader_questions": [],
+                "difference_from_existing": "",
+                "existing_post_refs": [],
+                "topic_source": "explicit" if explicit_seed else "legacy",
+            }
+            for seed in choose_publish_seed_candidates(explicit_seed, site)[:max_precheck]
+        ]
 
-    for seed in choose_publish_seed_candidates(explicit_seed, site)[:max_precheck]:
+    source_candidates = [*queued, *registry_candidates]
+    if selection_mode != "registry_only" or explicit_seed:
+        source_candidates.extend(legacy_candidates)
+    candidates: list[dict] = []
+    seen_seeds: set[str] = set()
+    seen_topic_ids: set[str] = set()
+
+    for source_candidate in source_candidates:
+        seed = str(source_candidate.get("seed") or "").strip()
+        if not seed:
+            continue
         normalized = seed.casefold()
-        category = infer_category(seed, content_domain)
-        article_type = infer_article_type(seed, category, content_domain)
+        topic_id = str(source_candidate.get("topic_id") or "")
+        if normalized in seen_seeds or (topic_id and topic_id in seen_topic_ids):
+            continue
+        if topic_id and topic_id in published_topic_ids:
+            continue
+        if normalize_topic_action(source_candidate.get("action")) != NEW_POST_ACTION:
+            continue
+        category = str(source_candidate.get("category") or infer_category(seed, content_domain))
+        article_type = str(
+            source_candidate.get("article_type")
+            or infer_article_type(seed, category, content_domain)
+        )
         precheck = seed_quality_precheck(seed, content_domain)
         precheck_status = precheck.get("status")
         if normalized in publish_used or normalized in generated_used:
@@ -167,6 +286,7 @@ def select_seed_candidates(
             continue
         candidates.append(
             {
+                **source_candidate,
                 "seed": seed,
                 "category": category,
                 "article_type": article_type,
@@ -174,13 +294,38 @@ def select_seed_candidates(
                 "recent_category": category in recent_categories,
             }
         )
+        seen_seeds.add(normalized)
+        if topic_id:
+            seen_topic_ids.add(topic_id)
 
-    for candidate in sorted(candidates, key=lambda item: (item["recent_category"], item["category"] in selected_categories)):
+    if explicit_seed:
+        return candidates[:1]
+
+    selected: list[dict] = []
+    selected_types: set[str] = set()
+    selected_categories: set[str] = set()
+    priority_candidates = [item for item in candidates if item.get("weekly_queue")]
+    for candidate in priority_candidates:
+        selected.append(candidate)
+        selected_types.add(candidate["article_type"])
+        selected_categories.add(candidate["category"])
+        if len(selected) >= max_posts:
+            return selected
+
+    fallback_candidates = [item for item in candidates if not item.get("weekly_queue")]
+    for candidate in sorted(
+        fallback_candidates,
+        key=lambda item: (
+            item.get("topic_source") == "legacy",
+            item["recent_category"],
+            item["category"] in selected_categories,
+        ),
+    ):
         category = candidate["category"]
         article_type = candidate["article_type"]
-        if not explicit_seed and article_type in selected_types:
+        if article_type in selected_types:
             continue
-        if not explicit_seed and category in selected_categories:
+        if category in selected_categories:
             continue
         selected.append(candidate)
         selected_types.add(article_type)
@@ -188,12 +333,16 @@ def select_seed_candidates(
         if len(selected) >= max_posts:
             break
     if len(selected) < max_posts:
-        selected_seeds = {item["seed"] for item in selected}
-        for candidate in candidates:
-            if candidate["seed"] in selected_seeds:
+        selected_keys = {
+            (str(item.get("topic_id") or ""), item["seed"].casefold())
+            for item in selected
+        }
+        for candidate in fallback_candidates:
+            key = (str(candidate.get("topic_id") or ""), candidate["seed"].casefold())
+            if key in selected_keys:
                 continue
             selected.append(candidate)
-            selected_seeds.add(candidate["seed"])
+            selected_keys.add(key)
             if len(selected) >= max_posts:
                 break
     return selected
@@ -228,18 +377,357 @@ def count_public_posts_today(site_url: str) -> int:
     return sum(1 for post in posts if post["published_kst"].date() == today)
 
 
+def claim_topic_candidate(
+    site: str,
+    candidate: dict,
+    run_id: str,
+) -> tuple[bool, dict, str]:
+    topic_id = str(candidate.get("topic_id") or "")
+    if not topic_id:
+        return True, candidate, "legacy_candidate"
+    store = load_topic_store()
+    if store is None:
+        return False, candidate, "topic_registry_unavailable"
+    try:
+        expected_revision = int(
+            candidate["revision"]
+            if candidate.get("revision") is not None
+            else candidate.get("topic_revision") or 0
+        )
+    except (TypeError, ValueError):
+        return False, candidate, "topic_revision_invalid"
+    method = getattr(store, "claim_topic", None)
+    try:
+        if callable(method):
+            record = method(
+                site,
+                topic_id,
+                run_id,
+                expected_revision=expected_revision,
+            )
+        else:
+            method = getattr(store, "claim_ready_topic", None)
+            if not callable(method):
+                return False, candidate, "topic_claim_api_unavailable"
+            record = method(
+                site,
+                run_id,
+                topic_id=topic_id,
+                expected_revision=expected_revision,
+            )
+    except Exception as exc:
+        return False, candidate, f"topic_claim_error:{exc}"
+    if record is None:
+        return False, candidate, "topic_claim_conflict_or_stale_revision"
+    fresh = normalize_topic_record(record)
+    if fresh.get("topic_id") != topic_id:
+        return False, candidate, "topic_claim_returned_different_topic"
+    claimed_status = str(fresh.get("registry_status") or "").upper()
+    if claimed_status and claimed_status != "CLAIMED":
+        return False, candidate, f"topic_claim_returned_{claimed_status.lower()}"
+    returned_run_id = str(fresh.get("claim_run_id") or "")
+    if returned_run_id and returned_run_id != run_id:
+        return False, candidate, "topic_claim_owned_by_different_run"
+    record_reservation = getattr(store, "record_claim_reservation", None)
+    if callable(record_reservation):
+        try:
+            lease_seconds = int(
+                os.getenv("TOPIC_CLAIM_LEASE_SECONDS", "7200")
+            )
+            if lease_seconds <= 0:
+                raise ValueError("TOPIC_CLAIM_LEASE_SECONDS must be positive")
+            reservation = record_reservation(
+                site,
+                topic_id,
+                run_id=run_id,
+                expected_revision=int(fresh.get("revision") or 0),
+                lease_seconds=lease_seconds,
+            )
+            if isinstance(reservation, dict):
+                fresh["claim_started_at"] = reservation.get("started_at", "")
+                fresh["claim_expires_at"] = reservation.get("expires_at", "")
+        except Exception as exc:
+            release_topic_claim(
+                site,
+                {**candidate, **fresh, "claim_run_id": run_id},
+                run_id,
+                f"claim lease persistence failed: {exc}",
+            )
+            return False, candidate, f"topic_claim_lease_error:{exc}"
+    fresh["category"] = resolve_topic_category_label(
+        store,
+        site,
+        fresh.get("category_id", ""),
+        fresh.get("category", ""),
+    )
+    claimed_candidate = {
+        **candidate,
+        **fresh,
+        "category": fresh.get("category") or candidate.get("category", ""),
+        "article_type": fresh.get("article_type") or candidate.get("article_type", ""),
+        "quality_precheck": candidate.get("quality_precheck") or {"status": "ready"},
+        "weekly_queue": candidate.get("weekly_queue") or {},
+        "claim_run_id": run_id,
+        "registry_status": "CLAIMED",
+    }
+    claimed_candidate["topic_action"] = claimed_candidate.get("action", NEW_POST_ACTION)
+    claimed_candidate["topic_revision"] = claimed_candidate.get("revision", 0)
+    return True, claimed_candidate, "claimed"
+
+
+def mark_topic_generated(
+    site: str,
+    candidate: dict,
+    run_id: str,
+    *,
+    article_dir: Path | None = None,
+) -> dict | None:
+    topic_id = str(candidate.get("topic_id") or "")
+    if not topic_id:
+        return candidate
+    store = load_topic_store()
+    if store is None:
+        raise RuntimeError(f"Topic registry unavailable after claiming {topic_id}.")
+    try:
+        from src.topics.models import TopicStatus
+
+        status = TopicStatus.GENERATED
+    except (ImportError, AttributeError):
+        status = "GENERATED"
+    record = store.get_topic(site, topic_id)
+    record_run_id = getattr(record, "claim_run_id", "") if record is not None else ""
+    record_revision = getattr(record, "revision", 0) if record is not None else 0
+    if record is None or record_run_id != run_id:
+        raise RuntimeError(f"Topic claim ownership changed before generation completed: {topic_id}.")
+    if record_revision and int(record_revision) != int(candidate.get("revision") or 0):
+        raise RuntimeError(f"Topic revision changed during generation: {topic_id}.")
+    try:
+        result = store.mark_topic_status(
+            site,
+            topic_id,
+            status,
+            reason=f"Article generated by claim {run_id}.",
+            expected_revision=record_revision,
+            run_id=run_id,
+        )
+    except TypeError:
+        result = store.mark_topic_status(
+            site,
+            topic_id,
+            status,
+            reason=f"Article generated by claim {run_id}.",
+        )
+    except Exception as exc:
+        raise RuntimeError(f"Could not mark topic {topic_id} GENERATED.") from exc
+    if result is False:
+        raise RuntimeError(f"Could not mark topic {topic_id} GENERATED.")
+    fresh = normalize_topic_record(result)
+    if fresh.get("topic_id"):
+        fresh["category"] = resolve_topic_category_label(
+            store,
+            site,
+            fresh.get("category_id", ""),
+            fresh.get("category", ""),
+        )
+    refreshed = {
+        **candidate,
+        **({} if not fresh.get("topic_id") else fresh),
+        "category": fresh.get("category") or candidate.get("category", ""),
+        "article_type": fresh.get("article_type") or candidate.get("article_type", ""),
+        "quality_precheck": candidate.get("quality_precheck") or {"status": "ready"},
+        "weekly_queue": candidate.get("weekly_queue") or {},
+        "claim_run_id": run_id,
+        "registry_status": "GENERATED",
+    }
+    refreshed["topic_action"] = refreshed.get("action", NEW_POST_ACTION)
+    refreshed["topic_revision"] = refreshed.get("revision", 0)
+    if article_dir is not None:
+        sync_article_topic_context(article_dir, refreshed)
+    return refreshed
+
+
+def sync_article_topic_context(article_dir: Path, candidate: dict) -> None:
+    metadata_path = article_dir / "metadata.json"
+    try:
+        metadata = read_json(metadata_path)
+    except Exception as exc:
+        raise RuntimeError(
+            f"Could not reload generated metadata before publishing: {metadata_path}"
+        ) from exc
+    topic_metadata = dict(metadata.get("candidate") or {})
+    for key in (
+        "topic_id",
+        "cluster_id",
+        "category_id",
+        "action",
+        "topic_action",
+        "revision",
+        "topic_revision",
+        "claim_run_id",
+        "editor_brief",
+        "reader_questions",
+        "difference_from_existing",
+        "existing_post_refs",
+    ):
+        if key in candidate:
+            topic_metadata[key] = candidate[key]
+    metadata["candidate"] = topic_metadata
+    try:
+        metadata_path.write_text(
+            json.dumps(metadata, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+    except OSError as exc:
+        raise RuntimeError(
+            f"Could not synchronize generated topic metadata before publishing: {metadata_path}"
+        ) from exc
+
+
+def release_topic_claim(site: str, candidate: dict, run_id: str, reason: str) -> None:
+    topic_id = str(candidate.get("topic_id") or "")
+    if not topic_id:
+        return
+    store = load_topic_store()
+    if store is None:
+        return
+    release = getattr(store, "release_claim", None)
+    if not callable(release):
+        return
+    try:
+        from src.topics.models import TopicStatus
+
+        status = TopicStatus.READY
+    except (ImportError, AttributeError):
+        status = "READY"
+    released = None
+    try:
+        released = release(
+            site,
+            topic_id,
+            run_id,
+            status=status,
+            reason=f"Generation/publish attempt released: {reason[:800]}",
+        )
+    except Exception:
+        released = None
+    if released is not None:
+        return
+
+    # Compatibility recovery for stores that cannot release a GENERATED claim
+    # through release_claim. Never change a claim owned by another run.
+    try:
+        record = store.get_topic(site, topic_id)
+        current = normalize_topic_record(record) if record is not None else {}
+        if str(current.get("claim_run_id") or "") != run_id:
+            return
+        current_status = str(current.get("registry_status") or "").upper()
+        if current_status not in {"CLAIMED", "GENERATED"}:
+            return
+        store.mark_topic_status(
+            site,
+            topic_id,
+            status,
+            reason=f"Generation/publish attempt released: {reason[:800]}",
+            expected_revision=int(current.get("revision") or 0),
+        )
+    except Exception:
+        return
+
+
+def ensure_publish_result_topic_context(result_path: Path, article_dir: Path, candidate: dict) -> None:
+    if not result_path.exists():
+        return
+    try:
+        payload = read_json(result_path)
+        metadata = read_json(article_dir / "metadata.json")
+    except Exception:
+        return
+    topic = metadata.get("candidate") or {}
+    context = {
+        "topic_id": topic.get("topic_id") or candidate.get("topic_id", ""),
+        "cluster_id": topic.get("cluster_id") or candidate.get("cluster_id", ""),
+        "category_id": topic.get("category_id") or candidate.get("category_id", ""),
+        "action": topic.get("action") or candidate.get("action", NEW_POST_ACTION),
+        "topic_action": (
+            topic.get("topic_action")
+            or topic.get("action")
+            or candidate.get("topic_action")
+            or candidate.get("action", NEW_POST_ACTION)
+        ),
+        "revision": topic.get("revision") or candidate.get("revision", 0),
+        "topic_revision": (
+            topic.get("topic_revision")
+            or topic.get("revision")
+            or candidate.get("topic_revision")
+            or candidate.get("revision", 0)
+        ),
+        "claim_run_id": topic.get("claim_run_id") or candidate.get("claim_run_id", ""),
+    }
+    if all(payload.get(key) == value for key, value in context.items()):
+        return
+    payload.update(context)
+    result_path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
+
+def mark_topic_for_review(site: str, candidate: dict, reason: str) -> None:
+    topic_id = str(candidate.get("topic_id") or "")
+    if not topic_id:
+        return
+    store = load_topic_store()
+    if store is None:
+        return
+    try:
+        from src.topics.models import TopicStatus
+
+        status = TopicStatus.HOLD
+    except (ImportError, AttributeError):
+        status = "HOLD"
+    try:
+        store.mark_topic_status(
+            site,
+            topic_id,
+            status,
+            reason=reason[:1000],
+            expected_revision=int(
+                candidate.get("revision")
+                if candidate.get("revision") is not None
+                else candidate.get("topic_revision") or 0
+            ),
+        )
+    except TypeError:
+        try:
+            store.mark_topic_status(site, topic_id, status, reason=reason[:1000])
+        except Exception:
+            return
+    except Exception:
+        return
+
+
 def build_published_item(single_result: dict, candidate: dict) -> dict:
     article_dir = Path(single_result["article_dir"])
     metadata = read_json(article_dir / "metadata.json")
     quality = read_json(article_dir / "quality_report.json")
     publish_result = read_json(Path(single_result["publish_result"]))
     article = metadata.get("article", {})
+    topic = metadata.get("candidate", {})
     blogger = publish_result.get("blogger", {})
     return {
         "seed": single_result["seed"],
+        "topic_id": topic.get("topic_id") or candidate.get("topic_id", ""),
+        "cluster_id": topic.get("cluster_id") or candidate.get("cluster_id", ""),
+        "category_id": topic.get("category_id") or candidate.get("category_id", ""),
+        "action": topic.get("action") or candidate.get("action", NEW_POST_ACTION),
+        "revision": topic.get("revision") or candidate.get("revision", 0),
+        "claim_run_id": topic.get("claim_run_id") or candidate.get("claim_run_id", ""),
         "title": article.get("title", ""),
+        "blogger_post_id": blogger.get("id", ""),
         "url": blogger.get("url", ""),
         "blogger_status": blogger.get("status", ""),
+        "published_at": blogger.get("published", ""),
+        "updated_at": blogger.get("updated", ""),
         "draft": bool(publish_result.get("draft", False)),
         "skipped": bool(publish_result.get("skipped", False)),
         "category": candidate.get("category", ""),
@@ -249,6 +737,113 @@ def build_published_item(single_result: dict, candidate: dict) -> dict:
         "image_count": (quality.get("metrics") or {}).get("image_count"),
         "article_dir": single_result["article_dir"],
     }
+
+
+def verify_topic_publications(site: str, published_items: list[dict]) -> list[dict]:
+    pending = [item for item in published_items if item.get("topic_id")]
+    if not pending:
+        return []
+    store = load_topic_store()
+    if store is None:
+        return [
+            {
+                "topic_id": item.get("topic_id"),
+                "status": "LIVE_UNVERIFIED",
+                "reason": "topic_registry_unavailable",
+            }
+            for item in pending
+        ]
+    try:
+        settings = load_settings(site)
+        live_posts = BloggerPublisher(settings).list_live_posts()
+    except Exception as exc:
+        return [
+            {
+                "topic_id": item.get("topic_id"),
+                "status": "LIVE_UNVERIFIED",
+                "reason": f"blogger_verification_failed:{exc}",
+            }
+            for item in pending
+        ]
+    by_id = {str(post.get("id") or ""): post for post in live_posts if post.get("id")}
+    by_url = {
+        str(post.get("url") or "").rstrip("/"): post
+        for post in live_posts
+        if post.get("url")
+    }
+    results = []
+    for item in pending:
+        post = by_id.get(str(item.get("blogger_post_id") or ""))
+        if post is None:
+            post = by_url.get(str(item.get("url") or "").rstrip("/"))
+        if post is None:
+            item["topic_registry_status"] = "LIVE_UNVERIFIED"
+            results.append(
+                {
+                    "topic_id": item.get("topic_id"),
+                    "status": "LIVE_UNVERIFIED",
+                    "reason": "blogger_post_not_visible_yet",
+                }
+            )
+            continue
+        try:
+            from src.topics.models import PublicationRef
+
+            verified_at = datetime.utcnow().isoformat() + "Z"
+            publication = PublicationRef(
+                blogger_post_id=str(post.get("id") or item.get("blogger_post_id") or ""),
+                url=str(post.get("url") or item.get("url") or ""),
+                title=str(post.get("title") or item.get("title") or ""),
+                status=str(post.get("status") or item.get("blogger_status") or "LIVE"),
+                published_at=str(post.get("published") or item.get("published_at") or ""),
+                updated_at=str(post.get("updated") or item.get("updated_at") or ""),
+                last_verified_at=verified_at,
+            )
+            verify = getattr(store, "verify_publication", None)
+            if callable(verify):
+                try:
+                    verify(
+                        site,
+                        str(item.get("topic_id")),
+                        blogger_post_id=publication.blogger_post_id,
+                        url=publication.url,
+                        verified_at=verified_at,
+                        status="LIVE",
+                    )
+                except (ValueError, KeyError):
+                    store.record_publication(
+                        site,
+                        str(item.get("topic_id")),
+                        publication,
+                        expected_revision=int(item.get("revision") or 0),
+                        run_id=str(item.get("claim_run_id") or ""),
+                    )
+            else:
+                store.record_publication(
+                    site,
+                    str(item.get("topic_id")),
+                    publication,
+                )
+        except Exception as exc:
+            item["topic_registry_status"] = "LIVE_UNVERIFIED"
+            results.append(
+                {
+                    "topic_id": item.get("topic_id"),
+                    "status": "LIVE_UNVERIFIED",
+                    "reason": f"registry_confirmation_failed:{exc}",
+                }
+            )
+            continue
+        item["topic_registry_status"] = "PUBLISHED"
+        results.append(
+            {
+                "topic_id": item.get("topic_id"),
+                "status": "PUBLISHED",
+                "blogger_post_id": publication.blogger_post_id,
+                "url": publication.url,
+            }
+        )
+    return results
 
 
 def build_batch_result(site: str, max_posts: int, existing_today: int) -> dict:
@@ -270,6 +865,13 @@ def recover_quality_failure(candidate: dict, exc: Exception, article_dir: Path |
     classification = classify_recovery_issue(str(exc), article_dir)
     return {
         "seed": candidate.get("seed"),
+        "topic_id": candidate.get("topic_id", ""),
+        "cluster_id": candidate.get("cluster_id", ""),
+        "category_id": candidate.get("category_id", ""),
+        "action": candidate.get("action", NEW_POST_ACTION),
+        "topic_action": candidate.get("topic_action") or candidate.get("action", NEW_POST_ACTION),
+        "revision": candidate.get("revision", 0),
+        "topic_revision": candidate.get("topic_revision") or candidate.get("revision", 0),
         "article_type": candidate.get("article_type"),
         "category": candidate.get("category"),
         "reason": "quality_gate_failed",

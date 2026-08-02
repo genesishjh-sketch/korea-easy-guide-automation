@@ -67,12 +67,13 @@ def infer_intent(keyword: str) -> str:
 
 
 def build_candidate(seed: str, signals: list[TopicSignal], content_domain: str = "korea_travel") -> TopicCandidate:
+    demand_signals = [signal for signal in signals if is_demand_evidence(signal)]
     weighted = Counter()
-    for signal in signals:
+    for signal in demand_signals:
         weighted[signal.title.lower()] += signal.score
 
-    source_bonus = len({signal.source for signal in signals}) * 5
-    activity_score = min(60, sum(signal.score for signal in signals) / max(1, len(signals)))
+    source_bonus = len({signal.source for signal in demand_signals}) * 5
+    activity_score = min(60, sum(signal.score for signal in demand_signals) / max(1, len(demand_signals)))
     diversity_score = min(20, len(weighted) * 2)
     score = round(activity_score + diversity_score + source_bonus, 2)
 
@@ -83,3 +84,18 @@ def build_candidate(seed: str, signals: list[TopicSignal], content_domain: str =
         score=score,
         signals=signals,
     )
+
+
+def is_demand_evidence(signal: TopicSignal) -> bool:
+    metadata = signal.metadata or {}
+    evidence_type = str(metadata.get("evidence_type") or "").upper()
+    if evidence_type:
+        weight = metadata.get("demand_weight", 1.0)
+        return (
+            evidence_type in {"OBSERVED_QUESTION", "FIRST_PARTY_QUERY"}
+            and not isinstance(weight, bool)
+            and isinstance(weight, (int, float))
+            and float(weight) > 0.0
+        )
+    method = str(metadata.get("collection_method") or "")
+    return (signal.source == "reddit" and method == "oauth") or signal.source == "search_console"

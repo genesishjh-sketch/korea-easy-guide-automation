@@ -1,0 +1,305 @@
+{
+  "schema_version": 1,
+  "site": "easy_pc_fix_guide",
+  "run_id": "backfill-search-console-20260729-easy-pc-fix-guide",
+  "run_type": "BACKFILL_RESEARCH",
+  "started_at": "2026-07-29T15:45:00+09:00",
+  "ended_at": "2026-07-29T15:50:00+09:00",
+  "complete": false,
+  "degraded": true,
+  "collector_status": "DEGRADED",
+  "stop_condition": "SOURCE_LIMIT",
+  "checkpoint": {
+    "cursor": "search-console-top-10",
+    "searched_scope": [
+      "Search Console query dimension from 2025-07-29 through 2026-07-29"
+    ],
+    "notes": "The existing reporting client returns the top 10 rows only."
+  },
+  "source_coverage": {
+    "google_search_console": 10
+  },
+  "unexplored_scope": [
+    "Search Console query rows beyond the reporting client's top-10 limit"
+  ],
+  "synthetic_influence_count": 0,
+  "blogger_duplicate_count": 0,
+  "sheet_sync_status": "PENDING",
+  "auditor": {
+    "passed": true,
+    "decision": "PASS",
+    "auditor_id": "codex-search-console-auditor",
+    "evidence_url_coverage_verified": true,
+    "synthetic_influence_verified": true,
+    "blogger_duplicates_verified": true,
+    "notes": "Queries came directly from the authorized Search Console property. No topic was promoted to READY."
+  },
+  "questions": [
+    {
+      "question_id": "q_sc_pc_brother_printer_job_stuck",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250729-20260729-brother-printer-job-stuck",
+      "title": "brother printer job stuck in queue windows 11",
+      "summary": "Authorized Search Console query: 3 impressions, 0 clicks, average position 38 in the 12-month window.",
+      "created_at": "2026-07-29T00:00:00+09:00",
+      "collected_at": "2026-07-29T15:50:00+09:00",
+      "engagement": {"impressions": 3, "clicks": 0, "ctr": 0, "position": 38},
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-07-29T15:50:00+09:00",
+      "verified_by": "codex",
+      "property_id": "https://easypcfixguide.blogspot.com/"
+    },
+    {
+      "question_id": "q_sc_pc_cant_delete_print_job",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250729-20260729-cant-delete-print-job",
+      "title": "cant delete print job",
+      "summary": "Authorized Search Console query: 1 impression, 0 clicks, average position 40 in the 12-month window.",
+      "created_at": "2026-07-29T00:00:00+09:00",
+      "collected_at": "2026-07-29T15:50:00+09:00",
+      "engagement": {"impressions": 1, "clicks": 0, "ctr": 0, "position": 40},
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-07-29T15:50:00+09:00",
+      "verified_by": "codex",
+      "property_id": "https://easypcfixguide.blogspot.com/"
+    },
+    {
+      "question_id": "q_sc_pc_easy_fix_windows_7",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250729-20260729-easy-fix-windows-7",
+      "title": "easy fix windows 7",
+      "summary": "Authorized Search Console query: 1 impression, 0 clicks, average position 72. It is retained as a generic legacy query and does not support a publishable topic.",
+      "created_at": "2026-07-29T00:00:00+09:00",
+      "collected_at": "2026-07-29T15:50:00+09:00",
+      "engagement": {"impressions": 1, "clicks": 0, "ctr": 0, "position": 72},
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-07-29T15:50:00+09:00",
+      "verified_by": "codex",
+      "property_id": "https://easypcfixguide.blogspot.com/"
+    },
+    {
+      "question_id": "q_sc_pc_local_area_no_internet",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250729-20260729-local-area-no-internet",
+      "title": "local area connection no internet",
+      "summary": "Authorized Search Console query: 1 impression, 0 clicks, average position 39 in the 12-month window.",
+      "created_at": "2026-07-29T00:00:00+09:00",
+      "collected_at": "2026-07-29T15:50:00+09:00",
+      "engagement": {"impressions": 1, "clicks": 0, "ctr": 0, "position": 39},
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-07-29T15:50:00+09:00",
+      "verified_by": "codex",
+      "property_id": "https://easypcfixguide.blogspot.com/"
+    },
+    {
+      "question_id": "q_sc_pc_pending_restart",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250729-20260729-pending-restart-windows-update",
+      "title": "pending restart windows update",
+      "summary": "Authorized Search Console query: 2 impressions, 0 clicks, average position 19.5 in the 12-month window.",
+      "created_at": "2026-07-29T00:00:00+09:00",
+      "collected_at": "2026-07-29T15:50:00+09:00",
+      "engagement": {"impressions": 2, "clicks": 0, "ctr": 0, "position": 19.5},
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-07-29T15:50:00+09:00",
+      "verified_by": "codex",
+      "property_id": "https://easypcfixguide.blogspot.com/"
+    },
+    {
+      "question_id": "q_sc_pc_ports_missing_device_manager",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250729-20260729-ports-missing-device-manager",
+      "title": "ports not showing in device manager windows 11",
+      "summary": "Authorized Search Console query: 1 impression, 0 clicks, average position 36. This is a distinct potential topic, held for more evidence.",
+      "created_at": "2026-07-29T00:00:00+09:00",
+      "collected_at": "2026-07-29T15:50:00+09:00",
+      "engagement": {"impressions": 1, "clicks": 0, "ctr": 0, "position": 36},
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-07-29T15:50:00+09:00",
+      "verified_by": "codex",
+      "property_id": "https://easypcfixguide.blogspot.com/"
+    },
+    {
+      "question_id": "q_sc_pc_time_windows_wrong",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250729-20260729-time-windows-wrong",
+      "title": "time.windows.com wrong time",
+      "summary": "Authorized Search Console query: 1 impression, 0 clicks, average position 39 in the 12-month window.",
+      "created_at": "2026-07-29T00:00:00+09:00",
+      "collected_at": "2026-07-29T15:50:00+09:00",
+      "engagement": {"impressions": 1, "clicks": 0, "ctr": 0, "position": 39},
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-07-29T15:50:00+09:00",
+      "verified_by": "codex",
+      "property_id": "https://easypcfixguide.blogspot.com/"
+    },
+    {
+      "question_id": "q_sc_pc_pending_restart_meaning",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250729-20260729-pending-restart-meaning",
+      "title": "what does pending restart mean in windows update",
+      "summary": "Authorized Search Console query: 1 impression, 0 clicks, average position 28 in the 12-month window.",
+      "created_at": "2026-07-29T00:00:00+09:00",
+      "collected_at": "2026-07-29T15:50:00+09:00",
+      "engagement": {"impressions": 1, "clicks": 0, "ctr": 0, "position": 28},
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-07-29T15:50:00+09:00",
+      "verified_by": "codex",
+      "property_id": "https://easypcfixguide.blogspot.com/"
+    },
+    {
+      "question_id": "q_sc_pc_file_explorer_freezing",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250729-20260729-file-explorer-freezing",
+      "title": "why is my file explorer freezing",
+      "summary": "Authorized Search Console query: 1 impression, 0 clicks, average position 44 in the 12-month window.",
+      "created_at": "2026-07-29T00:00:00+09:00",
+      "collected_at": "2026-07-29T15:50:00+09:00",
+      "engagement": {"impressions": 1, "clicks": 0, "ctr": 0, "position": 44},
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-07-29T15:50:00+09:00",
+      "verified_by": "codex",
+      "property_id": "https://easypcfixguide.blogspot.com/"
+    },
+    {
+      "question_id": "q_sc_pc_pc_time_always_wrong",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250729-20260729-pc-time-always-wrong",
+      "title": "why is the time on my pc always wrong",
+      "summary": "Authorized Search Console query: 1 impression, 0 clicks, average position 41 in the 12-month window.",
+      "created_at": "2026-07-29T00:00:00+09:00",
+      "collected_at": "2026-07-29T15:50:00+09:00",
+      "engagement": {"impressions": 1, "clicks": 0, "ctr": 0, "position": 41},
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-07-29T15:50:00+09:00",
+      "verified_by": "codex",
+      "property_id": "https://easypcfixguide.blogspot.com/"
+    }
+  ],
+  "clusters": [
+    {
+      "cluster_id": "cluster_444135f687371ba931",
+      "problem_signature": "Printer Job Stuck Deleting in Windows 11? Clear the Blocked Queue",
+      "canonical_label": "Printer Job Stuck Deleting in Windows 11? Clear the Blocked Queue",
+      "question_ids": [
+        "q_sc_pc_brother_printer_job_stuck",
+        "q_sc_pc_cant_delete_print_job"
+      ],
+      "topic_ids": ["topic_a47653f9f75e388c01"],
+      "aliases": [],
+      "observation_run_ids": []
+    },
+    {
+      "cluster_id": "cluster_fa5ec099d8424572ed",
+      "problem_signature": "generic windows 7 easy fix navigational query",
+      "canonical_label": "Generic legacy Windows 7 query",
+      "question_ids": ["q_sc_pc_easy_fix_windows_7"],
+      "topic_ids": [],
+      "aliases": [],
+      "observation_run_ids": []
+    },
+    {
+      "cluster_id": "cluster_2ecb26c706ccb59fbf",
+      "problem_signature": "Ethernet Connected but No Internet: Where Windows 11 Can Lose Access",
+      "canonical_label": "Ethernet Connected but No Internet: Where Windows 11 Can Lose Access",
+      "question_ids": ["q_sc_pc_local_area_no_internet"],
+      "topic_ids": ["topic_990dfddaa9861d1cfd"],
+      "aliases": [],
+      "observation_run_ids": []
+    },
+    {
+      "cluster_id": "cluster_4421e977cfb2c8a048",
+      "problem_signature": "Windows Update Pending Restart Stuck: Safe Fixes for Beginners",
+      "canonical_label": "Windows Update Pending Restart Stuck: Safe Fixes for Beginners",
+      "question_ids": [
+        "q_sc_pc_pending_restart",
+        "q_sc_pc_pending_restart_meaning"
+      ],
+      "topic_ids": ["topic_35c47dff9284d23712"],
+      "aliases": [],
+      "observation_run_ids": []
+    },
+    {
+      "cluster_id": "cluster_ed4ee6edc5239f3f35",
+      "problem_signature": "device manager ports category missing windows 11",
+      "canonical_label": "Ports missing in Device Manager",
+      "question_ids": ["q_sc_pc_ports_missing_device_manager"],
+      "topic_ids": ["topic_ed4ee6edc5239f3f35"],
+      "aliases": [],
+      "observation_run_ids": []
+    },
+    {
+      "cluster_id": "cluster_bb619b602a29d50a14",
+      "problem_signature": "Windows Clock Wrong Time: A Low-Risk Windows Diagnostic Path",
+      "canonical_label": "Windows Clock Wrong Time: A Low-Risk Windows Diagnostic Path",
+      "question_ids": [
+        "q_sc_pc_time_windows_wrong",
+        "q_sc_pc_pc_time_always_wrong"
+      ],
+      "topic_ids": ["topic_c8537e72cb2f00fbae"],
+      "aliases": [],
+      "observation_run_ids": []
+    },
+    {
+      "cluster_id": "cluster_c49d2a300421704128",
+      "problem_signature": "File Explorer Keeps Freezing on Windows: Simple Fixes for Beginners",
+      "canonical_label": "File Explorer Keeps Freezing on Windows: Simple Fixes for Beginners",
+      "question_ids": ["q_sc_pc_file_explorer_freezing"],
+      "topic_ids": ["topic_1b1fa93a09fa45c897"],
+      "aliases": [],
+      "observation_run_ids": []
+    }
+  ],
+  "topics": [
+    {
+      "topic_id": "topic_ed4ee6edc5239f3f35",
+      "cluster_id": "cluster_ed4ee6edc5239f3f35",
+      "canonical_title": "Why Ports May Be Missing in Device Manager on Windows 11",
+      "category_id": "cat_59262a4b41871e",
+      "canonical_intent": "diagnose a missing Ports COM and LPT category without unsafe driver tools",
+      "problem_signature": "device manager ports category missing windows 11",
+      "action": "WATCH",
+      "status": "REVIEW",
+      "question_ids": ["q_sc_pc_ports_missing_device_manager"],
+      "aliases": [],
+      "priority_score": 0,
+      "editor_brief": "Wait for another independent question or stronger first-party demand before considering a beginner-safe diagnostic guide.",
+      "reader_questions": [
+        "Why is Ports COM and LPT missing?",
+        "Does the category appear only when a serial device is connected?",
+        "Which official Windows checks are safe?"
+      ],
+      "difference_from_existing": "No mapped post focuses on the missing Ports category, but one low-volume query is insufficient for READY.",
+      "official_source_urls": [],
+      "official_source_refs": [],
+      "official_answerable": false,
+      "auditor_decision": "HOLD",
+      "auditor_reasons": [
+        "Only one low-impression first-party query is available.",
+        "Official answer sources must be verified before publication."
+      ],
+      "audited_at": "2026-07-29T15:50:00+09:00"
+    }
+  ],
+  "assignments": [
+    {"question_id": "q_sc_pc_brother_printer_job_stuck", "topic_id": "topic_a47653f9f75e388c01"},
+    {"question_id": "q_sc_pc_cant_delete_print_job", "topic_id": "topic_a47653f9f75e388c01"},
+    {"question_id": "q_sc_pc_local_area_no_internet", "topic_id": "topic_990dfddaa9861d1cfd"},
+    {"question_id": "q_sc_pc_pending_restart", "topic_id": "topic_35c47dff9284d23712"},
+    {"question_id": "q_sc_pc_pending_restart_meaning", "topic_id": "topic_35c47dff9284d23712"},
+    {"question_id": "q_sc_pc_ports_missing_device_manager", "topic_id": "topic_ed4ee6edc5239f3f35"},
+    {"question_id": "q_sc_pc_time_windows_wrong", "topic_id": "topic_c8537e72cb2f00fbae"},
+    {"question_id": "q_sc_pc_pc_time_always_wrong", "topic_id": "topic_c8537e72cb2f00fbae"},
+    {"question_id": "q_sc_pc_file_explorer_freezing", "topic_id": "topic_1b1fa93a09fa45c897"}
+  ]
+}

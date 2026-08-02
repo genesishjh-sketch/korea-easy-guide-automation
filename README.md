@@ -90,15 +90,72 @@ Use `--generate --limit 2` when you want a stronger sample check that generates 
 python -m src.pipeline.stage0_launch_queue_validate --site easy_pc_fix_guide --generate --limit 2
 ```
 
-## Reddit Research Mode
+## AI Topic Intelligence
 
-Easy PC Fix Guide now treats Reddit OAuth as an optional upgrade. The default zero-cost research path is:
+`data/topics/` is the durable source of truth for questions, clusters, stable
+topic/category IDs, review state, rollout state, and Blogger publication
+mappings. The shared Google Sheet is a review surface; Blogger remains
+authoritative for live post IDs and URLs.
 
-```text
-Google site:reddit.com searches -> Google Suggest -> official Microsoft validation
+The project skill at
+`.agents/skills/blog-topic-intelligence/SKILL.md` defines the separate Scout,
+Librarian, Editor, and Auditor passes. Common safe operations are:
+
+```bash
+.venv/bin/python -m src.pipeline.topic_board validate
+.venv/bin/python -m src.pipeline.topic_board sync-blogger --create-missing
+.venv/bin/python -m src.pipeline.topic_board export-sheet
+.venv/bin/python -m src.pipeline.topic_board --help
 ```
 
-If public Reddit JSON returns 403 or Reddit OAuth is not approved yet, the pipeline still creates Reddit-intent signals with `site:reddit.com/r/...` Google search URLs. Publishing quality is guarded by Microsoft official sources and the Hades quality gate, not by Reddit OAuth approval.
+Historical research is a resumable campaign, not one fixed-duration process:
+
+```bash
+.venv/bin/python -m src.pipeline.topic_board research-campaign \
+  --site korea_easy_guide \
+  --campaign-id korea-backfill-v2 \
+  --action create \
+  --input data/topics/backfill_manifests/korea_easy_guide.json
+```
+
+Use `--action claim`, then persist every bounded batch with
+`--action checkpoint --work-id ... --state PAUSED|DONE|SATURATED`. Infrastructure
+interruption never claims logical completion. The finite coverage manifest and
+cursor make the next run resume without duplicating questions or clusters.
+
+Both required backfills must complete before rollout evaluation. The first two
+qualifying, consecutive KST Sunday weeks then remain in `SHADOW`; at most one run
+per ISO week counts. Generated weekly queues continue using validated legacy
+topics until the Registry is automatically promoted to `READY_FIRST`. A
+successful Blogger insert is never retried because Sheet synchronization failed:
+its receipt stays in the durable publication outbox for reconciliation.
+
+`data/topics/sheet.json` identifies the single shared review workbook. Only Topic
+Board decision/priority/notes cells and Monthly Review approval/notes cells are
+user-editable; IDs and generated state are protected. Local Codex runs weekly
+research on Sunday at 20:00 KST and the global category review on the first Monday
+at 13:00 KST. The daily publishers and 14:00 recovery check also reconcile the
+Registry and Sheet. The Mac and Codex app must be running at those times. GitHub
+Actions validates committed queues but does not create or publish the scheduled
+queue.
+
+## Topic Evidence and Reddit Research
+
+The existing collectors are seed enrichers, not topic approval engines. Evidence is classified as:
+
+```text
+OBSERVED_QUESTION / FIRST_PARTY_QUERY -> eligible for demand, stability, READY, and cadence
+QUERY_PLAN / SEARCH_SUGGESTION / FALLBACK_TEMPLATE -> phrasing expansion only; weight 0
+```
+
+Only Reddit OAuth questions, or research-bundle questions whose canonical public page was actually verified, become `OBSERVED_QUESTION`. Verified Search Console rows use the `FIRST_PARTY_QUERY` contract. Automatic unauthenticated `public_json` results remain `QUERY_PLAN` until the canonical page is verified. Google Suggest is `SEARCH_SUGGESTION` only when live autocomplete succeeds; hard-coded suggestions are `FALLBACK_TEMPLATE`.
+
+If eligible evidence collection is unavailable, the weekly queue uses validated
+legacy topics as the explicit `DEGRADED` fallback; it does not claim or publish
+new AI-selected Registry topics. Query plans, autocomplete phrases, and fallback
+templates cannot create new READY topics or justify a cadence increase.
+Microsoft official sources and the Hades quality gate still validate publishing
+accuracy and quality; they do not prove user demand.
 
 Optional GitHub Secrets:
 
@@ -121,14 +178,14 @@ Setup links:
 - Responsible Builder Policy: https://support.reddithelp.com/hc/articles/42728983564564
 - GitHub Actions Secrets: https://github.com/genesishjh-sketch/korea-easy-guide-automation/settings/secrets/actions
 
-Create the Reddit app as `script` only if you later want direct OAuth collection. If Reddit shows the Responsible Builder Policy/Data API registration message instead of creating the app, stop retrying and keep using the default Google site-search path. The health check never prints secret values; it only reports whether OAuth can collect live Reddit signals.
+Create the Reddit app as `script` when direct observed-question collection is required. If Reddit shows the Responsible Builder Policy/Data API registration message instead of creating the app, stop retrying and keep only the approved READY backlog or validated legacy queue in `DEGRADED` mode. The health check never prints secret values; it only reports whether OAuth can collect live Reddit signals.
 
 Current Reddit Data Access Request status:
 
 ```text
 Submitted: 2026-06-25
-Current mode: search-based Reddit research; publishing continues without Reddit OAuth.
-Next step: no action required now. If Reddit approval arrives later, create the script app and store REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET as an optional upgrade.
+Current mode: OAuth approval pending; query plans and suggestions remain zero-weight enrichment.
+Next step: use only approved READY backlog or validated legacy topics in DEGRADED mode. After approval, create the script app and store REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET.
 ```
 
 Suggested Reddit app fields:
@@ -151,13 +208,13 @@ EASY_PC_FIX_GUIDE_REDDIT_USER_AGENT = easy-pc-fix-guide/0.1 by posting-automatio
 User action checklist:
 
 ```text
-1. Keep the blog running with Google site:reddit.com search-based Reddit research.
+1. Keep only the approved READY backlog or validated legacy queue running in explicit DEGRADED mode.
 2. Open https://www.reddit.com/prefs/apps.
 3. Click create app or create another app.
 4. Enter name: Easy PC Fix Guide Automation.
 5. Select app type: script.
 6. Enter redirect uri: http://localhost:8080.
-7. If Reddit still blocks creation with the Responsible Builder Policy/Data API message, stop retrying and keep the OAuth upgrade optional.
+7. If Reddit still blocks creation with the Responsible Builder Policy/Data API message, stop retrying; do not promote QUERY_PLAN, SEARCH_SUGGESTION, or FALLBACK_TEMPLATE items to READY.
 8. Before pressing create app, complete the reCAPTCHA "I'm not a robot" check. If Reddit shows `Incorrect response. Try again.`, complete reCAPTCHA again and press create app again.
 9. Copy the short client id under the app name into GitHub Secret REDDIT_CLIENT_ID.
 10. Copy the app secret into GitHub Secret REDDIT_CLIENT_SECRET.

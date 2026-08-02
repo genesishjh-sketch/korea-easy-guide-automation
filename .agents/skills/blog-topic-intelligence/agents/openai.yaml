@@ -1,0 +1,4 @@
+interface:
+  display_name: "Blog Topic Intelligence"
+  short_description: "Collect, deduplicate, review, and schedule blog topics"
+  default_prompt: "Use $blog-topic-intelligence to research verified questions and update the topic registry safely."

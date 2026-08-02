@@ -21,6 +21,32 @@ class TopicCandidate:
     intent: str
     score: float
     signals: list[TopicSignal] = field(default_factory=list)
+    topic_id: str = ""
+    cluster_id: str = ""
+    category_id: str = ""
+    action: str = "NEW_POST"
+    revision: int = 0
+    editor_brief: dict = field(default_factory=dict)
+    reader_questions: list[str] = field(default_factory=list)
+    difference_from_existing: str = ""
+    existing_post_refs: list[dict] = field(default_factory=list)
+    claim_run_id: str = ""
+
+    @property
+    def topic_action(self) -> str:
+        return self.action
+
+    @topic_action.setter
+    def topic_action(self, value: str) -> None:
+        self.action = value
+
+    @property
+    def topic_revision(self) -> int:
+        return self.revision
+
+    @topic_revision.setter
+    def topic_revision(self, value: int) -> None:
+        self.revision = value
 
 
 @dataclass

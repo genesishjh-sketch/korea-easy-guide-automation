@@ -2,10 +2,16 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from types import SimpleNamespace
 import tempfile
 import unittest
 from unittest.mock import patch
 
+from src.pipeline.stage2_publish import existing_topic_publication
+from src.pipeline.stage2_publish import enqueue_local_publication_sync
+from src.pipeline.stage2_publish import record_topic_publication
+from src.pipeline.stage2_publish import run
+from src.pipeline.stage2_publish import save_publish_result
 from src.pipeline.stage2_publish import validate_required_images
 from src.pipeline.stage2_publish import rewrite_local_image_paths
 from src.pipeline.stage2_publish import validate_fresh_public_images
@@ -15,6 +21,178 @@ from src.quality.hades import HadesQualityGate
 
 
 class Stage2ImageGateTests(unittest.TestCase):
+    def test_local_outbox_is_not_durable_when_fsync_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir, patch.dict(
+            "os.environ",
+            {
+                "TOPIC_PUBLICATION_OUTBOX": str(
+                    Path(tmpdir) / "pending.jsonl"
+                )
+            },
+        ), patch(
+            "src.pipeline.stage2_publish.os.fsync",
+            side_effect=OSError("fsync failed"),
+        ):
+            result = enqueue_local_publication_sync(
+                "easy_pc_fix_guide",
+                "topic-fsync",
+                {
+                    "blogger_post_id": "post-fsync",
+                    "url": "https://example.com/fsync.html",
+                },
+                error="registry unavailable",
+            )
+
+        self.assertFalse(result["durable"])
+        self.assertEqual(result["status"], "error")
+        self.assertIn("fsync failed", result["error"])
+
+    def test_publish_result_includes_topic_traceability(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            article_dir = Path(tmpdir)
+            (article_dir / "metadata.json").write_text(
+                json.dumps(
+                    {
+                        "candidate": {
+                            "topic_id": "topic-1",
+                            "cluster_id": "cluster-1",
+                            "category_id": "cat-1",
+                            "action": "NEW_POST",
+                            "revision": 4,
+                        }
+                    }
+                ),
+                encoding="utf-8",
+            )
+            path = save_publish_result(
+                article_dir,
+                {
+                    "id": "post-1",
+                    "url": "https://example.com/post-1.html",
+                    "status": "LIVE",
+                },
+                False,
+            )
+            payload = json.loads(path.read_text(encoding="utf-8"))
+
+        self.assertEqual(payload["topic_id"], "topic-1")
+        self.assertEqual(payload["revision"], 4)
+        self.assertEqual(payload["blogger"]["id"], "post-1")
+        self.assertEqual(payload["blogger"]["url"], "https://example.com/post-1.html")
+
+    def test_same_topic_id_is_not_republished_with_a_different_title(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            generated_root = Path(tmpdir) / "generated"
+            existing_dir = generated_root / "2026-07-01" / "existing"
+            current_dir = generated_root / "2026-07-02" / "current"
+            existing_dir.mkdir(parents=True)
+            current_dir.mkdir(parents=True)
+            (existing_dir / "metadata.json").write_text(
+                json.dumps(
+                    {
+                        "article": {"title": "Old public title"},
+                        "candidate": {"topic_id": "topic-same"},
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (existing_dir / "blogger_publish_result.json").write_text(
+                json.dumps(
+                    {
+                        "draft": False,
+                        "blogger": {
+                            "id": "post-existing",
+                            "url": "https://example.com/existing.html",
+                            "status": "LIVE",
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (current_dir / "metadata.json").write_text(
+                json.dumps(
+                    {
+                        "article": {"title": "Completely different title"},
+                        "candidate": {
+                            "topic_id": "topic-same",
+                            "action": "NEW_POST",
+                            "revision": 2,
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            settings = SimpleNamespace(
+                site_key="easy_pc_fix_guide",
+                generated_output_dir=str(generated_root),
+                blogger_publish_mode="publish",
+            )
+            with patch("src.pipeline.stage2_publish.load_settings", return_value=settings):
+                publication = existing_topic_publication(current_dir, "easy_pc_fix_guide")
+                result_path = run(current_dir, "publish", "easy_pc_fix_guide")
+
+            payload = json.loads(result_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(publication["blogger_post_id"], "post-existing")
+        self.assertTrue(payload["skipped"])
+        self.assertEqual(payload["reason"], "duplicate_topic_id")
+        self.assertEqual(payload["topic_id"], "topic-same")
+        self.assertEqual(payload["blogger"]["id"], "post-existing")
+
+    def test_registry_failure_after_blogger_success_uses_durable_outbox(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            outbox = Path(tmpdir) / "publication_sync_pending.jsonl"
+            with patch.dict(
+                "os.environ",
+                {"TOPIC_PUBLICATION_OUTBOX": str(outbox)},
+            ), patch(
+                "src.topics.store.TopicStore",
+                side_effect=RuntimeError("registry unavailable"),
+            ):
+                first = record_topic_publication(
+                    "easy_pc_fix_guide",
+                    {
+                        "topic_id": "topic-outbox",
+                        "revision": 8,
+                        "claim_run_id": "batch-run",
+                    },
+                    "Already live on Blogger",
+                    {
+                        "id": "post-live",
+                        "url": "https://example.com/live.html",
+                        "status": "LIVE",
+                    },
+                    draft=False,
+                )
+                second = record_topic_publication(
+                    "easy_pc_fix_guide",
+                    {
+                        "topic_id": "topic-outbox",
+                        "revision": 8,
+                        "claim_run_id": "batch-run",
+                    },
+                    "Already live on Blogger",
+                    {
+                        "id": "post-live",
+                        "url": "https://example.com/live.html",
+                        "status": "LIVE",
+                    },
+                    draft=False,
+                )
+            entries = [
+                json.loads(line)
+                for line in outbox.read_text(encoding="utf-8").splitlines()
+            ]
+
+        self.assertEqual(first["status"], "local_outbox")
+        self.assertEqual(second["status"], "local_outbox")
+        self.assertEqual(len(entries), 1)
+        self.assertEqual(entries[0]["topic_id"], "topic-outbox")
+        self.assertEqual(
+            entries[0]["publication"]["blogger_post_id"],
+            "post-live",
+        )
+
     def test_required_images_need_image_plan(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             with self.assertRaises(FileNotFoundError) as raised:

@@ -1,0 +1,313 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "monthly_proposal_bundle.schema.json",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "site",
+    "reviewed_at",
+    "window_start",
+    "auditor",
+    "proposals"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "site": {"enum": ["korea_easy_guide", "easy_pc_fix_guide"]},
+    "reviewed_at": {"type": "string", "minLength": 1},
+    "window_start": {"type": "string", "minLength": 1},
+    "auditor": {
+      "type": "object",
+      "required": ["decision", "auditor_id", "reviewed_at"],
+      "properties": {
+        "decision": {"enum": ["PASS", "HOLD", "FAIL"]},
+        "auditor_id": {"type": "string", "minLength": 1},
+        "reviewed_at": {"type": "string", "minLength": 1},
+        "notes": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "proposals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "payload", "reason"],
+        "properties": {
+          "proposal_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$"
+          },
+          "kind": {
+            "enum": [
+              "CREATE_CATEGORY",
+              "RENAME_CATEGORY",
+              "MERGE_CATEGORY",
+              "SPLIT_CATEGORY",
+              "LABEL_CHANGE",
+              "MERGE_CLUSTER",
+              "SPLIT_CLUSTER",
+              "REASSIGN_CATEGORY"
+            ]
+          },
+          "payload": {"type": "object"},
+          "reason": {"type": "string", "minLength": 1}
+        },
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {"kind": {"const": "CREATE_CATEGORY"}},
+              "required": ["kind"]
+            },
+            "then": {
+              "properties": {
+                "payload": {
+                  "type": "object",
+                  "required": ["category", "cluster_ids"],
+                  "properties": {
+                    "category": {
+                      "type": "object",
+                      "required": ["name", "blogger_label"],
+                      "properties": {
+                        "category_id": {"type": "string"},
+                        "name": {"type": "string", "minLength": 1},
+                        "blogger_label": {"type": "string", "minLength": 1},
+                        "aliases": {
+                          "type": "array",
+                          "items": {"type": "string"}
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    "cluster_ids": {
+                      "type": "array",
+                      "minItems": 5,
+                      "uniqueItems": true,
+                      "items": {"type": "string", "minLength": 1}
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {"kind": {"const": "RENAME_CATEGORY"}},
+              "required": ["kind"]
+            },
+            "then": {
+              "properties": {
+                "payload": {
+                  "type": "object",
+                  "required": ["category_id", "name"],
+                  "properties": {
+                    "category_id": {"type": "string", "minLength": 1},
+                    "name": {"type": "string", "minLength": 1},
+                    "blogger_label": {"type": "string"}
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {"kind": {"const": "LABEL_CHANGE"}},
+              "required": ["kind"]
+            },
+            "then": {
+              "properties": {
+                "payload": {
+                  "type": "object",
+                  "required": ["category_id", "blogger_label"],
+                  "properties": {
+                    "category_id": {"type": "string", "minLength": 1},
+                    "blogger_label": {"type": "string", "minLength": 1}
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {"kind": {"const": "MERGE_CATEGORY"}},
+              "required": ["kind"]
+            },
+            "then": {
+              "properties": {
+                "payload": {
+                  "type": "object",
+                  "required": ["source_category_id", "target_category_id"],
+                  "properties": {
+                    "source_category_id": {"type": "string", "minLength": 1},
+                    "target_category_id": {"type": "string", "minLength": 1}
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {"kind": {"const": "MERGE_CLUSTER"}},
+              "required": ["kind"]
+            },
+            "then": {
+              "properties": {
+                "payload": {
+                  "type": "object",
+                  "required": ["source_cluster_id", "target_cluster_id"],
+                  "properties": {
+                    "source_cluster_id": {"type": "string", "minLength": 1},
+                    "target_cluster_id": {"type": "string", "minLength": 1}
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {"kind": {"const": "REASSIGN_CATEGORY"}},
+              "required": ["kind"]
+            },
+            "then": {
+              "properties": {
+                "payload": {
+                  "type": "object",
+                  "oneOf": [
+                    {
+                      "required": ["topic_id", "category_id"],
+                      "properties": {
+                        "topic_id": {"type": "string", "minLength": 1},
+                        "category_id": {"type": "string", "minLength": 1}
+                      },
+                      "additionalProperties": false
+                    },
+                    {
+                      "required": ["assignments"],
+                      "properties": {
+                        "assignments": {
+                          "type": "object",
+                          "minProperties": 1,
+                          "additionalProperties": {
+                            "type": "string",
+                            "minLength": 1
+                          }
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {"kind": {"const": "SPLIT_CATEGORY"}},
+              "required": ["kind"]
+            },
+            "then": {
+              "properties": {
+                "payload": {
+                  "type": "object",
+                  "required": ["new_categories", "assignments", "groups"],
+                  "properties": {
+                    "new_categories": {
+                      "type": "array",
+                      "minItems": 2,
+                      "items": {
+                        "type": "object",
+                        "required": ["category_id", "name", "blogger_label"],
+                        "properties": {
+                          "category_id": {"type": "string", "minLength": 1},
+                          "name": {"type": "string", "minLength": 1},
+                          "blogger_label": {"type": "string", "minLength": 1}
+                        },
+                        "additionalProperties": false
+                      }
+                    },
+                    "assignments": {
+                      "type": "object",
+                      "minProperties": 1,
+                      "additionalProperties": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "groups": {
+                      "type": "array",
+                      "minItems": 2,
+                      "items": {
+                        "type": "object",
+                        "required": ["cluster_ids"],
+                        "properties": {
+                          "cluster_ids": {
+                            "type": "array",
+                            "minItems": 4,
+                            "uniqueItems": true,
+                            "items": {"type": "string", "minLength": 1}
+                          }
+                        },
+                        "additionalProperties": true
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {"kind": {"const": "SPLIT_CLUSTER"}},
+              "required": ["kind"]
+            },
+            "then": {
+              "properties": {
+                "payload": {
+                  "type": "object",
+                  "required": ["source_cluster_id", "new_clusters"],
+                  "properties": {
+                    "source_cluster_id": {"type": "string", "minLength": 1},
+                    "new_clusters": {
+                      "type": "array",
+                      "minItems": 2,
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "cluster_id",
+                          "problem_signature",
+                          "question_ids",
+                          "topic_ids"
+                        ],
+                        "properties": {
+                          "cluster_id": {"type": "string", "minLength": 1},
+                          "problem_signature": {"type": "string", "minLength": 1},
+                          "canonical_label": {"type": "string"},
+                          "question_ids": {
+                            "type": "array",
+                            "items": {"type": "string"}
+                          },
+                          "topic_ids": {
+                            "type": "array",
+                            "items": {"type": "string"}
+                          }
+                        },
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "additionalProperties": false
+}

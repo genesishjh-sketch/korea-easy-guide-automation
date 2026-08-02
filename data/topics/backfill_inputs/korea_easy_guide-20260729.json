@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "site": "korea_easy_guide",
+  "run_id": "backfill-20260729-korea-easy-guide",
+  "run_type": "BACKFILL_RESEARCH",
+  "started_at": "2026-07-29T14:00:00+09:00",
+  "ended_at": "2026-07-29T14:24:00+09:00",
+  "complete": false,
+  "degraded": true,
+  "collector_status": "DEGRADED",
+  "stop_condition": "DEGRADED",
+  "checkpoint": {
+    "cursor": "search-console-scope-reauthorization-required",
+    "searched_scope": [
+      "local_seed_topics",
+      "local_generated_metadata",
+      "local_blogger_publish_receipts"
+    ],
+    "notes": "Google Search Console 12-month read-only query could not run because the existing OAuth token requires scope reauthorization."
+  },
+  "source_coverage": {
+    "local_seed_topics": 82,
+    "local_generated_metadata": 74,
+    "local_publication_receipts": 51,
+    "google_search_console_12m": false
+  },
+  "unexplored_scope": [
+    "Google Search Console 12-month FIRST_PARTY_QUERY data (OAuth scope reauthorization required)"
+  ],
+  "questions": [],
+  "clusters": [],
+  "topics": [],
+  "assignments": [],
+  "auditor": {
+    "passed": false,
+    "decision": "HOLD",
+    "auditor_id": "codex-initial-backfill-auditor",
+    "evidence_url_coverage_verified": false,
+    "synthetic_influence_verified": true,
+    "blogger_duplicates_verified": true,
+    "notes": "Do not promote this backfill or create FIRST_PARTY_QUERY evidence until Search Console access is reauthorized and verified."
+  },
+  "synthetic_influence_count": 0,
+  "blogger_duplicate_count": 0,
+  "sheet_sync_status": "PENDING"
+}

@@ -17,6 +17,111 @@ from src.pipeline import stage1_generate
 
 
 class ImagePlanTests(unittest.TestCase):
+    def test_research_report_schema_rejects_numeric_strings(self) -> None:
+        report = {
+            "schema_version": stage1_generate.RESEARCH_REPORT_SCHEMA_VERSION,
+            "signal_evidence": [],
+            **{field: 0 for field in stage1_generate.NUMERIC_RESEARCH_FIELDS},
+            **{field: {} for field in stage1_generate.NUMERIC_RESEARCH_MAP_FIELDS},
+        }
+        report["observed_evidence_count"] = "1"
+
+        with self.assertRaisesRegex(ValueError, "observed_evidence_count"):
+            stage1_generate.validate_research_report(report)
+
+    def test_research_report_rejects_aggregate_not_derived_from_rows(self) -> None:
+        report = {
+            "schema_version": stage1_generate.RESEARCH_REPORT_SCHEMA_VERSION,
+            "signal_evidence": [],
+            **{field: 0 for field in stage1_generate.NUMERIC_RESEARCH_FIELDS},
+            **{field: {} for field in stage1_generate.NUMERIC_RESEARCH_MAP_FIELDS},
+        }
+        report["demand_eligible_signal_count"] = 3
+
+        with self.assertRaisesRegex(ValueError, "demand_eligible_signal_count"):
+            stage1_generate.validate_research_report(report)
+
+    def test_research_report_rejects_count_map_not_derived_from_rows(self) -> None:
+        report = {
+            "schema_version": stage1_generate.RESEARCH_REPORT_SCHEMA_VERSION,
+            "signal_evidence": [],
+            **{field: 0 for field in stage1_generate.NUMERIC_RESEARCH_FIELDS},
+            **{field: {} for field in stage1_generate.NUMERIC_RESEARCH_MAP_FIELDS},
+        }
+        report["signal_source_counts"] = {"reddit": 7}
+
+        with self.assertRaisesRegex(ValueError, "signal_source_counts"):
+            stage1_generate.validate_research_report(report)
+
+    def test_observed_question_requires_verified_provenance(self) -> None:
+        unverified = TopicSignal(
+            "reddit",
+            "wifi issue",
+            "Wi-Fi issue",
+            url="https://www.reddit.com/r/test/comments/abc/example/",
+            metadata={
+                "collection_method": "public_json",
+                "evidence_type": "OBSERVED_QUESTION",
+                "reddit_item_id": "abc",
+                "verified_by_codex": False,
+            },
+        )
+        verified = TopicSignal(
+            "reddit",
+            "wifi issue",
+            "Wi-Fi issue",
+            url="https://www.reddit.com/r/test/comments/abc/example/",
+            metadata={
+                "collection_method": "research_bundle",
+                "evidence_type": "OBSERVED_QUESTION",
+                "reddit_item_id": "abc",
+                "canonical_public_page_url": "https://www.reddit.com/r/test/comments/abc/example/",
+                "verified_by_codex": True,
+            },
+        )
+
+        with self.assertRaisesRegex(ValueError, "verified_by_codex"):
+            stage1_generate.signal_evidence_type(unverified)
+        self.assertEqual(
+            stage1_generate.signal_evidence_type(verified),
+            "OBSERVED_QUESTION",
+        )
+        self.assertTrue(stage1_generate.is_eligible_evidence(verified))
+
+    def test_first_party_query_is_an_eligible_future_contract(self) -> None:
+        signal = TopicSignal(
+            "search_console",
+            "wifi button missing",
+            "wifi button missing",
+            metadata={"evidence_type": "FIRST_PARTY_QUERY"},
+        )
+
+        self.assertEqual(
+            stage1_generate.signal_evidence_type(signal),
+            "FIRST_PARTY_QUERY",
+        )
+        self.assertEqual(stage1_generate.evidence_weight("FIRST_PARTY_QUERY"), 1.0)
+
+    def test_topic_context_aliases_are_synchronized(self) -> None:
+        candidate = build_candidate("wifi issue", [], "windows_help")
+
+        stage1_generate.apply_topic_context(
+            candidate,
+            {
+                "topic_id": "topic_123",
+                "topic_action": "NEW_POST",
+                "topic_revision": 7,
+                "claim_run_id": "run_abc",
+            },
+        )
+
+        self.assertEqual(candidate.topic_id, "topic_123")
+        self.assertEqual(candidate.action, "NEW_POST")
+        self.assertEqual(candidate.topic_action, "NEW_POST")
+        self.assertEqual(candidate.revision, 7)
+        self.assertEqual(candidate.topic_revision, 7)
+        self.assertEqual(candidate.claim_run_id, "run_abc")
+
     def test_default_uses_codex_generated_jpg_filenames(self) -> None:
         candidate = build_candidate("windows update error 0x80070643", [], "windows_help")
 
@@ -189,8 +294,15 @@ class ImagePlanTests(unittest.TestCase):
                         "reddit",
                         "incheon airport to seoul",
                         "Incheon to Seoul advice",
-                        url="https://reddit.com/r/test",
-                        metadata={"collection_method": "oauth"},
+                        url="https://www.reddit.com/r/test/comments/oauth123/incheon_to_seoul_advice/",
+                        metadata={
+                            "collection_method": "oauth",
+                            "source_item_id": "oauth123",
+                            "canonical_public_page_url": (
+                                "https://www.reddit.com/r/test/comments/oauth123/"
+                                "incheon_to_seoul_advice/"
+                            ),
+                        },
                     ),
                 ],
             ), patch.object(
@@ -237,6 +349,16 @@ class ImagePlanTests(unittest.TestCase):
         self.assertEqual(research_report["google_suggest_live_signal_count"], 1)
         self.assertEqual(research_report["google_suggest_fallback_signal_count"], 0)
         self.assertEqual(research_report["google_suggest_method_counts"]["live"], 1)
+        self.assertEqual(research_report["schema_version"], 2)
+        self.assertEqual(research_report["collector_role"], "seed_enricher")
+        self.assertEqual(research_report["observed_evidence_count"], 1)
+        self.assertEqual(research_report["fallback_evidence_count"], 1)
+        self.assertEqual(research_report["search_suggestion_count"], 1)
+        self.assertEqual(research_report["demand_eligible_signal_count"], 1)
+        self.assertEqual(
+            [row["evidence_type"] for row in research_report["signal_evidence"]],
+            ["FALLBACK_TEMPLATE", "OBSERVED_QUESTION", "SEARCH_SUGGESTION"],
+        )
         self.assertIn("reddit_collection_diagnostics", research_report)
         self.assertIn("google_suggest_diagnostics", research_report)
         self.assertTrue(hero_exists)

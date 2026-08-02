@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "inbox.schema.json",
+  "type": "object",
+  "required": ["schema_version", "site", "questions", "updated_at"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "site": {"type": "string"},
+    "updated_at": {"type": "string"},
+    "questions": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "question_id", "site", "source", "title", "source_item_id", "url",
+          "summary", "created_at", "collected_at", "engagement", "content_hash",
+          "evidence_type", "verification_method", "verified_at", "verified_by",
+          "property_id", "topic_id", "aliases"
+        ],
+        "properties": {
+          "question_id": {"type": "string"},
+          "site": {"type": "string"},
+          "source": {"type": "string"},
+          "title": {"type": "string"},
+          "source_item_id": {"type": "string"},
+          "url": {"type": "string"},
+          "summary": {"type": "string"},
+          "created_at": {"type": "string"},
+          "collected_at": {"type": "string"},
+          "engagement": {"type": "object", "additionalProperties": {"type": "number"}},
+          "content_hash": {"type": "string"},
+          "evidence_type": {"enum": ["OBSERVED_QUESTION", "FIRST_PARTY_QUERY", "SEARCH_SUGGESTION", "QUERY_PLAN", "FALLBACK_TEMPLATE"]},
+          "verification_method": {"type": "string"},
+          "verified_at": {"type": "string"},
+          "verified_by": {"type": "string"},
+          "property_id": {"type": "string"},
+          "topic_id": {"type": "string"},
+          "aliases": {"type": "array", "items": {"type": "string"}}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

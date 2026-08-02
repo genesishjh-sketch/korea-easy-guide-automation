@@ -1,0 +1,1914 @@
+{
+  "assignments": [
+    {
+      "question_id": "q_sc_pc_brother_printer_job_stuck",
+      "topic_id": "topic_fa5ec099d8424572ed"
+    },
+    {
+      "question_id": "q_sc_pc_easy_fix_windows_7",
+      "topic_id": "topic_fa5ec099d8424572ed"
+    },
+    {
+      "question_id": "q_sc_pc_kodak_printer_job_stuck_in_queue_windows_11",
+      "topic_id": "topic_fa5ec099d8424572ed"
+    },
+    {
+      "question_id": "q_sc_pc_cant_delete_print_job",
+      "topic_id": "topic_a47653f9f75e388c01"
+    },
+    {
+      "question_id": "q_sc_pc_clear_stuck_print_queue_windows_11",
+      "topic_id": "topic_a47653f9f75e388c01"
+    },
+    {
+      "question_id": "q_sc_pc_remove_printer_queue_windows_11",
+      "topic_id": "topic_a47653f9f75e388c01"
+    },
+    {
+      "question_id": "q_sc_pc_windows_11_cannot_cancel_print_job",
+      "topic_id": "topic_a47653f9f75e388c01"
+    },
+    {
+      "question_id": "q_sc_pc_windows_11_print_queue_stuck",
+      "topic_id": "topic_a47653f9f75e388c01"
+    },
+    {
+      "question_id": "q_sc_pc_windows_11_printer_queue_stuck",
+      "topic_id": "topic_a47653f9f75e388c01"
+    },
+    {
+      "question_id": "q_superuser_1750581",
+      "topic_id": "topic_a47653f9f75e388c01"
+    },
+    {
+      "question_id": "q_sc_pc_computer_shows_wrong_time",
+      "topic_id": "topic_c8537e72cb2f00fbae"
+    },
+    {
+      "question_id": "q_sc_pc_fix_computer_clock",
+      "topic_id": "topic_c8537e72cb2f00fbae"
+    },
+    {
+      "question_id": "q_sc_pc_fix_pc_clock",
+      "topic_id": "topic_c8537e72cb2f00fbae"
+    },
+    {
+      "question_id": "q_sc_pc_laptop_wrong_time",
+      "topic_id": "topic_c8537e72cb2f00fbae"
+    },
+    {
+      "question_id": "q_sc_pc_my_pc_clock_is_wrong",
+      "topic_id": "topic_c8537e72cb2f00fbae"
+    },
+    {
+      "question_id": "q_sc_pc_pc_clock_out_of_sync",
+      "topic_id": "topic_c8537e72cb2f00fbae"
+    },
+    {
+      "question_id": "q_sc_pc_system_clock_is_out_of_sync",
+      "topic_id": "topic_c8537e72cb2f00fbae"
+    },
+    {
+      "question_id": "q_sc_pc_the_time_is_wrong_on_my_computer",
+      "topic_id": "topic_c8537e72cb2f00fbae"
+    },
+    {
+      "question_id": "q_sc_pc_time_windows_wrong",
+      "topic_id": "topic_c8537e72cb2f00fbae"
+    },
+    {
+      "question_id": "q_sc_pc_why_is_my_laptop_time_wrong",
+      "topic_id": "topic_c8537e72cb2f00fbae"
+    },
+    {
+      "question_id": "q_sc_pc_why_is_my_pc_clock_wrong",
+      "topic_id": "topic_c8537e72cb2f00fbae"
+    },
+    {
+      "question_id": "q_sc_pc_why_is_my_pc_time_wrong",
+      "topic_id": "topic_c8537e72cb2f00fbae"
+    },
+    {
+      "question_id": "q_sc_pc_pc_time_always_wrong",
+      "topic_id": "topic_c8537e72cb2f00fbae"
+    },
+    {
+      "question_id": "q_sc_pc_windows_10_clock_wrong",
+      "topic_id": "topic_c8537e72cb2f00fbae"
+    },
+    {
+      "question_id": "q_sc_pc_windows_clock_wrong",
+      "topic_id": "topic_c8537e72cb2f00fbae"
+    },
+    {
+      "question_id": "q_sc_pc_windows_incorrect_time",
+      "topic_id": "topic_c8537e72cb2f00fbae"
+    },
+    {
+      "question_id": "q_sc_pc_windows_shows_wrong_time",
+      "topic_id": "topic_c8537e72cb2f00fbae"
+    },
+    {
+      "question_id": "q_sc_pc_windows_system_time_wrong",
+      "topic_id": "topic_c8537e72cb2f00fbae"
+    },
+    {
+      "question_id": "q_sc_pc_windows_time_and_date_wrong",
+      "topic_id": "topic_c8537e72cb2f00fbae"
+    },
+    {
+      "question_id": "q_sc_pc_windows_time_incorrect",
+      "topic_id": "topic_c8537e72cb2f00fbae"
+    },
+    {
+      "question_id": "q_sc_pc_windows_time_is_wrong",
+      "topic_id": "topic_c8537e72cb2f00fbae"
+    },
+    {
+      "question_id": "q_sc_pc_windows_time_not_sync",
+      "topic_id": "topic_c8537e72cb2f00fbae"
+    },
+    {
+      "question_id": "q_sc_pc_windows_time_zone_wrong",
+      "topic_id": "topic_c8537e72cb2f00fbae"
+    },
+    {
+      "question_id": "q_sc_pc_windows_timezone_wrong",
+      "topic_id": "topic_c8537e72cb2f00fbae"
+    },
+    {
+      "question_id": "q_sc_pc_wrong_time_on_pc",
+      "topic_id": "topic_c8537e72cb2f00fbae"
+    },
+    {
+      "question_id": "q_ms_answers_77229a1a",
+      "topic_id": "topic_c8537e72cb2f00fbae"
+    },
+    {
+      "question_id": "q_sc_pc_local_area_no_internet",
+      "topic_id": "topic_990dfddaa9861d1cfd"
+    },
+    {
+      "question_id": "q_sc_pc_pending_restart",
+      "topic_id": "topic_35c47dff9284d23712"
+    },
+    {
+      "question_id": "q_sc_pc_pending_restart_generic",
+      "topic_id": "topic_35c47dff9284d23712"
+    },
+    {
+      "question_id": "q_sc_pc_pending_restart_meaning",
+      "topic_id": "topic_35c47dff9284d23712"
+    },
+    {
+      "question_id": "q_sc_pc_windows_update_pending_restart",
+      "topic_id": "topic_35c47dff9284d23712"
+    },
+    {
+      "question_id": "q_sc_pc_windows_update_troubleshooter_checking_for_pending_restart",
+      "topic_id": "topic_35c47dff9284d23712"
+    },
+    {
+      "question_id": "q_sc_pc_ports_missing_device_manager",
+      "topic_id": "topic_ed4ee6edc5239f3f35"
+    },
+    {
+      "question_id": "q_ms_answers_8d499f70",
+      "topic_id": "topic_ed4ee6edc5239f3f35"
+    },
+    {
+      "question_id": "q_reddit_1be6arb",
+      "topic_id": "topic_ed4ee6edc5239f3f35"
+    },
+    {
+      "question_id": "q_sc_pc_file_explorer_freezing",
+      "topic_id": "topic_1b1fa93a09fa45c897"
+    },
+    {
+      "question_id": "q_sc_pc_win_11_printer_offline",
+      "topic_id": "topic_488a8276ae514c0fdb"
+    },
+    {
+      "question_id": "q_askubuntu_1068236",
+      "topic_id": "topic_8ad0c44e25d990848b"
+    },
+    {
+      "question_id": "q_askubuntu_1367249",
+      "topic_id": "topic_8ad0c44e25d990848b"
+    },
+    {
+      "question_id": "q_reddit_1vcka88",
+      "topic_id": "topic_8ad0c44e25d990848b"
+    }
+  ],
+  "auditor": {
+    "auditor_id": "codex-weekly-auditor",
+    "blogger_duplicates_verified": true,
+    "decision": "PASS",
+    "evidence_locator_coverage_verified": true,
+    "notes": "One Bluetooth duplicate route was caught and redirected to the exact LIVE FAQ target; unresolved Blogger duplicates are zero.",
+    "passed": true,
+    "synthetic_influence_verified": true
+  },
+  "blogger_duplicate_count": 0,
+  "campaign_id": "weekly-2026-W31-pc",
+  "checkpoint": {
+    "cursor": "round-2-saturation",
+    "notes": "Both combined expansion rounds produced fewer than two new verified clusters for this site. Quora was optional and blocked by robots.txt; all required work items reached DONE or SATURATED.",
+    "searched_scope": [
+      "Authorized Search Console queries for 2025-08-02 through 2026-08-02",
+      "Allowed English public-community hosts in the gap-focused plan"
+    ]
+  },
+  "clusters": [
+    {
+      "aliases": [],
+      "canonical_label": "Generic legacy Windows 7 query",
+      "cluster_id": "cluster_fa5ec099d8424572ed",
+      "problem_signature": "generic windows 7 easy fix navigational query",
+      "question_ids": [
+        "q_sc_pc_brother_printer_job_stuck",
+        "q_sc_pc_easy_fix_windows_7",
+        "q_sc_pc_kodak_printer_job_stuck_in_queue_windows_11"
+      ],
+      "topic_ids": [
+        "topic_fa5ec099d8424572ed"
+      ]
+    },
+    {
+      "aliases": [
+        "printer stuck deleting windows 11",
+        "Printer Job Stuck Deleting on Windows 11: Safe Fixes for Beginners",
+        "Printer Job Stuck Deleting in Windows 11: Clear the Blocked Queue Safely",
+        "Printer Job Stuck Deleting in Windows 11? Clear the Blocked Queue"
+      ],
+      "canonical_label": "Printer Job Stuck Deleting in Windows 11? Clear the Blocked Queue",
+      "cluster_id": "cluster_444135f687371ba931",
+      "problem_signature": "Printer Job Stuck Deleting in Windows 11? Clear the Blocked Queue",
+      "question_ids": [
+        "q_sc_pc_cant_delete_print_job",
+        "q_sc_pc_clear_stuck_print_queue_windows_11",
+        "q_sc_pc_remove_printer_queue_windows_11",
+        "q_sc_pc_windows_11_cannot_cancel_print_job",
+        "q_sc_pc_windows_11_print_queue_stuck",
+        "q_sc_pc_windows_11_printer_queue_stuck",
+        "q_superuser_1750581"
+      ],
+      "topic_ids": [
+        "topic_a47653f9f75e388c01"
+      ]
+    },
+    {
+      "aliases": [
+        "windows clock wrong time",
+        "Windows Clock Wrong Time: Easy Windows Fixes for Beginners",
+        "Windows Clock Wrong Time: A Low-Risk Windows Diagnostic Path"
+      ],
+      "canonical_label": "Windows Clock Wrong Time: A Low-Risk Windows Diagnostic Path",
+      "cluster_id": "cluster_bb619b602a29d50a14",
+      "problem_signature": "Windows Clock Wrong Time: A Low-Risk Windows Diagnostic Path",
+      "question_ids": [
+        "q_sc_pc_computer_shows_wrong_time",
+        "q_sc_pc_fix_computer_clock",
+        "q_sc_pc_fix_pc_clock",
+        "q_sc_pc_laptop_wrong_time",
+        "q_sc_pc_my_pc_clock_is_wrong",
+        "q_sc_pc_pc_clock_out_of_sync",
+        "q_sc_pc_system_clock_is_out_of_sync",
+        "q_sc_pc_the_time_is_wrong_on_my_computer",
+        "q_sc_pc_time_windows_wrong",
+        "q_sc_pc_why_is_my_laptop_time_wrong",
+        "q_sc_pc_why_is_my_pc_clock_wrong",
+        "q_sc_pc_why_is_my_pc_time_wrong",
+        "q_sc_pc_pc_time_always_wrong",
+        "q_sc_pc_windows_10_clock_wrong",
+        "q_sc_pc_windows_clock_wrong",
+        "q_sc_pc_windows_incorrect_time",
+        "q_sc_pc_windows_shows_wrong_time",
+        "q_sc_pc_windows_system_time_wrong",
+        "q_sc_pc_windows_time_and_date_wrong",
+        "q_sc_pc_windows_time_incorrect",
+        "q_sc_pc_windows_time_is_wrong",
+        "q_sc_pc_windows_time_not_sync",
+        "q_sc_pc_windows_time_zone_wrong",
+        "q_sc_pc_windows_timezone_wrong",
+        "q_sc_pc_wrong_time_on_pc",
+        "q_ms_answers_77229a1a"
+      ],
+      "topic_ids": [
+        "topic_c8537e72cb2f00fbae"
+      ]
+    },
+    {
+      "aliases": [
+        "ethernet connected but no internet windows 11",
+        "Ethernet Connected but No Internet on Windows 11: Safe Fixes for Beginners",
+        "Ethernet Connected but No Internet: Where Windows 11 Can Lose Access"
+      ],
+      "canonical_label": "Ethernet Connected but No Internet: Where Windows 11 Can Lose Access",
+      "cluster_id": "cluster_2ecb26c706ccb59fbf",
+      "problem_signature": "Ethernet Connected but No Internet: Where Windows 11 Can Lose Access",
+      "question_ids": [
+        "q_sc_pc_local_area_no_internet"
+      ],
+      "topic_ids": [
+        "topic_990dfddaa9861d1cfd"
+      ]
+    },
+    {
+      "aliases": [
+        "windows update pending restart stuck"
+      ],
+      "canonical_label": "Windows Update Pending Restart Stuck: Safe Fixes for Beginners",
+      "cluster_id": "cluster_4421e977cfb2c8a048",
+      "problem_signature": "Windows Update Pending Restart Stuck: Safe Fixes for Beginners",
+      "question_ids": [
+        "q_sc_pc_pending_restart",
+        "q_sc_pc_pending_restart_generic",
+        "q_sc_pc_pending_restart_meaning",
+        "q_sc_pc_windows_update_pending_restart",
+        "q_sc_pc_windows_update_troubleshooter_checking_for_pending_restart"
+      ],
+      "topic_ids": [
+        "topic_35c47dff9284d23712"
+      ]
+    },
+    {
+      "aliases": [],
+      "canonical_label": "Why Ports May Be Missing in Device Manager on Windows 11",
+      "cluster_id": "cluster_ed4ee6edc5239f3f35",
+      "problem_signature": "device manager ports category missing windows 11",
+      "question_ids": [
+        "q_sc_pc_ports_missing_device_manager",
+        "q_ms_answers_8d499f70",
+        "q_reddit_1be6arb"
+      ],
+      "topic_ids": [
+        "topic_ed4ee6edc5239f3f35"
+      ]
+    },
+    {
+      "aliases": [
+        "file explorer keeps freezing"
+      ],
+      "canonical_label": "File Explorer Keeps Freezing on Windows: Simple Fixes for Beginners",
+      "cluster_id": "cluster_c49d2a300421704128",
+      "problem_signature": "File Explorer Keeps Freezing on Windows: Simple Fixes for Beginners",
+      "question_ids": [
+        "q_sc_pc_file_explorer_freezing"
+      ],
+      "topic_ids": [
+        "topic_1b1fa93a09fa45c897"
+      ]
+    },
+    {
+      "aliases": [
+        "printer offline windows 11"
+      ],
+      "canonical_label": "Printer Says Offline on Windows 11? Simple Fixes for Beginners",
+      "cluster_id": "cluster_b0bbd30c6f0df3f0a6",
+      "problem_signature": "Printer Says Offline on Windows 11? Simple Fixes for Beginners",
+      "question_ids": [
+        "q_sc_pc_win_11_printer_offline"
+      ],
+      "topic_ids": [
+        "topic_488a8276ae514c0fdb"
+      ]
+    },
+    {
+      "aliases": [
+        "bluetooth not showing windows 11"
+      ],
+      "canonical_label": "Bluetooth Not Showing in Windows 11: Restore the Missing Toggle Safely",
+      "cluster_id": "cluster_da3efaacc54eaaa9f9",
+      "problem_signature": "Bluetooth Not Showing in Windows 11: Restore the Missing Toggle Safely",
+      "question_ids": [
+        "q_askubuntu_1068236",
+        "q_askubuntu_1367249",
+        "q_reddit_1vcka88"
+      ],
+      "topic_ids": [
+        "topic_8ad0c44e25d990848b"
+      ]
+    }
+  ],
+  "collector_status": "SUCCESS",
+  "complete": true,
+  "coverage_hash": "f41885c53407fff0ff730db2fd1ff290ad59b92bc733a7f8733bd68afb9f5921",
+  "coverage_manifest": [
+    {
+      "attempts": 0,
+      "cursor": "round-2-no-new-clusters",
+      "last_error": "",
+      "query_family": "dualboot-bluetooth-handoff",
+      "required": true,
+      "source": "ask_ubuntu",
+      "state": "SATURATED",
+      "window_end": "2026-08-02",
+      "window_start": "2025-08-02"
+    },
+    {
+      "attempts": 0,
+      "cursor": "round-2-no-new-clusters",
+      "last_error": "",
+      "query_family": "com-ports-and-wrong-time",
+      "required": true,
+      "source": "microsoft_answers",
+      "state": "SATURATED",
+      "window_end": "2026-08-02",
+      "window_start": "2025-08-02"
+    },
+    {
+      "attempts": 0,
+      "cursor": "robots.txt",
+      "last_error": "robots.txt blocked public access; optional source",
+      "query_family": "windows-device-exceptions",
+      "required": false,
+      "source": "quora",
+      "state": "BLOCKED",
+      "window_end": "2026-08-02",
+      "window_start": "2025-08-02"
+    },
+    {
+      "attempts": 0,
+      "cursor": "round-2-no-new-clusters",
+      "last_error": "",
+      "query_family": "com-ports-and-dualboot-bluetooth",
+      "required": true,
+      "source": "reddit",
+      "state": "SATURATED",
+      "window_end": "2026-08-02",
+      "window_start": "2025-08-02"
+    },
+    {
+      "attempts": 0,
+      "cursor": "all-queries-through-2026-08-02",
+      "last_error": "",
+      "query_family": "all-first-party-queries",
+      "required": true,
+      "source": "google_search_console",
+      "state": "DONE",
+      "window_end": "2026-08-02",
+      "window_start": "2025-08-02"
+    },
+    {
+      "attempts": 0,
+      "cursor": "round-2-no-new-clusters",
+      "last_error": "",
+      "query_family": "browser-print-queue",
+      "required": true,
+      "source": "superuser",
+      "state": "SATURATED",
+      "window_end": "2026-08-02",
+      "window_start": "2025-08-02"
+    }
+  ],
+  "degraded": false,
+  "ended_at": "2026-08-02T20:12:00+09:00",
+  "logic_version": "topic-intelligence-v2",
+  "questions": [
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "897a2e83bfb603ab1820c25985b327c78d95e1d0d49dc53f72b4e0c295c38f29",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 4,
+        "position": 38.75
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_brother_printer_job_stuck",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250729-20260729-brother-printer-job-stuck",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 4 impressions, 0 clicks, average position 38.75.",
+      "title": "brother printer job stuck in queue windows 11",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "16718718d4d88662ac71d58e8e07a2e0dd9e1fbc4bfa0ac27456a19bb5f0e343",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 40
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_cant_delete_print_job",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250729-20260729-cant-delete-print-job",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 40.",
+      "title": "cant delete print job",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "e83d9bbb56020e9af427a0511ad2fc4eebde6d90cc99ab74cc510246eb109afa",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 48
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_clear_stuck_print_queue_windows_11",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-clear-stuck-print-queue-windows-11",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 48.",
+      "title": "clear stuck print queue windows 11",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "ae9c457fdc38deb06221184a55ff96cf7b5975e1e325e303bae5fb85cefc37b5",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 43
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_computer_shows_wrong_time",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-computer-shows-wrong-time",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 43.",
+      "title": "computer shows wrong time",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "3c78db64358f51762bc866ff60bd9699be06cfcc75d176a7084572419c79f847",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 72
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_easy_fix_windows_7",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250729-20260729-easy-fix-windows-7",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 72.",
+      "title": "easy fix windows 7",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "30ec1ba47841d980c96e6b5c5fe4eec1e11f42f54fc29fd8d446a42eb853ab62",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 2,
+        "position": 40.5
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_fix_computer_clock",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-fix-computer-clock",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 2 impressions, 0 clicks, average position 40.5.",
+      "title": "fix computer clock",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "8d8a9557e585bb132fc57817f49554454c9c94c22d66edef827a09a1849bd1c5",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 35
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_fix_pc_clock",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-fix-pc-clock",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 35.",
+      "title": "fix pc clock",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "4f3afa444567176ab123aa6f32ab00edfcec4ff6ea12b6c4aa92de9c6c7a9205",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 32
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_kodak_printer_job_stuck_in_queue_windows_11",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-kodak-printer-job-stuck-in-queue-windows-11",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 32.",
+      "title": "kodak printer job stuck in queue windows 11",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "e93b04b3753c296909809358fd1f05dfbca99711ad312ea67b507fe3f65fff5d",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 36
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_laptop_wrong_time",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-laptop-wrong-time",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 36.",
+      "title": "laptop wrong time",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "57dd0932eff60f824aa4b834e04e37fd6894b826135f86e5040a4950f83b9293",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 39
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_local_area_no_internet",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250729-20260729-local-area-no-internet",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 39.",
+      "title": "local area connection no internet",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "3b04576fbe5161ce5ee0d823416508c9d1f4f59b358760a9c4bf8ab2ad8d5b1a",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 2,
+        "position": 44
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_my_pc_clock_is_wrong",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-my-pc-clock-is-wrong",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 2 impressions, 0 clicks, average position 44.",
+      "title": "my pc clock is wrong",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "a2bdeadb686dda431869c69fa4369ec22df588e24c6e48eba536a59ff554f087",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 34
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_pc_clock_out_of_sync",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-pc-clock-out-of-sync",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 34.",
+      "title": "pc clock out of sync",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "a3504f563625d57b2e4d816a30cac7f7840bfe428ecf10e94d05254796c8a2ed",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 47
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_pending_restart_generic",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-pending-restart",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 47.",
+      "title": "pending restart",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "0b15d223e4ee0c8789a1db0c8cbabf37b8fa084ab085c33ab43f8a52526e8e6b",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 2,
+        "position": 19.5
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_pending_restart",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250729-20260729-pending-restart-windows-update",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 2 impressions, 0 clicks, average position 19.5.",
+      "title": "pending restart windows update",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "ad72de6d2213ad6c6d12f577c7e682fe2f62a842526a17c878e6f5fc9dffdc54",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 36
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_ports_missing_device_manager",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250729-20260729-ports-missing-device-manager",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 36.",
+      "title": "ports not showing in device manager windows 11",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "e9d847ec239b58886e8aab53211d53010b48211c0794c9e875965af6e2f708b9",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 48
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_remove_printer_queue_windows_11",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-remove-printer-queue-windows-11",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 48.",
+      "title": "remove printer queue windows 11",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "406b6d277b27984aa8e7d1385cdbefa190e0ef33d0dd64d6ca8f1f056bceaea0",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 36
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_system_clock_is_out_of_sync",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-system-clock-is-out-of-sync",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 36.",
+      "title": "system clock is out of sync.",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "15ad27ef732b2fb9cef747dae34f4f0403063fd22d2b7168b3e7933bb0a23912",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 46
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_the_time_is_wrong_on_my_computer",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-the-time-is-wrong-on-my-computer",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 46.",
+      "title": "the time is wrong on my computer",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "61c814fe85e0ccb77eb7f63c4b72f7e7ee42b28bc43a934e2ebf2426251a7f29",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 39
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_time_windows_wrong",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250729-20260729-time-windows-wrong",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 39.",
+      "title": "time.windows.com wrong time",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "3d16737c8c7fcb01c359062c50365f65e8231476b01f70bcc941ef5ead7b8c0f",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 28
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_pending_restart_meaning",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250729-20260729-pending-restart-meaning",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 28.",
+      "title": "what does pending restart mean in windows update",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "0d5ba35fe4025e62c3af97e52348fb2dd2ae0e085d3ba98422676911f90c2757",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 44
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_file_explorer_freezing",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250729-20260729-file-explorer-freezing",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 44.",
+      "title": "why is my file explorer freezing",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "a2c96ffd4ce277648a4df47465324c6040716b04c5ff453924b7a60f11e2fde0",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 40
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_why_is_my_laptop_time_wrong",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-why-is-my-laptop-time-wrong",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 40.",
+      "title": "why is my laptop time wrong",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "b92025beb37fd4ead0ebb401af551eba9082ee77a8b859b90879e63f963034b6",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 43
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_why_is_my_pc_clock_wrong",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-why-is-my-pc-clock-wrong",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 43.",
+      "title": "why is my pc clock wrong",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "729b20d9bd14229b64220246ac4f60549424b2fd564e2afe87ae3c7e5b2add33",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 44
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_why_is_my_pc_time_wrong",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-why-is-my-pc-time-wrong",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 44.",
+      "title": "why is my pc time wrong",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "51e86cbd207baed5389ed351d0ff13281a94ff0353623300985252b203fb4219",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 41
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_pc_time_always_wrong",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250729-20260729-pc-time-always-wrong",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 41.",
+      "title": "why is the time on my pc always wrong",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "84024f475ddf96fba94c09b84d16a8fa165cc7d427854de36fe7d4eaf85135eb",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 42
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_win_11_printer_offline",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-win-11-printer-offline",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 42.",
+      "title": "win 11 printer offline",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "cb3bfa4e12a9ad37fd8f701bcd10727b563a9b98e7f2ed8ca93de6d009b19890",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 33
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_windows_10_clock_wrong",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-windows-10-clock-wrong",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 33.",
+      "title": "windows 10 clock wrong",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "ded0255d6c648e452a1f150abd838faf575c69762c21cd3718ba305ba9ff7481",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 21
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_windows_11_cannot_cancel_print_job",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-windows-11-cannot-cancel-print-job",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 21.",
+      "title": "windows 11 cannot cancel print job",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "90a3007ccd054c671af91efb298c08630d52beea5669d247283047f60403fd49",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 49
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_windows_11_print_queue_stuck",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-windows-11-print-queue-stuck",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 49.",
+      "title": "windows 11 print queue stuck",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "ffa760c56c946fd9dd0d13561e7452684238ec4759ba69236a2b7da0839dec28",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 48
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_windows_11_printer_queue_stuck",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-windows-11-printer-queue-stuck",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 48.",
+      "title": "windows 11 printer queue stuck",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "ade4a9a5a21004377e412869de3a76069643de281f36eecc27bbe248d4c46043",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 23
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_windows_clock_wrong",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-windows-clock-wrong",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 23.",
+      "title": "windows clock wrong",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "25838ef8f19858a20118263d8ca06438d0ba34c759748ede4fb57cd385250c51",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 25
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_windows_incorrect_time",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-windows-incorrect-time",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 25.",
+      "title": "windows incorrect time",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "030fc5d51b57232c5f54f2808ac709eda870a33aeb93e62f85773ca499d7b034",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 2,
+        "position": 26.5
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_windows_shows_wrong_time",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-windows-shows-wrong-time",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 2 impressions, 0 clicks, average position 26.5.",
+      "title": "windows shows wrong time",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "838506067c6e1d93c4a89f96a08f1b14e8ec5e1e022dd720d5a2404093896e15",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 32
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_windows_system_time_wrong",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-windows-system-time-wrong",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 32.",
+      "title": "windows system time wrong",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "88dd522253f5ce33dc4b27ec1b0ccf3782a2d640813785bb5103dd977c027dd2",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 28
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_windows_time_and_date_wrong",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-windows-time-and-date-wrong",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 28.",
+      "title": "windows time and date wrong",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "7c61246f07a0a8dc9b9bdad5fda83fc9da89edaf6c4f10ded2c70ba95fca42f3",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 30
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_windows_time_incorrect",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-windows-time-incorrect",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 30.",
+      "title": "windows time incorrect",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "99d57989231fc9224c3f847f99845689f6656ee22a3b24b63f90e2ccc8459e71",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 5,
+        "position": 28.6
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_windows_time_is_wrong",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-windows-time-is-wrong",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 5 impressions, 0 clicks, average position 28.6.",
+      "title": "windows time is wrong",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "d65081583c5ae4b9e8c0b51cab57f8d9661d57b9b5837aa7fcb3be5bfdb02dd5",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 26
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_windows_time_not_sync",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-windows-time-not-sync",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 26.",
+      "title": "windows time not sync",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "3f6aa41809e03b93f87ba2928b81f30a162b2aa5fdf86e30c1b952e3e3ba34a5",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 25
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_windows_time_zone_wrong",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-windows-time-zone-wrong",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 25.",
+      "title": "windows time zone wrong",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "d21d3fd74bf7e53128ffd3a590a00f0b8f554a99c87dc4388a24de7556cbd41e",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 30
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_windows_timezone_wrong",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-windows-timezone-wrong",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 30.",
+      "title": "windows timezone wrong",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "9c1b45357229e7c90d3908747da05e713aaca77be4dae29cd1df3de94a5540a4",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 2,
+        "position": 26
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_windows_update_pending_restart",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-windows-update-pending-restart",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 2 impressions, 0 clicks, average position 26.",
+      "title": "windows update pending restart",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "f4e5de63e1a3e5ca1022239f14b2f6ceee67eac2bb210eba96c1fc8aa9f3fa8d",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 5,
+        "position": 26.8
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_windows_update_troubleshooter_checking_for_pending_restart",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-windows-update-troubleshooter-checking-for-pending-restart",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 5 impressions, 0 clicks, average position 26.8.",
+      "title": "windows update troubleshooter checking for pending restart",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "e6621888cfa5cb0c94749a7b97850e6e724a22dda56f7ccc143cf98125d7039b",
+      "created_at": "2025-08-02T00:00:00+09:00",
+      "engagement": {
+        "clicks": 0,
+        "impressions": 1,
+        "position": 36
+      },
+      "evidence_type": "FIRST_PARTY_QUERY",
+      "property_id": "https://easypcfixguide.blogspot.com/",
+      "question_id": "q_sc_pc_wrong_time_on_pc",
+      "source": "google_search_console",
+      "source_item_id": "sc-pc-20250802-20260802-wrong-time-on-pc",
+      "summary": "Authorized Search Console query in the 2025-08-02 through 2026-08-02 window: 1 impressions, 0 clicks, average position 36.",
+      "title": "wrong time on pc",
+      "url": "",
+      "verification_method": "search_console_api",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "35839fb202115b90cbea6c335f9c997e9884a137263a702f74761e4d9f5f5c1d",
+      "created_at": "2025-01-20T00:00:00Z",
+      "engagement": {
+        "same_question": 5
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "question_id": "q_ms_answers_8d499f70",
+      "source": "microsoft_answers",
+      "source_item_id": "8d499f70-4f9d-4354-a2ca-165a0a258eb8",
+      "summary": "A Windows 11 user asks how to restore the Ports category and make a USB-to-serial adapter enumerate.",
+      "title": "How to add \"Ports (COM & LPT)\" and a USB-serial port onto my Windows 11 computer management.",
+      "url": "https://answers.microsoft.com/en-us/windows/forum/all/how-to-add-ports-com-lpt-and-a-usb-serial-port/8d499f70-4f9d-4354-a2ca-165a0a258eb8",
+      "verification_method": "browser_verified",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "716abf0d5785aa899f8f7137e97bf866257534280819aceae5845799185be906",
+      "created_at": "2022-11-01T00:00:00Z",
+      "engagement": {
+        "score": 1,
+        "views": 3000
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "question_id": "q_superuser_1750581",
+      "source": "superuser",
+      "source_item_id": "1750581",
+      "summary": "A user reports that print jobs from browser-based documents or email remain stuck in the queue.",
+      "title": "Some print jobs get stuck in queue when attempting to print from Google Docs or email",
+      "url": "https://superuser.com/questions/1750581/some-print-jobs-get-stuck-in-queue-when-attempting-to-print-from-google-docs-or",
+      "verification_method": "browser_verified",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "d9473122ad8cd1ed5c8f5b2af6f3598106918b8059a1061d98a3c5d134f0baf7",
+      "created_at": "2024-03-27T00:00:00Z",
+      "engagement": {
+        "helpful": 81,
+        "same_question": 161
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "question_id": "q_ms_answers_77229a1a",
+      "source": "microsoft_answers",
+      "source_item_id": "77229a1a-47da-4644-8be3-6b9506350f37",
+      "summary": "A Windows 11 user reports that automatic location keeps selecting the wrong time zone.",
+      "title": "Windows 11 keeps Setting the Wrong Time zone And Location",
+      "url": "https://answers.microsoft.com/en-us/windows/forum/all/windows-11-keeps-setting-the-wrong-time-zone-and/77229a1a-47da-4644-8be3-6b9506350f37",
+      "verification_method": "browser_verified",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "2ced04168f4f641ea4c57fcf229479078ab5ae976cfb41932214bc042db09bec",
+      "created_at": "2018-08-23T00:00:00Z",
+      "engagement": {
+        "score": 0,
+        "views": 755
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "question_id": "q_askubuntu_1068236",
+      "source": "ask_ubuntu",
+      "source_item_id": "1068236",
+      "summary": "A dual-boot user reports that Bluetooth options disappear in Windows while another operating system remains involved.",
+      "title": "Missing Bluetooth options in Windows 10 for Systems on Dual boot",
+      "url": "https://askubuntu.com/questions/1068236/missing-bluetooth-options-in-windows-10-for-systems-on-dual-boot",
+      "verification_method": "browser_verified",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "7c038b5c455c85ba868e802aa9c076ca45fea9e1b1df16ce9b7bee35d7dd7fa3",
+      "created_at": "2021-10-04T00:00:00Z",
+      "engagement": {
+        "score": 0,
+        "views": 779
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "question_id": "q_askubuntu_1367249",
+      "source": "ask_ubuntu",
+      "source_item_id": "1367249",
+      "summary": "A dual-boot user reports Bluetooth failure across Windows and Ubuntu and asks how to recover the adapter.",
+      "title": "Bluetooth does not work in dual booting computer (windows and Ubuntu)",
+      "url": "https://askubuntu.com/questions/1367249/bluetooth-does-not-work-in-dual-booting-computer-windows-and-ubuntu",
+      "verification_method": "browser_verified",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "83f0ea892cc4de2fb1aa4b254d78e55822827023a6197e3905e2418b05fea4b1",
+      "created_at": "2024-03-13T00:00:00Z",
+      "engagement": {
+        "upvotes": 2
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "question_id": "q_reddit_1be6arb",
+      "source": "reddit",
+      "source_item_id": "1be6arb",
+      "summary": "A Windows 11 user reports that the COM port is unavailable even after trying device drivers.",
+      "title": "Windows 11 COM Port not available, drivers not working",
+      "url": "https://www.reddit.com/r/WindowsHelp/comments/1be6arb/windows_11_com_port_not_available_drivers_not",
+      "verification_method": "browser_verified",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    },
+    {
+      "collected_at": "2026-08-02T20:10:00+09:00",
+      "content_hash": "2b037a89d298b9596bdd34a4c3a64b84276f3e67ee1c3843d3a1e12b32b7e372",
+      "created_at": "2026-08-01T00:00:00Z",
+      "engagement": {
+        "upvotes": 5
+      },
+      "evidence_type": "OBSERVED_QUESTION",
+      "question_id": "q_reddit_1vcka88",
+      "source": "reddit",
+      "source_item_id": "1vcka88",
+      "summary": "A dual-boot laptop user reports that Bluetooth works in Ubuntu but is completely undetected by Windows 11.",
+      "title": "Windows 11 cannot detect Bluetooth at all, but Bluetooth works perfectly in Ubuntu",
+      "url": "https://www.reddit.com/r/WindowsHelp/comments/1vcka88/windows_11_cannot_detect_bluetooth_at_all_but",
+      "verification_method": "browser_verified",
+      "verified_at": "2026-08-02T20:10:00+09:00",
+      "verified_by": "codex"
+    }
+  ],
+  "run_id": "weekly-2026-W31-easy-pc-fix-guide",
+  "run_type": "WEEKLY_RESEARCH",
+  "schema_version": 1,
+  "sheet_sync_status": "PENDING",
+  "site": "easy_pc_fix_guide",
+  "source_coverage": {
+    "ask_ubuntu": 2,
+    "google_search_console": 43,
+    "microsoft_answers": 2,
+    "quora": "BLOCKED_ROBOTS_OPTIONAL",
+    "reddit": 2,
+    "superuser": 1
+  },
+  "started_at": "2026-08-02T20:00:00+09:00",
+  "stop_condition": "SATURATED",
+  "synthetic_influence_count": 0,
+  "topics": [
+    {
+      "action": "REJECT",
+      "aliases": [],
+      "audited_at": "2026-08-02T20:11:00+09:00",
+      "auditor_decision": "FAIL",
+      "auditor_reasons": [
+        "The query is generic, legacy, and not answerable as a discrete topic."
+      ],
+      "canonical_intent": "Retain a generic unsupported legacy query without publishing.",
+      "canonical_title": "Generic legacy Windows 7 easy-fix query",
+      "category_id": "cat_a5f6f20747507c",
+      "cluster_id": "cluster_fa5ec099d8424572ed",
+      "difference_from_existing": "The query has no error, trigger, outcome, or answerable problem signature.",
+      "editor_brief": "Do not create a post from this query.",
+      "official_answerable": false,
+      "official_source_refs": [],
+      "official_source_urls": [],
+      "problem_signature": "generic windows 7 easy fix navigational query",
+      "question_ids": [
+        "q_sc_pc_brother_printer_job_stuck",
+        "q_sc_pc_easy_fix_windows_7",
+        "q_sc_pc_kodak_printer_job_stuck_in_queue_windows_11"
+      ],
+      "reader_questions": [
+        "What specific Windows 7 problem is being asked?"
+      ],
+      "status": "REJECTED",
+      "topic_id": "topic_fa5ec099d8424572ed"
+    },
+    {
+      "action": "FAQ_ADD",
+      "aliases": [
+        "printer stuck deleting windows 11",
+        "Printer Job Stuck Deleting on Windows 11: Safe Fixes for Beginners",
+        "Printer Job Stuck Deleting in Windows 11: Clear the Blocked Queue Safely",
+        "Printer Job Stuck Deleting in Windows 11? Clear the Blocked Queue"
+      ],
+      "audited_at": "2026-08-02T20:11:00+09:00",
+      "auditor_decision": "PASS",
+      "auditor_reasons": [
+        "Eligible evidence maps to one exact LIVE primary target.",
+        "The action avoids a duplicate new post."
+      ],
+      "canonical_intent": "legacy-seed",
+      "canonical_title": "Printer Job Stuck Deleting in Windows 11? Clear the Blocked Queue",
+      "category_id": "cat_cce9fd35f6178b",
+      "cluster_id": "cluster_444135f687371ba931",
+      "difference_from_existing": "This is not a separate new-post gap. Add the observed trigger to primary LIVE Blogger ID 6810372192264511383 at https://easypcfixguide.blogspot.com/2026/07/printer-job-stuck-deleting-in-windows.html.",
+      "editor_brief": "Update exact primary LIVE Blogger ID 6810372192264511383 (https://easypcfixguide.blogspot.com/2026/07/printer-job-stuck-deleting-in-windows.html); keep the material scoped as FAQ_ADD.",
+      "official_answerable": true,
+      "official_source_refs": [
+        {
+          "authority_type": "VENDOR",
+          "url": "https://support.microsoft.com/en-us/windows/hardware/printer/fix-print-spooler-service-not-running-errors-in-windows"
+        }
+      ],
+      "official_source_urls": [
+        "https://support.microsoft.com/en-us/windows/hardware/printer/fix-print-spooler-service-not-running-errors-in-windows"
+      ],
+      "problem_signature": "",
+      "question_ids": [
+        "q_sc_pc_cant_delete_print_job",
+        "q_sc_pc_clear_stuck_print_queue_windows_11",
+        "q_sc_pc_remove_printer_queue_windows_11",
+        "q_sc_pc_windows_11_cannot_cancel_print_job",
+        "q_sc_pc_windows_11_print_queue_stuck",
+        "q_sc_pc_windows_11_printer_queue_stuck",
+        "q_superuser_1750581"
+      ],
+      "reader_questions": [
+        "cant delete print job?",
+        "clear stuck print queue windows 11?",
+        "remove printer queue windows 11?"
+      ],
+      "status": "REVIEW",
+      "topic_id": "topic_a47653f9f75e388c01"
+    },
+    {
+      "action": "UPDATE_EXISTING",
+      "aliases": [
+        "windows clock wrong time",
+        "Windows Clock Wrong Time: Easy Windows Fixes for Beginners",
+        "Windows Clock Wrong Time: A Low-Risk Windows Diagnostic Path"
+      ],
+      "audited_at": "2026-08-02T20:11:00+09:00",
+      "auditor_decision": "PASS",
+      "auditor_reasons": [
+        "Eligible evidence maps to one exact LIVE primary target.",
+        "The action avoids a duplicate new post."
+      ],
+      "canonical_intent": "legacy-seed",
+      "canonical_title": "Windows Clock Wrong Time: A Low-Risk Windows Diagnostic Path",
+      "category_id": "cat_360336d6ede9b7",
+      "cluster_id": "cluster_bb619b602a29d50a14",
+      "difference_from_existing": "This is not a separate new-post gap. Add the observed trigger to primary LIVE Blogger ID 2018585495561282455 at https://easypcfixguide.blogspot.com/2026/07/windows-clock-wrong-time-easy-windows.html.",
+      "editor_brief": "Update exact primary LIVE Blogger ID 2018585495561282455 (https://easypcfixguide.blogspot.com/2026/07/windows-clock-wrong-time-easy-windows.html); keep the material scoped as UPDATE_EXISTING.",
+      "official_answerable": true,
+      "official_source_refs": [
+        {
+          "authority_type": "VENDOR",
+          "url": "https://support.microsoft.com/en-US/Windows/Experience/Personalization/set-time-date-and-time-zone-settings-in-windows"
+        }
+      ],
+      "official_source_urls": [
+        "https://support.microsoft.com/en-US/Windows/Experience/Personalization/set-time-date-and-time-zone-settings-in-windows"
+      ],
+      "problem_signature": "",
+      "question_ids": [
+        "q_sc_pc_computer_shows_wrong_time",
+        "q_sc_pc_fix_computer_clock",
+        "q_sc_pc_fix_pc_clock",
+        "q_sc_pc_laptop_wrong_time",
+        "q_sc_pc_my_pc_clock_is_wrong",
+        "q_sc_pc_pc_clock_out_of_sync",
+        "q_sc_pc_system_clock_is_out_of_sync",
+        "q_sc_pc_the_time_is_wrong_on_my_computer",
+        "q_sc_pc_time_windows_wrong",
+        "q_sc_pc_why_is_my_laptop_time_wrong",
+        "q_sc_pc_why_is_my_pc_clock_wrong",
+        "q_sc_pc_why_is_my_pc_time_wrong",
+        "q_sc_pc_pc_time_always_wrong",
+        "q_sc_pc_windows_10_clock_wrong",
+        "q_sc_pc_windows_clock_wrong",
+        "q_sc_pc_windows_incorrect_time",
+        "q_sc_pc_windows_shows_wrong_time",
+        "q_sc_pc_windows_system_time_wrong",
+        "q_sc_pc_windows_time_and_date_wrong",
+        "q_sc_pc_windows_time_incorrect",
+        "q_sc_pc_windows_time_is_wrong",
+        "q_sc_pc_windows_time_not_sync",
+        "q_sc_pc_windows_time_zone_wrong",
+        "q_sc_pc_windows_timezone_wrong",
+        "q_sc_pc_wrong_time_on_pc",
+        "q_ms_answers_77229a1a"
+      ],
+      "reader_questions": [
+        "computer shows wrong time?",
+        "fix computer clock?",
+        "fix pc clock?"
+      ],
+      "status": "REVIEW",
+      "topic_id": "topic_c8537e72cb2f00fbae"
+    },
+    {
+      "action": "FAQ_ADD",
+      "aliases": [
+        "ethernet connected but no internet windows 11",
+        "Ethernet Connected but No Internet on Windows 11: Safe Fixes for Beginners",
+        "Ethernet Connected but No Internet: Where Windows 11 Can Lose Access"
+      ],
+      "audited_at": "2026-08-02T20:11:00+09:00",
+      "auditor_decision": "PASS",
+      "auditor_reasons": [
+        "Eligible evidence maps to one exact LIVE primary target.",
+        "The action avoids a duplicate new post."
+      ],
+      "canonical_intent": "legacy-seed",
+      "canonical_title": "Ethernet Connected but No Internet: Where Windows 11 Can Lose Access",
+      "category_id": "cat_7cc7462a4538fb",
+      "cluster_id": "cluster_2ecb26c706ccb59fbf",
+      "difference_from_existing": "This is not a separate new-post gap. Add the observed trigger to primary LIVE Blogger ID 8791730429535827883 at https://easypcfixguide.blogspot.com/2026/07/ethernet-connected-but-no-internet-on.html.",
+      "editor_brief": "Update exact primary LIVE Blogger ID 8791730429535827883 (https://easypcfixguide.blogspot.com/2026/07/ethernet-connected-but-no-internet-on.html); keep the material scoped as FAQ_ADD.",
+      "official_answerable": true,
+      "official_source_refs": [
+        {
+          "authority_type": "VENDOR",
+          "url": "https://support.microsoft.com/en-us/windows/fix-ethernet-connection-problems-in-windows-2311254e-cab8-42d6-90f3-cb0b9f6369d8"
+        }
+      ],
+      "official_source_urls": [
+        "https://support.microsoft.com/en-us/windows/fix-ethernet-connection-problems-in-windows-2311254e-cab8-42d6-90f3-cb0b9f6369d8"
+      ],
+      "problem_signature": "",
+      "question_ids": [
+        "q_sc_pc_local_area_no_internet"
+      ],
+      "reader_questions": [
+        "local area connection no internet?"
+      ],
+      "status": "REVIEW",
+      "topic_id": "topic_990dfddaa9861d1cfd"
+    },
+    {
+      "action": "FAQ_ADD",
+      "aliases": [
+        "windows update pending restart stuck"
+      ],
+      "audited_at": "2026-08-02T20:11:00+09:00",
+      "auditor_decision": "PASS",
+      "auditor_reasons": [
+        "Eligible evidence maps to one exact LIVE primary target.",
+        "The action avoids a duplicate new post."
+      ],
+      "canonical_intent": "legacy-seed",
+      "canonical_title": "Windows Update Pending Restart Stuck: Safe Fixes for Beginners",
+      "category_id": "cat_bd6cc833ce082a",
+      "cluster_id": "cluster_4421e977cfb2c8a048",
+      "difference_from_existing": "This is not a separate new-post gap. Add the observed trigger to primary LIVE Blogger ID 5958633656043676041 at https://easypcfixguide.blogspot.com/2026/06/windows-update-pending-restart-stuck.html.",
+      "editor_brief": "Update exact primary LIVE Blogger ID 5958633656043676041 (https://easypcfixguide.blogspot.com/2026/06/windows-update-pending-restart-stuck.html); keep the material scoped as FAQ_ADD.",
+      "official_answerable": true,
+      "official_source_refs": [
+        {
+          "authority_type": "VENDOR",
+          "url": "https://support.microsoft.com/en-us/windows/troubleshoot-problems-updating-windows-188c2b0f-10a7-d72f-65b8-32d177eb136c"
+        }
+      ],
+      "official_source_urls": [
+        "https://support.microsoft.com/en-us/windows/troubleshoot-problems-updating-windows-188c2b0f-10a7-d72f-65b8-32d177eb136c"
+      ],
+      "problem_signature": "",
+      "question_ids": [
+        "q_sc_pc_pending_restart",
+        "q_sc_pc_pending_restart_generic",
+        "q_sc_pc_pending_restart_meaning",
+        "q_sc_pc_windows_update_pending_restart",
+        "q_sc_pc_windows_update_troubleshooter_checking_for_pending_restart"
+      ],
+      "reader_questions": [
+        "pending restart?",
+        "pending restart?",
+        "what does pending restart mean in windows update?"
+      ],
+      "status": "REVIEW",
+      "topic_id": "topic_35c47dff9284d23712"
+    },
+    {
+      "action": "NEW_POST",
+      "aliases": [
+        "COM and LPT missing",
+        "USB serial COM port unavailable"
+      ],
+      "audited_at": "2026-08-02T20:11:00+09:00",
+      "auditor_decision": "PASS",
+      "auditor_reasons": [
+        "Three eligible signals include first-party demand and two independent public questions.",
+        "No mapped LIVE Blogger title covers the COM/LPT enumeration problem.",
+        "Microsoft documentation supports a safe, bounded diagnostic path."
+      ],
+      "canonical_intent": "Diagnose a missing Ports (COM & LPT) category and USB-to-serial enumeration without third-party driver tools.",
+      "canonical_title": "Why Ports May Be Missing in Device Manager on Windows 11",
+      "category_id": "cat_59262a4b41871e",
+      "cluster_id": "cluster_ed4ee6edc5239f3f35",
+      "difference_from_existing": "No primary LIVE Blogger post targets a missing COM/LPT category. The USB Device Not Recognized article is broader and does not cover serial-port enumeration or COM assignment.",
+      "editor_brief": "Build a beginner-safe decision tree: confirm the adapter and cable, show hidden devices, inspect Device Manager problem codes, identify the hardware vendor driver, and avoid random driver-download sites.",
+      "official_answerable": true,
+      "official_source_refs": [
+        {
+          "authority_type": "VENDOR",
+          "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/device-manager-problem-codes"
+        },
+        {
+          "authority_type": "VENDOR",
+          "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/install/troubleshooting-device-and-driver-installations"
+        }
+      ],
+      "official_source_urls": [
+        "https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/device-manager-problem-codes",
+        "https://learn.microsoft.com/en-us/windows-hardware/drivers/install/troubleshooting-device-and-driver-installations"
+      ],
+      "priority_score": 82,
+      "problem_signature": "device manager ports category missing windows 11",
+      "question_ids": [
+        "q_sc_pc_ports_missing_device_manager",
+        "q_ms_answers_8d499f70",
+        "q_reddit_1be6arb"
+      ],
+      "reader_questions": [
+        "Why is Ports (COM & LPT) missing in Device Manager?",
+        "Should the category appear only after a USB serial adapter is connected?",
+        "Which Device Manager code identifies the driver failure?"
+      ],
+      "severity_reason": "The issue blocks serial-connected hardware but usually permits low-risk device and driver diagnostics.",
+      "severity_score": 8,
+      "status": "READY",
+      "topic_id": "topic_ed4ee6edc5239f3f35"
+    },
+    {
+      "action": "FAQ_ADD",
+      "aliases": [
+        "file explorer keeps freezing"
+      ],
+      "audited_at": "2026-08-02T20:11:00+09:00",
+      "auditor_decision": "PASS",
+      "auditor_reasons": [
+        "Eligible evidence maps to one exact LIVE primary target.",
+        "The action avoids a duplicate new post."
+      ],
+      "canonical_intent": "legacy-seed",
+      "canonical_title": "File Explorer Keeps Freezing on Windows: Simple Fixes for Beginners",
+      "category_id": "cat_248b006ddb6584",
+      "cluster_id": "cluster_c49d2a300421704128",
+      "difference_from_existing": "This is not a separate new-post gap. Add the observed trigger to primary LIVE Blogger ID 1118931590231934559 at https://easypcfixguide.blogspot.com/2026/07/file-explorer-keeps-freezing-on-windows.html.",
+      "editor_brief": "Update exact primary LIVE Blogger ID 1118931590231934559 (https://easypcfixguide.blogspot.com/2026/07/file-explorer-keeps-freezing-on-windows.html); keep the material scoped as FAQ_ADD.",
+      "official_answerable": true,
+      "official_source_refs": [
+        {
+          "authority_type": "VENDOR",
+          "url": "https://support.microsoft.com/en-us/windows/fix-file-explorer-if-it-won-t-open-or-start-48e41725-10c5-4ca8-82d6-4690854af02e"
+        }
+      ],
+      "official_source_urls": [
+        "https://support.microsoft.com/en-us/windows/fix-file-explorer-if-it-won-t-open-or-start-48e41725-10c5-4ca8-82d6-4690854af02e"
+      ],
+      "problem_signature": "",
+      "question_ids": [
+        "q_sc_pc_file_explorer_freezing"
+      ],
+      "reader_questions": [
+        "why is my file explorer freezing?"
+      ],
+      "status": "REVIEW",
+      "topic_id": "topic_1b1fa93a09fa45c897"
+    },
+    {
+      "action": "FAQ_ADD",
+      "aliases": [
+        "printer offline windows 11"
+      ],
+      "audited_at": "2026-08-02T20:11:00+09:00",
+      "auditor_decision": "PASS",
+      "auditor_reasons": [
+        "Eligible evidence maps to one exact LIVE primary target.",
+        "The action avoids a duplicate new post."
+      ],
+      "canonical_intent": "legacy-seed",
+      "canonical_title": "Printer Says Offline on Windows 11? Simple Fixes for Beginners",
+      "category_id": "cat_cce9fd35f6178b",
+      "cluster_id": "cluster_b0bbd30c6f0df3f0a6",
+      "difference_from_existing": "This is not a separate new-post gap. Add the observed trigger to primary LIVE Blogger ID 8074303509204276408 at https://easypcfixguide.blogspot.com/2026/07/printer-says-offline-on-windows-11.html.",
+      "editor_brief": "Update exact primary LIVE Blogger ID 8074303509204276408 (https://easypcfixguide.blogspot.com/2026/07/printer-says-offline-on-windows-11.html); keep the material scoped as FAQ_ADD.",
+      "official_answerable": true,
+      "official_source_refs": [
+        {
+          "authority_type": "VENDOR",
+          "url": "https://support.microsoft.com/en-us/windows/hardware/printer/fix-printer-connection-and-printing-problems-in-windows"
+        }
+      ],
+      "official_source_urls": [
+        "https://support.microsoft.com/en-us/windows/hardware/printer/fix-printer-connection-and-printing-problems-in-windows"
+      ],
+      "problem_signature": "",
+      "question_ids": [
+        "q_sc_pc_win_11_printer_offline"
+      ],
+      "reader_questions": [
+        "win 11 printer offline?"
+      ],
+      "status": "REVIEW",
+      "topic_id": "topic_488a8276ae514c0fdb"
+    },
+    {
+      "action": "FAQ_ADD",
+      "aliases": [
+        "bluetooth not showing windows 11"
+      ],
+      "audited_at": "2026-08-02T20:11:00+09:00",
+      "auditor_decision": "PASS",
+      "auditor_reasons": [
+        "Eligible evidence maps to one exact LIVE primary target.",
+        "The action avoids a duplicate new post."
+      ],
+      "canonical_intent": "legacy-seed",
+      "canonical_title": "Bluetooth Not Showing in Windows 11: Restore the Missing Toggle Safely",
+      "category_id": "cat_59262a4b41871e",
+      "cluster_id": "cluster_da3efaacc54eaaa9f9",
+      "difference_from_existing": "This is not a separate new-post gap. Add the observed trigger to primary LIVE Blogger ID 2530130838139091832 at https://easypcfixguide.blogspot.com/2026/07/bluetooth-not-showing-in-windows-11.html.",
+      "editor_brief": "Update exact primary LIVE Blogger ID 2530130838139091832 (https://easypcfixguide.blogspot.com/2026/07/bluetooth-not-showing-in-windows-11.html); keep the material scoped as FAQ_ADD.",
+      "official_answerable": true,
+      "official_source_refs": [
+        {
+          "authority_type": "VENDOR",
+          "url": "https://support.microsoft.com/en-gb/windows/fix-bluetooth-problems-in-windows-723e092f-03fa-858b-5c80-131ec3fba75c"
+        }
+      ],
+      "official_source_urls": [
+        "https://support.microsoft.com/en-gb/windows/fix-bluetooth-problems-in-windows-723e092f-03fa-858b-5c80-131ec3fba75c"
+      ],
+      "problem_signature": "",
+      "question_ids": [
+        "q_askubuntu_1068236",
+        "q_askubuntu_1367249",
+        "q_reddit_1vcka88"
+      ],
+      "reader_questions": [
+        "Missing Bluetooth options in Windows 10 for Systems on Dual boot?",
+        "Bluetooth does not work in dual booting computer (windows and Ubuntu)?",
+        "Windows 11 cannot detect Bluetooth at all, but Bluetooth works perfectly in Ubuntu?"
+      ],
+      "status": "REVIEW",
+      "topic_id": "topic_8ad0c44e25d990848b"
+    }
+  ],
+  "unexplored_scope": []
+}

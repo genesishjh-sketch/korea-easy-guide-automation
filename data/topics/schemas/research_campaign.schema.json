@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "research_campaign.schema.json",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "site",
+    "campaign_id",
+    "run_type",
+    "state",
+    "window_start",
+    "window_end",
+    "logic_version",
+    "coverage_hash",
+    "work_items",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "site": {"enum": ["korea_easy_guide", "easy_pc_fix_guide"]},
+    "campaign_id": {"type": "string", "pattern": "^[A-Za-z0-9._-]+$"},
+    "run_type": {"enum": ["BACKFILL_RESEARCH", "WEEKLY_RESEARCH"]},
+    "state": {"enum": ["PENDING", "RUNNING", "PAUSED", "DONE", "BLOCKED"]},
+    "window_start": {"type": "string"},
+    "window_end": {"type": "string"},
+    "logic_version": {"type": "string", "minLength": 1},
+    "coverage_hash": {"type": "string", "minLength": 1},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"},
+    "completed_at": {"type": "string"},
+    "work_items": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "work_id",
+          "source",
+          "query_family",
+          "required",
+          "state",
+          "cursor",
+          "attempts",
+          "last_error",
+          "discovered_ids",
+          "updated_at"
+        ],
+        "properties": {
+          "work_id": {"type": "string"},
+          "source": {"type": "string", "minLength": 1},
+          "query_family": {"type": "string", "minLength": 1},
+          "required": {"type": "boolean"},
+          "state": {
+            "enum": ["PENDING", "RUNNING", "PAUSED", "DONE", "BLOCKED", "SATURATED"]
+          },
+          "cursor": {"type": "string"},
+          "attempts": {"type": "integer", "minimum": 0},
+          "last_error": {"type": "string"},
+          "discovered_ids": {
+            "type": "array",
+            "items": {"type": "string"},
+            "uniqueItems": true
+          },
+          "updated_at": {"type": "string", "format": "date-time"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

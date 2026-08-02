@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sheet_decision_bundle.schema.json",
+  "type": "object",
+  "required": ["schema_version", "site", "decisions"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "site": {"enum": ["korea_easy_guide", "easy_pc_fix_guide"]},
+    "decisions": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": ["topic_id", "expected_revision", "decision"],
+            "properties": {
+              "topic_id": {"type": "string", "minLength": 1},
+              "expected_revision": {"type": "integer", "minimum": 1},
+              "decision": {"enum": ["HOLD", "REJECT", "PRIORITY_OVERRIDE", "NOTES"]},
+              "reason": {"type": "string"},
+              "priority_override": {"type": "number", "minimum": 0, "maximum": 100},
+              "notes": {"type": "string"},
+              "category_id": {"type": "string"}
+            },
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "required": ["proposal_id", "decision", "reviewed_by"],
+            "properties": {
+              "proposal_id": {"type": "string", "minLength": 1},
+              "decision": {"enum": ["APPROVE", "REJECT"]},
+              "reviewed_by": {"type": "string", "minLength": 1},
+              "reason": {"type": "string", "minLength": 1}
+            },
+            "additionalProperties": false
+          }
+        ]
+      }
+    }
+  },
+  "additionalProperties": false
+}

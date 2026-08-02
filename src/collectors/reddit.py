@@ -11,6 +11,24 @@ from src.utils.text import clean_space
 
 LOGGER = logging.getLogger(__name__)
 
+EVIDENCE_OBSERVED_QUESTION = "OBSERVED_QUESTION"
+EVIDENCE_FIRST_PARTY_QUERY = "FIRST_PARTY_QUERY"
+EVIDENCE_SEARCH_SUGGESTION = "SEARCH_SUGGESTION"
+EVIDENCE_QUERY_PLAN = "QUERY_PLAN"
+EVIDENCE_FALLBACK_TEMPLATE = "FALLBACK_TEMPLATE"
+EVIDENCE_TYPES = {
+    EVIDENCE_OBSERVED_QUESTION,
+    EVIDENCE_FIRST_PARTY_QUERY,
+    EVIDENCE_SEARCH_SUGGESTION,
+    EVIDENCE_QUERY_PLAN,
+    EVIDENCE_FALLBACK_TEMPLATE,
+}
+ELIGIBLE_EVIDENCE_TYPES = {
+    EVIDENCE_OBSERVED_QUESTION,
+    EVIDENCE_FIRST_PARTY_QUERY,
+}
+SEED_ENRICHER_ROLE = "seed_enricher"
+
 DEFAULT_SUBREDDITS = [
     "koreatravel",
     "korea",
@@ -49,7 +67,32 @@ SEARCH_INTENT_MODIFIERS = [
 ]
 
 
-class RedditCollector:
+def _evidence_metadata(evidence_type: str, **metadata) -> dict:
+    if evidence_type not in EVIDENCE_TYPES:
+        raise ValueError(f"unsupported evidence_type: {evidence_type}")
+    eligible = evidence_type in ELIGIBLE_EVIDENCE_TYPES
+    return {
+        **metadata,
+        "evidence_type": evidence_type,
+        "collector_role": SEED_ENRICHER_ROLE,
+        "demand_weight": 1.0 if eligible else 0.0,
+        "stability_weight": 1.0 if eligible else 0.0,
+        "ready_weight": 1.0 if eligible else 0.0,
+        "cadence_weight": 1.0 if eligible else 0.0,
+    }
+
+
+def _evidence_type_counts(signals: list[TopicSignal]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for signal in signals:
+        evidence_type = str(
+            (signal.metadata or {}).get("evidence_type") or EVIDENCE_FALLBACK_TEMPLATE
+        )
+        counts[evidence_type] = counts.get(evidence_type, 0) + 1
+    return dict(sorted(counts.items()))
+
+
+class RedditSeedEnricher:
     def __init__(
         self,
         user_agent: str,
@@ -71,6 +114,8 @@ class RedditCollector:
 
     def collect(self, query: str, limit: int = 10) -> list[TopicSignal]:
         self.diagnostics = {
+            "collector_name": "reddit_seed_enricher",
+            "collector_role": SEED_ENRICHER_ROLE,
             "query": query,
             "subreddits": list(self.subreddits),
             "oauth_configured": bool(self.client_id and self.client_secret),
@@ -81,13 +126,22 @@ class RedditCollector:
             "public_json_skipped": bool(self.skip_public_json),
             "public_json_skip_reason": self.skip_public_json_reason if self.skip_public_json else "",
             "google_site_search_signal_count": 0,
+            "public_json_signal_count": 0,
+            "query_plan_count": 0,
+            "observed_signal_count": 0,
+            "first_party_query_count": 0,
+            "fallback_template_count": 0,
+            "demand_eligible_signal_count": 0,
+            "evidence_type_counts": {},
             "used_fallback": False,
             "fallback_reason": "",
         }
         if self.client_id and self.client_secret:
             oauth_signals = self._collect_with_praw(query, limit)
             if oauth_signals:
+                self._mark_observed_questions(oauth_signals, "oauth")
                 self.diagnostics["status"] = "oauth_connected"
+                self._record_evidence_diagnostics(oauth_signals)
                 return oauth_signals
 
         signals: list[TopicSignal] = []
@@ -124,26 +178,37 @@ class RedditCollector:
                             keyword=query,
                             title=title,
                             url=f"https://www.reddit.com{data.get('permalink', '')}",
-                            score=float(data.get("score", 0)) + float(data.get("num_comments", 0)) * 1.5,
-                            metadata={
-                                "subreddit": subreddit,
-                                "collection_method": "public_json",
-                                "num_comments": data.get("num_comments", 0),
-                                "created_utc": data.get("created_utc"),
-                            },
+                            score=0.0,
+                            metadata=_evidence_metadata(
+                                EVIDENCE_QUERY_PLAN,
+                                subreddit=subreddit,
+                                collection_method="public_json",
+                                reddit_item_id=str(data.get("id") or ""),
+                                canonical_public_page_url=f"https://www.reddit.com{data.get('permalink', '')}",
+                                verified_by_codex=False,
+                                query_expansion_only=True,
+                                reported_score=data.get("score", 0),
+                                num_comments=data.get("num_comments", 0),
+                                created_utc=data.get("created_utc"),
+                            ),
                         )
                     )
 
         if signals:
-            self.diagnostics["status"] = "public_json_connected"
+            self.diagnostics["status"] = "public_json_unverified"
             self.diagnostics["public_json_error_count"] = len(self.diagnostics["public_json_failed_subreddits"])
-            return sorted(signals, key=lambda item: item.score, reverse=True)
+            self.diagnostics["public_json_signal_count"] = len(signals)
+            self.diagnostics["query_plan_count"] = len(signals)
+            self._record_evidence_diagnostics(signals)
+            return signals
 
         search_signals = self._google_site_search_signals(query, limit)
         if search_signals:
-            self.diagnostics["status"] = "google_site_search_ready"
+            self.diagnostics["status"] = "query_plan_only"
             self.diagnostics["public_json_error_count"] = len(self.diagnostics["public_json_failed_subreddits"])
             self.diagnostics["google_site_search_signal_count"] = len(search_signals)
+            self.diagnostics["query_plan_count"] = len(search_signals)
+            self._record_evidence_diagnostics(search_signals)
             return search_signals
 
         query_terms = {part for part in query.lower().split() if len(part) > 2}
@@ -158,8 +223,13 @@ class RedditCollector:
                     source="reddit_fallback",
                     keyword=query,
                     title=question,
-                    score=2.0 + overlap,
-                    metadata={"collection_method": "fallback"},
+                    score=0.0,
+                    metadata=_evidence_metadata(
+                        EVIDENCE_FALLBACK_TEMPLATE,
+                        collection_method="fallback",
+                        overlap_term_count=overlap,
+                        query_expansion_only=True,
+                    ),
                 )
             )
         self.diagnostics["status"] = "fallback_only" if fallback_signals else "no_reddit_signals"
@@ -172,6 +242,7 @@ class RedditCollector:
                 self.diagnostics["fallback_reason"] = "All available Reddit live collection paths returned no usable signals; public JSON had errors."
             else:
                 self.diagnostics["fallback_reason"] = "Reddit live collection returned no matching signals."
+        self._record_evidence_diagnostics(fallback_signals)
         return sorted(fallback_signals, key=lambda item: item.score, reverse=True)[:limit]
 
     def _google_site_search_signals(self, query: str, limit: int) -> list[TopicSignal]:
@@ -190,12 +261,14 @@ class RedditCollector:
                     keyword=query,
                     title=f"Reddit questions about {normalized_query} in r/{subreddit}",
                     url=url,
-                    score=6.0,
-                    metadata={
-                        "subreddit": subreddit,
-                        "collection_method": "google_site_search",
-                        "search_query": search_query,
-                    },
+                    score=0.0,
+                    metadata=_evidence_metadata(
+                        EVIDENCE_QUERY_PLAN,
+                        subreddit=subreddit,
+                        collection_method="google_site_search",
+                        search_query=search_query,
+                        query_expansion_only=True,
+                    ),
                 )
             )
         for index, modifier in enumerate(SEARCH_INTENT_MODIFIERS):
@@ -208,14 +281,58 @@ class RedditCollector:
                     keyword=query,
                     title=f"Reddit {modifier} searches for {normalized_query}",
                     url=f"https://www.google.com/search?q={quote_plus(search_query)}",
-                    score=4.0 - (index * 0.25),
-                    metadata={
-                        "collection_method": "google_site_search",
-                        "search_query": search_query,
-                    },
+                    score=0.0,
+                    metadata=_evidence_metadata(
+                        EVIDENCE_QUERY_PLAN,
+                        collection_method="google_site_search",
+                        search_query=search_query,
+                        query_expansion_only=True,
+                        modifier_order=index,
+                    ),
                 )
             )
         return signals[:limit]
+
+    def _record_evidence_diagnostics(self, signals: list[TopicSignal]) -> None:
+        counts = _evidence_type_counts(signals)
+        observed_count = counts.get(EVIDENCE_OBSERVED_QUESTION, 0)
+        first_party_query_count = counts.get(EVIDENCE_FIRST_PARTY_QUERY, 0)
+        self.diagnostics["evidence_type_counts"] = counts
+        self.diagnostics["observed_signal_count"] = int(observed_count)
+        self.diagnostics["first_party_query_count"] = int(first_party_query_count)
+        self.diagnostics["fallback_template_count"] = int(
+            counts.get(EVIDENCE_FALLBACK_TEMPLATE, 0)
+        )
+        self.diagnostics["demand_eligible_signal_count"] = int(
+            observed_count + first_party_query_count
+        )
+
+    @staticmethod
+    def _mark_observed_questions(signals: list[TopicSignal], collection_method: str) -> None:
+        for signal in signals:
+            if signal.source != "reddit":
+                continue
+            metadata = dict(signal.metadata or {})
+            metadata.update(
+                _evidence_metadata(
+                    EVIDENCE_OBSERVED_QUESTION,
+                    **{
+                        key: value
+                        for key, value in metadata.items()
+                        if key
+                        not in {
+                            "evidence_type",
+                            "collector_role",
+                            "demand_weight",
+                            "stability_weight",
+                            "ready_weight",
+                            "cadence_weight",
+                        }
+                    },
+                )
+            )
+            metadata["collection_method"] = collection_method
+            signal.metadata = metadata
 
     def _fallback_questions(self) -> list[str]:
         if self._uses_windows_subreddits():
@@ -248,12 +365,15 @@ class RedditCollector:
                             title=title,
                             url=f"https://www.reddit.com{submission.permalink}",
                             score=float(submission.score) + float(submission.num_comments) * 1.5,
-                            metadata={
-                                "subreddit": subreddit,
-                                "collection_method": "oauth",
-                                "num_comments": submission.num_comments,
-                                "created_utc": submission.created_utc,
-                            },
+                            metadata=_evidence_metadata(
+                                EVIDENCE_OBSERVED_QUESTION,
+                                subreddit=subreddit,
+                                collection_method="oauth",
+                                source_item_id=str(submission.id),
+                                canonical_public_page_url=f"https://www.reddit.com{submission.permalink}",
+                                num_comments=submission.num_comments,
+                                created_utc=submission.created_utc,
+                            ),
                         )
                     )
             return sorted(signals, key=lambda item: item.score, reverse=True)
@@ -261,3 +381,7 @@ class RedditCollector:
             LOGGER.warning("Reddit OAuth collection failed, falling back to public JSON: %s", exc)
             self.diagnostics["oauth_error"] = str(exc)
             return []
+
+
+# Backwards-compatible import for existing pipeline code and third-party callers.
+RedditCollector = RedditSeedEnricher

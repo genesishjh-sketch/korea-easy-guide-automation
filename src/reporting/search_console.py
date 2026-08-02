@@ -13,6 +13,7 @@ from src.google_auth import SEARCH_CONSOLE_SUBMIT_SCOPE, get_credentials
 URL_INSPECTION_ATTEMPTS = 3
 URL_INSPECTION_RETRY_SECONDS = 2
 TRANSIENT_INSPECTION_STATUSES = {429, 500, 502, 503, 504}
+SEARCH_ANALYTICS_PAGE_SIZE = 25000
 
 
 class SearchConsoleClient:
@@ -58,6 +59,93 @@ class SearchConsoleClient:
             }
         except Exception as exc:
             return {"status": "error", "site_url": self.site_url, "error": str(exc)}
+
+    def all_queries(
+        self,
+        start_date: date,
+        end_date: date,
+        *,
+        page_size: int = SEARCH_ANALYTICS_PAGE_SIZE,
+        max_rows: int | None = None,
+    ) -> dict[str, Any]:
+        """Return the complete paginated query dataset for research backfills."""
+
+        if not self.site_url:
+            return {
+                "status": "not_configured",
+                "note": "SEARCH_CONSOLE_SITE_URL is missing.",
+                "queries": [],
+                "complete": False,
+            }
+        selected_page_size = max(1, min(int(page_size), SEARCH_ANALYTICS_PAGE_SIZE))
+        selected_max_rows = (
+            max(1, int(max_rows))
+            if max_rows is not None
+            else None
+        )
+        rows: list[dict[str, Any]] = []
+        start_row = 0
+        try:
+            service = self._service(readonly=True)
+            while True:
+                remaining = (
+                    selected_max_rows - len(rows)
+                    if selected_max_rows is not None
+                    else selected_page_size
+                )
+                if remaining <= 0:
+                    break
+                request_size = min(selected_page_size, remaining)
+                response = (
+                    service.searchanalytics()
+                    .query(
+                        siteUrl=self.site_url,
+                        body={
+                            "startDate": start_date.isoformat(),
+                            "endDate": end_date.isoformat(),
+                            "dimensions": ["query"],
+                            "dataState": "all",
+                            "rowLimit": request_size,
+                            "startRow": start_row,
+                        },
+                    )
+                    .execute()
+                )
+                page = list(response.get("rows") or [])
+                rows.extend(page)
+                if len(page) < request_size:
+                    return {
+                        "status": "connected",
+                        "site_url": self.site_url,
+                        "start_date": start_date.isoformat(),
+                        "end_date": end_date.isoformat(),
+                        "queries": [_query_row(item) for item in rows],
+                        "row_count": len(rows),
+                        "complete": True,
+                        "next_start_row": "",
+                    }
+                start_row += len(page)
+            return {
+                "status": "connected",
+                "site_url": self.site_url,
+                "start_date": start_date.isoformat(),
+                "end_date": end_date.isoformat(),
+                "queries": [_query_row(item) for item in rows],
+                "row_count": len(rows),
+                "complete": False,
+                "next_start_row": start_row,
+                "note": "max_rows stopped pagination before source exhaustion",
+            }
+        except Exception as exc:
+            return {
+                "status": "error",
+                "site_url": self.site_url,
+                "error": str(exc),
+                "queries": [_query_row(item) for item in rows],
+                "row_count": len(rows),
+                "complete": False,
+                "next_start_row": start_row,
+            }
 
     def indexed_page_estimate(self, start_date: date, end_date: date) -> dict[str, Any]:
         if not self.site_url:
@@ -231,6 +319,16 @@ def normalize_site_url(value: str) -> str:
     if not value.endswith("/"):
         value += "/"
     return value
+
+
+def _query_row(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "query": str((row.get("keys") or [""])[0]),
+        "clicks": float(row.get("clicks", 0) or 0),
+        "impressions": float(row.get("impressions", 0) or 0),
+        "ctr": float(row.get("ctr", 0) or 0),
+        "position": float(row.get("position", 0) or 0),
+    }
 
 
 def parse_index_inspection(inspected_url: str, response: dict[str, Any]) -> dict[str, Any]:

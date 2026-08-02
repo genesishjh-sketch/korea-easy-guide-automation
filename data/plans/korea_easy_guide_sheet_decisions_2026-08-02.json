@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "site": "korea_easy_guide",
+  "decisions": [
+    {
+      "topic_id": "topic_4f0c58b7ee4065136d",
+      "expected_revision": 4,
+      "decision": "NOTES",
+      "notes": "Initial migration ignored duplicate local Blogger receipt post:11543349930859767; authoritative owner is topic_940db37c5208dcac61. Review this topic independently; no runtime topic merge was performed."
+    },
+    {
+      "topic_id": "topic_f2d6260feed2b0f1a7",
+      "expected_revision": 3,
+      "decision": "NOTES",
+      "notes": "Initial migration ignored duplicate local Blogger receipt post:5362386935147860367; authoritative owner is topic_eebad8a8e5acb60f26. Review this topic independently; no runtime topic merge was performed."
+    }
+  ]
+}

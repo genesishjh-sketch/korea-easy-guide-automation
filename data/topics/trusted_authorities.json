@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "global": {
+    "GOVERNMENT": [
+      ".gov",
+      ".gov.uk",
+      ".gc.ca",
+      ".go.kr",
+      ".go.jp",
+      ".gov.au",
+      ".europa.eu"
+    ]
+  },
+  "sites": {
+    "easy_pc_fix_guide": {
+      "GOVERNMENT": [
+        "cisa.gov"
+      ],
+      "VENDOR": [
+        "microsoft.com",
+        "intel.com",
+        "amd.com",
+        "nvidia.com",
+        "dell.com",
+        "hp.com",
+        "lenovo.com"
+      ],
+      "PLATFORM": [
+        "support.microsoft.com",
+        "learn.microsoft.com"
+      ],
+      "OPERATOR": [],
+      "FIRST_PARTY": []
+    },
+    "korea_easy_guide": {
+      "GOVERNMENT": [
+        "korea.net",
+        "visitkorea.or.kr",
+        "hikorea.go.kr",
+        "seoul.go.kr"
+      ],
+      "VENDOR": [
+        "samsung.com",
+        "lg.com"
+      ],
+      "PLATFORM": [
+        "kakao.com",
+        "naver.com",
+        "coupang.com"
+      ],
+      "OPERATOR": [
+        "airport.kr",
+        "letskorail.com",
+        "korail.com",
+        "seoulmetro.co.kr"
+      ],
+      "FIRST_PARTY": []
+    }
+  }
+}

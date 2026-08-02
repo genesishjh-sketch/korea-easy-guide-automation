@@ -134,9 +134,9 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertEqual(payload["quality_score"], 100)
         self.assertEqual(payload["quality_metrics"]["word_count"], 1512)
         self.assertEqual(payload["reddit_signal_quality"]["fallback_reddit_signal_count"], 6)
-        self.assertIn("fallback 질문만 사용", payload["reddit_signal_quality"]["warning"])
+        self.assertIn("FALLBACK_TEMPLATE 질문만", payload["reddit_signal_quality"]["warning"])
         self.assertEqual(payload["google_signal_quality"]["google_suggest_fallback_signal_count"], 5)
-        self.assertIn("Google Suggest live 신호 없이 fallback", payload["google_signal_quality"]["warning"])
+        self.assertIn("FALLBACK_TEMPLATE", payload["google_signal_quality"]["warning"])
         self.assertTrue(payload["operational_status"]["publish_quality_ok"])
         self.assertEqual(payload["operational_status"]["collection_status"], "fallback_only")
         self.assertFalse(payload["operational_status"]["ready_for_cadence_increase"])
@@ -402,15 +402,15 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertIn("- 이미지 수: 2", message)
         self.assertIn("- 공식 링크 수: 7", message)
         self.assertIn("- FAQ 수: 9", message)
-        self.assertIn("- Reddit fallback 신호 수: 6", message)
+        self.assertIn("- Reddit FALLBACK_TEMPLATE 수: 6", message)
         self.assertIn("- Google Suggest 신호 수: 5", message)
-        self.assertIn("- Google Suggest live 신호 수: 0", message)
-        self.assertIn("- Google Suggest fallback 신호 수: 5", message)
+        self.assertIn("- SEARCH_SUGGESTION 수: 0", message)
+        self.assertIn("- Google FALLBACK_TEMPLATE 수: 5", message)
         self.assertIn("- 운영 상태: 발행 품질 OK, 수집 안정성 점검 필요", message)
         self.assertIn("- 발행 품질 안정성: 안정", message)
         self.assertIn("- 수집 안정성: 주의: fallback 질문 의존", message)
         self.assertIn("수집 품질 경고", message)
-        self.assertIn("fallback 질문만 사용", message)
+        self.assertIn("FALLBACK_TEMPLATE 질문만", message)
         self.assertIn("- Reddit 수집 진단 상태: fallback_only", message)
         self.assertEqual(message.count("- Reddit 수집 진단 상태: fallback_only"), 1)
         self.assertIn("- Reddit public JSON 실패 수: 4", message)
@@ -421,7 +421,7 @@ class DuplicatePublishGuardTests(unittest.TestCase):
             message.count("- fallback 이유: All available Reddit live collection paths returned no usable signals"),
             1,
         )
-        self.assertIn("Google Suggest live 신호 없이 fallback", message)
+        self.assertIn("FALLBACK_TEMPLATE", message)
         self.assertIn("- Google Suggest 수집 진단 상태: fallback_only", message)
         self.assertIn("- Google Suggest fallback 제안 수: 5", message)
         self.assertIn("- Google Suggest 오류: timeout", message)
@@ -451,7 +451,7 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertIn("- 발행 품질 안정성: 안정", message)
         self.assertNotIn("- 품질통과: 아니오", message)
         self.assertNotIn("- 품질점수: n/a/100", message)
-        self.assertNotIn("- Reddit fallback 신호 수: 0", message)
+        self.assertNotIn("- Reddit FALLBACK_TEMPLATE 수: 0", message)
 
     def test_daily_success_message_includes_quality_issue_actions(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -516,7 +516,7 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertIn("공식 출처 문제가 감지", message)
         self.assertIn("주제 일치 문제가 감지", message)
 
-    def test_operational_status_allows_cadence_increase_with_oauth_or_search_signals(self) -> None:
+    def test_operational_status_allows_cadence_increase_only_with_observed_signals(self) -> None:
         result = daily_draft.build_operational_status(
             {"score": 100, "passed": True, "issues": []},
             {
@@ -542,8 +542,8 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         )
 
         self.assertTrue(search_result["publish_quality_ok"])
-        self.assertEqual(search_result["collection_status"], "stable_google_site_search")
-        self.assertTrue(search_result["ready_for_cadence_increase"])
+        self.assertEqual(search_result["collection_status"], "query_plan_only")
+        self.assertFalse(search_result["ready_for_cadence_increase"])
 
     def test_operational_status_blocks_cadence_increase_when_quality_has_issues(self) -> None:
         result = daily_draft.build_operational_status(
@@ -559,6 +559,29 @@ class DuplicatePublishGuardTests(unittest.TestCase):
         self.assertFalse(result["publish_quality_ok"])
         self.assertEqual(result["collection_status"], "stable_oauth")
         self.assertFalse(result["ready_for_cadence_increase"])
+
+    def test_numeric_strings_do_not_count_as_research_evidence(self) -> None:
+        signal_quality = daily_draft.build_reddit_signal_quality(
+            {
+                "reddit_oauth_signal_count": "3",
+                "reddit_public_json_signal_count": 0,
+                "reddit_google_site_search_signal_count": "6",
+                "fallback_reddit_signal_count": 0,
+            }
+        )
+        operational_status = daily_draft.build_operational_status(
+            {"score": 100, "passed": True, "issues": []},
+            signal_quality,
+        )
+
+        self.assertEqual(signal_quality["reddit_oauth_signal_count"], 0)
+        self.assertEqual(signal_quality["query_plan_count"], 0)
+        self.assertEqual(
+            signal_quality["numeric_schema_issues"],
+            ["reddit_oauth_signal_count", "reddit_google_site_search_signal_count"],
+        )
+        self.assertEqual(operational_status["collection_status"], "no_reddit_signals")
+        self.assertFalse(operational_status["ready_for_cadence_increase"])
 
     def test_daily_success_message_warns_when_reddit_uses_public_json_only(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -606,8 +629,8 @@ class DuplicatePublishGuardTests(unittest.TestCase):
                 }
             )
 
-        self.assertIn("- Reddit public JSON 신호 수: 4", message)
-        self.assertIn("public JSON 경로에만 의존", message)
+        self.assertIn("- Reddit public JSON 후보 수(원문 검증 전 QUERY_PLAN): 4", message)
+        self.assertIn("원문 검증 전 QUERY_PLAN", message)
         self.assertIn("- Reddit 수집 진단 상태: public_json_connected", message)
         self.assertIn("- Reddit public JSON 실패 수: 1", message)
         self.assertIn("- 실패 subreddit: WindowsHelp", message)
@@ -1122,6 +1145,8 @@ class DuplicatePublishGuardTests(unittest.TestCase):
                 daily_draft, "run_publish_with_duplicate_guard", return_value=result_path
             ), patch.object(
                 daily_draft, "ROOT_DIR", Path(tmpdir)
+            ), patch.object(
+                daily_draft, "public_posts_published_today", return_value=[]
             ), patch.object(daily_draft, "notify_daily_completion"):
                 result = daily_draft.run(
                     seed="duplicate topic",

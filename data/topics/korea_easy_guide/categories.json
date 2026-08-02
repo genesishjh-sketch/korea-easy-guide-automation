@@ -1,0 +1,68 @@
+{
+  "categories": {
+    "cat_337b140f40da04": {
+      "aliases": [],
+      "blogger_label": "Accommodation",
+      "category_id": "cat_337b140f40da04",
+      "created_at": "2026-07-29T05:09:36.158600+00:00",
+      "name": "Accommodation",
+      "site": "korea_easy_guide",
+      "status": "ACTIVE",
+      "updated_at": "2026-07-29T05:09:36.158601+00:00"
+    },
+    "cat_38224e1c4ad74f": {
+      "aliases": [],
+      "blogger_label": "Transportation",
+      "category_id": "cat_38224e1c4ad74f",
+      "created_at": "2026-07-29T05:09:36.158570+00:00",
+      "name": "Transportation",
+      "site": "korea_easy_guide",
+      "status": "ACTIVE",
+      "updated_at": "2026-07-29T05:09:36.158578+00:00"
+    },
+    "cat_3a2b695cf83810": {
+      "aliases": [],
+      "blogger_label": "Mobile & Internet",
+      "category_id": "cat_3a2b695cf83810",
+      "created_at": "2026-07-29T05:09:36.158585+00:00",
+      "name": "Mobile & Internet",
+      "site": "korea_easy_guide",
+      "status": "ACTIVE",
+      "updated_at": "2026-07-29T05:09:36.158586+00:00"
+    },
+    "cat_43dc230f352201": {
+      "aliases": [],
+      "blogger_label": "Apps in Korea",
+      "category_id": "cat_43dc230f352201",
+      "created_at": "2026-07-29T05:09:36.158591+00:00",
+      "name": "Apps in Korea",
+      "site": "korea_easy_guide",
+      "status": "ACTIVE",
+      "updated_at": "2026-07-29T05:09:36.158592+00:00"
+    },
+    "cat_6facd04357ab64": {
+      "aliases": [],
+      "blogger_label": "Travel Basics",
+      "category_id": "cat_6facd04357ab64",
+      "created_at": "2026-07-29T05:09:36.158666+00:00",
+      "name": "Travel Basics",
+      "site": "korea_easy_guide",
+      "status": "ACTIVE",
+      "updated_at": "2026-07-29T05:09:36.158678+00:00"
+    },
+    "cat_fa7867aabd52f3": {
+      "aliases": [],
+      "blogger_label": "Food & Delivery",
+      "category_id": "cat_fa7867aabd52f3",
+      "created_at": "2026-07-29T05:09:36.158596+00:00",
+      "name": "Food & Delivery",
+      "site": "korea_easy_guide",
+      "status": "ACTIVE",
+      "updated_at": "2026-07-29T05:09:36.158596+00:00"
+    }
+  },
+  "revision": 34,
+  "schema_version": 1,
+  "site": "korea_easy_guide",
+  "updated_at": "2026-08-02T11:24:34.568088+00:00"
+}

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import date
 import unittest
 from unittest.mock import Mock
 from unittest.mock import patch
@@ -14,6 +15,51 @@ from src.reporting.search_console import is_transient_inspection_error
 
 
 class SearchConsoleAuditTests(unittest.TestCase):
+    def test_all_queries_paginates_until_source_exhaustion(self) -> None:
+        settings = Mock(
+            search_console_site_url="https://example.com/",
+            site_url="https://example.com",
+        )
+        first_request = Mock()
+        first_request.execute.return_value = {
+            "rows": [
+                {"keys": ["first"], "clicks": 1, "impressions": 10},
+                {"keys": ["second"], "clicks": 2, "impressions": 20},
+            ]
+        }
+        second_request = Mock()
+        second_request.execute.return_value = {
+            "rows": [
+                {"keys": ["third"], "clicks": 3, "impressions": 30},
+            ]
+        }
+        service = Mock()
+        service.searchanalytics.return_value.query.side_effect = [
+            first_request,
+            second_request,
+        ]
+
+        with patch.object(
+            SearchConsoleClient,
+            "_service",
+            return_value=service,
+        ):
+            result = SearchConsoleClient(settings).all_queries(
+                date(2025, 8, 1),
+                date(2026, 7, 31),
+                page_size=2,
+            )
+
+        self.assertTrue(result["complete"])
+        self.assertEqual(result["row_count"], 3)
+        self.assertEqual(
+            [item["query"] for item in result["queries"]],
+            ["first", "second", "third"],
+        )
+        calls = service.searchanalytics.return_value.query.call_args_list
+        self.assertEqual(calls[0].kwargs["body"]["startRow"], 0)
+        self.assertEqual(calls[1].kwargs["body"]["startRow"], 2)
+
     def test_pass_verdict_is_indexed(self) -> None:
         self.assertTrue(is_indexed({"verdict": "PASS", "coverage_state": "Submitted and indexed"}))
 

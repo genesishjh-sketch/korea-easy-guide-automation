@@ -79,9 +79,47 @@ class BloggerPublisher:
         request = service.posts().list(blogId=self.blog_id, fetchBodies=fetch_bodies, status=["LIVE"], maxResults=500)
         while request is not None:
             response = request.execute()
-            posts.extend(response.get("items", []))
+            # Blogger's list response does not consistently echo the requested
+            # status on each item. The endpoint was explicitly filtered to LIVE,
+            # so preserve that verified catalog fact for downstream reconciliation.
+            posts.extend(
+                {**item, "status": "LIVE"}
+                for item in response.get("items", [])
+            )
             request = service.posts().list_next(request, response)
         return posts
+
+    def get_post(self, post_id: str) -> dict[str, Any]:
+        if not str(post_id or "").strip():
+            raise ValueError("post_id is required")
+        service = self._service()
+        return service.posts().get(
+            blogId=self.blog_id,
+            postId=str(post_id),
+            view="ADMIN",
+        ).execute()
+
+    def update_post_labels(
+        self,
+        post_id: str,
+        labels: list[str],
+        *,
+        post: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        current = post or self.get_post(post_id)
+        body = {
+            "kind": "blogger#post",
+            "id": str(post_id),
+            "blog": {"id": self.blog_id},
+            "title": str(current.get("title") or ""),
+            "content": str(current.get("content") or ""),
+            "labels": list(labels),
+        }
+        return self._service().posts().update(
+            blogId=self.blog_id,
+            postId=str(post_id),
+            body=body,
+        ).execute()
 
     def upsert_page(self, title: str, html: str) -> dict[str, Any]:
         service = self._service()

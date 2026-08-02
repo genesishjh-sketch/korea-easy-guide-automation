@@ -1,21 +1,10 @@
-name: Weekly Topic Queue
+name: Weekly Topic Queue Validation
 
 on:
   workflow_dispatch:
-    inputs:
-      start_date:
-        description: "Optional queue start date, YYYY-MM-DD"
-        required: false
-      posts_per_day:
-        description: "Planned posts per blog per day"
-        required: false
-        default: "1"
-  schedule:
-    # Sunday 22:00 KST. Creates the Monday-Sunday topic queue before daily publishing starts.
-    - cron: "0 13 * * 0"
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: weekly-topic-queue
@@ -26,18 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       APP_ENV: production
-      GOOGLE_OAUTH_CLIENT_SECRET_FILE: .credentials/client_secret.json
-      GOOGLE_OAUTH_TOKEN_FILE: .credentials/google_token.json
-      BLOGGER_PUBLISH_MODE: publish
-      GOOGLE_SEARCH_PROVIDER: suggest
-      NOTIFICATION_PROVIDER: ${{ vars.NOTIFICATION_PROVIDER }}
-      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-      KOREA_EASY_GUIDE_BLOGGER_BLOG_ID: ${{ vars.BLOGGER_BLOG_ID || '288143591612645486' }}
-      KOREA_EASY_GUIDE_SITE_URL: ${{ vars.SITE_URL || 'https://koreaeasyguide.blogspot.com' }}
-      EASY_PC_FIX_GUIDE_BLOGGER_BLOG_ID: ${{ vars.EASY_PC_FIX_GUIDE_BLOGGER_BLOG_ID }}
-      EASY_PC_FIX_GUIDE_SITE_URL: ${{ vars.EASY_PC_FIX_GUIDE_SITE_URL || 'https://easypcfixguide.blogspot.com' }}
-      WEEKLY_QUEUE_POSTS_PER_DAY: ${{ github.event.inputs.posts_per_day || vars.WEEKLY_QUEUE_POSTS_PER_DAY || '1' }}
+      BLOGGER_PUBLISH_MODE: validate
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -47,35 +25,56 @@ jobs:
         run: pip install -r requirements.txt
       - name: Run queue regression tests
         run: python -m unittest tests.test_weekly_queue tests.test_daily_batch
-      - name: Write Google OAuth files
+      - name: Validate topic registry freshness and invariants
+        shell: bash
         run: |
-          mkdir -p .credentials
-          printf '%s' '${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET_JSON }}' > .credentials/client_secret.json
-          printf '%s' '${{ secrets.GOOGLE_OAUTH_TOKEN_JSON }}' > .credentials/google_token.json
-      - name: Build weekly topic queues
+          validate_registry() {
+            local site="$1"
+            set +e
+            python -m src.pipeline.topic_board validate --site "${site}" --max-run-age-hours 192
+            local status=$?
+            set -e
+            if [ "${status}" -eq 0 ]; then
+              return 0
+            fi
+            if [ "${status}" -eq 2 ]; then
+              echo "::warning::${site} registry rollout/freshness gate is not ready; local controller must use explicit legacy fallback."
+              return 0
+            fi
+            echo "::error::${site} registry validation failed with exit ${status}."
+            return "${status}"
+          }
+          validate_registry korea_easy_guide
+          validate_registry easy_pc_fix_guide
+      - name: Validate committed queue provenance
         run: |
-          START_ARG=""
-          if [ -n "${{ github.event.inputs.start_date }}" ]; then
-            START_ARG="--start-date ${{ github.event.inputs.start_date }}"
-          fi
-          python -m src.pipeline.weekly_queue --site korea_easy_guide --days 7 --posts-per-day "${WEEKLY_QUEUE_POSTS_PER_DAY}" ${START_ARG}
-          python -m src.pipeline.weekly_queue --site easy_pc_fix_guide --days 7 --posts-per-day "${WEEKLY_QUEUE_POSTS_PER_DAY}" ${START_ARG}
-      - name: Commit weekly plans
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/plans/
-          if git diff --cached --quiet; then
-            echo "No weekly plan changes to commit."
-          else
-            git commit -m "Update weekly topic queues"
-            git push
-          fi
-      - name: Upload weekly plans
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v6
-        with:
-          name: weekly-topic-queue
-          path: |
-            data/plans/
-            reports/
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          for site in ("korea_easy_guide", "easy_pc_fix_guide"):
+              paths = sorted(Path("data/plans").glob(f"{site}_weekly_queue_*.json"))
+              if not paths:
+                  print(f"::warning::{site}: committed weekly queue file is missing")
+                  continue
+              queue = json.loads(paths[-1].read_text(encoding="utf-8"))
+              status = queue.get("status")
+              if status not in {"approved", "DEGRADED", "SHADOW"}:
+                  raise SystemExit(f"{site}: unsupported queue status {status!r}")
+              if status == "DEGRADED":
+                  selection = queue.get("topic_selection") or {}
+                  if not queue.get("fallback_reason"):
+                      raise SystemExit(f"{site}: DEGRADED queue is missing fallback_reason")
+                  if selection.get("fallback_source") not in {"legacy", ""}:
+                      raise SystemExit(f"{site}: DEGRADED queue has invalid fallback_source")
+              for item in queue.get("items") or []:
+                  if item.get("topic_source") == "registry" and item.get("registry_status") not in {
+                      "READY",
+                      "SCHEDULED",
+                  }:
+                      raise SystemExit(
+                          f"{site}: registry queue item is not READY/SCHEDULED: {item.get('topic_id')}"
+                      )
+                  if item.get("topic_source") == "registry" and not queue.get("research_run_id"):
+                      raise SystemExit(f"{site}: registry queue is missing research_run_id")
+          PY

@@ -1,0 +1,18 @@
+{
+  "run_type": "BACKFILL_RESEARCH",
+  "window_start": "2025-08-01",
+  "window_end": "2026-07-31",
+  "logic_version": "topic-intelligence-v2",
+  "work_items": [
+    {"work_id": "reddit-update-errors", "source": "reddit", "query_family": "windows-update-error-codes", "required": true},
+    {"work_id": "reddit-network", "source": "reddit", "query_family": "wifi-internet-bluetooth", "required": true},
+    {"work_id": "reddit-devices", "source": "reddit", "query_family": "printer-scanner-audio-microphone", "required": true},
+    {"work_id": "reddit-boot-files", "source": "reddit", "query_family": "boot-recovery-file-explorer-search", "required": true},
+    {"work_id": "reddit-accounts-apps", "source": "reddit", "query_family": "onedrive-account-apps-settings", "required": true},
+    {"work_id": "microsoft-answers-windows", "source": "microsoft_answers", "query_family": "windows-user-symptoms", "required": true},
+    {"work_id": "superuser-windows", "source": "superuser", "query_family": "desktop-troubleshooting", "required": true},
+    {"work_id": "askubuntu-dualboot", "source": "ask_ubuntu", "query_family": "dual-boot-and-shared-hardware", "required": true},
+    {"work_id": "search-console-all-queries", "source": "search_console", "query_family": "all-first-party-queries", "required": true},
+    {"work_id": "quora-pc", "source": "quora", "query_family": "beginner-pc-problems", "required": false}
+  ]
+}

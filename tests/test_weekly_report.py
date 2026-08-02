@@ -10,10 +10,58 @@ from unittest.mock import patch
 from zoneinfo import ZoneInfo
 
 from src.config import load_settings
+from src.pipeline import stage1_generate
 from src.reporting.weekly import WeeklyReporter
 from src.reporting.weekly import _seed_plan_source_quality_lines
 from src.reporting.weekly import article_status_summary
 from src.reporting.weekly import monitoring_review_items
+
+
+def _research_evidence_row(
+    source: str,
+    collection_method: str,
+    evidence_type: str,
+    index: int,
+) -> dict:
+    weight = stage1_generate.evidence_weight(evidence_type)
+    observed = evidence_type == stage1_generate.EVIDENCE_OBSERVED_QUESTION
+    return {
+        "source": source,
+        "title": f"signal {index}",
+        "url": (
+            f"https://www.reddit.com/r/test/comments/{index}/example/"
+            if observed
+            else ""
+        ),
+        "collection_method": collection_method,
+        "evidence_type": evidence_type,
+        "collector_role": "seed_enricher",
+        "query_expansion_only": not bool(weight),
+        "source_item_id": f"item-{index}" if observed else "",
+        "canonical_public_page_url": (
+            f"https://www.reddit.com/r/test/comments/{index}/example/"
+            if observed
+            else ""
+        ),
+        "verified_by_codex": False,
+        "signal_score": 1.0 if weight else 0.0,
+        "demand_weight": weight,
+        "stability_weight": weight,
+        "ready_weight": weight,
+        "cadence_weight": weight,
+    }
+
+
+def _valid_research_report(
+    rows: list[dict],
+    **extra,
+) -> dict:
+    return {
+        "schema_version": stage1_generate.RESEARCH_REPORT_SCHEMA_VERSION,
+        "signal_evidence": rows,
+        **stage1_generate.derive_research_evidence_aggregates(rows),
+        **extra,
+    }
 
 
 class WeeklyReportPublicFeedTests(unittest.TestCase):
@@ -425,7 +473,7 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertIn("URL 검사 대상: https://easypcfixguide.blogspot.com/2026/06/wi-fi-button-missing-on-windows-11.html", markdown)
         self.assertIn("## 수집 신호 품질", markdown)
         self.assertIn("Reddit OAuth 신호 수: 0", markdown)
-        self.assertIn("Reddit public JSON 신호 수: 0", markdown)
+        self.assertIn("Reddit public JSON 후보 수(원문 검증 전 QUERY_PLAN): 0", markdown)
         self.assertIn("Reddit fallback 신호 수: 2", markdown)
         self.assertIn("fallback만 사용한 글 수: 1건 (고유 제목 1개)", markdown)
         self.assertIn("fallback만 사용한 글", markdown)
@@ -741,20 +789,31 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
             article_two = Path(tmpdir) / "two"
             article_one.mkdir()
             article_two.mkdir()
+            fallback_rows = [
+                *[
+                    _research_evidence_row(
+                        "reddit_fallback",
+                        "fallback",
+                        stage1_generate.EVIDENCE_FALLBACK_TEMPLATE,
+                        index,
+                    )
+                    for index in range(2)
+                ],
+                *[
+                    _research_evidence_row(
+                        "google_suggest",
+                        "fallback",
+                        stage1_generate.EVIDENCE_FALLBACK_TEMPLATE,
+                        index,
+                    )
+                    for index in range(2, 6)
+                ],
+            ]
             (article_one / "research_report.json").write_text(
                 json.dumps(
-                    {
-                        "live_reddit_signal_count": 0,
-                        "reddit_oauth_signal_count": 0,
-                        "reddit_public_json_signal_count": 0,
-                        "fallback_reddit_signal_count": 2,
-                        "google_suggest_signal_count": 4,
-                        "google_suggest_live_signal_count": 0,
-                        "google_suggest_fallback_signal_count": 4,
-                        "signal_source_counts": {"reddit_fallback": 2, "google_suggest": 4},
-                        "reddit_collection_method_counts": {"fallback": 2},
-                        "google_suggest_method_counts": {"fallback": 4},
-                        "reddit_collection_diagnostics": {
+                    _valid_research_report(
+                        fallback_rows,
+                        reddit_collection_diagnostics={
                             "status": "fallback_only",
                             "oauth_configured": False,
                             "public_json_error_count": 4,
@@ -764,7 +823,7 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                             ],
                             "fallback_reason": "All available Reddit live collection paths returned no usable signals; public JSON had errors.",
                         },
-                        "google_suggest_diagnostics": {
+                        google_suggest_diagnostics={
                             "status": "fallback_only",
                             "live_suggestion_count": 0,
                             "fallback_suggestion_count": 4,
@@ -772,25 +831,44 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                             "fallback_reason": "Google Suggest request failed; used local query-intent fallback.",
                             "error": "timeout",
                         },
-                    }
+                    )
                 ),
                 encoding="utf-8",
             )
-            (article_two / "research_report.json").write_text(
-                json.dumps(
-                    {
-                        "live_reddit_signal_count": 3,
-                        "reddit_oauth_signal_count": 2,
-                        "reddit_public_json_signal_count": 1,
-                        "fallback_reddit_signal_count": 1,
-                        "google_suggest_signal_count": 2,
-                        "google_suggest_live_signal_count": 2,
-                        "google_suggest_fallback_signal_count": 0,
-                        "signal_source_counts": {"reddit": 3, "reddit_fallback": 1, "google_suggest": 2},
-                        "reddit_collection_method_counts": {"oauth": 2, "public_json": 1, "fallback": 1},
-                        "google_suggest_method_counts": {"live": 2},
-                    }
+            observed_rows = [
+                *[
+                    _research_evidence_row(
+                        "reddit",
+                        "oauth",
+                        stage1_generate.EVIDENCE_OBSERVED_QUESTION,
+                        index,
+                    )
+                    for index in range(10, 12)
+                ],
+                _research_evidence_row(
+                    "reddit",
+                    "public_json",
+                    stage1_generate.EVIDENCE_QUERY_PLAN,
+                    12,
                 ),
+                _research_evidence_row(
+                    "reddit_fallback",
+                    "fallback",
+                    stage1_generate.EVIDENCE_FALLBACK_TEMPLATE,
+                    13,
+                ),
+                *[
+                    _research_evidence_row(
+                        "google_suggest",
+                        "live",
+                        stage1_generate.EVIDENCE_SEARCH_SUGGESTION,
+                        index,
+                    )
+                    for index in range(14, 16)
+                ],
+            ]
+            (article_two / "research_report.json").write_text(
+                json.dumps(_valid_research_report(observed_rows)),
                 encoding="utf-8",
             )
 
@@ -801,9 +879,10 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
                 ]
             )
 
-        self.assertEqual(result["status"], "fallback_only")
+        self.assertEqual(result["status"], "observed")
         self.assertEqual(result["article_count_with_research"], 2)
-        self.assertEqual(result["live_reddit_signal_count"], 3)
+        self.assertEqual(result["valid_research_report_count"], 2)
+        self.assertEqual(result["live_reddit_signal_count"], 2)
         self.assertEqual(result["reddit_oauth_signal_count"], 2)
         self.assertEqual(result["reddit_public_json_signal_count"], 1)
         self.assertEqual(result["fallback_reddit_signal_count"], 3)
@@ -822,6 +901,11 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         self.assertEqual(result["reddit_collection_diagnostics"][0]["failed_subreddits"], ["WindowsHelp", "Windows11"])
         self.assertEqual(result["google_suggest_diagnostics"][0]["title"], "Fallback only article")
         self.assertEqual(result["google_suggest_diagnostics"][0]["fallback_suggestion_count"], 4)
+        self.assertTrue(result["evidence_counts_verified"])
+        self.assertEqual(
+            result["derived_evidence_counts"]["demand_eligible_signal_count"],
+            2,
+        )
 
     def test_signal_quality_result_deduplicates_fallback_article_titles(self) -> None:
         settings = load_settings("easy_pc_fix_guide")
@@ -832,13 +916,17 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
             article_two = Path(tmpdir) / "two"
             article_one.mkdir()
             article_two.mkdir()
-            fallback_report = {
-                "live_reddit_signal_count": 0,
-                "fallback_reddit_signal_count": 2,
-                "google_suggest_signal_count": 4,
-                "signal_source_counts": {"reddit_fallback": 2, "google_suggest": 4},
-                "reddit_collection_method_counts": {"fallback": 2},
-            }
+            fallback_report = _valid_research_report(
+                [
+                    _research_evidence_row(
+                        "reddit_fallback",
+                        "fallback",
+                        stage1_generate.EVIDENCE_FALLBACK_TEMPLATE,
+                        index,
+                    )
+                    for index in range(2)
+                ]
+            )
             (article_one / "research_report.json").write_text(json.dumps(fallback_report), encoding="utf-8")
             (article_two / "research_report.json").write_text(json.dumps(fallback_report), encoding="utf-8")
 
@@ -851,6 +939,115 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
 
         self.assertEqual(result["fallback_only_article_count"], 2)
         self.assertEqual(result["fallback_only_articles"], ["Wi-Fi Button Missing on Windows 11"])
+
+    def test_signal_quality_rejects_numeric_strings_without_crashing(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            article_dir = Path(tmpdir) / "malformed"
+            article_dir.mkdir()
+            report = _valid_research_report([])
+            report["live_reddit_signal_count"] = "3"
+            (article_dir / "research_report.json").write_text(
+                json.dumps(report),
+                encoding="utf-8",
+            )
+
+            result = reporter._signal_quality_result(
+                [{"title": "Malformed research report", "article_dir": str(article_dir)}]
+            )
+
+        self.assertEqual(result["live_reddit_signal_count"], 0)
+        self.assertEqual(result["reddit_oauth_signal_count"], 0)
+        self.assertEqual(result["numeric_schema_issue_count"], 1)
+        self.assertEqual(result["invalid_research_report_count"], 1)
+        self.assertEqual(
+            result["numeric_schema_issues"][0]["code"],
+            "invalid_research_report_schema",
+        )
+        self.assertEqual(result["status"], "no_observed_evidence")
+
+    def test_signal_quality_rejects_schema_version_mismatch(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+        report = _valid_research_report([])
+        report["schema_version"] = stage1_generate.RESEARCH_REPORT_SCHEMA_VERSION - 1
+        report["demand_eligible_signal_count"] = 999
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            article_dir = Path(tmpdir) / "old-schema"
+            article_dir.mkdir()
+            (article_dir / "research_report.json").write_text(
+                json.dumps(report),
+                encoding="utf-8",
+            )
+            result = reporter._signal_quality_result(
+                [{"title": "Old schema", "article_dir": str(article_dir)}]
+            )
+
+        self.assertEqual(result["valid_research_report_count"], 0)
+        self.assertEqual(result["invalid_research_report_count"], 1)
+        self.assertEqual(result["demand_eligible_signal_count"], 0)
+        self.assertEqual(result["research_schema_issue_count"], 1)
+        self.assertEqual(
+            result["numeric_schema_issues"][0]["code"],
+            "invalid_research_report_schema_version",
+        )
+
+    def test_signal_quality_zeroes_mismatched_eligible_aggregate(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+        report = _valid_research_report([])
+        report["demand_eligible_signal_count"] = 3
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            article_dir = Path(tmpdir) / "forged"
+            article_dir.mkdir()
+            (article_dir / "research_report.json").write_text(
+                json.dumps(report),
+                encoding="utf-8",
+            )
+            result = reporter._signal_quality_result(
+                [{"title": "Forged aggregate", "article_dir": str(article_dir)}]
+            )
+
+        self.assertEqual(result["demand_eligible_signal_count"], 0)
+        self.assertEqual(
+            result["derived_evidence_counts"]["demand_eligible_signal_count"],
+            0,
+        )
+        self.assertEqual(result["valid_research_report_count"], 0)
+        self.assertEqual(result["invalid_research_report_count"], 1)
+        self.assertEqual(
+            result["numeric_schema_issues"][0]["code"],
+            "invalid_research_report_schema",
+        )
+
+    def test_signal_quality_reports_invalid_json_without_using_evidence(self) -> None:
+        settings = load_settings("easy_pc_fix_guide")
+        reporter = WeeklyReporter(settings)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            article_dir = Path(tmpdir) / "invalid-json"
+            article_dir.mkdir()
+            (article_dir / "research_report.json").write_text(
+                '{"schema_version": 2, "demand_eligible_signal_count": 999',
+                encoding="utf-8",
+            )
+            result = reporter._signal_quality_result(
+                [{"title": "Invalid JSON", "article_dir": str(article_dir)}]
+            )
+
+        self.assertEqual(result["article_count_with_research"], 1)
+        self.assertEqual(result["valid_research_report_count"], 0)
+        self.assertEqual(result["invalid_research_report_count"], 1)
+        self.assertEqual(result["demand_eligible_signal_count"], 0)
+        self.assertEqual(result["research_schema_issue_count"], 1)
+        self.assertEqual(
+            result["numeric_schema_issues"][0]["code"],
+            "invalid_research_report_schema",
+        )
 
     def test_next_actions_do_not_ask_for_first_article_when_public_feed_has_posts(self) -> None:
         settings = load_settings("easy_pc_fix_guide")
@@ -1103,8 +1300,8 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
         )
 
         joined = "\n".join(actions)
-        self.assertIn("Google site:reddit.com 검색 신호", joined)
         self.assertIn("fallback 질문만 사용", joined)
+        self.assertIn("판단 점수가 0", joined)
         self.assertNotIn("https://www.reddit.com/prefs/apps", joined)
 
     def test_next_actions_include_public_json_only_warning(self) -> None:
@@ -1125,8 +1322,8 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
 
         joined = "\n".join(actions)
         self.assertIn("public JSON", joined)
-        self.assertIn("Google site:reddit.com 검색 신호", joined)
-        self.assertIn("OAuth는 선택 보강", joined)
+        self.assertIn("실제 공개 원문", joined)
+        self.assertIn("OAuth 또는 Codex 원문 검증", joined)
         self.assertIn("https://www.reddit.com/prefs/apps", joined)
         self.assertIn("REDDIT_CLIENT_SECRET", joined)
 
@@ -1178,7 +1375,8 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
 
         joined = "\n".join(actions)
         self.assertIn("Reddit OAuth Health가 주의 상태", joined)
-        self.assertIn("검색 기반으로 계속 가능", joined)
+        self.assertIn("READY/legacy 큐만 DEGRADED", joined)
+        self.assertIn("OBSERVED_QUESTION 또는 FIRST_PARTY_QUERY", joined)
         self.assertIn("상태 점수: 0/100", joined)
         self.assertIn("REDDIT_CLIENT_ID", joined)
 
@@ -1212,7 +1410,8 @@ class WeeklyReportPublicFeedTests(unittest.TestCase):
 
         joined = "\n".join(actions)
         self.assertIn("Reddit OAuth Health가 주의 상태", joined)
-        self.assertIn("OAuth는 선택 보강", joined)
+        self.assertIn("READY/legacy 큐만 DEGRADED", joined)
+        self.assertIn("판단 점수가 0", joined)
         self.assertNotIn("Reddit 실제 신호 없이 fallback 질문만 사용한 글", joined)
         self.assertNotIn("일일 운영 상태 기준으로 아직 발행량 증량 준비가 아닙니다", joined)
 

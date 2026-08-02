@@ -1,0 +1,44 @@
+{
+  "run_type": "WEEKLY_RESEARCH",
+  "window_start": "2025-08-02",
+  "window_end": "2026-08-02",
+  "logic_version": "topic-intelligence-v2",
+  "work_items": [
+    {
+      "work_id": "search-console-all-queries",
+      "source": "google_search_console",
+      "query_family": "all-first-party-queries",
+      "required": true
+    },
+    {
+      "work_id": "reddit-pc-device-exceptions",
+      "source": "reddit",
+      "query_family": "com-ports-and-dualboot-bluetooth",
+      "required": true
+    },
+    {
+      "work_id": "microsoft-answers-windows",
+      "source": "microsoft_answers",
+      "query_family": "com-ports-and-wrong-time",
+      "required": true
+    },
+    {
+      "work_id": "superuser-windows",
+      "source": "superuser",
+      "query_family": "browser-print-queue",
+      "required": true
+    },
+    {
+      "work_id": "askubuntu-dualboot",
+      "source": "ask_ubuntu",
+      "query_family": "dualboot-bluetooth-handoff",
+      "required": true
+    },
+    {
+      "work_id": "quora-pc",
+      "source": "quora",
+      "query_family": "windows-device-exceptions",
+      "required": false
+    }
+  ]
+}

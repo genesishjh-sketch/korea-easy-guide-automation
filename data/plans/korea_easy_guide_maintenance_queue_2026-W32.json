@@ -1,0 +1,11 @@
+{
+  "site": "korea_easy_guide",
+  "week": "2026-W32",
+  "created_at": "2026-08-02T20:25:50.562193+09:00",
+  "start_date": "2026-08-03",
+  "end_date": "2026-08-09",
+  "max_items_per_site_week": 2,
+  "status": "HOLD",
+  "hold_reason": "shadow_rollout_not_promoted",
+  "items": []
+}

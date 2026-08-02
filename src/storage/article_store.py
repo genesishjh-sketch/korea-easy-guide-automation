@@ -30,6 +30,9 @@ class ArticleStore:
 
         (article_dir / "article.md").write_text(article.markdown, encoding="utf-8")
         (article_dir / "article.html").write_text(article.html, encoding="utf-8")
+        candidate_metadata = asdict(candidate)
+        candidate_metadata["topic_action"] = candidate.topic_action
+        candidate_metadata["topic_revision"] = candidate.topic_revision
         (article_dir / "metadata.json").write_text(
             json.dumps(
                 {
@@ -37,13 +40,7 @@ class ArticleStore:
                         **asdict(article),
                         "created_at": article.created_at.isoformat(),
                     },
-                    "candidate": {
-                        "keyword": candidate.keyword,
-                        "category": candidate.category,
-                        "intent": candidate.intent,
-                        "score": candidate.score,
-                        "signals": [asdict(signal) for signal in candidate.signals],
-                    },
+                    "candidate": candidate_metadata,
                 },
                 ensure_ascii=False,
                 indent=2,

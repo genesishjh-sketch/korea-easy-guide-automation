@@ -53,7 +53,13 @@ class WorkflowSafetyTests(unittest.TestCase):
         self.assertIn("schedule:", korea_workflow)
         self.assertIn('cron: "40 0 * * *"', korea_workflow)
         self.assertIn('cron: "55 0 * * *"', korea_workflow)
-        self.assertIn("github.event_name == 'schedule' && 'publish'", korea_workflow)
+        self.assertIn(
+            "BLOGGER_PUBLISH_MODE: ${{ github.event.inputs.mode || 'validate' }}",
+            korea_workflow,
+        )
+        self.assertNotIn("github.event_name == 'schedule' && 'publish'", korea_workflow)
+        self.assertIn("Codex local owns scheduled publishing", korea_workflow)
+        self.assertIn("Scheduled GitHub runs never insert Blogger posts", korea_workflow)
         self.assertIn("group: korea-easy-guide-daily-publish", korea_workflow)
         self.assertIn("cancel-in-progress: false", korea_workflow)
         self.assertIn("python -m src.pipeline.stage3_submit_sitemap", korea_workflow)
@@ -73,6 +79,14 @@ class WorkflowSafetyTests(unittest.TestCase):
         self.assertNotIn("--site easy_pc_fix_guide", publication_count_line)
         self.assertIn('cron: "10 0 * * *"', easy_pc_workflow)
         self.assertIn('cron: "25 0 * * *"', easy_pc_workflow)
+        self.assertIn(
+            "BLOGGER_PUBLISH_MODE: ${{ github.event.inputs.mode || 'validate' }}",
+            easy_pc_workflow,
+        )
+        self.assertNotIn(
+            "github.event_name == 'schedule' && 'publish'",
+            easy_pc_workflow,
+        )
         easy_pc_publication_count_line = next(
             line
             for line in easy_pc_workflow.splitlines()
@@ -135,12 +149,17 @@ class WorkflowSafetyTests(unittest.TestCase):
         self.assertIn("stage3_submit_sitemap --site easy_pc_fix_guide --strict", workflow)
         self.assertIn("stage3_search_console_audit --site easy_pc_fix_guide --inspection-count 5 --strict", workflow)
 
-    def test_easy_pc_daily_has_backup_schedule_after_primary_publish(self) -> None:
+    def test_easy_pc_daily_has_validate_only_backup_schedule(self) -> None:
         workflow = (ROOT_DIR / ".github" / "workflows" / "easy-pc-daily.yml").read_text(encoding="utf-8")
 
         self.assertIn('cron: "10 0 * * *"', workflow)
         self.assertIn('cron: "25 0 * * *"', workflow)
-        self.assertIn("daily limit guard prevents duplicate publishing", workflow)
+        self.assertIn("Codex local owns scheduled publishing", workflow)
+        self.assertIn("Scheduled GitHub runs never insert Blogger posts", workflow)
+        self.assertIn(
+            "BLOGGER_PUBLISH_MODE: ${{ github.event.inputs.mode || 'validate' }}",
+            workflow,
+        )
         self.assertIn("group: easy-pc-fix-daily-publish", workflow)
         self.assertIn("cancel-in-progress: false", workflow)
 
@@ -226,6 +245,27 @@ class WorkflowSafetyTests(unittest.TestCase):
         self.assertIn("actions/upload-artifact@v6", workflow)
         self.assertIn("reports/easy_pc_fix_guide-reddit-health.json", workflow)
         self.assertIn("reports/easy_pc_fix_guide-reddit-health.md", workflow)
+
+    def test_weekly_topic_queue_validates_registry_and_preserves_static_seeds(self) -> None:
+        workflow = (ROOT_DIR / ".github" / "workflows" / "weekly-topic-queue.yml").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertNotIn('cron: "0 13 * * 0"', workflow)
+        self.assertIn("workflow_dispatch:", workflow)
+        self.assertIn("contents: read", workflow)
+        self.assertNotIn("TOPIC_BOARD_MODE:", workflow)
+        self.assertIn("Validate topic registry freshness and invariants", workflow)
+        self.assertIn(
+            "python -m src.pipeline.topic_board validate --site \"${site}\" --max-run-age-hours 192",
+            workflow,
+        )
+        self.assertIn("explicit legacy fallback", workflow)
+        self.assertIn("Validate committed queue provenance", workflow)
+        self.assertIn('status not in {"approved", "DEGRADED", "SHADOW"}', workflow)
+        self.assertIn("registry queue is missing research_run_id", workflow)
+        self.assertNotIn("git push", workflow)
+        self.assertNotIn("Build weekly topic queues", workflow)
 
 
 if __name__ == "__main__":

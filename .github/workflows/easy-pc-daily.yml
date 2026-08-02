@@ -1,4 +1,4 @@
-name: Easy PC Fix Daily Publish
+name: Easy PC Fix Daily Validate / Manual Publish
 
 on:
   workflow_dispatch:
@@ -11,9 +11,9 @@ on:
         required: false
         default: "validate"
   schedule:
-    # 09:10 KST primary daily publish.
+    # 09:10 KST GitHub validation fallback. Codex local owns scheduled publishing.
     - cron: "10 0 * * *"
-    # 09:25 KST backup. The daily limit guard prevents duplicate publishing.
+    # 09:25 KST validation retry. Scheduled GitHub runs never insert Blogger posts.
     - cron: "25 0 * * *"
 
 concurrency:
@@ -33,7 +33,7 @@ jobs:
       EASY_PC_FIX_GUIDE_GA4_PROPERTY_ID: ${{ vars.EASY_PC_FIX_GUIDE_GA4_PROPERTY_ID }}
       GOOGLE_OAUTH_CLIENT_SECRET_FILE: .credentials/client_secret.json
       GOOGLE_OAUTH_TOKEN_FILE: .credentials/google_token.json
-      BLOGGER_PUBLISH_MODE: ${{ github.event_name == 'schedule' && 'publish' || github.event.inputs.mode || 'validate' }}
+      BLOGGER_PUBLISH_MODE: ${{ github.event.inputs.mode || 'validate' }}
       DAILY_BATCH_MAX_POSTS: ${{ vars.EASY_PC_FIX_GUIDE_DAILY_BATCH_MAX_POSTS || '1' }}
       REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
       REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
