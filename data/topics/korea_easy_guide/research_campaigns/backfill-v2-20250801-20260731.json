@@ -7,8 +7,8 @@
   "run_type": "BACKFILL_RESEARCH",
   "schema_version": 1,
   "site": "korea_easy_guide",
-  "state": "PENDING",
-  "updated_at": "2026-08-02T12:06:06.697119+00:00",
+  "state": "PAUSED",
+  "updated_at": "2026-08-02T12:15:46.999480+00:00",
   "window_end": "2026-07-31",
   "window_start": "2025-08-01",
   "work_items": {
@@ -25,15 +25,18 @@
       "work_id": "quora-korea"
     },
     "reddit-accommodation": {
-      "attempts": 0,
-      "cursor": "",
-      "discovered_ids": [],
+      "attempts": 1,
+      "cursor": "scout-opened-2-current-window-items-librarian-editor-auditor-pending",
+      "discovered_ids": [
+        "1uqosnf",
+        "1tzekqd"
+      ],
       "last_error": "",
       "query_family": "accommodation-checkin-booking",
       "required": true,
       "source": "reddit",
-      "state": "PENDING",
-      "updated_at": "2026-08-02T12:06:06.697119+00:00",
+      "state": "PAUSED",
+      "updated_at": "2026-08-02T12:15:46.999480+00:00",
       "work_id": "reddit-accommodation"
     },
     "reddit-apps-payments": {

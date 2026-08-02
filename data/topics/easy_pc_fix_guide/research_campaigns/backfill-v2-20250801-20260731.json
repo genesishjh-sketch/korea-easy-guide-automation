@@ -7,21 +7,24 @@
   "run_type": "BACKFILL_RESEARCH",
   "schema_version": 1,
   "site": "easy_pc_fix_guide",
-  "state": "PENDING",
-  "updated_at": "2026-08-02T12:06:06.896836+00:00",
+  "state": "PAUSED",
+  "updated_at": "2026-08-02T12:15:47.403023+00:00",
   "window_end": "2026-07-31",
   "window_start": "2025-08-01",
   "work_items": {
     "askubuntu-dualboot": {
-      "attempts": 0,
-      "cursor": "",
-      "discovered_ids": [],
+      "attempts": 1,
+      "cursor": "scout-opened-2-current-window-items-librarian-editor-auditor-pending",
+      "discovered_ids": [
+        "1555340",
+        "1562175"
+      ],
       "last_error": "",
       "query_family": "dual-boot-and-shared-hardware",
       "required": true,
       "source": "ask_ubuntu",
-      "state": "PENDING",
-      "updated_at": "2026-08-02T12:06:06.896836+00:00",
+      "state": "PAUSED",
+      "updated_at": "2026-08-02T12:15:47.403023+00:00",
       "work_id": "askubuntu-dualboot"
     },
     "microsoft-answers-windows": {
