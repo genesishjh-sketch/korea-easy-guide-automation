@@ -1,0 +1,170 @@
+{
+  "schema_version": 2,
+  "collector_role": "seed_enricher_plus_opened_official_research",
+  "site": "easy_pc_fix_guide",
+  "content_domain": "windows_help",
+  "seed_keyword": "laptop battery draining fast windows 11",
+  "topic": "Laptop Battery Draining Fast in Windows 11: Find the Cause Safely",
+  "queries": [
+    "laptop battery draining fast windows 11",
+    "Windows 11 battery usage by app official Microsoft",
+    "Windows 11 Energy recommendations battery official Microsoft",
+    "powercfg battery report Windows 11 Microsoft Learn",
+    "caring for your battery Windows 11 Microsoft Support",
+    "Windows 11 Smart charging Microsoft Support",
+    "Windows 11 release health battery drain",
+    "Windows message center battery drain July 2026",
+    "Dell laptop battery draining quickly official support",
+    "Windows 11 sleep battery drain official guidance"
+  ],
+  "sources": [
+    {
+      "name": "Microsoft Support: Caring for your battery in Windows",
+      "url": "https://support.microsoft.com/en-us/windows/experience/power-battery/caring-for-your-battery-in-windows",
+      "type": "microsoft_support_opened"
+    },
+    {
+      "name": "Microsoft Support: Learn more about Energy recommendations",
+      "url": "https://support.microsoft.com/en-us/windows/experience/power-battery/learn-more-about-energy-recommendations",
+      "type": "microsoft_support_opened"
+    },
+    {
+      "name": "Microsoft Support: Battery saving tips for Windows",
+      "url": "https://support.microsoft.com/en-US/Windows/Experience/Power-Battery/battery-saving-tips-for-windows",
+      "type": "microsoft_support_opened"
+    },
+    {
+      "name": "Microsoft Learn: Powercfg command-line options",
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/design/device-experiences/powercfg-command-line-options",
+      "type": "microsoft_learn_opened"
+    },
+    {
+      "name": "Microsoft Support: Use Smart charging in Windows",
+      "url": "https://support.microsoft.com/en-us/windows/experience/power-battery/use-smart-charging-in-windows",
+      "type": "microsoft_support_opened"
+    },
+    {
+      "name": "Microsoft Learn: Windows release health",
+      "url": "https://learn.microsoft.com/en-us/windows/release-health/",
+      "type": "windows_release_health_opened"
+    },
+    {
+      "name": "Microsoft Learn: Windows message center",
+      "url": "https://learn.microsoft.com/en-us/windows/release-health/windows-message-center",
+      "type": "windows_message_center_opened"
+    },
+    {
+      "name": "Dell Support: The battery is draining quicker than expected",
+      "url": "https://www.dell.com/support/kbdoc/en-us/000143524/the-battery-drains-quicker-than-expected-on-a-dell-notebook-with-modern-standby-mode-enabled",
+      "type": "manufacturer_support_opened"
+    }
+  ],
+  "reader_questions": [
+    "Why did my Windows 11 laptop battery life change suddenly?",
+    "How can I tell whether an app or the battery itself is responsible?",
+    "Which Windows power settings are safe for a beginner to change?",
+    "How do I check battery health without third-party software?",
+    "Can a Windows update cause battery drain on specific laptop models?",
+    "Why does the battery lose charge while the laptop is sleeping?",
+    "When is short runtime normal for a demanding workload?",
+    "What physical signs mean I should stop using the battery?"
+  ],
+  "factual_notes": [
+    {
+      "source": "Microsoft Support: Caring for your battery in Windows",
+      "note": "Lithium-ion capacity declines with age and use; excessive heat accelerates deterioration; an expanded battery requires immediate stop-use precautions; Windows 11 can generate a battery report."
+    },
+    {
+      "source": "Microsoft Support: Learn more about Energy recommendations",
+      "note": "Energy recommendations groups high-impact power settings, and the available recommendations vary by device hardware and sensors."
+    },
+    {
+      "source": "Microsoft Support: Battery saving tips for Windows",
+      "note": "Battery usage by app, Energy saver, lower brightness, shorter screen timeouts, lower refresh rate, and app graphics preferences can reduce consumption."
+    },
+    {
+      "source": "Microsoft Learn: Powercfg command-line options",
+      "note": "powercfg /batteryreport creates an HTML battery-usage report; /energy analyzes common efficiency problems; /sleepstudy reports Modern Standby quality."
+    },
+    {
+      "source": "Microsoft Support: Use Smart charging in Windows",
+      "note": "Supported devices can intentionally hold charge below 100 percent to protect long-term battery health."
+    },
+    {
+      "source": "Microsoft Learn: Windows message center",
+      "note": "In July 2026 Microsoft reported a limited Dell/Intel compatibility issue that could cause shutdowns, poor performance, heat, and battery drain; the article limits this statement to affected devices."
+    },
+    {
+      "source": "Dell Support",
+      "note": "Manufacturer guidance distinguishes fast drain from charging, detection, swelling, and hardware diagnostic symptoms and directs model-specific service for unsafe batteries."
+    }
+  ],
+  "topic_context": {
+    "topic_id": "",
+    "cluster_id": "",
+    "category_id": "",
+    "action": "NEW_POST",
+    "topic_action": "NEW_POST",
+    "revision": 0,
+    "topic_revision": 0,
+    "claim_run_id": "",
+    "editor_brief": {},
+    "reader_questions": [],
+    "difference_from_existing": "New angle with no close published title found.",
+    "existing_post_refs": []
+  },
+  "signal_evidence": [
+    {"source":"reddit_search","title":"Reddit questions in r/WindowsHelp","url":"https://www.google.com/search?q=site%3Areddit.com%2Fr%2FWindowsHelp+%22laptop+battery+draining+fast+windows+11%22","collection_method":"google_site_search","evidence_type":"QUERY_PLAN","collector_role":"seed_enricher","query_expansion_only":true,"source_item_id":"","canonical_public_page_url":"","verified_by_codex":false,"signal_score":0.0,"demand_weight":0.0,"stability_weight":0.0,"ready_weight":0.0,"cadence_weight":0.0},
+    {"source":"reddit_search","title":"Reddit questions in r/Windows11","url":"https://www.google.com/search?q=site%3Areddit.com%2Fr%2FWindows11+%22laptop+battery+draining+fast+windows+11%22","collection_method":"google_site_search","evidence_type":"QUERY_PLAN","collector_role":"seed_enricher","query_expansion_only":true,"source_item_id":"","canonical_public_page_url":"","verified_by_codex":false,"signal_score":0.0,"demand_weight":0.0,"stability_weight":0.0,"ready_weight":0.0,"cadence_weight":0.0},
+    {"source":"reddit_search","title":"Reddit questions in r/techsupport","url":"https://www.google.com/search?q=site%3Areddit.com%2Fr%2Ftechsupport+%22laptop+battery+draining+fast+windows+11%22","collection_method":"google_site_search","evidence_type":"QUERY_PLAN","collector_role":"seed_enricher","query_expansion_only":true,"source_item_id":"","canonical_public_page_url":"","verified_by_codex":false,"signal_score":0.0,"demand_weight":0.0,"stability_weight":0.0,"ready_weight":0.0,"cadence_weight":0.0},
+    {"source":"reddit_search","title":"Reddit questions in r/pchelp","url":"https://www.google.com/search?q=site%3Areddit.com%2Fr%2Fpchelp+%22laptop+battery+draining+fast+windows+11%22","collection_method":"google_site_search","evidence_type":"QUERY_PLAN","collector_role":"seed_enricher","query_expansion_only":true,"source_item_id":"","canonical_public_page_url":"","verified_by_codex":false,"signal_score":0.0,"demand_weight":0.0,"stability_weight":0.0,"ready_weight":0.0,"cadence_weight":0.0},
+    {"source":"reddit_search","title":"Reddit question search plan","url":"https://www.google.com/search?q=site%3Areddit.com+%22laptop+battery+draining+fast+windows+11%22+question+windows","collection_method":"google_site_search","evidence_type":"QUERY_PLAN","collector_role":"seed_enricher","query_expansion_only":true,"source_item_id":"","canonical_public_page_url":"","verified_by_codex":false,"signal_score":0.0,"demand_weight":0.0,"stability_weight":0.0,"ready_weight":0.0,"cadence_weight":0.0},
+    {"source":"reddit_search","title":"Reddit problem search plan","url":"https://www.google.com/search?q=site%3Areddit.com+%22laptop+battery+draining+fast+windows+11%22+problem+windows","collection_method":"google_site_search","evidence_type":"QUERY_PLAN","collector_role":"seed_enricher","query_expansion_only":true,"source_item_id":"","canonical_public_page_url":"","verified_by_codex":false,"signal_score":0.0,"demand_weight":0.0,"stability_weight":0.0,"ready_weight":0.0,"cadence_weight":0.0},
+    {"source":"google_suggest","title":"laptop battery draining fast windows 11","url":"","collection_method":"live","evidence_type":"SEARCH_SUGGESTION","collector_role":"seed_enricher","query_expansion_only":true,"source_item_id":"","canonical_public_page_url":"","verified_by_codex":false,"signal_score":0.0,"demand_weight":0.0,"stability_weight":0.0,"ready_weight":0.0,"cadence_weight":0.0},
+    {"source":"google_suggest","title":"hp laptop battery draining fast windows 11","url":"","collection_method":"live","evidence_type":"SEARCH_SUGGESTION","collector_role":"seed_enricher","query_expansion_only":true,"source_item_id":"","canonical_public_page_url":"","verified_by_codex":false,"signal_score":0.0,"demand_weight":0.0,"stability_weight":0.0,"ready_weight":0.0,"cadence_weight":0.0},
+    {"source":"google_suggest","title":"dell laptop battery draining fast windows 11","url":"","collection_method":"live","evidence_type":"SEARCH_SUGGESTION","collector_role":"seed_enricher","query_expansion_only":true,"source_item_id":"","canonical_public_page_url":"","verified_by_codex":false,"signal_score":0.0,"demand_weight":0.0,"stability_weight":0.0,"ready_weight":0.0,"cadence_weight":0.0},
+    {"source":"google_suggest","title":"laptop battery draining fast after windows 11 update","url":"","collection_method":"live","evidence_type":"SEARCH_SUGGESTION","collector_role":"seed_enricher","query_expansion_only":true,"source_item_id":"","canonical_public_page_url":"","verified_by_codex":false,"signal_score":0.0,"demand_weight":0.0,"stability_weight":0.0,"ready_weight":0.0,"cadence_weight":0.0},
+    {"source":"google_suggest","title":"how to fix laptop battery draining fast windows 11","url":"","collection_method":"live","evidence_type":"SEARCH_SUGGESTION","collector_role":"seed_enricher","query_expansion_only":true,"source_item_id":"","canonical_public_page_url":"","verified_by_codex":false,"signal_score":0.0,"demand_weight":0.0,"stability_weight":0.0,"ready_weight":0.0,"cadence_weight":0.0},
+    {"source":"google_suggest","title":"why my laptop battery drain so fast windows 11","url":"","collection_method":"live","evidence_type":"SEARCH_SUGGESTION","collector_role":"seed_enricher","query_expansion_only":true,"source_item_id":"","canonical_public_page_url":"","verified_by_codex":false,"signal_score":0.0,"demand_weight":0.0,"stability_weight":0.0,"ready_weight":0.0,"cadence_weight":0.0},
+    {"source":"google_suggest","title":"why is my laptop battery draining so fast windows 11 hp","url":"","collection_method":"live","evidence_type":"SEARCH_SUGGESTION","collector_role":"seed_enricher","query_expansion_only":true,"source_item_id":"","canonical_public_page_url":"","verified_by_codex":false,"signal_score":0.0,"demand_weight":0.0,"stability_weight":0.0,"ready_weight":0.0,"cadence_weight":0.0},
+    {"source":"google_suggest","title":"why is my laptop battery draining so fast windows 11 dell","url":"","collection_method":"live","evidence_type":"SEARCH_SUGGESTION","collector_role":"seed_enricher","query_expansion_only":true,"source_item_id":"","canonical_public_page_url":"","verified_by_codex":false,"signal_score":0.0,"demand_weight":0.0,"stability_weight":0.0,"ready_weight":0.0,"cadence_weight":0.0}
+  ],
+  "live_reddit_signal_count": 0,
+  "reddit_oauth_signal_count": 0,
+  "reddit_public_json_signal_count": 0,
+  "reddit_google_site_search_signal_count": 6,
+  "fallback_reddit_signal_count": 0,
+  "google_suggest_signal_count": 8,
+  "google_suggest_live_signal_count": 8,
+  "google_suggest_fallback_signal_count": 0,
+  "observed_evidence_count": 0,
+  "observed_question_count": 0,
+  "first_party_query_count": 0,
+  "verified_public_page_signal_count": 0,
+  "query_plan_count": 6,
+  "fallback_evidence_count": 0,
+  "search_suggestion_count": 8,
+  "demand_eligible_signal_count": 0,
+  "stability_eligible_signal_count": 0,
+  "ready_eligible_signal_count": 0,
+  "cadence_eligible_signal_count": 0,
+  "signal_source_counts": {"google_suggest": 8, "reddit_search": 6},
+  "reddit_collection_method_counts": {"google_site_search": 6},
+  "google_suggest_method_counts": {"live": 8},
+  "evidence_type_counts": {"QUERY_PLAN": 6, "SEARCH_SUGGESTION": 8},
+  "reddit_collection_diagnostics": {"status": "blocked", "http_status": 403, "note": "Unauthenticated Reddit JSON was unavailable and no community text was accepted as evidence."},
+  "google_suggest_diagnostics": {"status": "live", "accepted_as_demand": false, "note": "Suggestions expanded phrasing only and have zero evidence weight."},
+  "evidence_policy": {
+    "OBSERVED_QUESTION": "Eligible only when an opened public question has verified immutable provenance.",
+    "FIRST_PARTY_QUERY": "Eligible first-party Search Console evidence.",
+    "QUERY_PLAN": "Unopened search plan; zero demand weight.",
+    "FALLBACK_TEMPLATE": "Synthetic fallback; zero demand weight.",
+    "SEARCH_SUGGESTION": "Phrasing expansion only; zero demand weight."
+  },
+  "notes": [
+    "This SHADOW-mode topic came from the validated legacy queue, not from AI Registry demand evidence.",
+    "Every factual source listed above was opened during the 2026-08-02 run.",
+    "Community text was not used as instructions or factual support.",
+    "Numeric evidence fields are derived from signal_evidence and remain numeric."
+  ]
+}

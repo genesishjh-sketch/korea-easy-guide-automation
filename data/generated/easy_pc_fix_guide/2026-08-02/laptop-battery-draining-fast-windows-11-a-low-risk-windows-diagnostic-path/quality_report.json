@@ -1,0 +1,21 @@
+{
+  "reviewer": "Hades Engineer",
+  "passed": true,
+  "score": 100,
+  "min_score": 90,
+  "issues": [],
+  "metrics": {
+    "word_count": 2714,
+    "korean_char_count": 0,
+    "image_count": 2,
+    "official_link_count": 7,
+    "faq_question_count": 17,
+    "heading_count": 30,
+    "direct_internal_link_count": 4,
+    "research_query_count": 10,
+    "research_source_count": 8,
+    "research_official_source_count": 7,
+    "research_reader_question_count": 8,
+    "research_direct_official_source_count": 7
+  }
+}

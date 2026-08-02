@@ -1,0 +1,38 @@
+{
+  "mode": "codex_generated_no_api",
+  "strict": true,
+  "notes": [
+    "Art direction is specific to laptop battery drain and avoids the recent laptop-on-desk pattern.",
+    "Hero and inline images use different media, lighting, composition, and reader jobs.",
+    "Both images were generated with the built-in image_gen tool; no paid image API was called.",
+    "Generated outputs were visually inspected for relevance, repetition, text, logos, and internal similarity."
+  ],
+  "prompt_policy": {
+    "generation_owner": "codex_app_automation",
+    "tool": "built_in_image_gen",
+    "api_cost_policy": "Do not call OpenAI Images API or external paid image APIs.",
+    "prompt_method": "Fresh one-off prompts were written from the exact article intent and image role.",
+    "diversity_rule": "Avoid repeated laptop-on-desk, laptop-and-coffee, generic office, router, or reused diagnostic scenes.",
+    "quality_loop": "Reject generic, text-heavy, off-topic, repetitive, or internally similar output before publishing."
+  },
+  "images": [
+    {
+      "role": "hero",
+      "filename": "ai-hero.jpg",
+      "url": "assets/ai-hero.jpg",
+      "alt": "Cutaway laptop battery showing display, background app, and wireless power drain",
+      "caption": "A battery can drain quickly because the display, active apps, and wireless activity are consuming power, even when the cells are still healthy.",
+      "prompt": "Fresh one-off hero image prompt for this exact battery-drain article. Image role and role purpose: hero context visual that makes excessive power use understandable before the reader changes settings. Create a refined 3D editorial macro cutaway of an unbranded laptop battery pack with unevenly glowing cells and three energy streams leading to unlabeled symbols for display brightness, background apps, and wireless activity. Use a dramatic off-center three-quarter view, graphite and deep teal studio background, cyan rim light, and restrained amber energy glow. Recent-image avoidance: this is not a laptop scene; avoid laptop-on-desk, coffee, generic office, Wi-Fi router, and full-laptop scenes. Do not show fake Windows UI, fake operating-system screens, readable UI text, readable error codes, command prompts, registry editors, logos, warning dialogs, fire, swelling, smoke, or watermarks.",
+      "required": true
+    },
+    {
+      "role": "inline",
+      "filename": "ai-inline-1.jpg",
+      "url": "assets/ai-inline-1.jpg",
+      "alt": "Three-stage battery troubleshooting flow from app usage to energy settings and battery report",
+      "caption": "Check app-level battery use first, apply reversible energy settings second, and use the battery report to judge capacity and recent drain.",
+      "prompt": "Fresh one-off inline process image prompt for this exact battery-drain article. Image role and role purpose: inline educational checklist showing the safe troubleshooting order. Create a bright, polished isometric 3D diagram with three separate zones connected left to right: a battery beside app tiles with one high-consumption tile, brightness and Energy saver controls represented by simple objects, and a blank chart report under a magnifying glass. Use an off-white background, slate blue, teal, muted green, and small amber accents. Recent-image avoidance: this is not a laptop scene; do not make this a second hero, battery cutaway, dark cinematic image, laptop-on-desk scene, office photo, or router scene. Do not show fake Windows UI, fake operating-system screens, readable UI text, readable error codes, command prompts, registry editors, letters, numbers, logos, people, or watermarks.",
+      "required": true
+    }
+  ]
+}
