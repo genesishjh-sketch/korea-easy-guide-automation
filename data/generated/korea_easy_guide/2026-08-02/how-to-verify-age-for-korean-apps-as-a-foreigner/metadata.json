@@ -1,0 +1,95 @@
+{
+  "article": {
+    "title": "How to Verify Your Age on Korean Apps as a Foreigner",
+    "slug": "how-to-verify-age-for-korean-apps-as-a-foreigner",
+    "category": "Travel Basics",
+    "tags": [
+      "Travel Basics",
+      "Korea travel",
+      "foreign visitors",
+      "Korean apps",
+      "age verification",
+      "PASS",
+      "foreign residents"
+    ],
+    "meta_description": "Learn which Korean app age-verification route works for tourists, overseas users, and foreign residents using passports, SMS, or PASS.",
+    "image": {
+      "path": "assets/ai-hero.jpg",
+      "url": "assets/ai-hero.jpg",
+      "alt": "Korean app age verification choices shown with a passport, residence card, SIM card, and secure age gate",
+      "source": "codex_image_plan",
+      "credit": "Generated with built-in Codex image generation",
+      "caption": "The usable route depends on whether the service accepts a foreign passport or requires a Korean mobile line registered in your own name."
+    },
+    "inline_images": [
+      {
+        "path": "assets/ai-inline-1.jpg",
+        "url": "assets/ai-inline-1.jpg",
+        "alt": "Three-path Korean app verification troubleshooting board for tourists, overseas users, and registered residents",
+        "source": "codex_image_plan",
+        "credit": "Generated with built-in Codex image generation",
+        "caption": "Separate the short-stay passport route, overseas manual-review route, and registered-resident mobile verification route before troubleshooting."
+      }
+    ],
+    "sources": [
+      {
+        "name": "Google Play requirements for Korea",
+        "url": "https://support.google.com/googleplay/android-developer/answer/6223646?hl=en"
+      },
+      {
+        "name": "NAVER legal-name and age verification help",
+        "url": "https://help.naver.com/service/5640/contents/5896?lang=en&osType=COMMONOS"
+      },
+      {
+        "name": "NAVER overseas-resident legal-name help",
+        "url": "https://help.naver.com/service/5640/contents/20897?lang=en&osType=COMMONOS"
+      },
+      {
+        "name": "NAVER foreign-passport verification",
+        "url": "https://help.naver.com/service/5640/contents/25235?lang=ko&osType=COMMONOS"
+      },
+      {
+        "name": "KT PASS guide",
+        "url": "https://inside.kt.com/html/guide_pass.html"
+      },
+      {
+        "name": "KISA mobile identity verification",
+        "url": "https://identity.kisa.or.kr/web/main/contents/M030-02"
+      },
+      {
+        "name": "Korean National Law Information Center",
+        "url": "https://www.law.go.kr/LSW/lsRvsDocListP.do?chrClsCd=010202&lsId=000815&lsRvsGubun=all"
+      }
+    ],
+    "created_at": "2026-08-02T09:08:32+09:00"
+  },
+  "candidate": {
+    "keyword": "how to verify age for korean apps as a foreigner",
+    "category": "Travel Basics",
+    "intent": "how-to",
+    "score": 0.0,
+    "signals": [],
+    "topic_id": "",
+    "cluster_id": "",
+    "category_id": "",
+    "action": "NEW_POST",
+    "revision": 0,
+    "editor_brief": {},
+    "reader_questions": [
+      "Why does a Korean app ask for both age and real-name verification?",
+      "Can a tourist use a passport instead of a Korean phone number?",
+      "Can a foreign resident use PASS with a phone in their own name?",
+      "Why does verification fail when account and telecom names differ?",
+      "What safe alternative exists when the app has no foreigner route?"
+    ],
+    "difference_from_existing": "No live post separates content rating, legal-name verification, carrier/PASS verification, and the limited foreign-passport alternatives available to tourists, overseas users, and registered foreign residents.",
+    "existing_post_refs": [
+      "https://koreaeasyguide.blogspot.com/2026/07/korea-mobile-payment-options-for.html",
+      "https://koreaeasyguide.blogspot.com/2026/07/how-to-use-naver-reservation-in-korea.html",
+      "https://koreaeasyguide.blogspot.com/2026/07/korea-long-stay-checklist-for-exchange.html"
+    ],
+    "claim_run_id": "",
+    "topic_action": "NEW_POST",
+    "topic_revision": 0
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "mode": "codex_generated_no_api",
+  "strict": true,
+  "notes": [
+    "Use built-in Codex image generation only; never call a paid image API.",
+    "The hero visualizes the identity-material decision before an app verification attempt.",
+    "The inline image is a distinct three-path troubleshooting flow, not a second hero variation.",
+    "Avoid readable private data, real identity numbers, logos, fake app interfaces, and text-heavy diagrams.",
+    "Avoid recent Korea-blog defaults such as traveler-with-phone, luggage-only airport, skyline-only, and cafe-table phone scenes."
+  ],
+  "prompt_policy": {
+    "generation_owner": "codex_app_automation",
+    "tool": "built_in_image_gen",
+    "api_cost_policy": "Do not call OpenAI Images API or external paid image APIs.",
+    "prompt_method": "Write a fresh one-off prompt for each role using this article's age-verification problem, the identity materials involved, and recent-image avoidance.",
+    "diversity_rule": "Hero and inline images must use different viewpoints, layouts, colors, and reader jobs; do not center a person holding a phone.",
+    "quality_loop": "Discard and regenerate any generic, repetitive, text-heavy, off-topic, logo-bearing, or internally similar result before publishing."
+  },
+  "images": [
+    {
+      "role": "hero",
+      "filename": "ai-hero.jpg",
+      "alt": "Korean app age verification choices shown with a passport, residence card, SIM card, and secure age gate",
+      "caption": "The usable route depends on whether the service accepts a foreign passport or requires a Korean mobile line registered in your own name.",
+      "prompt": "Fresh one-off editorial image for this specific article. Image role: hero decision moment. Use case: stylized-concept. Asset type: Korea Easy Guide blog hero. Primary request: visualize the decision a foreign user faces when a Korean app requests age and real-name verification. Scene/backdrop: a clean Korean service-counter-inspired studio set, not an airport and not a cafe. Subject: a carefully arranged unbranded passport, neutral residence-card silhouette with all fields blank, small SIM card, secure age-gate token, and privacy shield arranged as three possible identity paths. Style/medium: premium tactile 3D editorial still life with realistic paper, plastic, and metal textures. Composition/framing: wide landscape, slight three-quarter overhead view, strong visual hierarchy, no person and no phone as the focal point. Lighting/mood: calm daylight, trustworthy, practical. Color palette: navy, warm ivory, muted coral, and brushed silver. Recent-image avoidance: avoid repeated traveler-with-phone, luggage-only airport, skyline-only, and cafe-table phone scenes. Constraints: no readable text, no numbers, no personal data, no national emblems, no logos, no brand marks, no fake app UI, no watermark. Avoid: traveler holding phone, luggage, airport terminal, Seoul skyline, cafe table, beauty products, generic cyber-security lock floating in space.",
+      "required": true,
+      "url": "assets/ai-hero.jpg"
+    },
+    {
+      "role": "inline",
+      "filename": "ai-inline-1.jpg",
+      "alt": "Three-path Korean app verification troubleshooting board for tourists, overseas users, and registered residents",
+      "caption": "Separate the short-stay passport route, overseas manual-review route, and registered-resident mobile verification route before troubleshooting.",
+      "prompt": "Fresh one-off process visual for this specific article. Image role: inline troubleshooting flow. Use case: infographic-diagram. Asset type: Korea Easy Guide inline explainer. Primary request: show a three-branch troubleshooting flow for Korean app verification without using readable labels. Scene/backdrop: pale stone work surface with a physical route board made from colored lines and objects. Subject: branch one pairs an unbranded passport with a camera aperture token; branch two pairs a sealed support envelope with a masked ID-card silhouette; branch three pairs a SIM card with a biometric fingerprint token and residence-card silhouette. Each branch ends in either a green check tile or an amber stop tile, making clear that platform support differs. Style/medium: top-down photographed physical infographic, crisp and educational, not a software screenshot. Composition/framing: wide landscape with three visibly separate routes and ample spacing; no people. Lighting/mood: bright neutral studio light, precise and reassuring. Color palette: teal, amber, slate blue, off-white. Recent-image avoidance: avoid repeated traveler-with-phone, luggage-only airport, skyline-only, and cafe-table phone scenes; do not make this a second hero still life. Constraints: no readable words, no letters, no numbers, no personal data, no logos, no brand marks, no fake app interface, no watermark. Avoid: second version of hero, centered smartphone, suitcase, airport, skyline, cafe, abstract glowing padlock, dense text.",
+      "required": true,
+      "url": "assets/ai-inline-1.jpg"
+    }
+  ]
+}

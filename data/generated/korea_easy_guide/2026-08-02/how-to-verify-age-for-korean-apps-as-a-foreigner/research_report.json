@@ -1,0 +1,132 @@
+{
+  "schema_version": 2,
+  "collector_role": "codex_official_source_research",
+  "site": "korea_easy_guide",
+  "content_domain": "korea_travel",
+  "seed_keyword": "how to verify age for korean apps as a foreigner",
+  "topic": "How to Verify Your Age on Korean Apps as a Foreigner",
+  "queries": [
+    "Korea app age verification foreigner official",
+    "Google Play Korea age and real name verification official",
+    "NAVER legal name age verification foreigner official",
+    "NAVER foreign passport verification reservation ordering official",
+    "Korea PASS foreigner mobile identity verification official telecom",
+    "KISA mobile phone identity verification PASS official",
+    "Korea Juvenile Protection Act age and identity verification official",
+    "foreign resident Korean phone name mismatch identity verification"
+  ],
+  "reader_questions": [
+    "Why does a Korean app ask for both age and real-name verification?",
+    "Can a short-stay tourist use a passport instead of a Korean phone number?",
+    "Can a registered foreign resident use PASS with a phone in their own name?",
+    "Why does verification fail when the name on the account and telecom record differ?",
+    "Does NAVER passport verification unlock every NAVER service?",
+    "What should a visitor do when an app offers no foreigner-compatible verification path?",
+    "Is PASS free, and does verification cancel or refund a paid purchase?"
+  ],
+  "sources": [
+    {
+      "name": "Google Play Console Help: Requirements for distributing apps in Korea",
+      "url": "https://support.google.com/googleplay/android-developer/answer/6223646?hl=en",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_use": "Google explains that access to content designated harmful to juveniles in Korea can require both age and real-name verification, and that users may need to verify that they are 19 or older."
+    },
+    {
+      "name": "NAVER Help: Why legal name and age verification is required",
+      "url": "https://help.naver.com/service/5640/contents/5896?lang=en&osType=COMMONOS",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_use": "NAVER lists paid or purchasing services, NAVER Game, and adult digital content as services that may require legal-name or age verification."
+    },
+    {
+      "name": "NAVER Help: Legal-name verification for overseas residents",
+      "url": "https://help.naver.com/service/5640/contents/20897?lang=en&osType=COMMONOS",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_use": "NAVER documents mobile or i-PIN verification, a separate customer-center document route for people residing overseas, name/date-of-birth matching, masking rules, service restrictions, and processing delay."
+    },
+    {
+      "name": "NAVER Help: Foreign Passport Verification",
+      "url": "https://help.naver.com/service/5640/contents/25235?lang=ko&osType=COMMONOS",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_use": "Foreign nationals can use an eligible unexpired non-Korean passport for supported reservation or ordering services; the passport name and birth date must match the NAVER account and a live face check is used."
+    },
+    {
+      "name": "KT official PASS phone-number login guide",
+      "url": "https://inside.kt.com/html/guide_pass.html",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_use": "KT describes PASS as a free mobile identity-verification method, explains the push/PIN or biometric flow, and says eligible foreign mobile subscribers who can use phone identity verification may use it."
+    },
+    {
+      "name": "KISA Identity Verification Support Portal: mobile phone verification",
+      "url": "https://identity.kisa.or.kr/web/main/contents/M030-02",
+      "type": "official",
+      "opened": true,
+      "factual_use": "KISA distinguishes SMS mobile verification from the PASS app flow and shows that both start from information tied to the user's mobile phone."
+    },
+    {
+      "name": "Korean National Law Information Center: Juvenile Protection Act revision history",
+      "url": "https://www.law.go.kr/LSW/lsRvsDocListP.do?chrClsCd=010202&lsId=000815&lsRvsGubun=all",
+      "type": "official",
+      "opened": true,
+      "factual_use": "Official legal source used to cross-check that Korean youth-protection rules include age and identity checks; the article relies on the platform help pages for the user-facing procedure."
+    }
+  ],
+  "notes": [
+    "Content rating, age confirmation, and legal identity verification are different gates; passing one does not guarantee the others.",
+    "A short-stay tourist SIM that is not registered for Korean mobile identity verification is not equivalent to a resident's own-name Korean mobile line.",
+    "NAVER's foreign-passport route is explicitly described for supported reservation and ordering services and must not be generalized to all NAVER adult content or all Korean apps.",
+    "NAVER's manual document route is described for people residing outside Korea; visitors currently in Korea should follow the service-specific help path rather than assuming eligibility.",
+    "KT says PASS itself is free, but the user still needs an eligible mobile subscription and data or SMS access; carrier and plan costs are separate.",
+    "Name, birth date, gender marker, nationality, residence-card data, and mobile subscriber record may need to match exactly; Romanization and spacing differences can cause failures.",
+    "The article does not recommend using another person's phone, identity, residence number, or account because that defeats the verification purpose and can create account and payment problems.",
+    "Verification is not a purchase cancellation or refund mechanism; paid-content refunds remain controlled by the store or app's purchase rules.",
+    "Community text, unopened search URLs, and suggestions were not used as factual evidence or as proof of demand."
+  ],
+  "topic_context": {
+    "topic_id": "",
+    "cluster_id": "",
+    "category_id": "",
+    "action": "NEW_POST",
+    "topic_action": "NEW_POST",
+    "revision": 0,
+    "topic_revision": 0,
+    "editor_brief": {},
+    "reader_questions": [],
+    "difference_from_existing": "No live Korea Easy Guide post explains the separate Korean app gates for content rating, legal-name verification, carrier/PASS verification, and limited foreign-passport alternatives. Existing SIM, mobile-payment, NAVER Reservation, and long-stay guides cover adjacent setup tasks but not this failure path.",
+    "existing_post_refs": [
+      "https://koreaeasyguide.blogspot.com/2026/07/korea-mobile-payment-options-for.html",
+      "https://koreaeasyguide.blogspot.com/2026/07/how-to-use-naver-reservation-in-korea.html",
+      "https://koreaeasyguide.blogspot.com/2026/07/korea-long-stay-checklist-for-exchange.html"
+    ]
+  },
+  "signal_evidence": [],
+  "signal_source_counts": {},
+  "reddit_collection_method_counts": {},
+  "google_suggest_method_counts": {},
+  "evidence_type_counts": {},
+  "live_reddit_signal_count": 0,
+  "reddit_oauth_signal_count": 0,
+  "reddit_public_json_signal_count": 0,
+  "reddit_google_site_search_signal_count": 0,
+  "fallback_reddit_signal_count": 0,
+  "google_suggest_signal_count": 0,
+  "google_suggest_live_signal_count": 0,
+  "google_suggest_fallback_signal_count": 0,
+  "observed_evidence_count": 0,
+  "observed_question_count": 0,
+  "first_party_query_count": 0,
+  "verified_public_page_signal_count": 0,
+  "query_plan_count": 0,
+  "fallback_evidence_count": 0,
+  "search_suggestion_count": 0,
+  "demand_eligible_signal_count": 0,
+  "stability_eligible_signal_count": 0,
+  "ready_eligible_signal_count": 0,
+  "cadence_eligible_signal_count": 0,
+  "research_completed_at": "2026-08-02T09:08:32+09:00",
+  "research_method": "Opened and read current Google Play, NAVER, KT, KISA, and Korean legal pages before writing. No search-result URL was counted as factual evidence."
+}
