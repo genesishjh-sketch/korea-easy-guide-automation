@@ -1,0 +1,39 @@
+{
+  "mode": "codex_generated_no_api",
+  "strict": true,
+  "notes": [
+    "Art direction for this startup-app article only; do not reuse a fixed template.",
+    "Use built-in Codex image generation and no paid image API.",
+    "Avoid laptop-on-desk, coffee, generic office, router, fake Windows UI, and readable interface text.",
+    "Hero and inline images must use different media, composition, and reader roles.",
+    "Inspect both files and regenerate any generic, text-heavy, off-topic, or internally similar result."
+  ],
+  "prompt_policy": {
+    "generation_owner": "codex_app_automation",
+    "tool": "built_in_image_gen",
+    "api_cost_policy": "Do not call OpenAI Images API or external paid image APIs.",
+    "prompt_method": "Write a fresh one-off prompt from this article, its reader decision, the exact image role, and recent hosted-image history before each call.",
+    "diversity_rule": "Use topic-specific startup sequencing objects and avoid recent laptop-centered desk scenes. Hero and inline must not look like two versions of one template.",
+    "quality_loop": "Discard and regenerate any generic, repetitive, off-topic, text-heavy, or unsafe image before publishing."
+  },
+  "images": [
+    {
+      "role": "hero",
+      "filename": "ai-hero.jpg",
+      "alt": "Abstract Windows 11 startup app control visual with optional app tokens separated from protected essentials",
+      "caption": "An abstract help visual: choose optional sign-in apps while leaving security, accessibility, and essential sync tools alone.",
+      "prompt": "Fresh one-off prompt; not a reusable template. Image role: hero; role purpose: explain the decision to choose which apps launch at Windows 11 sign-in. Create a horizontal 16:9 premium editorial macro still life. Show a physical start gate with several distinct generic app tokens queued behind it; two optional tokens are calmly moved to a side tray while a shield token, accessibility-shaped token, and backup/sync token remain on the protected path. Use graphite, cool blue, and one restrained amber accent, shallow depth of field, and tactile objects. Recent-image avoidance: avoid repeated laptop-on-desk, coffee, office, and router scenes; avoid laptop imagery entirely. Do not show fake Windows UI, readable UI text, readable error codes, readable letters or numbers, command prompts, registry editors, logos, real Microsoft marks, error screens, watermarks, or distorted hands. The image must communicate selective startup control, not computer repair or deletion.",
+      "required": true,
+      "url": "assets/ai-hero.jpg"
+    },
+    {
+      "role": "inline",
+      "filename": "ai-inline-1.jpg",
+      "alt": "Abstract three-step checklist for review, disable one startup app, and verify after sign-in",
+      "caption": "An educational checklist visual: review, change one optional app, then verify after the next sign-in.",
+      "prompt": "Fresh one-off prompt; not a reusable template. Image role: inline educational checklist; role purpose: teach the review-change-verify process for disabling one startup app safely. Create a horizontal 16:9 clean top-down paper-cut diagram with exactly three unlabeled visual stages: a magnifier inspecting a small set of generic app tiles, one optional tile moved away from a start arrow, and a green verification ring after a restart loop. Use soft off-white paper, navy, teal, and muted coral, generous negative space, and a diagonal flow. Recent-image avoidance: avoid repeating laptop-on-desk, generic office, coffee, router, and macro hardware scenes; avoid laptop imagery entirely. Do not show fake Windows UI, readable UI text, readable error codes, readable letters or numbers, command prompts, registry editors, logos, real Microsoft marks, error dialogs, warning overlays, or watermarks. This must look clearly different from the macro still-life hero and teach a process rather than depict a screen.",
+      "required": true,
+      "url": "assets/ai-inline-1.jpg"
+    }
+  ]
+}

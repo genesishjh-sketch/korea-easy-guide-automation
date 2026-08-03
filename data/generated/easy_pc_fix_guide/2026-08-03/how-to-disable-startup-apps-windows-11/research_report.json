@@ -1,0 +1,150 @@
+{
+  "schema_version": 2,
+  "site": "easy_pc_fix_guide",
+  "content_domain": "windows_help",
+  "seed_keyword": "how to disable startup apps windows 11",
+  "topic": "Disable Startup Apps in Windows 11 Without Uninstalling Them",
+  "queries": [
+    "how to disable startup apps Windows 11 official Microsoft",
+    "Windows 11 Startup apps Settings official Microsoft",
+    "Windows 11 Task Manager startup impact official Microsoft",
+    "Windows startup apps not listed Startup folder Microsoft Support",
+    "tips improve PC performance disable startup apps Microsoft Support",
+    "Windows release health startup apps Windows 11 24H2",
+    "Windows message center startup apps performance 2026",
+    "Windows 11 re-enable startup app official Microsoft"
+  ],
+  "reader_questions": [
+    "How do I stop an app from opening at sign-in without uninstalling it?",
+    "Should I use Settings or Task Manager to manage startup apps?",
+    "Which startup apps are safe for a beginner to disable?",
+    "What do High, Medium, Low, None, and Not Measured startup impact mean?",
+    "Why is an app missing from the Windows 11 Startup list?",
+    "Why does a disabled startup app still run after I open it manually?",
+    "How do I undo a startup change?",
+    "Will disabling startup apps always make Windows boot faster?"
+  ],
+  "sources": [
+    {
+      "name": "Microsoft Support: Configure Startup applications in Windows",
+      "url": "https://support.microsoft.com/en-US/Windows/Experience/Startup-Boot/configure-startup-applications-in-windows",
+      "type": "microsoft_support_opened"
+    },
+    {
+      "name": "Microsoft Support: Tips to improve PC performance in Windows",
+      "url": "https://support.microsoft.com/en-US/Windows/Experience/Performance-Optimization/tips-to-improve-pc-performance-in-windows",
+      "type": "microsoft_support_opened"
+    },
+    {
+      "name": "Microsoft Windows: Take control of your Windows startup",
+      "url": "https://www.microsoft.com/en-us/windows/learning-center/take-control-of-windows-startup",
+      "type": "microsoft_product_opened"
+    },
+    {
+      "name": "Microsoft Learn: Desktop Startup apps compatibility guidance",
+      "url": "https://learn.microsoft.com/en-us/windows/compatibility/startup-apps",
+      "type": "microsoft_learn_opened"
+    },
+    {
+      "name": "Microsoft Learn: Windows 11 version 24H2 release health",
+      "url": "https://learn.microsoft.com/en-us/windows/release-health/status-windows-11-24h2",
+      "type": "windows_release_health_opened"
+    },
+    {
+      "name": "Microsoft Learn: Windows message center",
+      "url": "https://learn.microsoft.com/en-us/windows/release-health/windows-message-center",
+      "type": "windows_message_center_opened"
+    }
+  ],
+  "factual_notes": [
+    {
+      "source": "Microsoft Support: Configure Startup applications in Windows",
+      "note": "Registered startup applications can be configured from Settings or Task Manager; Task Manager adds impact details. Startup folders cover some apps not registered with a startup task. Microsoft warns that registry modifications can have unintended consequences."
+    },
+    {
+      "source": "Microsoft Support: Configure Startup applications in Windows",
+      "note": "Settings uses On to start an app automatically at sign-in and Off to prevent automatic start. Task Manager uses Enable and Disable for the same registered list."
+    },
+    {
+      "source": "Microsoft Support: Configure Startup applications in Windows",
+      "note": "Microsoft defines High impact as more than one second of CPU time or more than 3 MB of disk usage; Not Measured means the enabled app has insufficient measurement data; None indicates disabled."
+    },
+    {
+      "source": "Microsoft Support: Tips to improve PC performance in Windows",
+      "note": "Apps that run at startup can slow boot and increase background usage; Microsoft recommends disabling apps that are not needed automatically and reviewing Startup apps in Task Manager."
+    },
+    {
+      "source": "Microsoft Windows: Take control of your Windows startup",
+      "note": "Too many automatic apps can slow startup and continue using battery or performance resources, but frequently used apps may be convenient to keep enabled."
+    },
+    {
+      "source": "Microsoft Learn: Desktop Startup apps compatibility guidance",
+      "note": "Microsoft's developer guidance treats startup impact and unnecessary duplicate functionality as design considerations; this supports selective review rather than disabling everything."
+    },
+    {
+      "source": "Microsoft Learn: Windows message center",
+      "note": "The April 2026 message center noted improved performance for launching apps listed under Settings > Apps > Startup. It did not describe a broad issue blocking normal startup toggles."
+    },
+    {
+      "source": "Microsoft Learn: Windows 11 version 24H2 release health",
+      "note": "The current 24H2 health page was checked for version-specific context; no broad startup-app toggle failure was identified in the opened current known-issues summary."
+    }
+  ],
+  "topic_context": {
+    "topic_id": "",
+    "cluster_id": "",
+    "category_id": "",
+    "action": "NEW_POST",
+    "topic_action": "NEW_POST",
+    "revision": 0,
+    "topic_revision": 0,
+    "claim_run_id": "",
+    "editor_brief": {},
+    "reader_questions": [],
+    "difference_from_existing": "This how-to is limited to choosing, disabling, testing, and re-enabling individual sign-in apps without uninstalling them; the existing startup-performance article diagnoses slow boot impact rather than teaching this controlled settings task.",
+    "existing_post_refs": [
+      "https://easypcfixguide.blogspot.com/2026/07/windows-startup-apps-slowing-down-pc.html"
+    ]
+  },
+  "evidence_policy": {
+    "OBSERVED_QUESTION": "Eligible only when an opened public question has verified immutable provenance.",
+    "FIRST_PARTY_QUERY": "Eligible first-party Search Console evidence.",
+    "QUERY_PLAN": "Unopened search plan; zero demand weight.",
+    "FALLBACK_TEMPLATE": "Synthetic fallback; zero demand weight.",
+    "SEARCH_SUGGESTION": "Phrasing expansion only; zero demand weight."
+  },
+  "notes": [
+    "This SHADOW-mode topic came from the validated legacy queue, not from AI Registry demand evidence.",
+    "Every factual source listed above was opened during the 2026-08-03 run.",
+    "Reddit public JSON returned 403 and was not treated as evidence or instruction.",
+    "Google suggestions were used only for phrasing expansion and do not prove demand.",
+    "Community answers were not used as factual support."
+  ],
+  "collector_role": "legacy_queue_research",
+  "signal_evidence": [],
+  "signal_source_counts": {},
+  "evidence_type_counts": {"OBSERVED_QUESTION": 0, "FIRST_PARTY_QUERY": 0, "QUERY_PLAN": 6, "SEARCH_SUGGESTION": 8, "FALLBACK_TEMPLATE": 0},
+  "reddit_collection_diagnostics": {"status": "unavailable", "http_status": 403},
+  "reddit_collection_method_counts": {"oauth": 0, "public_json": 0, "google_site_search": 6, "fallback": 0},
+  "google_suggest_diagnostics": {"status": "phrasing_only"},
+  "google_suggest_method_counts": {"live": 8, "fallback": 0},
+  "demand_eligible_signal_count": 0,
+  "stability_eligible_signal_count": 0,
+  "ready_eligible_signal_count": 0,
+  "cadence_eligible_signal_count": 0,
+  "observed_evidence_count": 0,
+  "observed_question_count": 0,
+  "first_party_query_count": 0,
+  "verified_public_page_signal_count": 0,
+  "query_plan_count": 6,
+  "search_suggestion_count": 8,
+  "fallback_evidence_count": 0,
+  "live_reddit_signal_count": 0,
+  "reddit_oauth_signal_count": 0,
+  "reddit_public_json_signal_count": 0,
+  "reddit_google_site_search_signal_count": 6,
+  "fallback_reddit_signal_count": 0,
+  "google_suggest_signal_count": 8,
+  "google_suggest_live_signal_count": 8,
+  "google_suggest_fallback_signal_count": 0
+}
