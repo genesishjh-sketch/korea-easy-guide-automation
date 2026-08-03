@@ -1,0 +1,175 @@
+{
+  "schema_version": 2,
+  "collector_role": "publication_research",
+  "site": "korea_easy_guide",
+  "content_domain": "korea_travel",
+  "seed_keyword": "baemin vs coupang eats for foreigners",
+  "topic": "Baemin vs Coupang Eats for Foreigners: Language, Cards, Fees, and Backup Plans",
+  "researched_at_kst": "2026-08-03T09:08:00+09:00",
+  "queries": [
+    "Baemin official app foreigner English language 2026",
+    "Baemin official Apple App Store languages pickup delivery tracking",
+    "Baemin foreign-issued cards Apple Pay June 2026",
+    "Woowa Brothers Baemin multilingual English Japanese Chinese rollout",
+    "Coupang Eats official app English language pickup tracking",
+    "Coupang Eats official delivery fee minimum order WOW conditions",
+    "Korean government delivery app delay missing food responsibility",
+    "Food Safety Korea 1399 delivery food complaint"
+  ],
+  "query_count": 8,
+  "sources": [
+    {
+      "name": "Baemin on the Apple App Store",
+      "url": "https://apps.apple.com/kr/app/%EB%B0%B0%EB%8B%AC%EC%9D%98%EB%AF%BC%EC%A1%B1-%EB%B0%B0%EB%8B%AC%ED%8C%81-%EB%AC%B4%EB%A3%8C-%EB%B0%B0%EB%AF%BC%ED%81%B4%EB%9F%BD/id378084485",
+      "type": "official_or_platform",
+      "publisher": "Apple App Store / Woowa Bros Co., Ltd.",
+      "access_status": "opened",
+      "checked_at_kst": "2026-08-03T09:08:00+09:00"
+    },
+    {
+      "name": "Baemin on Google Play",
+      "url": "https://play.google.com/store/apps/details?gl=KR&id=com.sampleapp",
+      "type": "official_or_platform",
+      "publisher": "Google Play / WoowaBrothers",
+      "access_status": "opened",
+      "checked_at_kst": "2026-08-03T09:08:00+09:00"
+    },
+    {
+      "name": "Baemin multilingual rollout engineering report",
+      "url": "https://techblog.woowahan.com/26162/",
+      "type": "official_or_platform",
+      "publisher": "Woowa Brothers",
+      "access_status": "opened",
+      "checked_at_kst": "2026-08-03T09:08:00+09:00"
+    },
+    {
+      "name": "Coupang Eats on the Apple App Store",
+      "url": "https://apps.apple.com/kr/app/coupang-eats-food-delivery/id1445504255?l=en-GB",
+      "type": "official_or_platform",
+      "publisher": "Apple App Store / Coupang Corp.",
+      "access_status": "opened",
+      "checked_at_kst": "2026-08-03T09:08:00+09:00"
+    },
+    {
+      "name": "Coupang Eats on Google Play",
+      "url": "https://play.google.com/store/apps/details?gl=KR&id=com.coupang.mobile.eats",
+      "type": "official_or_platform",
+      "publisher": "Google Play / Coupang Corp.",
+      "access_status": "opened",
+      "checked_at_kst": "2026-08-03T09:08:00+09:00"
+    },
+    {
+      "name": "Delivery-platform responsibility policy briefing",
+      "url": "https://www.korea.kr/news/policyNewsView.do?newsId=148891774",
+      "type": "official_government",
+      "publisher": "Republic of Korea Policy Briefing / Fair Trade Commission",
+      "access_status": "opened",
+      "checked_at_kst": "2026-08-03T09:08:00+09:00"
+    },
+    {
+      "name": "Food Safety Korea reporting center",
+      "url": "https://www.foodsafetykorea.go.kr/portal/complain/complainIntro.do",
+      "type": "official_government",
+      "publisher": "Ministry of Food and Drug Safety",
+      "access_status": "opened",
+      "checked_at_kst": "2026-08-03T09:08:00+09:00"
+    },
+    {
+      "name": "Baemin foreign-issued cards through Apple Pay",
+      "url": "https://www.koreatimes.co.kr/business/companies/20260531/baedal-minjok-to-accept-foreign-issued-cards-through-apple-pay",
+      "type": "reputable_news_reporting_company_announcement",
+      "publisher": "The Korea Times",
+      "access_status": "opened",
+      "checked_at_kst": "2026-08-03T09:08:00+09:00"
+    }
+  ],
+  "source_count": 8,
+  "official_source_count": 7,
+  "reader_questions": [
+    "Does Baemin have an English interface now?",
+    "Does Coupang Eats support English for foreign visitors?",
+    "Which app has the clearest route for an overseas-issued card?",
+    "How should a traveler compare delivery fees, minimums, and membership conditions?",
+    "What address and phone-number blockers can stop checkout?",
+    "Can an accepted food order still be cancelled or refunded?",
+    "What should a foreign visitor do when both apps fail?"
+  ],
+  "reader_question_count": 7,
+  "factual_notes": [
+    {
+      "fact": "Baemin's official engineering report says the customer-facing multilingual version opened in February 2026 with English, Japanese, and Chinese.",
+      "source_urls": ["https://techblog.woowahan.com/26162/"]
+    },
+    {
+      "fact": "Baemin's current App Store listing shows Korean plus three languages and documents pickup, selected no-minimum orders, regional restrictions, rider tracking, and 24-hour main support at 1600-0987.",
+      "source_urls": ["https://apps.apple.com/kr/app/%EB%B0%B0%EB%8B%AC%EC%9D%98%EB%AF%BC%EC%A1%B1-%EB%B0%B0%EB%8B%AC%ED%8C%81-%EB%AC%B4%EB%A3%8C-%EB%B0%B0%EB%AF%BC%ED%81%B4%EB%9F%BD/id378084485"]
+    },
+    {
+      "fact": "Woowa Brothers announced that eligible overseas-issued Visa, Mastercard, JCB, and Amex cards could be used through Apple Pay on Baemin starting June 2, 2026.",
+      "source_urls": ["https://www.koreatimes.co.kr/business/companies/20260531/baedal-minjok-to-accept-foreign-issued-cards-through-apple-pay"]
+    },
+    {
+      "fact": "Coupang Eats' current official store listings identify English support and describe pickup, real-time tracking, selected no-minimum one-item orders, and conditional WOW delivery benefits.",
+      "source_urls": [
+        "https://apps.apple.com/kr/app/coupang-eats-food-delivery/id1445504255?l=en-GB",
+        "https://play.google.com/store/apps/details?gl=KR&id=com.coupang.mobile.eats"
+      ]
+    },
+    {
+      "fact": "Coupang Eats lists 1670-9827 and eatshelp@coupang.com for support, and says optional camera access can be used for card scanning during payment-method registration.",
+      "source_urls": ["https://play.google.com/store/apps/details?gl=KR&id=com.coupang.mobile.eats"]
+    },
+    {
+      "fact": "The official Coupang Eats pages do not promise universal overseas-card acceptance or universal signup without Korean verification, so the article treats checkout as the authoritative test.",
+      "source_urls": [
+        "https://apps.apple.com/kr/app/coupang-eats-food-delivery/id1445504255?l=en-GB",
+        "https://play.google.com/store/apps/details?gl=KR&id=com.coupang.mobile.eats"
+      ]
+    },
+    {
+      "fact": "A Korean government briefing says delivery platforms may not disclaim all responsibility for faults such as missing food or delivery delays.",
+      "source_urls": ["https://www.korea.kr/news/policyNewsView.do?newsId=148891774"]
+    },
+    {
+      "fact": "Food Safety Korea lists 1399 for reports about suspected unsafe or substandard food and requests supporting details and evidence.",
+      "source_urls": ["https://www.foodsafetykorea.go.kr/portal/complain/complainIntro.do"]
+    }
+  ],
+  "topic_context": {
+    "topic_id": "",
+    "cluster_id": "",
+    "category_id": "",
+    "action": "NEW_POST",
+    "topic_action": "NEW_POST",
+    "revision": 0,
+    "topic_revision": 0,
+    "claim_run_id": "",
+    "editor_brief": {},
+    "reader_questions": [],
+    "difference_from_existing": "Keep this article focused on a Baemin-versus-Coupang-Eats decision and do not repeat the step-by-step Coupang Eats setup article.",
+    "existing_post_refs": []
+  },
+  "evidence_policy": {
+    "topic_source": "validated_legacy_queue",
+    "rollout_mode": "SHADOW",
+    "demand_claimed_from_research": false,
+    "community_text_used_as_instructions": false,
+    "search_urls_counted_as_demand": false,
+    "notes": "Publication eligibility comes from the validated legacy queue. Opened sources support article facts only; no query plan or suggestion is treated as demand evidence."
+  },
+  "observed_question_count": 0,
+  "first_party_query_count": 0,
+  "observed_evidence_count": 0,
+  "query_plan_count": 0,
+  "search_suggestion_count": 0,
+  "fallback_evidence_count": 0,
+  "demand_eligible_signal_count": 0,
+  "ready_eligible_signal_count": 0,
+  "stability_eligible_signal_count": 0,
+  "cadence_eligible_signal_count": 0,
+  "notes": [
+    "Every source record above was opened during this run.",
+    "Dynamic prices, coverage, promotions, card approval, and cancellation outcomes must be verified in the user's live checkout.",
+    "Community reviews were not used as factual support or instructions."
+  ]
+}

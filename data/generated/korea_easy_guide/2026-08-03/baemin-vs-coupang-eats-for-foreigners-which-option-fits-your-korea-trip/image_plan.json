@@ -1,0 +1,42 @@
+{
+  "mode": "codex_generated_no_api",
+  "strict": true,
+  "created_at_kst": "2026-08-03T09:10:00+09:00",
+  "notes": [
+    "Both images were generated with the built-in image_gen tool; no paid image API was called.",
+    "The hero is a photographic comparison scene and the inline image is a tactile four-stage process diagram.",
+    "Both outputs were visually inspected for relevance, repetition, text, logos, and internal similarity before use."
+  ],
+  "prompt_policy": {
+    "generation_owner": "codex_app_automation",
+    "tool": "built_in_image_gen",
+    "api_cost_policy": "Do not call OpenAI Images API or external paid image APIs.",
+    "prompt_method": "A fresh one-off prompt was written for each article-specific image role immediately before generation.",
+    "diversity_rule": "Avoid repeated traveler-with-phone, luggage-only airport, skyline-only, and cafe-table phone scenes. Keep hero and inline compositions distinct.",
+    "quality_loop": "Discard and regenerate any generic, repeated, text-heavy, off-topic, or internally similar result."
+  },
+  "images": [
+    {
+      "role": "hero",
+      "filename": "ai-hero.jpg",
+      "alt": "Two unlabeled food delivery order trays compared side by side in a Korean apartment lobby",
+      "caption": "A side-by-side choice between two Korean food-delivery checkout paths.",
+      "prompt": "Fresh one-off hero prompt, not a reusable template. Image role and purpose: wide photorealistic comparison hero for Baemin vs Coupang Eats for foreigners. Create a modern Seoul apartment lobby delivery shelf divided into two order setups: a mint-accented insulated bag with tteokbokki and dumplings on the left, and a warm-orange-accented bag with fried chicken and a rice bowl on the right. Add blank receipt slips, two route tokens, and a neutral card wallet. Eye-level three-quarter view, soft morning window light, believable Korean food packaging. Recent-image avoidance: avoid repeated traveler holding a phone, airport luggage, skyline, cafe table, tourist pose, fake app screen, logos, readable text, and watermarks.",
+      "required": true,
+      "url": "assets/ai-hero.jpg",
+      "hosted_path": "src/images/ai_assets/hosted/korea-baemin-vs-coupang-eats-foreigners-hero-20260803.jpg",
+      "inspection_status": "PASS"
+    },
+    {
+      "role": "inline",
+      "filename": "ai-inline-1.jpg",
+      "alt": "A text-free delivery checkout flow showing address, payment, restaurant acceptance, and backup pickup stages",
+      "caption": "Four gates determine whether a delivery order will actually work.",
+      "prompt": "Fresh one-off inline prompt, not a reusable template. Image role and purpose: text-free four-stage process diagram for a foreign visitor's Korean delivery checkout. Use tactile miniature objects connected by one route line: apartment model with map pin and key tag for address; payment card with shield; restaurant kitchen pass with covered meal and confirmation light; storefront pickup counter with takeaway bag as backup. Add one amber warning marker between payment and acceptance. Top-down 3:2 realistic 3D editorial diagram on terrazzo and brushed metal. Recent-image avoidance: make this visually different from the lobby hero; avoid repeated photography, people, phones, app UI, readable text, logos, skyline, luggage, cafe scenes, and watermarks.",
+      "required": true,
+      "url": "assets/ai-inline-1.jpg",
+      "hosted_path": "src/images/ai_assets/hosted/korea-baemin-vs-coupang-eats-foreigners-checkout-flow-20260803.jpg",
+      "inspection_status": "PASS"
+    }
+  ]
+}
