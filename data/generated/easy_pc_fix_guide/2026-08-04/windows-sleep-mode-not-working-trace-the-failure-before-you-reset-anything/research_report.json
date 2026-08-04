@@ -1,0 +1,185 @@
+{
+  "schema_version": 2,
+  "site": "easy_pc_fix_guide",
+  "content_domain": "windows_help",
+  "seed_keyword": "windows sleep mode not working",
+  "topic": "Windows 11 Sleep Mode Not Working: Find What Is Blocking It",
+  "queries": [
+    "Windows 11 sleep mode not working Microsoft Support",
+    "Windows 11 power and sleep settings official Microsoft",
+    "powercfg requests sleep blocker Microsoft Learn",
+    "powercfg available sleep states lastwake waketimers Microsoft Learn",
+    "Windows 11 Modern Standby screen off versus sleep Microsoft Learn",
+    "Windows system sleeping states S3 S0 low power idle Microsoft Learn",
+    "Windows 11 SleepStudy system sleep diagnostics Microsoft Learn",
+    "Windows release health sleep issues Windows 11 current",
+    "Windows message center sleep power driver issue 2026",
+    "Windows 11 lid close power button sleep setting Microsoft Support"
+  ],
+  "reader_questions": [
+    "Why does the display turn off while the PC stays awake?",
+    "Why does automatic sleep fail even though manual Sleep works?",
+    "Why does Windows wake immediately after entering sleep?",
+    "Can an app, media session, or driver prevent sleep?",
+    "How can I see which sleep states my PC supports?",
+    "What is the difference between Modern Standby and traditional S3 sleep?",
+    "Which powercfg reports are safe to read before changing settings?",
+    "When should I use the device maker or a technician instead of changing firmware?"
+  ],
+  "sources": [
+    {
+      "name": "Microsoft Support: Shut down, sleep, or hibernate your PC",
+      "url": "https://support.microsoft.com/en-US/Windows/Experience/Power-Battery/shut-down-sleep-or-hibernate-your-pc",
+      "type": "microsoft_support_opened"
+    },
+    {
+      "name": "Microsoft Support: Change the power mode for your Windows PC",
+      "url": "https://support.microsoft.com/en-us/windows/change-the-power-mode-for-your-windows-pc-c2aff038-22c9-f46d-5ca0-78696fdf2de8",
+      "type": "microsoft_support_opened"
+    },
+    {
+      "name": "Microsoft Learn: Powercfg command-line options",
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/design/device-experiences/powercfg-command-line-options",
+      "type": "microsoft_learn_opened"
+    },
+    {
+      "name": "Microsoft Learn: System sleeping states",
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/drivers/kernel/system-sleeping-states",
+      "type": "microsoft_learn_opened"
+    },
+    {
+      "name": "Microsoft Learn: Modern Standby states",
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/design/device-experiences/modern-standby-states",
+      "type": "microsoft_learn_opened"
+    },
+    {
+      "name": "Microsoft Learn: Modern Standby SleepStudy",
+      "url": "https://learn.microsoft.com/en-us/windows-hardware/design/device-experiences/modern-standby-sleepstudy",
+      "type": "microsoft_learn_opened"
+    },
+    {
+      "name": "Microsoft Learn: Windows release health",
+      "url": "https://learn.microsoft.com/en-us/windows/release-health/",
+      "type": "windows_release_health_opened"
+    },
+    {
+      "name": "Microsoft Learn: Windows message center",
+      "url": "https://learn.microsoft.com/en-us/windows/release-health/windows-message-center",
+      "type": "windows_message_center_opened"
+    }
+  ],
+  "factual_notes": [
+    {
+      "source": "Microsoft Support: Shut down, sleep, or hibernate your PC",
+      "note": "Microsoft documents the power-button and laptop lid actions, notes that wake methods vary by PC, and describes hibernate as using less power than sleep but resuming more slowly."
+    },
+    {
+      "source": "Microsoft Support: Change the power mode for your Windows PC",
+      "note": "Windows 11 exposes power mode under Settings > System > Power & battery; custom power plans can affect which options are available."
+    },
+    {
+      "source": "Microsoft Learn: Powercfg command-line options",
+      "note": "powercfg /a reports available sleep states, /requests lists application and driver power requests, /lastwake reports the last wake source, /waketimers lists active wake timers, and /devicequery wake_armed lists devices configured to wake the PC."
+    },
+    {
+      "source": "Microsoft Learn: Powercfg command-line options",
+      "note": "Power requests can prevent display power-off or low-power sleep; systemsleepdiagnostics generates a recent sleep-transition report and requires elevation."
+    },
+    {
+      "source": "Microsoft Learn: System sleeping states",
+      "note": "Windows sleep behavior depends on the sleep states implemented by the hardware. Microsoft directs users to powercfg /a to enumerate the states available on a specific PC."
+    },
+    {
+      "source": "Microsoft Learn: Modern Standby states",
+      "note": "Modern Standby distinguishes Screen Off and Sleep segments; screen-off activity does not by itself prove that the system has reached its lowest-power sleep phase."
+    },
+    {
+      "source": "Microsoft Learn: Modern Standby SleepStudy",
+      "note": "SleepStudy is an inbox report for Modern Standby PCs. It summarizes Active, Screen Off, and Sleep periods and identifies top activity sources without acting as an automatic repair tool."
+    },
+    {
+      "source": "Microsoft Learn: Windows release health",
+      "note": "The current dashboard was opened on 2026-08-04 and provides separate known-issue pages for Windows 11 versions 26H1, 25H2, and 24H2."
+    },
+    {
+      "source": "Microsoft Learn: Windows message center",
+      "note": "The current message center was opened for time-sensitive update context. It includes narrow device and driver notices, so an entry must match the reader's Windows version, update, model, and symptom before it is treated as relevant."
+    }
+  ],
+  "topic_context": {
+    "topic_id": "",
+    "cluster_id": "",
+    "category_id": "",
+    "action": "NEW_POST",
+    "topic_action": "NEW_POST",
+    "revision": 0,
+    "topic_revision": 0,
+    "claim_run_id": "",
+    "editor_brief": {},
+    "reader_questions": [],
+    "difference_from_existing": "This article separates automatic-timer failure, failed sleep entry, immediate wake, and missing sleep states, then uses power-request and wake-source evidence; the existing battery article focuses on battery drain rather than failure to sleep.",
+    "existing_post_refs": [
+      "https://easypcfixguide.blogspot.com/2026/08/laptop-battery-draining-fast-in-windows.html"
+    ]
+  },
+  "evidence_policy": {
+    "OBSERVED_QUESTION": "Eligible only when an opened public question has verified immutable provenance.",
+    "FIRST_PARTY_QUERY": "Eligible first-party Search Console evidence.",
+    "QUERY_PLAN": "Unopened search plan; zero demand weight.",
+    "FALLBACK_TEMPLATE": "Synthetic fallback; zero demand weight.",
+    "SEARCH_SUGGESTION": "Phrasing expansion only; zero demand weight."
+  },
+  "notes": [
+    "This SHADOW-mode topic came from the validated legacy queue, not from AI Registry demand evidence.",
+    "Every factual source listed above was opened during the 2026-08-04 run.",
+    "Reddit public JSON returned HTTP 403 and was not treated as evidence or instruction.",
+    "Google suggestions were used only for phrasing expansion and do not prove demand.",
+    "Community answers were not used as factual support."
+  ],
+  "collector_role": "legacy_queue_research",
+  "signal_evidence": [],
+  "signal_source_counts": {},
+  "evidence_type_counts": {
+    "OBSERVED_QUESTION": 0,
+    "FIRST_PARTY_QUERY": 0,
+    "QUERY_PLAN": 6,
+    "SEARCH_SUGGESTION": 8,
+    "FALLBACK_TEMPLATE": 0
+  },
+  "reddit_collection_diagnostics": {
+    "status": "unavailable",
+    "http_status": 403
+  },
+  "reddit_collection_method_counts": {
+    "oauth": 0,
+    "public_json": 0,
+    "google_site_search": 6,
+    "fallback": 0
+  },
+  "google_suggest_diagnostics": {
+    "status": "phrasing_only"
+  },
+  "google_suggest_method_counts": {
+    "live": 8,
+    "fallback": 0
+  },
+  "demand_eligible_signal_count": 0,
+  "stability_eligible_signal_count": 0,
+  "ready_eligible_signal_count": 0,
+  "cadence_eligible_signal_count": 0,
+  "observed_evidence_count": 0,
+  "observed_question_count": 0,
+  "first_party_query_count": 0,
+  "verified_public_page_signal_count": 0,
+  "query_plan_count": 6,
+  "search_suggestion_count": 8,
+  "fallback_evidence_count": 0,
+  "live_reddit_signal_count": 0,
+  "reddit_oauth_signal_count": 0,
+  "reddit_public_json_signal_count": 0,
+  "reddit_google_site_search_signal_count": 6,
+  "fallback_reddit_signal_count": 0,
+  "google_suggest_signal_count": 8,
+  "google_suggest_live_signal_count": 8,
+  "google_suggest_fallback_signal_count": 0
+}

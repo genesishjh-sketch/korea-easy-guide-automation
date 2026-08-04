@@ -1,0 +1,218 @@
+<style>
+  .epfg-post { --ink:#172033; --muted:#526173; --line:#d9e3ea; --blue:#2563eb; --green:#0f766e; --red:#b91c1c; color:var(--ink); font-family:Arial,Helvetica,sans-serif; font-size:17px; line-height:1.72; max-width:860px; margin:0 auto; }
+  .epfg-post * { box-sizing:border-box; }
+  .epfg-post figure { margin:0 0 28px; }
+  .epfg-post img { display:block; width:100%; height:auto; }
+  .epfg-post h1 { margin:0 0 18px; font-size:34px; line-height:1.18; }
+  .epfg-post h2 { margin:38px 0 14px; padding-top:8px; border-top:1px solid var(--line); font-size:25px; line-height:1.25; }
+  .epfg-post h3 { margin:22px 0 8px; font-size:20px; }
+  .epfg-post p { margin:0 0 18px; }
+  .epfg-post a { color:var(--blue); font-weight:700; text-decoration:none; border-bottom:1px solid rgba(37,99,235,.32); }
+  .epfg-post__hero,.epfg-post__inline { overflow:hidden; border:1px solid var(--line); border-radius:16px; background:#f8fbfd; }
+  .epfg-post__caption { margin:0; padding:10px 14px; background:#f8fbfd; color:var(--muted); font-size:14px; }
+  .epfg-post__lead { margin:0 0 24px; padding:18px 20px; border-left:5px solid var(--blue); border-radius:0 12px 12px 0; background:#eef5ff; }
+  .epfg-post__note { margin:18px 0 24px; padding:16px 18px; border:1px solid #b9e2d6; border-left:5px solid var(--green); border-radius:12px; background:#f0fdfa; }
+  .epfg-post__warning { margin:18px 0 24px; padding:16px 18px; border:1px solid #f1c6c6; border-left:5px solid var(--red); border-radius:12px; background:#fff5f5; color:#6b1f1f; font-weight:700; }
+  .epfg-post table { width:100%; margin:14px 0 26px; border-collapse:separate; border-spacing:0; overflow:hidden; border:1px solid var(--line); border-radius:12px; }
+  .epfg-post th,.epfg-post td { padding:13px 15px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
+  .epfg-post th { background:#eaf3ff; color:#17335f; }
+  .epfg-post tr:last-child td { border-bottom:0; }
+  .epfg-post ol,.epfg-post ul { margin:0 0 24px; padding-left:22px; }
+  .epfg-post li { margin:0 0 10px; }
+  .epfg-post code { padding:2px 6px; border-radius:5px; background:#edf2f7; font-size:.94em; }
+  @media (max-width:640px) { .epfg-post{font-size:16px}.epfg-post h2{font-size:22px}.epfg-post table{display:block;overflow-x:auto}.epfg-post th,.epfg-post td{min-width:170px} }
+</style>
+
+<article class="epfg-post">
+  <h1>Windows 11 Sleep Mode Not Working: Find What Is Blocking It</h1>
+
+  <figure class="epfg-post__hero">
+    <img src="assets/ai-hero.jpg" alt="Abstract moon-shaped sleep switch blocked by one amber activity token" loading="lazy">
+    <figcaption class="epfg-post__caption">A quiet diagnostic metaphor: Windows can enter sleep only after settings, apps, and devices stop keeping the system active.</figcaption>
+  </figure>
+
+  <p class="epfg-post__lead">If your Windows 11 PC will not sleep, first identify which failure you actually have: the automatic timer never acts, manual Sleep returns to the desktop, the PC sleeps and wakes immediately, or the Sleep choice is missing. Save your work, restart once, test manual Sleep with accessories disconnected, then check settings before changing a driver or power policy.</p>
+
+  <h2>Quick Answer</h2>
+  <ul>
+    <li>Test <strong>Start &gt; Power &gt; Sleep</strong> before blaming the timer. A manual failure and an idle-timer failure are different problems.</li>
+    <li>Close active calls, music, video, games, and file transfers. These activities can legitimately ask Windows to remain awake.</li>
+    <li>Temporarily disconnect nonessential USB devices and external docks, then test again.</li>
+    <li>Confirm the screen-off and sleep timers under <strong>Settings &gt; System &gt; Power &amp; battery</strong>.</li>
+    <li>If the PC sleeps and wakes immediately, look for the last wake source instead of lengthening the timer.</li>
+    <li>Use built-in <code>powercfg</code> reports only in the Advanced Fixes section below. Read the result before changing anything.</li>
+  </ul>
+
+  <h2 data-section="safety">Applies to / Risk level / Data loss risk / Estimated time / Last checked</h2>
+  <table>
+    <tr><th>Item</th><th>Details</th></tr>
+    <tr><td>Applies to</td><td>Windows 11 Home and Pro; menu names and available sleep states vary by PC hardware</td></tr>
+    <tr><td>Risk level</td><td>Low</td></tr>
+    <tr><td>Data loss risk</td><td>No</td></tr>
+    <tr><td>Estimated time</td><td>20-40 minutes, including two controlled sleep tests</td></tr>
+    <tr><td>Last checked</td><td>2026-08-04</td></tr>
+  </table>
+
+  <h2 data-section="symptoms">Identify the Exact Sleep Failure</h2>
+  <ul>
+    <li>The display turns off after the chosen time, but fans, lights, or audio show that the PC is still awake.</li>
+    <li>The automatic sleep timer never acts even when the keyboard and mouse are untouched.</li>
+    <li>Selecting Sleep makes the screen go dark briefly, then the desktop returns.</li>
+    <li>The PC enters sleep normally but wakes again within seconds or minutes.</li>
+    <li>The Sleep option is missing from the Power menu.</li>
+    <li>Closing a laptop lid turns off the display but does not produce the expected sleep behavior.</li>
+    <li>The problem began after connecting a dock, controller, network adapter, display, or other accessory.</li>
+    <li>The problem began after a Windows, driver, firmware, or application update.</li>
+  </ul>
+
+  <h2 data-section="diagnosis">Why Screen Off Is Not Always Sleep</h2>
+  <p>A black display does not prove the whole PC is asleep. Microsoft documents both traditional sleep states and Modern Standby. A traditional system can use an S3 sleep state, while a Modern Standby PC uses an S0 low-power idle model. On Modern Standby, the screen-off period can include short background activity before and during the lower-power phase. That behavior can look different from an older laptop even when it is working correctly.</p>
+  <p>Windows also honors power requests from apps and drivers. A media session, active call, file transfer, display driver, or connected device may ask the system not to turn off the display or enter low power. A different device or timer may wake a PC that successfully went to sleep. This is why a controlled test and an observation are safer than changing several power settings at once.</p>
+  <table>
+    <tr><th>Observation</th><th>Most useful next test</th></tr>
+    <tr><td>Manual Sleep works, but the idle timer does not</td><td>Check the timer, active media or calls, and known apps that may keep the system busy.</td></tr>
+    <tr><td>Manual Sleep immediately returns to the desktop</td><td>Disconnect nonessential accessories, restart, and inspect a wake source or power request.</td></tr>
+    <tr><td>The PC sleeps, then wakes later</td><td>Record the wake time and check the last wake source and active wake timers.</td></tr>
+    <tr><td>Sleep is absent from the Power menu</td><td>Check which sleep states the hardware reports and use the PC maker's support page.</td></tr>
+  </table>
+
+  <h2>Prepare a Clean, Reversible Test</h2>
+  <ol>
+    <li>Save every open document. Sleep troubleshooting should not cost unsaved work if the PC restarts unexpectedly.</li>
+    <li>Write down whether the problem happens on battery, while plugged in, or both.</li>
+    <li>Pause any large download, cloud sync, backup, game installation, call, video, or music playback.</li>
+    <li>Disconnect nonessential USB devices, external storage, controllers, hubs, and docks. Keep the keyboard and mouse you need.</li>
+    <li>Note the current time and whether the screen, fans, case lights, and connected displays turn off.</li>
+    <li>Restart Windows once. Use Restart from the Power menu rather than closing and reopening the lid.</li>
+  </ol>
+  <div class="epfg-post__note"><strong>Testing rule:</strong> change one condition, test Sleep, and record the result. Reconnect accessories one at a time only after the basic test works.</div>
+
+  <h2 data-section="steps">Step 1: Compare Manual Sleep with the Automatic Timer</h2>
+  <ol>
+    <li>After the restart, wait until the desktop is fully settled and no installation is running.</li>
+    <li>Select <strong>Start &gt; Power &gt; Sleep</strong>. Do not move the mouse or press a key during the test.</li>
+    <li>Wait about one minute. Note whether only the display turns off, whether the PC appears to sleep, or whether it wakes immediately.</li>
+    <li>Wake it with the power button or the method documented by the PC maker. Different systems support different wake inputs.</li>
+    <li>If manual Sleep works, test the idle timer next. Open <strong>Settings &gt; System &gt; Power &amp; battery</strong> and expand the screen, sleep, and hibernate timeout controls available on your device.</li>
+    <li>Choose a short temporary sleep time for the current power condition, leave the PC untouched, and observe it. Restore your preferred value after the test.</li>
+    <li>If the display turns off but the system does not sleep, make sure you changed the sleep timeout, not only the screen timeout.</li>
+    <li>If a work or school policy locks the setting, stop and contact the administrator instead of trying to bypass it.</li>
+  </ol>
+
+  <h2 data-section="steps">Step 2: Check the Lid and Power-Button Action</h2>
+  <ol>
+    <li>Search Windows for <strong>Control Panel</strong>, open <strong>System and Security</strong>, then open <strong>Power Options</strong>.</li>
+    <li>Select <strong>Choose what the power buttons do</strong>. On a laptop, also review the lid-close action.</li>
+    <li>Compare the <strong>On battery</strong> and <strong>Plugged in</strong> columns. They can be intentionally different.</li>
+    <li>Set the action you actually want, save it, and run one controlled test.</li>
+    <li>Do not assume a closed lid means Sleep. It can be configured to do nothing, especially when a laptop is used with an external display or dock.</li>
+    <li>If the setting is unavailable or managed, use the device maker's documentation or your administrator's policy.</li>
+  </ol>
+
+  <h2 data-section="steps">Step 3: Isolate an App or Accessory</h2>
+  <ol>
+    <li>Repeat manual Sleep with nonessential accessories still disconnected.</li>
+    <li>If it now works, reconnect one device, wait for Windows to recognize it, and test again.</li>
+    <li>If the timer fails only while one known app is open, close that app normally and retest. Media playback and calls can intentionally keep a system awake.</li>
+    <li>Check the app's official settings for an option related to keeping the PC awake. Do not install an extra “sleep fixer.”</li>
+    <li>If one dock, network adapter, controller, or USB device changes the result, record its exact model and obtain guidance from the PC or device maker.</li>
+    <li>Do not disable every device at once. That removes evidence and can also disable input, networking, accessibility, or security features you need.</li>
+  </ol>
+
+  <figure class="epfg-post__inline">
+    <img src="assets/ai-inline-1.jpg" alt="Three-stage sleep troubleshooting path using timer, app, and device symbols" loading="lazy">
+    <figcaption class="epfg-post__caption">Follow one evidence path at a time: confirm the timer, remove active app requests, then reconnect devices individually.</figcaption>
+  </figure>
+
+  <h2 data-section="steps">Step 4: Update from Trusted Sources</h2>
+  <ol>
+    <li>Open <strong>Settings &gt; Windows Update</strong> and check for normal Windows updates.</li>
+    <li>Review optional driver updates carefully. Install only a driver that matches your device and symptom.</li>
+    <li>For a laptop, desktop, motherboard, dock, or graphics device, use the manufacturer's official support page for your exact model.</li>
+    <li>Restart when the official installer or Windows asks, then repeat the same controlled sleep test.</li>
+    <li>Never use a random driver updater, unknown repair software, or an unofficial firmware package.</li>
+    <li>If the symptom started immediately after an update, note the update date and Windows version before taking any recovery action.</li>
+  </ol>
+  <p>Windows release health and the Windows message center are the right places to check version-specific update problems. At this article's last check, Microsoft maintained separate current pages for Windows 11 versions 26H1, 25H2, and 24H2. Do not assume every sleep problem is a Windows-wide incident: compare your version, update date, device model, and the issue description. A message-center item about a narrow device or driver does not prove that an unrelated PC has the same cause.</p>
+
+  <h2 data-section="advanced">Advanced Fixes: Read the Evidence Before You Change Power Rules</h2>
+  <div class="epfg-post__warning">Back up important files before advanced fixes. Save your work, use an administrator account only when required, do not run commands you do not understand, and copy commands only from official Microsoft documentation. Read-only reports come first. Do not create power-request overrides, edit the Registry, change BIOS/UEFI sleep modes, or flash firmware as a guess.</div>
+
+  <h3>Check available sleep states and active requests</h3>
+  <ol>
+    <li>Open <strong>Terminal (Admin)</strong> only if Windows says administrator access is required.</li>
+    <li>Run <code>powercfg /a</code>. Microsoft says this reports which sleep states are available and may explain why a state is unavailable.</li>
+    <li>Run <code>powercfg /requests</code>. It lists current app and driver power requests that can prevent the display from turning off or the PC from entering low-power sleep.</li>
+    <li>Record the exact process, service, or driver name. Close a recognized app normally and retest before changing any system rule.</li>
+    <li>Do not use <code>powercfg /requestsoverride</code> just to make the list empty. An override can hide a legitimate request, such as active audio, display use, or a device operation.</li>
+  </ol>
+
+  <h3>Check why the PC woke</h3>
+  <ol>
+    <li>After an unwanted wake, run <code>powercfg /lastwake</code> and record what Windows reports.</li>
+    <li>Run <code>powercfg /waketimers</code> to list active wake timers.</li>
+    <li>Run <code>powercfg /devicequery wake_armed</code> to list devices currently allowed to wake the system.</li>
+    <li>Do not disable wake for the keyboard, network adapter, or another device until you understand how you expect to wake or remotely manage the PC.</li>
+  </ol>
+
+  <h3>Generate a sleep report when the simple checks are inconclusive</h3>
+  <p>Microsoft documents <code>powercfg /systemsleepdiagnostics</code> as an administrator report showing recent intervals when the user was away and whether the system slept. On a Modern Standby PC, <code>powercfg /sleepstudy</code> creates an HTML report with Screen Off and Sleep segments, active time, power use, and top activity sources. SleepStudy is not a generic repair button and may not apply to a traditional S3 system. Keep the report for a device maker or support technician rather than changing a setting you cannot reverse.</p>
+  <p>Microsoft also states that switching between traditional S3 and Modern Standby is not a normal Windows setting change. Do not follow instructions that promise to force a different hardware sleep model with a Registry edit or an unsupported firmware change.</p>
+
+  <h2 data-section="stop">When to Stop and Get Help</h2>
+  <ul>
+    <li>The PC crashes, shows a blue screen, or restarts instead of sleeping.</li>
+    <li>BitLocker recovery appears, a drive disappears, files become unreadable, or storage makes unusual noises.</li>
+    <li>The PC becomes unusually hot, the battery swells, or a burning smell or electrical noise is present.</li>
+    <li>The Sleep option is missing and <code>powercfg /a</code> reports a hardware or firmware limitation you do not understand.</li>
+    <li>The problem affects a work or school PC with managed power policy, encryption, VPN, or remote-management requirements.</li>
+    <li>The issue began with a firmware update, motherboard change, or repair that requires model-specific support.</li>
+    <li>A requested fix involves an unsupported sleep-state conversion, Registry editing, firmware flashing, or disabling security.</li>
+    <li>Three controlled tests produce inconsistent results and you cannot identify whether the cause is an app, device, update, or hardware fault.</li>
+  </ul>
+
+  <h2 data-section="faq">FAQ</h2>
+  <h3>Why does my screen turn off but the PC stay awake?</h3>
+  <p>Screen timeout and system sleep timeout are separate. On Modern Standby hardware, a screen-off session can also contain limited background activity before or during the low-power phase.</p>
+  <h3>Why does Windows 11 wake immediately after I choose Sleep?</h3>
+  <p>A device, wake timer, or other wake source may trigger it. Test with nonessential accessories disconnected, then use the read-only last-wake and wake-timer reports in Advanced Fixes.</p>
+  <h3>Can a browser, game, or media app block sleep?</h3>
+  <p>Yes. Microsoft documents power requests that apps and drivers can use to keep the display on or prevent low-power sleep. Close the app normally and verify with a controlled test.</p>
+  <h3>Should I disable every device that can wake the PC?</h3>
+  <p>No. You might disable the keyboard, remote management, networking, or accessibility behavior you need. Identify one source and confirm the device maker's guidance first.</p>
+  <h3>Is Modern Standby the same as traditional S3 sleep?</h3>
+  <p>No. Modern Standby uses an S0 low-power idle model, while traditional sleep commonly uses S3. The supported model is determined by the hardware design; it is not a beginner toggle.</p>
+  <h3>Does disabling Fast Startup fix sleep mode?</h3>
+  <p>Fast Startup affects shutdown and startup, not every sleep failure. Do not change it as a universal first fix. Diagnose manual sleep, timers, requests, and wake sources first.</p>
+  <h3>Should I update the BIOS or firmware?</h3>
+  <p>Not as a guess. Firmware changes can be high risk if interrupted or mismatched. Use the exact PC maker's official instructions or ask its support team after simpler evidence points there.</p>
+  <h3>Is hibernate a safe alternative?</h3>
+  <p>Microsoft says hibernate uses less power than sleep and restores your session more slowly, but it is not available on every PC. It can be a temporary option while you investigate, not proof that the sleep problem is fixed.</p>
+  <h3>Should I reset or reinstall Windows?</h3>
+  <p>No, not for an unexplained sleep problem before controlled tests and official diagnostics. Recovery actions are broader and can affect apps, settings, or data; use them only with a backup and a clearly supported reason.</p>
+  <h3>How do I tell support what happened?</h3>
+  <p>Provide the PC model, Windows version, whether it happens on battery or AC power, the exact test time, connected devices, recent changes, and the relevant <code>powercfg</code> report result.</p>
+
+  <h2 data-section="related_guides">Related Guides</h2>
+  <ul>
+    <li><a href="https://easypcfixguide.blogspot.com/2026/08/laptop-battery-draining-fast-in-windows.html" target="_blank" rel="noopener noreferrer">Laptop Battery Draining Fast in Windows 11: Find the Cause Safely</a></li>
+    <li><a href="https://easypcfixguide.blogspot.com/2026/07/windows-11-slow-after-update-measure.html" target="_blank" rel="noopener noreferrer">Windows 11 Slow After Update? Measure the Bottleneck Before Changing Settings</a></li>
+    <li><a href="https://easypcfixguide.blogspot.com/2026/07/usb-device-not-recognized-in-windows-11.html" target="_blank" rel="noopener noreferrer">USB Device Not Recognized in Windows 11: Identify the Port, Cable, or Driver Boundary</a></li>
+    <li><a href="https://easypcfixguide.blogspot.com/2026/06/how-to-check-your-windows-version.html" target="_blank" rel="noopener noreferrer">Check Your Windows Version, Build, Edition, and System Type</a></li>
+  </ul>
+
+  <h2 data-section="sources">Microsoft Sources</h2>
+  <ul>
+    <li><a href="https://support.microsoft.com/en-US/Windows/Experience/Power-Battery/shut-down-sleep-or-hibernate-your-pc" target="_blank" rel="noopener noreferrer">Shut down, sleep, or hibernate your PC</a></li>
+    <li><a href="https://support.microsoft.com/en-us/windows/change-the-power-mode-for-your-windows-pc-c2aff038-22c9-f46d-5ca0-78696fdf2de8" target="_blank" rel="noopener noreferrer">Change the power mode for your Windows PC</a></li>
+    <li><a href="https://learn.microsoft.com/en-us/windows-hardware/design/device-experiences/powercfg-command-line-options" target="_blank" rel="noopener noreferrer">Powercfg command-line options</a></li>
+    <li><a href="https://learn.microsoft.com/en-us/windows-hardware/drivers/kernel/system-sleeping-states" target="_blank" rel="noopener noreferrer">System sleeping states</a></li>
+    <li><a href="https://learn.microsoft.com/en-us/windows-hardware/design/device-experiences/modern-standby-states" target="_blank" rel="noopener noreferrer">Modern Standby states</a></li>
+    <li><a href="https://learn.microsoft.com/en-us/windows-hardware/design/device-experiences/modern-standby-sleepstudy" target="_blank" rel="noopener noreferrer">Modern Standby SleepStudy</a></li>
+    <li><a href="https://learn.microsoft.com/en-us/windows/release-health/" target="_blank" rel="noopener noreferrer">Windows release health</a></li>
+    <li><a href="https://learn.microsoft.com/en-us/windows/release-health/windows-message-center" target="_blank" rel="noopener noreferrer">Windows message center</a></li>
+  </ul>
+
+  <h2 data-section="summary">Final Summary</h2>
+  <p>When Windows 11 sleep mode is not working, separate a timer problem from a failed sleep transition, an unwanted wake, or a missing hardware sleep state. Start with saved work, one restart, a manual Sleep test, correct timers, and disconnected accessories. Update only through Windows or the device maker. If the cause remains unclear, use Microsoft’s read-only <code>powercfg</code> reports to identify requests, supported states, and wake sources before changing anything. Stop when the evidence points to managed policy, firmware, hardware, encryption, crashes, or storage trouble.</p>
+</article>

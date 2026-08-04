@@ -1,0 +1,45 @@
+{
+  "mode": "codex_generated_no_api",
+  "strict": true,
+  "notes": [
+    "Do not call paid image APIs in the Python pipeline.",
+    "Use Codex-generated JPG assets from src/images/ai_assets/windows.",
+    "Do not use SVG fallback for Windows help public posts.",
+    "Do not generate fake Windows UI or readable error screens.",
+    "Vary visual concepts across posts: change medium, camera angle, props, composition, and dominant accent color by article type.",
+    "Hero and inline images must have different roles and should not look like two versions of the same template.",
+    "The saved image plan is only a creative brief; Codex image generation must use a fresh article-specific prompt instead of pasting a fixed formula.",
+    "Do not add extra images unless each image has a distinct role such as hero, troubleshooting flow, warning, or decision checklist.",
+    "Publishing should stop when required image files are missing.",
+    "Codex app automation must use the built-in image_gen tool for missing images; GitHub Actions alone must not try to call paid image APIs.",
+    "Before calling image_gen, Codex must adapt this brief into a one-off prompt based on the article title, reader intent, recent image history, and the image role."
+  ],
+  "prompt_policy": {
+    "generation_owner": "codex_app_automation",
+    "tool": "built_in_image_gen",
+    "api_cost_policy": "Do not call OpenAI Images API or external paid image APIs.",
+    "prompt_method": "Treat each saved prompt as an art-direction brief. Before generating, Codex must write a fresh one-off image prompt for the exact article, image role, reader intent, and recent visual history.",
+    "diversity_rule": "Recent laptop-on-desk or generic office visuals are not acceptable unless the topic specifically requires that exact object. Hero and inline images must use different visual metaphors, camera angles, props, and composition.",
+    "quality_loop": "If the image looks generic, repeated, off-topic, text-heavy, or too similar to recent posts, discard it and regenerate before publishing."
+  },
+  "images": [
+    {
+      "role": "hero",
+      "filename": "ai-hero.jpg",
+      "alt": "Abstract moon-shaped sleep switch blocked by one amber activity token",
+      "caption": "A quiet diagnostic metaphor: Windows can enter sleep only after settings, apps, and devices stop keeping the system active.",
+      "prompt": "Fresh one-off prompt. Image role: hero problem metaphor. Create an article-specific editorial macro photograph for 'Windows 11 Sleep Mode Not Working: Find What Is Blocking It.' Show a dark indigo tabletop with a large frosted acrylic crescent-moon mechanism nearly completing a circular low-power path. One small glowing amber token shaped like an abstract activity pulse physically blocks the final gap, while the rest of the path is calm and dim. Make the sleep mechanism—not a computer—the unmistakable hero. Use a close three-quarter macro angle, shallow depth of field, precise cool rim lighting, graphite and midnight-blue materials, and one amber interruption accent. The mood is quiet, diagnostic, reassuring, and premium, suitable for a beginner troubleshooting guide. Recent-image avoidance: avoid repeating laptop-on-desk, laptop-and-coffee, generic office, router, and bright daytime device scenes; use no centered laptop. No human hands or generic repair tools. Do not show real Microsoft logos, fake Windows UI, fake operating-system screens, readable UI text, readable error codes, readable letters or numbers, command prompts, registry editors, brand marks, private information, scary alerts, or watermarks.",
+      "required": true,
+      "url": "assets/ai-hero.jpg"
+    },
+    {
+      "role": "inline",
+      "filename": "ai-inline-1.jpg",
+      "alt": "Three-stage sleep troubleshooting path using timer, app, and device symbols",
+      "caption": "Follow one evidence path at a time: confirm the timer, remove active app requests, then reconnect devices individually.",
+      "prompt": "Fresh one-off prompt. Image role: inline three-step process diagram. Create an article-specific educational bitmap for 'Windows 11 Sleep Mode Not Working: Find What Is Blocking It.' Use a clean top-down, wide composition on a pale blue-gray background with three clearly separated physical zones connected by simple object arrows: first, a blank timer dial leading to a small moon token; second, a smooth audio-wave puck and activity bead being moved away from the moon path; third, a USB plug and mouse-shaped device token reconnecting one at a time toward a final softly glowing sleep crescent. Use unlabeled objects only, with crisp isometric depth, matte paper-and-resin textures, teal verification accents, one amber blocker, and generous whitespace. The visual must teach timer, app-request, and device isolation as three distinct checks and must look nothing like the dark macro hero. Recent-image avoidance: avoid repeating laptop-on-desk, laptop-and-coffee, generic office, router, and dark macro still-life scenes; use no centered laptop. No human figure or text-heavy checklist. No real or fake operating-system screens, Microsoft logos, readable UI text, readable error codes, command prompts, registry editors, fake official documentation, brand marks, or watermarks.",
+      "required": true,
+      "url": "assets/ai-inline-1.jpg"
+    }
+  ]
+}
