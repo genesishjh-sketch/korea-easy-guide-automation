@@ -1,0 +1,28 @@
+{
+  "article": {
+    "title": "Korea Tax Refund: Airport or Downtown? A Practical Choice Guide",
+    "slug": "korea-tax-refund-airport-or-downtown-practical-choice-guide",
+    "category": "Transportation",
+    "tags": ["Transportation", "Korea travel", "tax refund", "airport", "shopping", "foreign visitors"],
+    "meta_description": "Compare airport and downtown tax refunds in Korea, including eligibility, customs validation, receipt limits, timing, payment methods, and safe steps."
+  },
+  "candidate": {
+    "keyword": "korea tax refund airport vs downtown",
+    "category": "Transportation",
+    "intent": "comparison",
+    "score": 0.0,
+    "signals": [],
+    "topic_id": "",
+    "cluster_id": "",
+    "category_id": "",
+    "action": "NEW_POST",
+    "topic_action": "NEW_POST",
+    "revision": 0,
+    "topic_revision": 0,
+    "editor_brief": {},
+    "reader_questions": [],
+    "difference_from_existing": "This comparison answers where and when to process a refund, while the existing guide explains the broader tax-refund system.",
+    "existing_post_refs": ["https://koreaeasyguide.blogspot.com/2026/07/korea-tax-refund-guide-for-tourists.html"],
+    "claim_run_id": ""
+  }
+}

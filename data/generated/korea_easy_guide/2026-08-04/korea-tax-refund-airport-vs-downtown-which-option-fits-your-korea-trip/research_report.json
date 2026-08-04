@@ -1,0 +1,114 @@
+{
+  "schema_version": 2,
+  "collector_role": "codex_official_source_research",
+  "site": "korea_easy_guide",
+  "content_domain": "korea_travel",
+  "seed_keyword": "korea tax refund airport vs downtown",
+  "topic": "Korea Tax Refund: Airport or Downtown? A Practical Choice Guide",
+  "researched_at": "2026-08-04T10:00:00+09:00",
+  "queries": [
+    "Korea tax refund airport vs downtown official",
+    "site:english.visitkorea.or.kr Korea tourist tax refund downtown airport",
+    "site:customs.go.kr English Korea tax refund outbound confirmation",
+    "site:airport.kr Incheon Airport domestic tax refund",
+    "Korea downtown tourist tax refund official operator",
+    "Korea immediate tax refund limits official 2026",
+    "Incheon Airport tax refund checked baggage procedure",
+    "Korea tax refund card cash processing time official"
+  ],
+  "reader_questions": [
+    "Is a downtown refund actually finished before I reach the airport?",
+    "Which method is safer when my goods will be checked baggage?",
+    "What passport, voucher, card, and goods must I bring?",
+    "How do immediate refund limits differ from downtown and airport refund limits?",
+    "What happens if I receive downtown cash but miss export validation?",
+    "Which route works best for vouchers from several refund operators?",
+    "What should I do when a staffed airport counter is closed?"
+  ],
+  "sources": [
+    {
+      "name": "VISITKOREA Duty Free and Tax Refunds",
+      "url": "https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=140736",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_notes": ["General minimum purchase is KRW 15,000.", "Downtown processing requires passport, refund voucher, goods, and an international credit card.", "Immediate refund limits are under KRW 1 million per transaction and KRW 5 million total during the trip."]
+    },
+    {
+      "name": "VISITKOREA Comprehensive Tax Refund Guide",
+      "url": "https://english.visitkorea.or.kr/svc/contents/contentsView.do?menuSn=929&vcontsId=248765",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_notes": ["Downtown general refunds require later customs export confirmation.", "The listed downtown single-receipt ceiling is KRW 6 million.", "Opened or used goods and non-verifiable services are ineligible."]
+    },
+    {
+      "name": "Korea Customs Service Tax Refund",
+      "url": "https://www.customs.go.kr/english/cm/cntnts/cntntsView.do?cntntsId=5504&mi=10803",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_notes": ["Outbound confirmation may require passport, sales certificate, and unopened purchased goods.", "Goods must be taken out of Korea within three months of purchase."]
+    },
+    {
+      "name": "Incheon International Airport Domestic Tax Refund",
+      "url": "https://www.airport.kr/ap_en/1425/subview.do",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_notes": ["Carry-on and checked-baggage refund goods follow different preparation sequences.", "Travelers should tell airline staff before checking refund-eligible goods.", "The airport lists staffed desk hours and kiosk options by terminal."]
+    },
+    {
+      "name": "VISITKOREA Airport Refund Counter FAQ",
+      "url": "https://english.visitkorea.or.kr/svc/contents/contentsView.do?vcontsId=185926",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_notes": ["Incheon terminal refund counter and kiosk locations differ.", "Travelers are advised to confirm current locations and hours before use."]
+    },
+    {
+      "name": "Global Tax Free Refund Guide",
+      "url": "https://www.shoppingplus.co.kr/taxrefund",
+      "type": "platform",
+      "opened": true,
+      "factual_notes": ["The operator supports mobile, airport, downtown, immediate, and hotel refund channels.", "Its guide requires customs validation and departure within three months."]
+    }
+  ],
+  "topic_context": {
+    "topic_id": "",
+    "cluster_id": "",
+    "category_id": "",
+    "action": "NEW_POST",
+    "topic_action": "NEW_POST",
+    "revision": 0,
+    "topic_revision": 0,
+    "editor_brief": {},
+    "reader_questions": [],
+    "difference_from_existing": "This article compares the timing and failure modes of airport and downtown processing; the existing post remains the general system guide.",
+    "existing_post_refs": ["https://koreaeasyguide.blogspot.com/2026/07/korea-tax-refund-guide-for-tourists.html"]
+  },
+  "signal_evidence": [],
+  "live_reddit_signal_count": 0,
+  "reddit_oauth_signal_count": 0,
+  "reddit_public_json_signal_count": 0,
+  "reddit_google_site_search_signal_count": 0,
+  "fallback_reddit_signal_count": 0,
+  "google_suggest_signal_count": 0,
+  "google_suggest_live_signal_count": 0,
+  "google_suggest_fallback_signal_count": 0,
+  "observed_evidence_count": 0,
+  "observed_question_count": 0,
+  "first_party_query_count": 0,
+  "verified_public_page_signal_count": 0,
+  "query_plan_count": 0,
+  "fallback_evidence_count": 0,
+  "search_suggestion_count": 0,
+  "demand_eligible_signal_count": 0,
+  "stability_eligible_signal_count": 0,
+  "ready_eligible_signal_count": 0,
+  "cadence_eligible_signal_count": 0,
+  "signal_source_counts": {},
+  "reddit_collection_method_counts": {},
+  "google_suggest_method_counts": {},
+  "evidence_type_counts": {},
+  "notes": [
+    "The topic came from the validated legacy queue because rollout mode is SHADOW.",
+    "No demand claim is based on QUERY_PLAN, SEARCH_SUGGESTION, fallback text, or unopened search URLs.",
+    "Every factual claim used in the article was checked against an opened official or operator page."
+  ]
+}

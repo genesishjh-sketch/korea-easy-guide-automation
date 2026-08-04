@@ -1,0 +1,37 @@
+{
+  "mode": "codex_generated_no_api",
+  "strict": true,
+  "notes": [
+    "Generated with the Codex built-in image_gen tool; no paid image API was used.",
+    "Hero and inline images use different object sets, compositions, and reader-help roles.",
+    "Final images must be copied to article assets and unique hosted paths before publishing."
+  ],
+  "prompt_policy": {
+    "generation_owner": "codex_app_automation",
+    "tool": "built_in_image_gen",
+    "api_cost_policy": "Do not call OpenAI Images API or external paid image APIs.",
+    "prompt_method": "Fresh one-off prompts were written from the article title, refund decision, image role, and recent visual history.",
+    "diversity_rule": "Avoid repeated traveler-with-phone, luggage-only airport, skyline-only, cafe-table phone, and generic stock-travel scenes.",
+    "quality_loop": "Inspect each image and regenerate if generic, text-heavy, off-topic, repetitive, or internally similar."
+  },
+  "images": [
+    {
+      "role": "hero",
+      "filename": "ai-hero.jpg",
+      "alt": "Two visual paths compare downtown and airport tax refund processing in Korea",
+      "caption": "The hero comparison separates an earlier downtown refund from departure-day airport processing.",
+      "prompt": "Fresh one-off prompt rule. Image role: hero decision comparison for Korea Tax Refund: Airport or Downtown. Create a photorealistic editorial still life with a shared refund voucher branching to two clearly different paths: a downtown service counter with passport and payment card, and an Incheon departure counter with boarding-pass shape, unopened shopping bag, and inspection tray. Use a wide top-down three-quarter composition and restrained cream, blue, and coral. Recent-image avoidance: avoid repeated traveler-with-phone, luggage-only airport, skyline-only, cafe-table phone, generic airport stock, readable text, letters, numbers, logos, QR codes, barcodes, fake app UI, and watermarks.",
+      "required": true,
+      "url": "assets/ai-hero.jpg"
+    },
+    {
+      "role": "inline",
+      "filename": "ai-inline-1.jpg",
+      "alt": "Passport voucher unopened goods and departure validation arranged as a tax refund checklist",
+      "caption": "Keep the passport, refund voucher, and unopened goods available until departure validation is complete.",
+      "prompt": "Fresh one-off prompt rule. Image role: inline process checklist for completing a Korea tourist tax refund. Create a photorealistic oblique tabletop sequence with four physical stations connected by a cord: neutral passport cover, blank refund voucher, sealed goods in an inspection tray, and a final validation token. Use tactile paper and fabric, pale stone, muted teal, amber, and a bright airport counter. Do not make this a second version of the hero image; avoid split-screen comparison, runway view, traveler with phone, shopping-bag-only scene, readable text, letters, numbers, logos, QR codes, barcodes, fake seals, app screens, and watermarks.",
+      "required": true,
+      "url": "assets/ai-inline-1.jpg"
+    }
+  ]
+}
