@@ -1,0 +1,35 @@
+{
+  "article": {
+    "title": "Korea Residence Card (Formerly ARC): A First-Time Foreigner’s Guide",
+    "slug": "korea-residence-card-formerly-arc-first-time-foreigner-guide",
+    "category": "Travel Basics",
+    "tags": [
+      "Travel Basics",
+      "Korea living",
+      "Residence Card",
+      "ARC",
+      "foreigner registration",
+      "HiKorea"
+    ],
+    "meta_description": "Apply for Korea’s Residence Card (formerly ARC): deadline, documents, KRW 35,000 fee, address reporting, mobile ID, and common foreigner blockers."
+  },
+  "candidate": {
+    "keyword": "korea alien registration card basics",
+    "category": "Travel Basics",
+    "intent": "how_to",
+    "score": 0.0,
+    "signals": [],
+    "topic_id": "",
+    "cluster_id": "",
+    "category_id": "",
+    "action": "NEW_POST",
+    "topic_action": "NEW_POST",
+    "revision": 0,
+    "topic_revision": 0,
+    "editor_brief": {},
+    "reader_questions": [],
+    "difference_from_existing": "This legacy-queue article is limited to first Residence Card registration, first-use blockers, and post-issuance reporting obligations; it does not duplicate tourist entry or general visa guides.",
+    "existing_post_refs": [],
+    "claim_run_id": ""
+  }
+}

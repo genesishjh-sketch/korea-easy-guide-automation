@@ -1,0 +1,37 @@
+{
+  "mode": "codex_generated_no_api",
+  "strict": true,
+  "notes": [
+    "Generated with the Codex built-in image_gen tool; no paid image API was used.",
+    "Hero and inline images use different object sets, compositions, and reader-help roles.",
+    "Final images must be copied to article assets and unique hosted paths before publishing."
+  ],
+  "prompt_policy": {
+    "generation_owner": "codex_app_automation",
+    "tool": "built_in_image_gen",
+    "api_cost_policy": "Do not call OpenAI Images API or external paid image APIs.",
+    "prompt_method": "Fresh one-off prompts were written from the Residence Card application journey, reporting duties, image role, and recent visual history.",
+    "diversity_rule": "Avoid repeated traveler-with-phone, luggage-only airport, skyline-only, cafe-table phone, generic immigration queue, and stock passport scenes.",
+    "quality_loop": "Inspect each image and regenerate if generic, text-heavy, off-topic, repetitive, or internally similar."
+  },
+  "images": [
+    {
+      "role": "hero",
+      "filename": "ai-hero.jpg",
+      "alt": "Passport appointment card apartment key and residence card arranged as a Korea registration journey",
+      "caption": "A successful first registration connects the passport, HiKorea appointment, Korean address, supporting documents, and final Residence Card.",
+      "prompt": "Fresh one-off prompt rule. Image role: hero visual for Korea Residence Card formerly ARC first-time foreigner guide. Create a photorealistic editorial administrative still life arranged as a clear left-to-right journey on a pale government-counter surface: neutral closed passport with no emblem, blank appointment card, small apartment key and lease folder, one borderless portrait-photo silhouette with no real face, official-looking but entirely blank IC residence card with visible chip, and a collection envelope. Use a wide three-quarter composition, cool ivory, slate blue, muted mint, and one warm amber accent. Make the card and address step central, not travel. Recent-image avoidance: no traveler holding a phone, no luggage, no airport, no skyline, no cafe table, no immigration queue, no readable text, no letters, no numbers, no Korean characters, no logos, no real government seal, no QR code, no barcode, no fake app UI, no personal data, and no watermark.",
+      "required": true,
+      "url": "assets/ai-hero.jpg"
+    },
+    {
+      "role": "inline",
+      "filename": "ai-inline-1.jpg",
+      "alt": "Residence card moving box house key and calendar show the steps for reporting an address change in Korea",
+      "caption": "After a move, update your registered place of residence instead of assuming the landlord or Korean household report covers you.",
+      "prompt": "Fresh one-off prompt rule. Image role: inline mistake-prevention visual for reporting a Residence Card address change in Korea. Create a photorealistic top-down scene with a miniature apartment doorway, two moving boxes, a brass house key moving from an old address tile to a new address tile, a blank IC residence card, a simple paper calendar represented only by fifteen unnumbered raised dots, and a completed-report folder. Use a curved path connecting old home, report, and new home. Palette: terracotta, soft teal, charcoal, and cream. This must be visually distinct from the hero: no passport, no portrait photo, no appointment card, no collection envelope, and no linear application journey. Recent-image avoidance: avoid repeated traveler-with-phone, luggage-only airport, skyline-only, cafe-table phone, and generic stock-administration scenes. Also avoid readable text, letters, numbers, Korean characters, logos, seals, QR codes, barcodes, app screens, personal data, and watermarks.",
+      "required": true,
+      "url": "assets/ai-inline-1.jpg"
+    }
+  ]
+}

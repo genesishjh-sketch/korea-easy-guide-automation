@@ -1,0 +1,168 @@
+{
+  "schema_version": 2,
+  "collector_role": "codex_official_source_research",
+  "site": "korea_easy_guide",
+  "content_domain": "korea_travel",
+  "seed_keyword": "korea alien registration card basics",
+  "topic": "Korea Residence Card (Formerly ARC): A First-Time Foreigner’s Guide",
+  "researched_at": "2026-08-05T09:18:00+09:00",
+  "queries": [
+    "site:immigration.go.kr foreigner registration residence card Korea 90 days fee English",
+    "site:hikorea.go.kr foreign registration residence card application required documents fee",
+    "site:global.seoul.go.kr residence card foreign resident registration Korea",
+    "site:investkorea.org foreigner registration Korea residence card required documents",
+    "site:immigration.go.kr immigration_eng change of residence foreign registration 15 days Korea",
+    "site:immigration.go.kr immigration_eng loss residence card reissuance Korea",
+    "site:hikorea.go.kr English visit reservation immigration office foreign registration",
+    "site:immigration.go.kr immigration_eng 1345 immigration contact center languages hours",
+    "site:nhis.or.kr english foreigners national health insurance residence card Korea",
+    "site:immigration.go.kr immigration_eng mobile foreigner residence card 2025",
+    "site:immigration.go.kr immigration_eng employment information report 2026 residence registration",
+    "Korea Residence Card ARC documents proof of residence university employer official"
+  ],
+  "reader_questions": [
+    "Who must apply for a Korea Residence Card and what is the 90-day deadline?",
+    "Is ARC still the correct name for the physical foreign resident ID?",
+    "Which immigration office should I reserve and does the reservation satisfy the deadline?",
+    "What documents and photo specifications are required for a first application?",
+    "How much is the IC Residence Card and can delivery cost extra?",
+    "What should I do if my name is not on the lease or I live in a dorm or goshiwon?",
+    "Which address, passport, employment, and workplace changes must be reported after issuance?",
+    "Can I use a Mobile Residence Card and does every bank accept it?",
+    "Can I open a bank account or leave Korea before the physical card arrives?"
+  ],
+  "sources": [
+    {
+      "name": "Ministry of Justice Foreigner Registration Card Basics",
+      "url": "https://www.immigration.go.kr/bbs/moj/93/559234/artclView.do",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_notes": [
+        "A foreign national intending to stay more than 90 days must register within 90 days of entry.",
+        "Applicants reserve on HiKorea and apply at the immigration office with jurisdiction over the place of residence.",
+        "The general document set includes passport, proof of residence, one 3.5 by 4.5 centimeter photo, and status-specific documents.",
+        "The photo must be recent within six months, front-facing, and use a plain or white borderless background."
+      ]
+    },
+    {
+      "name": "HiKorea e-Government for Foreigners",
+      "url": "https://www.hikorea.go.kr/",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_notes": [
+        "HiKorea is the official portal used for immigration visit reservations, e-Applications, forms, and current service notices.",
+        "A reservation selects an office and time but is not itself completion of foreigner registration."
+      ]
+    },
+    {
+      "name": "Korea Immigration Service Residence Card Fee Increase",
+      "url": "https://immigration.go.kr/bbs/immigration_eng/229/590314/artclView.do",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_notes": [
+        "The new issuance fee is KRW 35,000 from January 1, 2025.",
+        "New cards include an IC chip used for Mobile Residence Card setup.",
+        "Existing valid cards did not require replacement solely because of the new design; voluntary reissue uses the new fee."
+      ]
+    },
+    {
+      "name": "Korea Immigration Service 1345 Contact Center",
+      "url": "https://www.immigration.go.kr/immigration_eng/1862/subview.do",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_notes": [
+        "1345 provides multilingual immigration and Korea-living counseling on weekdays from 09:00 to 22:00.",
+        "After 18:00, Korean, English, and Chinese are available.",
+        "The service can provide immigration-office jurisdiction and service-hour information."
+      ]
+    },
+    {
+      "name": "Ministry of Justice Visa Navigator and Reporting Obligations",
+      "url": "https://www.immigration.go.kr/bbs/immigration_eng/230/454085/download.do",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_notes": [
+        "Registered foreigners must report a change of residence within 15 days to the relevant immigration office or community service center.",
+        "Registration-detail changes are generally reported within 15 days, while passport changes are reported within 45 days under the guide.",
+        "International students need advance permission for covered part-time work, and workplace changes can require permission or reporting."
+      ]
+    },
+    {
+      "name": "Ministry of Justice 2026 Employment Information Reporting Guide",
+      "url": "https://www.immigration.go.kr/bbs/immigration_eng/229/488609/download.do",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_notes": [
+        "From January 2, 2026, foreign nationals engaged in for-profit activity under listed statuses must report occupation, industry, and annual income bracket.",
+        "The listed statuses include D-7 to D-9, E-1 to E-10, F-2, F-4, F-6, and H-2, excluding F-5 from this reporting program.",
+        "Initial and changed employment information can be submitted through HiKorea, and changes must generally be reported within 15 days."
+      ]
+    },
+    {
+      "name": "Ministry of Justice Mobile Residence Card Press Release",
+      "url": "https://www.immigration.go.kr/bbs/immigration_eng/229/476646/download.do",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_notes": [
+        "Registered foreign nationals age 14 and older with a smartphone registered in their name can use the Mobile Residence Card.",
+        "New IC-card holders can set it up by tapping the card, entering the PIN, and completing face authentication.",
+        "Older physical-card holders must visit an immigration office or branch for QR-based setup.",
+        "Only one smartphone can hold the Mobile Residence Card."
+      ]
+    },
+    {
+      "name": "National Health Insurance Service Guidance for Foreigners",
+      "url": "https://www.nhis.or.kr/english/wbheaa02900m01.do",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_notes": [
+        "Foreign residents working at covered workplaces can be compulsorily enrolled through employment.",
+        "Many eligible self-employed foreign residents are subject to mandatory health insurance after staying more than six months, depending on status and exceptions.",
+        "National health insurance coverage for enrolled foreign residents is described as the same coverage provided to Korean citizens."
+      ]
+    }
+  ],
+  "topic_context": {
+    "topic_id": "",
+    "cluster_id": "",
+    "category_id": "",
+    "action": "NEW_POST",
+    "topic_action": "NEW_POST",
+    "revision": 0,
+    "topic_revision": 0,
+    "editor_brief": {},
+    "reader_questions": [],
+    "difference_from_existing": "This legacy-queue article is limited to first Residence Card registration, first-use blockers, and post-issuance reporting obligations; it does not duplicate tourist entry or general visa guides.",
+    "existing_post_refs": []
+  },
+  "signal_evidence": [],
+  "live_reddit_signal_count": 0,
+  "reddit_oauth_signal_count": 0,
+  "reddit_public_json_signal_count": 0,
+  "reddit_google_site_search_signal_count": 0,
+  "fallback_reddit_signal_count": 0,
+  "google_suggest_signal_count": 0,
+  "google_suggest_live_signal_count": 0,
+  "google_suggest_fallback_signal_count": 0,
+  "observed_evidence_count": 0,
+  "observed_question_count": 0,
+  "first_party_query_count": 0,
+  "verified_public_page_signal_count": 0,
+  "query_plan_count": 0,
+  "fallback_evidence_count": 0,
+  "search_suggestion_count": 0,
+  "demand_eligible_signal_count": 0,
+  "stability_eligible_signal_count": 0,
+  "ready_eligible_signal_count": 0,
+  "cadence_eligible_signal_count": 0,
+  "signal_source_counts": {},
+  "reddit_collection_method_counts": {},
+  "google_suggest_method_counts": {},
+  "evidence_type_counts": {},
+  "notes": [
+    "The topic came from the validated legacy queue because persisted rollout mode is SHADOW and backfill is incomplete.",
+    "No demand claim is based on QUERY_PLAN, SEARCH_SUGGESTION, fallback text, community answers, or unopened search-result URLs.",
+    "Every factual note used in the article was checked against an opened Korean government, immigration, HiKorea, or NHIS page.",
+    "Visa-specific exceptions are routed to HiKorea and 1345 instead of being generalized."
+  ]
+}
