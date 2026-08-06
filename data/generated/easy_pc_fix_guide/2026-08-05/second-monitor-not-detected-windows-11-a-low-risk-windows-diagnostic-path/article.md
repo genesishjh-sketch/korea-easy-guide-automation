@@ -30,7 +30,7 @@ When Windows 11 cannot see a second monitor, do not begin by uninstalling driver
 | Risk level | Low |
 | Data loss risk | No |
 | Estimated time | 15–35 minutes |
-| Last checked | 2026-08-05 |
+| Last checked | 2026-08-06 |
 
 Driver rollback or reinstall is an advanced step even though the safe-first path is low risk. Save open work and back up important files before advanced fixes.
 
@@ -100,7 +100,7 @@ Open **Settings > Windows Update > Check for updates**. Install normal Windows u
 
 Windows Update is the safest general source for drivers. If it does not help, use the official support page for the exact PC, dock, or graphics adapter model. Avoid third-party driver-updater websites and unknown repair software; they can install the wrong package and make a reversible display problem harder to diagnose.
 
-The Windows release-health dashboard and message center were checked on 2026-08-05. They provide version-specific known-issue context, but the current pages did not identify one broad second-monitor incident that replaces local signal-path testing. Match any future notice to your Windows version, update, device model, and symptom before treating it as the cause.
+The Windows release-health dashboard and message center were checked on 2026-08-06. They provide version-specific known-issue context, but the current pages did not identify one broad second-monitor incident that replaces local signal-path testing. Match any future notice to your Windows version, update, device model, and symptom before treating it as the cause.
 
 ## Advanced fixes: rollback or reinstall the display driver
 

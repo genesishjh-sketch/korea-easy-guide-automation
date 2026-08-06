@@ -41,8 +41,8 @@
     {"source": "Microsoft Support: Update drivers through Device Manager in Windows", "note": "Microsoft recommends Windows Update as the normal driver source and documents rollback, automatic update, manual manufacturer packages, and reinstall through Device Manager."},
     {"source": "Microsoft Support: Keyboard shortcuts in Windows", "note": "The current shortcut reference lists Windows+P for project settings, Windows+K for Cast, and Windows+Ctrl+Shift+B for a blank or black screen."},
     {"source": "Microsoft Support: Install Windows updates", "note": "Windows Update remains the supported path for current Windows quality and driver updates before using model-specific manufacturer support."},
-    {"source": "Microsoft Learn: Windows release health", "note": "The release-health hub was opened on 2026-08-05 and provides version-specific known and resolved issue pages for supported Windows 11 releases."},
-    {"source": "Microsoft Learn: Windows message center", "note": "The message center was opened on 2026-08-05 for current update context; notices must match the reader's version, update, device, and symptom before being treated as causal."},
+    {"source": "Microsoft Learn: Windows release health", "note": "The release-health hub was reopened on 2026-08-06 and provides version-specific known and resolved issue pages for supported Windows 11 releases."},
+    {"source": "Microsoft Learn: Windows message center", "note": "The message center was reopened on 2026-08-06 for current update context; notices must match the reader's version, update, device, and symptom before being treated as causal."},
     {"source": "Microsoft Learn: Windows 11 version 24H2 known issues", "note": "The current page was checked for display-related incidents. It did not document a broad second-monitor detection incident that supersedes local monitor, cable, dock, port, projection-mode, and driver isolation."}
   ],
   "topic_context": {
@@ -68,7 +68,7 @@
   },
   "notes": [
     "This SHADOW-mode topic came from the validated legacy queue, not from AI Registry demand evidence.",
-    "Every factual source listed above was opened during the 2026-08-05 run.",
+    "Every factual source listed above was reopened and verified during the 2026-08-06 recovery run.",
     "Reddit public JSON returned HTTP 403 and was not treated as evidence or instruction.",
     "Google suggestions were used only for phrasing expansion and do not prove demand.",
     "Community answers were not used as factual support."
