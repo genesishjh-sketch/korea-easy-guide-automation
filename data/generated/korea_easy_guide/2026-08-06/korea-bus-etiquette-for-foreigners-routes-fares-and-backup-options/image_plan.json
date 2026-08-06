@@ -1,0 +1,42 @@
+{
+  "mode": "codex_generated_no_api",
+  "strict": true,
+  "notes": [
+    "Do not call paid image APIs in the Python pipeline.",
+    "Use Codex-generated JPG assets from src/images/ai_assets/korea.",
+    "Default Korea image roles are hero photo plus one information-rich checklist/flow image.",
+    "Only add a third or fourth image when it has a distinct role such as comparison, map flow, warning, or cost decision.",
+    "Do not add multiple similar lifestyle/photos just to increase image count.",
+    "Publishing should stop when required image files are missing.",
+    "Codex app automation must generate these images with the built-in image_gen tool, copy them into article assets, copy hosted versions into src/images/ai_assets/hosted/, commit/push hosted files, then publish.",
+    "Image prompts must be created as fresh article-specific art direction. Do not paste a fixed prompt formula into image_gen."
+  ],
+  "prompt_policy": {
+    "generation_owner": "codex_app_automation",
+    "tool": "built_in_image_gen",
+    "api_cost_policy": "Do not call OpenAI Images API or external paid image APIs.",
+    "prompt_method": "Treat each saved prompt as an art-direction brief. Before generating, Codex must write a fresh one-off image prompt for the article, travel task, image role, and recent visual history.",
+    "diversity_rule": "Do not repeat traveler-with-phone, luggage-at-airport, generic cafe-table, or skyline-only visuals across nearby Korea posts. Hero and inline images must have different purposes and compositions.",
+    "quality_loop": "If the image is generic, repeated, tourist-stock-like, text-heavy, or not useful for the article, discard it and regenerate before publishing."
+  },
+  "images": [
+    {
+      "role": "hero",
+      "filename": "ai-hero.jpg",
+      "alt": "Passengers boarding a Seoul city bus in an orderly line while a transit card is tapped at the front door",
+      "caption": "Board through the front door, let exiting passengers clear, and have your transit card ready before you reach the reader.",
+      "prompt": "Fresh one-off article-specific hero prompt for Korea bus etiquette, not a reusable template. Image role: hero decision moment. Photorealistic street-level editorial scene at a real-looking Seoul neighborhood bus stop in soft morning light: a blue or green Korean city bus has stopped tight to the curb with its front door open, exiting passengers have already cleared, and a small mixed group of local riders and one visibly international visitor board in a calm single flow. The visitor is not posing and is not holding a phone; show a close, natural hand gesture with an unbranded transit-card shape ready near the front-door reader. Include tactile bus details, curb markings, handrails, and ordinary city texture, but no legible route number or Korean text. Wide blog-hero composition, candid and practical rather than glossy tourism advertising. Recent-image avoidance: avoid repeated traveler-with-phone, luggage-only airport, skyline-only, and cafe-table scenes. No luggage, airport, skyline, cafe table, readable signs, logos, brand marks, text overlay, or watermark. This must look specific to boarding etiquette on a Korean city bus.",
+      "required": true,
+      "url": "assets/ai-hero.jpg"
+    },
+    {
+      "role": "inline",
+      "filename": "ai-inline-1.jpg",
+      "alt": "Text-free bus ride checklist showing a transit card, stop bell, sealed bottle, and front-to-rear boarding flow",
+      "caption": "The useful sequence is simple: card ready, front door in, bell before the stop, tap out, rear door off.",
+      "prompt": "Fresh one-off article-specific inline prompt for Korea bus etiquette, not a reusable template and deliberately different from the photographic hero. Image role: inline process checklist. Create a polished top-down educational still life on a pale neutral surface using physical miniature objects arranged as a left-to-right ride sequence: an unbranded transit card beside a small front-door bus model, a red stop-bell button in the middle, then a rear-door bus model and a second card-reader shape; add one sealed water bottle with a cap and one open cup kept apart as a mistake-prevention cue, without symbols or text. Use subtle route-line cords and directional spacing to make the process readable without labels. Crisp studio lighting, accurate everyday materials, generous separation, useful checklist feel. Recent-image avoidance: avoid repeated traveler-with-phone, luggage-only airport, skyline-only, cafe-table, and generic lifestyle scenes. No people, phones, luggage, airports, skylines, readable words, Korean letters, logos, fake app screens, brand marks, or watermark. Do not make this a second version of the street-level hero.",
+      "required": true,
+      "url": "assets/ai-inline-1.jpg"
+    }
+  ]
+}

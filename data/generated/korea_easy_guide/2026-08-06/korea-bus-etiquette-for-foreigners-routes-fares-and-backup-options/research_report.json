@@ -1,0 +1,158 @@
+{
+  "schema_version": 2,
+  "collector_role": "codex_official_source_research",
+  "site": "korea_easy_guide",
+  "content_domain": "korea_travel",
+  "seed_keyword": "korea bus etiquette for foreigners",
+  "topic": "Korea Bus Etiquette for Foreigners: Ride Without Awkward Mistakes",
+  "researched_at": "2026-08-06T09:18:00+09:00",
+  "queries": [
+    "site:english.seoul.go.kr bus fare transportation card Seoul 2026",
+    "site:english.visitkorea.or.kr Korea bus transportation card how to ride bus",
+    "site:english.visitseoul.net Seoul bus how to use transportation card etiquette",
+    "site:tmoney.co.kr English Korea transportation card transfer bus",
+    "site:english.seoul.go.kr bus etiquette food drinks priority seats stop button Korea",
+    "site:english.visitkorea.or.kr public transportation etiquette Korea bus priority seat",
+    "site:kakaomobility.com English KakaoMap public transit bus Korea official",
+    "site:navercorp.com NAVER Map English public transport Korea official"
+  ],
+  "reader_questions": [
+    "Do I enter a Korean city bus through the front or rear door?",
+    "When should I press the stop bell, and will the bus stop automatically?",
+    "Must I tap my transportation card when getting off if I am not transferring?",
+    "Can a tourist pay cash, or are Korean city buses cashless?",
+    "How do transfer discounts, time limits, and same-route exclusions work?",
+    "What should I do when the card reader says the balance is insufficient?",
+    "Which seats should a visitor leave for older, pregnant, injured, or disabled passengers?",
+    "Can I carry coffee or takeout food onto a Seoul bus?",
+    "Which map app gives foreign visitors live bus arrivals and boarding guidance?"
+  ],
+  "sources": [
+    {
+      "name": "Seoul Metropolitan Government Bus Guide and Fares",
+      "url": "https://english.seoul.go.kr/policy/transportation/modes-of-transport/bus/",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_notes": [
+        "Seoul transfer rules require tapping when getting off and normally boarding the next service within 30 minutes, extended to 60 minutes at night.",
+        "Transfers are accepted up to four times for five boardings, but the same bus or same route is excluded.",
+        "The page lists adult card fares of KRW 1,500 for trunk and branch buses, KRW 3,000 for rapid buses, KRW 2,500 for owl buses, and KRW 1,200 for local buses, while warning that distance charges can apply.",
+        "Prepaid transportation cards are sold at convenience stores and charging stations."
+      ]
+    },
+    {
+      "name": "VISITKOREA City Bus Guide",
+      "url": "https://english.visitkorea.or.kr/svc/contents/infoHtmlView.do?vcontsId=140659",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_notes": [
+        "Most Korean city buses use the front door for boarding and the rear door for exiting.",
+        "Cashless buses are expanding; all city buses in Incheon, Daegu, and Gwangju are described as cashless, with many Seoul routes also cashless.",
+        "A transportation card is required for transfer discounts; cash payment does not receive the transfer benefit.",
+        "Transfer rules vary by city, and the page gives Busan as an example with fewer transfers than Seoul."
+      ]
+    },
+    {
+      "name": "VISITKOREA Transportation Cards",
+      "url": "https://english.visitkorea.or.kr/svc/contents/infoHtmlView.do?vcontsId=140663",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_notes": [
+        "Tmoney and EZL cards can be purchased and recharged at convenience stores nationwide without opening a Korean bank account.",
+        "The page lists general Tmoney card purchase prices around KRW 3,000 to KRW 5,000, separate from the stored balance.",
+        "Physical Climate Card short-term passes are limited to covered Seoul services, so route coverage must be checked before relying on one."
+      ]
+    },
+    {
+      "name": "Seoul Metropolitan Government Public Transportation Guide",
+      "url": "https://english.seoul.go.kr/service/movement/public-transportation/",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_notes": [
+        "The official three-step sequence is prepare the card and bus information, enter at the front and tap, then press the bell, tap at the rear reader, and exit through the back.",
+        "The stop bell should be pressed before arrival at the destination stop.",
+        "Naver Map, Kakao Map, TOPIS, and stop displays can provide live bus location and arrival information.",
+        "Using multiple mobile transit apps can cause double payment or transfer errors."
+      ]
+    },
+    {
+      "name": "Seoul Rules for Food Carried on City Buses",
+      "url": "https://english.seoul.go.kr/seoul-citys-specified-provisions-foods-prohibited-carry/",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_notes": [
+        "Drivers may refuse spill-prone or unpackaged food intended for consumption on board.",
+        "Disposable cups, open drinks, and leak-prone takeout can be prohibited, while sealed bottles, closed cans, sealed tumblers, and securely boxed food are listed as acceptable examples.",
+        "A passenger consuming prohibited items may be asked to leave."
+      ]
+    },
+    {
+      "name": "Official Seoul Travel Bus Page",
+      "url": "https://english.visitseoul.net/bus",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_notes": [
+        "Seoul has blue trunk, green branch, local, yellow circulation, and red rapid bus types with different route roles.",
+        "Cashless operations have expanded and tourists are directed to buy and recharge a transportation card at convenience stores or station machines.",
+        "English-capable route apps are recommended for visitors."
+      ]
+    },
+    {
+      "name": "NAVER Map Multilingual Public Transit Guide",
+      "url": "https://navercorp.com/en/media/pressReleasesDetail?seq=32216",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_notes": [
+        "NAVER Map supports Korean, English, Chinese, and Japanese.",
+        "Its public-transit features include real-time arrival information, boarding and alighting guidance, subway maps, and alternative routes.",
+        "The company provides a multilingual usage guide aimed at foreign visitors."
+      ]
+    }
+  ],
+  "topic_context": {
+    "topic_id": "",
+    "cluster_id": "",
+    "category_id": "",
+    "action": "NEW_POST",
+    "topic_action": "NEW_POST",
+    "revision": 0,
+    "topic_revision": 0,
+    "editor_brief": {},
+    "reader_questions": [],
+    "difference_from_existing": "This validated legacy-queue article focuses on the social and operational sequence of riding Korean city buses. It does not duplicate the existing transfer-only guide or the intercity-bus booking guide.",
+    "existing_post_refs": [
+      "Seoul Subway to Bus Transfer Guide for Foreign Visitors",
+      "Korea Intercity Bus Ticket Guide: Express vs Intercity, Booking, Payment, and Boarding"
+    ]
+  },
+  "signal_evidence": [],
+  "live_reddit_signal_count": 0,
+  "reddit_oauth_signal_count": 0,
+  "reddit_public_json_signal_count": 0,
+  "reddit_google_site_search_signal_count": 0,
+  "fallback_reddit_signal_count": 0,
+  "google_suggest_signal_count": 0,
+  "google_suggest_live_signal_count": 0,
+  "google_suggest_fallback_signal_count": 0,
+  "observed_evidence_count": 0,
+  "observed_question_count": 0,
+  "first_party_query_count": 0,
+  "verified_public_page_signal_count": 0,
+  "query_plan_count": 0,
+  "fallback_evidence_count": 0,
+  "search_suggestion_count": 0,
+  "demand_eligible_signal_count": 0,
+  "stability_eligible_signal_count": 0,
+  "ready_eligible_signal_count": 0,
+  "cadence_eligible_signal_count": 0,
+  "signal_source_counts": {},
+  "reddit_collection_method_counts": {},
+  "google_suggest_method_counts": {},
+  "evidence_type_counts": {},
+  "notes": [
+    "The topic came from the validated legacy queue because persisted rollout mode is SHADOW and backfill is incomplete.",
+    "No demand claim is based on QUERY_PLAN, SEARCH_SUGGESTION, fallback text, community answers, or unopened search-result URLs.",
+    "Every factual note used in the article was checked against an opened Korean government, tourism, or platform page.",
+    "Fare and transfer examples are framed as Seoul-specific; readers are told to verify rules in other cities."
+  ]
+}
