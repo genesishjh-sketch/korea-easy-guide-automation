@@ -1,0 +1,40 @@
+{
+  "mode": "codex_generated_no_api",
+  "strict": true,
+  "notes": [
+    "Both images were generated with the built-in image generation tool using fresh article-specific prompts.",
+    "No paid image API was called.",
+    "The hero shows housing comparison with an agent; the inline image shows physical room inspection.",
+    "Both images were visually inspected for topic fit, legibility, internal similarity, generic composition, and obvious generation defects."
+  ],
+  "prompt_policy": {
+    "generation_owner": "codex_app_automation",
+    "tool": "built_in_image_gen",
+    "api_cost_policy": "No OpenAI Images API or external paid image API was used.",
+    "prompt_method": "Fresh one-off art direction for this article and image role.",
+    "diversity_rule": "The office consultation and room inspection have different purposes and compositions; neither uses traveler-with-phone, luggage-only airport, skyline-only, or cafe-table phone imagery.",
+    "quality_loop": "Each generated result was inspected before use."
+  },
+  "images": [
+    {
+      "role": "hero",
+      "filename": "ai-hero.jpg",
+      "alt": "An exchange student comparing a Korean studio floor plan and budget with a housing agent",
+      "caption": "Start with the housing office, then compare the full cost and contract—not just listing photos.",
+      "prompt": "Fresh one-off prompt; not a reusable template. Image role: hero decision scene. Use case: photorealistic-natural. Asset type: wide landscape hero image for an English guide about exchange-student housing in Korea. Create a realistic editorial photograph of an exchange student comparing housing options at a small Korean university neighborhood real-estate office. Show one college-age exchange student and a professional housing agent reviewing a paper floor plan and budget grid, with a dormitory brochure, key tag, tape measure, and transit map. Use natural late-morning window light, believable proportions and material texture. Recent-image avoidance: avoid repeated traveler-with-phone, luggage-only airport, skyline-only, and cafe-table phone scenes. No brand logos, watermark, or legible text.",
+      "required": true,
+      "url": "assets/ai-hero.jpg",
+      "hosted_path": "src/images/ai_assets/hosted/korea-exchange-student-housing-hero-20260807.jpg"
+    },
+    {
+      "role": "inline",
+      "filename": "ai-inline-1.jpg",
+      "alt": "An exchange student inspecting a compact Korean studio window, heating control, and utility meter with an agent",
+      "caption": "Inspect the room while the utilities work; document existing damage before paying the balance.",
+      "prompt": "Fresh one-off prompt; not a reusable template. Image role: inline inspection process. Use case: photorealistic-natural. Asset type: inline landscape image for an English guide about inspecting off-campus housing in Korea. Create a realistic documentary photograph inside a modest compact Korean studio. Show an exchange student using a paper checklist to inspect the window frame while a housing agent points out the heating control and utility meter. Include a small entry, kitchenette, outlets, tape measure and key tag. Use neutral daylight and credible room proportions. Recent-image avoidance: avoid repeated traveler-with-phone, luggage-only airport, skyline-only, and cafe-table phone scenes. Do not make this a second version of the hero. No luxury staging, text-heavy infographic, logos, watermark, or legible text.",
+      "required": true,
+      "url": "assets/ai-inline-1.jpg",
+      "hosted_path": "src/images/ai_assets/hosted/korea-exchange-student-housing-inspection-20260807.jpg"
+    }
+  ]
+}

@@ -1,0 +1,172 @@
+{
+  "schema_version": 2,
+  "collector_role": "codex_official_source_research",
+  "site": "korea_easy_guide",
+  "content_domain": "korea_travel",
+  "seed_keyword": "how to find housing in korea as an exchange student",
+  "topic": "How to Find Housing in Korea as an Exchange Student",
+  "researched_at": "2026-08-07T09:12:00+09:00",
+  "queries": [
+    "site:studyinkorea.go.kr international student housing Korea dormitory off campus",
+    "site:global.seoul.go.kr foreign resident housing rental contract Korea guide",
+    "site:english.seoul.go.kr housing lease foreign residents Korea contract",
+    "site:mois.go.kr foreigner move-in report Korea rental address residence card English",
+    "site:easylaw.go.kr international student finding home Korea lease English",
+    "site:rtms.molit.go.kr Korea housing lease report system foreigner English",
+    "site:immigration.go.kr foreigner change residence address report Korea English",
+    "site:yonsei.ac.kr exchange student housing dormitory Korea official 2026"
+  ],
+  "reader_questions": [
+    "Should an exchange student apply for a dormitory before looking off campus?",
+    "What is the practical difference between wolse and jeonse?",
+    "Which costs beyond rent and deposit should be included in a semester budget?",
+    "How can a foreign student verify a room, owner, broker, and lease before paying?",
+    "What should be tested during an in-person studio inspection?",
+    "How do dormitory payment, cancellation, and refund deadlines work?",
+    "What residence-change and housing-lease reports may be required after moving?",
+    "What can a student do when the dorm is full or a safe lease is not ready?",
+    "What foreigner-specific blockers can prevent address reporting or deposit payment?"
+  ],
+  "sources": [
+    {
+      "name": "Study in Korea Living and Housing Guide",
+      "url": "https://www.studyinkorea.go.kr/en/life/livingAndHousing.do?tab=accommodation",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_notes": [
+        "The government guide identifies dormitories and private housing as common international-student options.",
+        "It distinguishes wolse, with a deposit and recurring monthly rent, from jeonse, with a large lump-sum deposit and no monthly rent.",
+        "It advises visiting a property in person before signing rather than relying only on online information.",
+        "It points students to real-estate applications as search tools, which the article treats only as listing leads rather than verification."
+      ]
+    },
+    {
+      "name": "Easy Law Finding a Home for International Students",
+      "url": "https://www.easylaw.go.kr/CSP/CnpClsMain.laf?ccfNo=3&cciNo=1&cnpClsNo=1&csmSeq=2853&popMenu=ov",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_notes": [
+        "The guide compares dormitories, boarding houses, and wolse or jeonse housing by cost structure, convenience, privacy, and rules.",
+        "It advises checking real-estate registration records for ownership, mortgages, lease rights, and other interests before contracting.",
+        "It explains that residence reporting and a fixed date are relevant to deposit priority protection.",
+        "It states current lease-reporting thresholds and a 30-day reporting period for covered contracts and jurisdictions.",
+        "It notes Seoul's designated global real-estate offices for foreign-language lease guidance."
+      ]
+    },
+    {
+      "name": "Easy Law English Lease Agreements Guide",
+      "url": "https://m.easylaw.go.kr/MOM/SubCsmOvRetrieve.laf?ccfNo=1&cciNo=1&cnpClsNo=1&csmSeq=2495&langCd=700101",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_notes": [
+        "The English guide explains application of the Housing Lease Protection Act to foreign nationals.",
+        "It says a foreign tenant who completes alien registration and reports a change of residence may exceptionally receive protection under the Act.",
+        "The article therefore directs readers to verify their own protection steps with the responsible local office."
+      ]
+    },
+    {
+      "name": "MOLIT Real Estate Transaction Management System",
+      "url": "https://rtms.molit.go.kr/main/systemInfo.do",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_notes": [
+        "The Ministry of Land system supports online housing-lease reporting and issuance of a reporting certificate.",
+        "Its system overview explains that a contract copy can support a report by one party under the described electronic process.",
+        "The article links readers to the official system but tells them to confirm coverage and current procedure for the exact contract."
+      ]
+    },
+    {
+      "name": "Korea Immigration Service Customized Stay Guide",
+      "url": "https://www.immigration.go.kr/bbs/immigration_eng/230/454085/download.do",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_notes": [
+        "Registered foreign residents must report a change of residence within 15 days, while F-4 holders have a 14-day period in the guide.",
+        "The listed documents are passport, residence card, application form, and proof of residence.",
+        "The guide says applications can be filed online through Hi Korea."
+      ]
+    },
+    {
+      "name": "Korea Immigration Contact Center 1345",
+      "url": "https://www.immigration.go.kr/immigration_eng/1862/subview.do",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_notes": [
+        "The Ministry of Justice contact center provides counseling on immigration and living in Korea.",
+        "It offers multilingual support and can be reached by dialing 1345 in Korea.",
+        "The article recommends it when proof-of-residence or reporting requirements are unclear."
+      ]
+    },
+    {
+      "name": "Yonsei University 2026 Spring Housing Notice",
+      "url": "https://dorm.yonsei.ac.kr/en/board/?id=schedule_en&idx=8927&mode=V",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_notes": [
+        "Exchange and visiting students were eligible for the cited semester, but housing was not guaranteed and assignments were first come, first served.",
+        "The notice separates application, result, payment, housing-period, and refund deadlines.",
+        "It lists wire transfer, Wise, and Flywire as semester-specific payment methods.",
+        "Missing the payment deadline could cancel housing without notice, and the notice provides a full-refund cutoff before move-in.",
+        "The article frames all dates, prices, and methods as one university example rather than a national rule."
+      ]
+    },
+    {
+      "name": "Seoul Foreign Resident Center Safe Jeonse and Wolse Seminar",
+      "url": "https://global.seoul.go.kr/web/news/news/bordContDetail.do?brd_no=2&lang=EN&mode=W&post_no=3A171376A59E0108E063C0A8A023C119",
+      "type": "official_or_platform",
+      "opened": true,
+      "factual_notes": [
+        "The Seoul Foreign Resident Center's program organized lease safety into checks before signing, during contracting, and after signing.",
+        "Its published scope included identifying a bad house, checking monthly rent, verifying a broker, writing the contract, and required post-contract reports.",
+        "The article uses this as support for the same three-stage safety structure without relying on expired event registration information."
+      ]
+    }
+  ],
+  "topic_context": {
+    "topic_id": "",
+    "cluster_id": "",
+    "category_id": "",
+    "action": "NEW_POST",
+    "topic_action": "NEW_POST",
+    "revision": 0,
+    "topic_revision": 0,
+    "editor_brief": {},
+    "reader_questions": [],
+    "difference_from_existing": "This validated legacy-queue article focuses on choosing, verifying, contracting, paying for, and moving into exchange-student housing. It does not duplicate the existing Korean bank-account guide or general residence-card guide.",
+    "existing_post_refs": [
+      "How to Open a Bank Account in Korea as a Foreigner",
+      "Korea Residence Card (Formerly ARC): A First-Time Foreigner’s Guide"
+    ]
+  },
+  "signal_evidence": [],
+  "live_reddit_signal_count": 0,
+  "reddit_oauth_signal_count": 0,
+  "reddit_public_json_signal_count": 0,
+  "reddit_google_site_search_signal_count": 0,
+  "fallback_reddit_signal_count": 0,
+  "google_suggest_signal_count": 0,
+  "google_suggest_live_signal_count": 0,
+  "google_suggest_fallback_signal_count": 0,
+  "observed_evidence_count": 0,
+  "observed_question_count": 0,
+  "first_party_query_count": 0,
+  "verified_public_page_signal_count": 0,
+  "query_plan_count": 0,
+  "fallback_evidence_count": 0,
+  "search_suggestion_count": 0,
+  "demand_eligible_signal_count": 0,
+  "stability_eligible_signal_count": 0,
+  "ready_eligible_signal_count": 0,
+  "cadence_eligible_signal_count": 0,
+  "signal_source_counts": {},
+  "reddit_collection_method_counts": {},
+  "google_suggest_method_counts": {},
+  "evidence_type_counts": {},
+  "notes": [
+    "The topic came from the validated legacy queue because persisted rollout mode is SHADOW and backfill is incomplete.",
+    "No demand claim is based on QUERY_PLAN, SEARCH_SUGGESTION, fallback text, community material, or unopened search-result URLs.",
+    "Every factual note used in the article was checked against an opened Korean government, university, or official foreign-resident page.",
+    "University costs, dates, payment methods, and refund rules are presented only as a dated Yonsei example and readers are told to verify their own institution.",
+    "The article provides practical orientation rather than individualized legal advice and directs readers to the responsible office for contract-specific verification."
+  ]
+}
